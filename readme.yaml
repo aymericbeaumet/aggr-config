@@ -2,19 +2,36 @@
 version: 1
 ---
 
-# Fork this repository and edit it as you see fit.
-# Then, head to https://aggr.io/@[username] to see your aggregation.
+# Individuals
+- https://aymericbeaumet.com # @('_')@
+- https://blog.codinghorror.com
+- https://martinfowler.com
+- http://antirez.com
+- https://dave.cheney.net
+- https://www.touilleur-express.fr
 
-# This file demonstrates the possibilities Aggr offers.
-# It is actually being rendered at https://aggr.io/@aggr-io
+# Instagram
+- https://www.instagram.com/keijei.paris
+- https://www.instagram.com/leandres.happy
 
-# The top structure of this file is a list of strings representing all the sources you want to subscribe to.
-# The sources can be:
+# Comics
+- https://xkcd.com
+- https://www.commitstrip.com/fr
 
-# 1) Arbitrary websites, in which case an RSS/Atom feed is being looked for:
-- https://github.com/aggr-io/aggr-config
+# Programming languages
+- https://blog.golang.org
+- https://blog.rust-lang.org
+- https://this-week-in-rust.org
+- https://devblogs.microsoft.com/typescript
 
-# 2) Specific RSS/ATOM feeds, in which case the automatic discovery is bypassed:
-- https://github.com/aggr-io/docs/commits/main.atom
+# Inspirational
+- https://www.ted.com/talks
+- https://bigthink.com/videos
 
-# Have a look to https://github.com/aymericbeaumet/aggr-config for a down to earth example.
+# YouTube
+- https://www.youtube.com/channel/UCDC6DBi0kRp6Jk21xqfvFLA # Hugo Lisoir
+- https://www.youtube.com/c/TomScottGo
+- https://www.youtube.com/channel/UCsXVk37bltHxD1rDPwtNM8Q # Kurzgesagt – In a Nutshell
+- https://www.youtube.com/user/ScienceEtonnante
+- https://www.youtube.com/channel/UC9-y-6csu5WGm29I7JiwpnA # Computerphile 
+- https://www.youtube.com/user/numberphile
