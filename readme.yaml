@@ -2,17 +2,13 @@
 version: 1
 ---
 
-# Individuals
+# Blogs
 - https://aymericbeaumet.com # @('_')@
 - https://blog.codinghorror.com
 - https://martinfowler.com
 - http://antirez.com
 - https://dave.cheney.net
 - https://www.touilleur-express.fr
-
-# Instagram
-- https://www.instagram.com/keijei.paris
-- https://www.instagram.com/leandres.happy
 
 # Comics
 - https://xkcd.com
@@ -35,3 +31,7 @@ version: 1
 - https://www.youtube.com/user/ScienceEtonnante
 - https://www.youtube.com/channel/UC9-y-6csu5WGm29I7JiwpnA # Computerphile 
 - https://www.youtube.com/user/numberphile
+
+# Instagram
+- https://www.instagram.com/keijei.paris
+- https://www.instagram.com/leandres.happy
