@@ -14,11 +14,12 @@ version: 1
 - https://xkcd.com
 - https://www.commitstrip.com/fr
 
-# Programming languages
+# Tech
 - https://blog.golang.org
 - https://blog.rust-lang.org
 - https://this-week-in-rust.org
 - https://devblogs.microsoft.com/typescript
+- https://hacks.mozilla.org
 
 # Inspirational
 - https://www.ted.com/talks
@@ -31,7 +32,3 @@ version: 1
 - https://www.youtube.com/user/ScienceEtonnante
 - https://www.youtube.com/channel/UC9-y-6csu5WGm29I7JiwpnA # Computerphile 
 - https://www.youtube.com/user/numberphile
-
-# Instagram
-- https://www.instagram.com/keijei.paris
-- https://www.instagram.com/leandres.happy
