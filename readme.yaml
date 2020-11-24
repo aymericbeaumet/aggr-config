@@ -2,6 +2,10 @@
 version: 1
 ---
 
+# News
+- https://hnrss.org/frontpage
+- https://www.bbc.com/news/world
+
 # Blogs
 - https://aymericbeaumet.com # @('_')@
 - https://blog.codinghorror.com
@@ -32,3 +36,4 @@ version: 1
 - https://www.youtube.com/user/ScienceEtonnante
 - https://www.youtube.com/channel/UC9-y-6csu5WGm29I7JiwpnA # Computerphile 
 - https://www.youtube.com/user/numberphile
+- https://www.youtube.com/user/TroncheEnBiais
