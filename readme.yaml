@@ -20,10 +20,10 @@ version: 1
 - https://this-week-in-rust.org
 - https://devblogs.microsoft.com/typescript
 - https://hacks.mozilla.org
+- https://kubernetes.io/blog/
 
 # Inspirational
 - https://www.ted.com/talks
-- https://bigthink.com/videos
 
 # YouTube
 - https://www.youtube.com/channel/UCDC6DBi0kRp6Jk21xqfvFLA # Hugo Lisoir
