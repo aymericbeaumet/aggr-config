@@ -4,27 +4,38 @@ version: 1
 
 # News
 - https://hnrss.org/frontpage
+- http://feeds.bbci.co.uk/news/world/rss.xml
 
-# Blogs
+# Blogs (en)
 - https://aymericbeaumet.com # @('_')@
 - https://blog.codinghorror.com
 - https://martinfowler.com
 - http://antirez.com
 - https://dave.cheney.net
+
+# Blogs (fr)
 - https://www.touilleur-express.fr
 
 # Comics
 - https://xkcd.com
 - https://www.commitstrip.com/fr
 
-# Tech
+# Open-Source Projects
 - https://blog.golang.org
 - https://blog.rust-lang.org
 - https://this-week-in-rust.org
 - https://devblogs.microsoft.com/typescript
-- https://hacks.mozilla.org
 - https://kubernetes.io/blog/
+
+# Tech
+- https://hacks.mozilla.org
 - https://blog.cloudflare.com
+- https://netflixtechblog.com/
+- https://redditblog.com/topic/technology/
+- https://tech.dropbox.com/
+- https://blog.twitter.com/engineering
+- https://code.facebook.com/posts/
+- https://githubengineering.com/
 
 # Inspirational
 - https://www.ted.com/talks
