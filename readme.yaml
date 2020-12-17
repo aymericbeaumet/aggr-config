@@ -3,7 +3,7 @@ version: 1
 ---
 
 # News
-- { url: "https://hnrss.org/frontpage?points=200", as: Hacker News }
+- { url: "https://hnrss.org/frontpage?points=200", as: "Hacker News" }
 - http://feeds.bbci.co.uk/news/world/rss.xml
 
 # Blogs (en)
@@ -34,7 +34,7 @@ version: 1
 - https://netflixtechblog.com/
 - https://redditblog.com/topic/technology/
 - https://tech.dropbox.com/
-- { url: "https://blog.twitter.com/engineering", as: Twitter Engineering }
+- { url: "https://blog.twitter.com/engineering", as: "Twitter Engineering" }
 - https://code.facebook.com/posts/
 - https://githubengineering.com/
 
