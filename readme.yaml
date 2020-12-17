@@ -38,7 +38,7 @@ version: 1
 - https://githubengineering.com/
 
 # Inspirational
-- https://www.ted.com/talks
+- { url: "https://www.ted.com/talks", as: "TED Talks" }
 
 # YouTube (en)
 - https://www.youtube.com/c/TomScottGo
