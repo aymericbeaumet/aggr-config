@@ -3,7 +3,7 @@ version: 1
 ---
 
 # News
-- { url: https://hnrss.org/frontpage?points=200, as: Hacker News }
+- { url: "https://hnrss.org/frontpage?points=200", as: Hacker News }
 - http://feeds.bbci.co.uk/news/world/rss.xml
 
 # Blogs (en)
