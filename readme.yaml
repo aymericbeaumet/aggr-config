@@ -34,7 +34,7 @@ version: 1
 - https://netflixtechblog.com/
 - https://redditblog.com/topic/technology/
 - https://tech.dropbox.com/
-- https://blog.twitter.com/engineering
+- { url: "https://blog.twitter.com/engineering", as: Twitter Engineering }
 - https://code.facebook.com/posts/
 - https://githubengineering.com/
 
