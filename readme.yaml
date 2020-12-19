@@ -12,6 +12,7 @@ version: 1
 - http://antirez.com
 - https://dave.cheney.net
 - https://www.gatesnotes.com
+- https://daringfireball.net
 
 # Blogs (fr)
 - https://www.touilleur-express.fr
@@ -26,6 +27,9 @@ version: 1
 - https://this-week-in-rust.org
 - https://devblogs.microsoft.com/typescript
 - https://kubernetes.io/blog/
+
+# SaaS
+- https://blog.jumboprivacy.com
 
 # Tech
 - https://hacks.mozilla.org
