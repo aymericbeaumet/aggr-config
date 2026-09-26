@@ -89,6 +89,18 @@ images:
     width: 2000
     height: 1500
   color: '#78472a'
+- source: https://i.ytimg.com/vi/w1DUFiPnrDo/hqdefault.jpg
+  original:
+    file: 2026-09-24-16gb-ipod-nano-3g-upgrade.image-73c27268cb20.jpg
+    width: 480
+    height: 360
+  color: '#010101'
+- source: https://i.ytimg.com/vi/5zk2CDQ5N9A/hqdefault.jpg
+  original:
+    file: 2026-09-24-16gb-ipod-nano-3g-upgrade.image-52d24bc13177.jpg
+    width: 480
+    height: 360
+  color: '#020202'
 ---
 
 [16GB iPod Nano 3G Upgrade Part 2](https://www.youtube.com/watch?v=w1DUFiPnrDo)
