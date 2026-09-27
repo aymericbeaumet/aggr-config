@@ -1,0 +1,322 @@
+<div id="readability-page-1" class="page"><div>
+            
+
+
+
+<p>Text-to-image has advanced at a breathless pace in 2021 - 2022, starting with DALL·E, then DALL·E 2, Imagen, and now Stable Diffusion. I dug into a couple of papers to learn more about the space and organized my understanding into a few key concepts:</p>
+<ul>
+  <li><a href="#diffusion-from-data-to-noise-and-back">Diffusion</a>: Gradually add noise to data and then learn to generate data from noise</li>
+  <li><a href="#text-conditioning-influencing-image-output-via-text">Text conditioning</a>: Generating images given (i.e., conditioned on) a text prompt</li>
+  <li><a href="#classifier-guidance-increasing-the-strength-of-prompts">Classifier guidance</a>: Using classifier gradients to text-increase image alignment</li>
+  <li><a href="#latent-space-diffusion-on-latents-instead-of-pixels">Latent space</a>: Applying diffusion on image embeddings instead of image pixels</li>
+</ul>
+
+<p><img src="https://eugeneyan.com/assets/og_image/robot-painting.jpg" loading="lazy" title="OG image prompt: 'a robot holding a paint brush painting on an art stand'" alt="OG image prompt: 'a robot holding a paint brush painting on an art stand'"></p>
+
+<p>OG image prompt: "a robot holding a paint brush painting on an art stand"</p>
+
+<h2 id="diffusion-from-data-to-noise-and-back">Diffusion: From data to noise and back</h2>
+
+<p>Let’s start with the earliest diffusion paper I know, cryptically titled <strong>“<a href="https://arxiv.org/abs/1503.03585" target="_blank">Deep Unsupervised Learning using Nonequilibrium Thermodynamics</a></strong>, by Sohl-Dickstein in 2015. In it, the authors explained that the idea of diffusion was inspired by non-equilibrium statistical physics (perhaps the <a href="https://en.wikipedia.org/wiki/Diffusion" target="_blank">particle physics concept</a> with the same name?)</p>
+
+<p>The key idea is to gradually destroy structure in a data distribution (e.g., image) via a forward diffusion process, and then learn a reverse diffusion process (via a model) to restore the structure in the data. And once we have a trained model, we can generate images by starting from pure noise and applying reverse diffusion (aka sampling).</p>
+
+<p>To implement forward diffusion, they apply a Markov chain that progressively adds Gaussian noise to the data until the signal is destroyed (i.e., complete noise).</p>
+
+<p>For reverse diffusion,  they train a <strong>diffusion probabilistic model (DPM)</strong> to transform noised images to less noisy images. Reverse diffusion is done via many small denoising steps, instead of a single large step from pure noise to clean image—the intuition is that taking many small steps is more tractable than a single large step.</p>
+
+<p>They shared an example of diffusion on 2d Swiss roll data. Forward diffusion (top in blue, left to right) gradually adds Gaussian noise until the data is pure noise. Reverse diffusion (middle in red, <em>right to left</em>) gradually denoises the data to get back the 2d swiss roll.</p>
+
+<p><img src="https://eugeneyan.com/assets/diffusion.webp" loading="lazy" title="Image" alt="Image"></p>
+<p>Forward (blue) and backward (red) diffusion process (<a href="https://arxiv.org/abs/1503.03585" target="_blank">source</a>)</p>
+
+<p><strong><a href="https://arxiv.org/abs/2006.11239" target="_blank">Denoising Diffusion Probabilistic Models (DDPM; 2020)</a></strong> shares a gentler explanation of the diffusion process: Forward diffusion (\(q\)) is a predefined process that gradually adds Gaussian noise to the image until it’s pure noise. Reverse diffusion (\(p\)) is a learned process that gradually denoises an image starting from pure noise until we get an actual image.</p>
+
+<p><img src="https://eugeneyan.com/assets/ddpm.webp" loading="lazy" title="Forward (q) and backward (p) diffusion process" alt="Forward (q) and backward (p) diffusion process"></p>
+<p>Forward (q) and backward (p) diffusion process (<a href="https://arxiv.org/abs/2006.11239" target="_blank">source</a>)</p>
+
+<p>If we knew the conditional distribution of \(p(x_{t-1}\vert x_{t})\), we could just run the forward diffusion process in reverse: Sample random Gaussian noise (\(x_{t}\)) and denoise it to get a sample image from the real distribution.</p>
+
+<p>Unfortunately, we don’t know \(p(x_{t-1}\vert x_{t})\) as it’s intractable—it requires knowing the distribution of <em>all possible images</em> to compute the conditional probability. Thus, we train a model (i.e., neural network) to learn the conditional probability distribution \(p_{\theta}(x_{t-1}\vert x_{t})\), where \(\theta\) are the model parameters.</p>
+
+<p>Given that the forward diffusion process is Gaussian (since the added noise is Gaussian), perhaps we can assume the reverse process to be Gaussian too. If so, reverse diffusion can be represented via mean (\(\mu_{\theta}\)) and variance (\(\Sigma_{\theta}\)) and be parameterized as:</p><p>
+
+\[p_{\theta}(x_{t-1}\vert x_{t}) := \mathcal{N} (x_{t-1}; \mu_{\theta}(x_{t}, t), \Sigma_{\theta} (x_{t}, t))\]
+
+</p><p>In layman’s terms, the probability of the less noisy image (\(x_{t-1}\)) given a noisier image  (\(x_{t}\))  from the previous timestep (\(t\)) is drawn from a Gaussian distribution  (\(\mathcal{N}\)) where the mean is the mean of \(x_{t}\) at timestep \(t\) and the variance is the variance of \(x_{t}\) at timestep \(t\). Thus, the neural network needs to learn the mean (\(\mu_{\theta}\)) and variance (\(\Sigma_{\theta}\)). That said, in DDPM, the variance is predefined and the network only has to learn the mean.</p>
+
+<p><img src="https://eugeneyan.com/assets/ddpm-training.webp" loading="lazy" title="Training algorithm for DDPM" alt="Training algorithm for DDPM"></p>
+<p>Training algorithm for DDPM (<a href="https://arxiv.org/abs/2006.11239" target="_blank">source</a>)</p>
+
+<p>Here’s a step-by-step of the training algorithm:</p>
+<ul>
+  <li>Line 1: Start while loop</li>
+  <li>Line 2: Sample a random clean image (\(x_{0}\)) from the set of images</li>
+  <li>Line 3: Sample a noise level (\(t\)) uniformly from 1 to max \(T\)</li>
+  <li>Line 4: Sample some noise (\(\epsilon\)) from a Gaussian and corrupt image with the noise</li>
+  <li>Line 5: Train the neural network to predict the noise based on the corrupted image</li>
+  <li>Line 6: End while loop when model converges</li>
+</ul>
+
+<p><img src="https://eugeneyan.com/assets/ddpm-sampling.webp" loading="lazy" title="Sampling algorithm for DDPM" alt="Sampling algorithm for DDPM"></p>
+<p>Sampling algorithm for DDPM (<a href="https://arxiv.org/abs/2006.11239" target="_blank">source</a>)</p>
+
+<p>When we have a trained model, here’s how to generate new images starting from noise:</p>
+<ul>
+  <li>Line 1: Get a sample noise image (\(x_{T}\)) from a Gaussian distribution</li>
+  <li>Line 2: Iterate from timestep \(T\) to timestep 1</li>
+  <li>Line 3: Sample additional Gaussian noise (\(z\) if timestep &gt; 1 else zero, because we just return the clean image at timestep 1)</li>
+  <li>Line 4: Get the slightly denoised image (\(x_{t-1}\)) by subtracting the noise (\(\epsilon_{\theta}(x_{t}, t)\)) from the noisy image (\(x_{t}\)), and then adding back some noise (\(z\))</li>
+  <li>Line 5: End iteration</li>
+  <li>Line 6: Return clean image from timestep 1</li>
+</ul>
+
+<p>Notice the model predicts all the noise from a noisy image (\(\epsilon_{\theta}(x_{t}, t)\)). However, we only subtract a fraction of it, weighted by \(\frac{1-\sigma_{t}}{\sqrt{}1-\bar{\sigma_{t}}}\), and then add back noise (\(z\)) weighted by \(\sigma_{t}\).</p>
+
+<p>I was curious about these noise removal and addition weights and coded up a <a href="https://github.com/eugeneyan/text-to-image/blob/main/the-annotated-diffusion-fashion-mnist-more-epochs.ipynb" target="_blank">DDPM</a> to tinker with it. To my surprise, the noise removal weights are as low as 0.01 to 0.02 while the noise addition weights go as high as 0.14. Remember the intuition that estimating small amounts of noise for multiple timesteps is more tractable than estimating all noise via a single timestep? This is how it’s implemented in the algorithm and code.</p>
+
+<div><pre><code data-language="bash">t = 799 - Latent weight: 1.010, Removed noise weight: 0.020, Added noise weight: 0.141
+t = 640 - Latent weight: 1.008, Removed noise weight: 0.016, Added noise weight: 0.127
+t = 480 - Latent weight: 1.006, Removed noise weight: 0.012, Added noise weight: 0.110
+t = 320 - Latent weight: 1.004, Removed noise weight: 0.009, Added noise weight: 0.090
+t = 160 - Latent weight: 1.002, Removed noise weight: 0.008, Added noise weight: 0.064
+t = 0   - Latent weight: 1.000, Removed noise weight: 0.010, Added noise weight: 0.000
+</code></pre></div>
+<p>Weights for the latent, noise removal, and noise addition at t = 799, 640, 480, 320, 160, 0 (<a href="https://github.com/eugeneyan/text-to-image" target="_blank">source</a>)</p>
+
+<p>Via experimenting with the DDPM, I learned that more timesteps had a positive impact on sample quality though it also required more epochs and a large timestep embedding. Larger dimensions for the timestep embedding also improved loss and sample quality. On the other hand, more epochs, different loss functions, and batch size didn’t help. (Want to understand diffusion better? Clone this <a href="https://github.com/eugeneyan/text-to-image.git" target="_blank">GitHub repo</a> and play with the code!)</p>
+
+<p>So far, these models are <em>only capable of basic diffusion</em> (i.e., generating images from noise, limited by the dataset they’re trained on). They are unable to generate images from text prompts (unlike DALL·E and Stable Diffusion)—to do this, <em>we need text conditioning.</em></p>
+
+<p>(Aside: I thought the approach of corrupting input with noise and learning to remove the noise was similar to denoising autoencoders and wrote a <a href="https://eugeneyan.com/writing/autoencoders-vs-diffusers/" target="_blank">brief comparison</a>.)</p>
+
+<h2 id="text-conditioning-influencing-image-output-via-text">Text conditioning: Influencing image output via text</h2>
+
+<p>To understand text conditioning, I think it helps to start with <strong><a href="https://arxiv.org/abs/2103.00020" target="_blank">Contrastive Language-Image Pre-training (CLIP; 2021)</a></strong>. It embeds text and image in the same space via a projection layer. Thus, it can efficiently learn visual concepts, in the form of text, via natural language supervision and perform zero-shot classification.</p>
+
+<p><img src="https://eugeneyan.com/assets/clip.webp" loading="lazy" title="CLIP pre-training and zero-shot classification" alt="CLIP pre-training and zero-shot classification"></p>
+<p>CLIP pre-training and zero-shot classification (<a href="https://arxiv.org/abs/2103.00020" target="_blank">source</a>)</p>
+
+<p>In the pre-training stage, the image and text encoders are trained to predict which images are paired with which texts in a dataset of 400M image-caption pairs. CLIP is trained to maximize the cosine similarity of the image and text embeddings of image-caption pairs via a multi-modal embedding space.</p>
+
+<p>This is implemented via a linear projection to map each encoder’s representation to the multi-modal embedding space (lines 13 - 15 below). As a result, the text and image embeddings are now in the same space. Thus, given a text embedding, we can apply k-nearest neighbors to find similar images.</p>
+
+<div><pre><code data-language="python"># image_encoder - ResNet or Vision Transformer
+# text_encoder  - CBOW or Text Transformer
+# I[n, h, w, c] - minibatch of aligned images
+# T[n, l]       - minibatch of aligned texts
+# W_i[d_i, d_e] - learned projection of image to embed
+# W_t[d_t, d_e] - learned projection of text to embed
+# t             - learned temperature parameter
+
+# extract feature representations of each modality
+I_f = image_encoder(I) #[n, d_i]
+T_f = text_encoder(T)  #[n, d_t]
+
+# joint multimodal embedding [n, d_e]
+I_e = l2_normalize(np.dot(I_f, W_i), axis=1)
+T_e = l2_normalize(np.dot(T_f, W_t), axis=1)
+
+# scaled pairwise cosine similarities [n, n]
+logits = np.dot(I_e, T_e.T) * np.exp(t)
+
+# symmetric loss function
+labels = np.arange(n)
+loss_i = cross_entropy_loss(logits, labels, axis=0)
+loss_t = cross_entropy_loss(logits, labels, axis=1)
+loss   = (loss_i + loss_t) / 2
+</code></pre></div>
+
+<p>Pseudo-code to embed images and text via a multi-modal embedding (<a href="https://arxiv.org/abs/2103.00020" target="_blank">source</a>)</p>
+
+<p>For zero-shot classification, all the dataset classes are converted into captions such as “a photo of a &lt;class&gt;”. Then, CLIP is used to predict the class that best matches the image.</p>
+
+<p>CLIP was quickly followed up by <strong><a href="https://arxiv.org/abs/2102.12092" target="_blank">DALL·E (2021)</a>, one of the first text-to-image generation models open to the public</strong>—this is our first example of text conditioning.</p>
+
+<p><img src="https://eugeneyan.com/assets/dalle-avocado.webp" loading="lazy" title="Remember the avocado chair from DALL·E?" alt="Remember the avocado chair from DALL·E?"></p>
+<p>Remember the avocado chair from DALL·E? (<a href="https://openai.com/blog/dall-e/" target="_blank">source</a>)</p>
+
+<p>At a high level, DALL·E starts by compressing images into 8,192 discrete tokens in a visual codebook (\(\mathcal{Z}\) in the image below). These image tokens can then be concatenated with text embeddings. The combined embedding is then fed into a transformer which learns how to predict the image tokens given a text embedding.</p>
+
+<p><img src="https://eugeneyan.com/assets/vqgan-codebook.webp" loading="lazy" title="Visual example of a codebook from the VQGAN paper" alt="Visual example of a codebook from the VQGAN paper"></p>
+<p>Example of a visual codebook from the VQGAN paper (Note, this is not DALL·E; <a href="https://arxiv.org/abs/2012.09841" target="_blank">source</a>)</p>
+
+<p>Why compress images into tokens in a codebook? The authors explained that using pixels directly as image tokens would require too much memory for high-resolution images. As a result, model capacity is spent on high-frequency details (i.e., pixels) instead of low-frequency structure (i.e., lines) that make images visually recognizable. (This is the same reason Stable diffusion encodes images into the latent space before running diffusion.)</p>
+
+<p>First, DALL·E trains a discrete variational encoder (dVAE) to compress 256 x 256 images into 32 x 32 image tokens (vocabulary size = 8,192). The parameters of the dVAE are then frozen when training the transformer.</p>
+
+<p>Next, image captions are lowercased and truncated to a max length of 256 tokens before being encoded (vocabulary size = 16,384). The image tokens are then concatenated after the text tokens (example below).</p>
+
+<p><img src="https://eugeneyan.com/assets/dalle-sequence.webp" loading="lazy" title="Example of concatenated text and image tokens in DALL·E" alt="Example of concatenated text and image tokens in DALL·E"></p>
+<p>Example of concatenated text and image tokens in DALL·E (<a href="https://arxiv.org/abs/2102.12092" target="_blank">source</a>)</p>
+
+<p>Finally, an autoregressive transformer (i.e., predict the next item in a sequence) is trained to learn the joint distribution over the text and image tokens. The transformer is decoder-only, where each image token can attend to all text tokens earlier in the sequence.</p>
+
+<p>To generate images from text, the text prompt is embedded and fed into the transformer. The transformer then generates the sequence of image tokens. Finally, the dVAE decodes the image tokens to return a 256 x 256 image.</p>
+
+<p><strong><a href="https://arxiv.org/abs/2204.06125" target="_blank">DALL·E 2 (aka unCLIP, 2022)</a> builds on the previous two papers</strong> by using the text and image encoder from CLIP and the autoregressive transformer from DALL·E. Similarly, unCLIP is trained on a dataset of image-caption pairs which are embedded via CLIP text and image encoders into text embeddings (\(z_{t}\)) and image embeddings (\(z_{i}\)).</p>
+
+<p><img src="https://eugeneyan.com/assets/unclip.webp" loading="lazy" title="How the encoded text (blue) generates images via the prior and decoder" alt="How the encoded text (blue) generates images via the prior and decoder"></p>
+<p>How the encoded text (blue) generates images via the prior and decoder (<a href="https://arxiv.org/abs/2204.06125" target="_blank">source</a>)</p>
+
+<p>In the image above, the prior (\(p(z_{i}\vert y)\)) learns to produce CLIP image embeddings (\(z_{i}\)) conditioned on the text prompt (\(y\)). The decoder (\(p(x\vert z_{i}, y)\)) then produces the image conditioned on the CLIP image embedding (\(z_{i}\)) and optional text prompt (\(y\)). In other words, to generate images from text prompts (\(p(x\vert y)\)), we first sample CLIP image embeddings via the prior before decoding them via the decoder.</p><p>
+
+\[p(x\vert y) = P(x, z_{i}\vert y) = P(x\vert z_{i}, y)P(z_{i}\vert y)\]
+
+</p><p>The paper shared two approaches to learn the prior: autoregressive and diffusion.</p>
+
+<p>The autoregressive approach is similar to that of DALL·E where text conditioning is done by having the text embedding early in the sequence. They also prepend a dot product token (of text and image embedding) between the text and image embedding. This allowed the autoregressive prior to condition the model on the higher dot product since a higher text-image dot product indicates images that are more representative of the caption.</p>
+
+<p>For the diffusion approach, they trained a decoder-only transformer with a casual attention mask on a sequence of encoded text, text embedding, time step embedding, noised CLIP image embedding, and final embedding. The final embedding’s output is then used to predict the unnoised CLIP image embedding. Interestingly, in contrast to DDPM,  they found it better to train the model to directly predict the unnoised image, instead of predicting the noise and then subtracting from the noisy image.</p>
+
+<p>The latter shows one way text conditioning can be applied to diffusion. The transformer attends to the text information in the sequence and uses it to predict the final output.</p>
+
+<p><strong><a href="https://arxiv.org/abs/2205.11487" target="_blank">Imagen (2022)</a> takes it further by using a text encoder that wasn’t even trained on image-caption pairs (🤯).</strong> It uses the encoder network of the <a href="https://arxiv.org/abs/1910.10683" target="_blank">T5</a>. This is a departure from CLIP-based approaches, where the text encoder is specifically trained on image-caption pairs and the text embeddings are projected into a multi-modal embedding space.</p>
+
+<p>It works because extremely large language models (LLMs), by virtue of sheer size, can still learn useful representations despite not being explicitly trained on text-to-image tasks. The benefit is that LLMs can learn on a text-only corpus which is easily larger than image-text datasets. Furthermore, they found that scaling the text encoder size is more impactful than UNet size in image-text alignment and image fidelity.</p>
+
+<p><img src="https://eugeneyan.com/assets/imagen-curves.webp" loading="lazy" title="Text encoder size &gt; UNet size; dynamic thresholding &gt; static thresholding" alt="Text encoder size &gt; UNet size; dynamic thresholding &gt; static thresholding"></p>
+<p>Text encoder size &gt; UNet size; dynamic thresholding &gt; static thresholding (<a href="https://arxiv.org/abs/2205.11487" target="_blank">source</a>)</p>
+
+<p>Imagen does text conditioning by first tokenizing the input text and encoding it via the T5 encoder. The encoded text then passes through a pooling step (image below).</p>
+
+<p><img src="https://eugeneyan.com/assets/imagen-text-embedding.webp" loading="lazy" title="Encoding text via the T5 transformer in Imagen" alt="Encoding text via the T5 transformer in Imagen"></p>
+<p>Encoding text via the T5 transformer in Imagen (<a href="https://www.assemblyai.com/blog/how-imagen-actually-works/" target="_blank">source</a>)</p>
+
+<p>The text embedding is then combined with the image and time step embedding (image below). The model is conditioned via cross-attention over the text embedding. This is implemented by concatenating the text embedding to the key-value pairs of each self-attention layer in the UNet. Cross-attention on the text embedding outperformed simple mean or attention-based pooling.</p>
+
+<p><img src="https://eugeneyan.com/assets/imagen-conditioning.webp" loading="lazy" title="Conditioning on time and text embeddings in Imagen" alt="Conditioning on time and text embeddings in Imagen"></p>
+<p>Conditioning on time and text embeddings in Imagen (<a href="https://www.assemblyai.com/blog/how-imagen-actually-works/" target="_blank">source</a>)</p>
+
+<p>(Note how text is conditioned differently in DALL·E variants and Imagen. In DALL·E, text conditioning is done by concatenating the text embedding to the image embedding and then passing it through a transformer. In Imagen, text conditioning is done via cross-attention in the UNet.)</p>
+
+<p>The text embedding (green and red boxes below) is used throughout the image generation step. First, it’s used to generate the initial 64 x 64 image from noise (blue box). Then, it is used to increase the image resolution to 256 x 256 and then 1,024 x 1,024 (yellow boxes).</p>
+
+<p><img src="https://eugeneyan.com/assets/imagen-high-level.webp" loading="lazy" title="High-level overview of Imagen" alt="High-level overview of Imagen"></p>
+<p>High-level overview of Imagen's text encoder, diffusion generator, and resolution model (<a href="https://www.assemblyai.com/blog/how-imagen-actually-works/" target="_blank">source</a>)</p>
+
+<p>With text conditioning, we can now generate images based on text prompts. But text conditioning alone is insufficient to generate high-quality images that adhere to the text prompt—<em>we also need guidance.</em></p>
+
+<h2 id="classifier-guidance-increasing-the-strength-of-prompts">Classifier guidance: Increasing the strength of prompts</h2>
+
+<p>Guidance is a technique to explicitly incorporate image class—or text prompt—directly in the diffusion process. (This is the often tweaked <a href="https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion#diffusers.StableDiffusionPipeline.__call__.guidance_scale" target="_blank"><code>guidance_scale</code></a> hyperpameter.)</p>
+
+<p><strong>The <a href="https://arxiv.org/abs/2105.05233" target="_blank">classifier-guidance paper (2021)</a> noted that GANs relied heavily on class labels</strong>, often via class-conditioned normalization or discriminators with heads designed to behave like classifiers.  This suggests that class information is crucial to the success of GANs for generation. So, to take a leaf from GANs, they use a classifier \(p_\phi(y\vert x)\) to improve image generation via diffusion.</p>
+
+<p>As a result, \(\nabla_{x} \log p_\phi(y\vert x)\) is added to the score function, updating it from \(\nabla_{x} \log p_\theta(x)\) to \(\nabla_{x} \log p_\gamma (x\vert y) = \nabla_{x} \log p_\theta(x) + \gamma \nabla_{x} \log p_\phi(y\vert x)\), where \(\nabla_x \log p_\phi(y\vert x)\) is the gradient of the classifier and \(\gamma\) is the guidance scale.</p>
+
+<p>(Note: For simplicity, I’ve dropped the \(t\) variable in the equations. In practice, text-to-image diffusion is also conditioned on time step which indicates the level of input noise.)</p>
+
+<p>To achieve this, they train a classifier (\(p_\phi(y \vert x)\)) on noised images (\(x\)) and then use the gradient (\(\nabla_{x} \log p_\phi(y \vert x)\)) to guide the sampling process towards the class label (\(y\)). To produce noised images, forward diffusion is applied on ImageNet with random crops to reduce overfitting. The classifier adopts the downsampling truck of the UNet, with pooling on the 8 x 8 layer to produce the final output.</p>
+
+<p>Recall that the score function is now \(\nabla_x \log p_\gamma (x\vert y) = \nabla_x \log p_\theta(x) + \gamma \nabla_x \log p_\phi(y \vert x)\) and \(\gamma\) is the guidance scale. The paper found that increasing the guidance scale beyond 1 had the effect of amplifying the conditioning signal (i.e., text prompt) and led to better images.</p>
+
+<p><img src="https://eugeneyan.com/assets/classifier-guidance.webp" loading="lazy" title="With standard (left; scale=1) and stronger (right; scale=10) classifier-guidance" alt="With standard (left) and stronger (right; scale = 10) classifier-guidance"></p>
+<p>With standard (left; scale=1) and stronger (right; scale=10) classifier-guidance (<a href="https://arxiv.org/abs/2105.05233" target="_blank">source</a>)</p>
+
+<p>When using a scale of 1, while the classifier assigned reasonable probabilities of ~50% to the classes of the sampled images, upon visual inspection, these images did not match the classes. Scaling up the classifier gradients (i.e., guidance &gt; 1) solved this issue and the class probabilities of the classifier increased to nearly 100%.</p>
+
+<p>However, <em>classifier guidance is impractical</em> as the classifier needs to be trained—from scratch—on noisy images. I.e., we can’t use a pre-trained classifier.</p>
+
+<p>Thus, <strong><a href="https://arxiv.org/abs/2207.12598" target="_blank">classifier-free guidance (2021)</a></strong> was proposed. Instead of training a separate classifier, <strong>it trains a conditional diffusion model (\(p(x \vert y)\)) with conditioning dropout.</strong> Some proportion of the time, the conditioning information (i.e., image caption) is replaced with a null token. This is simple to implement and does not complicate the training pipeline or increase model parameters.</p>
+
+<p>As a result, the single neural network can function as either a conditional model \(p(x|y)\) or unconditional model \(p(x)\), depending on the guidance scale:</p>
+<ul>
+  <li>\(\gamma = 0\): unconditional model</li>
+  <li>\(\gamma = 1\): standard conditional model</li>
+  <li>\(\gamma &gt; 1\):  strongly conditional model that adheres more to the conditional (i.e., text prompt) and returns images with better text-alignment</li>
+</ul>
+
+<p><strong><a href="https://arxiv.org/abs/2112.10741" target="_blank">GLIDE (2021)</a> explored using both CLIP-guidance and classifier-free guidance.</strong> CLIP guidance was implemented by replacing the classifier with a CLIP model trained on noised images. They found that users preferred images generated via classifier-free guidance.</p>
+
+<p><img src="https://eugeneyan.com/assets/glide-guidance.webp" loading="lazy" title="No guidance (left) vs. CLIP-guidance (middle) vs. classifier-free guidance in GLIDE" alt="No guidance (left) vs. CLIP-guidance (middle) vs. classifier-free guidance (right) in GLIDE"></p>
+<p>“A stained glass window of a panda eating bamboo”: No guidance (left) vs. CLIP-guidance (middle) vs. classifier-free guidance (right) in GLIDE (<a href="https://arxiv.org/abs/2112.10741" target="_blank">source</a>)</p>
+
+<p>To be clear, DALL·E, DALL·E 2, and Imagen apply classifier-free guidance too. DALL·E randomly drops the text-conditioning 10% of the time while DALL·E 2 randomly sets the text embeddings to zero and randomly drops text captions 10% and 50% of the time. Imagen randomly sets text embeddings to zero for 10% of training instances. In the space of text-to-image diffusion, classifier-free guidance (aka conditioning dropout) is now <em>as essential as dropout for regularization</em>.</p>
+
+<p>That said, it was another development that allowed regular users to hack text-to-image diffusion on their laptops—<em>departure to latent space</em>.</p>
+
+<h2 id="latent-space-diffusion-on-latents-instead-of-pixels">Latent space: Diffusion on latents instead of pixels</h2>
+
+<p><strong><a href="https://arxiv.org/abs/2112.10752" target="_blank">Stable Diffusion (2021)</a> differs from the previous diffusion models by working in the latent space instead of pixel space.</strong> It first compresses images via a variational autoencoder (VAE) into a more efficient and lower dimensional latent embedding. Next, the diffusion model learns to generate latent (i.e., compressed) representations of images which are then decoded into images via the VAE decoder.</p>
+
+<p>Similar to DALL·E and its visual codebook, latent space is motivated by the observation that most pixels in an image are imperceptible details that are semantically meaningless. However, because regular diffusion models are trained and evaluated in the pixel space, it leads to unnecessary computation and thus costly training and inference. Thus, the paper proposes diffusion on compressed images where the imperceptible details are excluded.</p>
+
+<p><img src="https://eugeneyan.com/assets/stable-diffusion.webp" loading="lazy" title="Using a VAE to encode images from pixel space to latent space (left)" alt="Using a VAE to encode images from pixel space to latent space (left)"></p>
+<p>Using a VAE to encode images from pixel space to latent space (left) (<a href="https://arxiv.org/abs/2112.10752" target="_blank">source</a>)</p>
+
+<p>In Stable Diffusion, the VAE encodes noised images (via \(\mathcal{E}\)) into a low-dimensional latent representation which is fed into the UNet. It then decodes UNet-generated latent representations (via \(\mathcal{D}\)) into human-understandable images. The VAE has a reduction factor of 8, where the original image pixel space of 3 x 512 x 512 is encoded into latent space of 6 x 64 x 64, thus requiring 1/8 x 1/8 = 1/64 of the memory. During sampling, only the VAE decoder is needed.</p>
+
+<p>Stable Diffusion uses the CLIP text encoder. (But as Imagen has demonstrated, probably any sufficiently large text-only LLM can be used).</p>
+
+<p>Latent diffusion leads to faster training and sampling because we’re now working in the latent—instead of pixel—space. This leads to lower cost which leads to more experiments. The lower memory requirement also allows sampling run on consumer-grade laptops, putting text-to-image generation in the hands of regular hackers.</p>
+
+<p>• • •</p>
+
+<p>We started with how diffusion can generate images from noise. Then, we saw how text conditioning enabled prompt-based image generation via autoregressive transformers and cross-attention, even using text encoders that weren’t trained on text-to-image tasks. Finally, we learned how guidance helps with generating images that are more aligned with the text prompt though at the cost of image diversity.</p>
+
+<p>The space of text-to-image has progressed rapidly since I started deliberately studying it. Two weeks ago, NVIDIA released <a href="https://arxiv.org/abs/2211.01324" target="_blank">eDiff-I</a> which uses an ensemble of diffusion models. And we haven’t touched on text-to-video (e.g., Facebook’s <a href="https://arxiv.org/abs/2209.14792" target="_blank">Make-A-Video</a>, Google’s <a href="https://arxiv.org/abs/2210.02303" target="_blank">Imagen Video</a>) and text-to-3d (e.g., Google’s <a href="https://arxiv.org/abs/2209.14988" target="_blank">DreamFusion</a>, NVIDIA’s <a href="https://arxiv.org/abs/2211.10440" target="_blank">Magic3D</a>).</p>
+
+<p>Unfortunately, we can’t discuss all of them here (mostly because I don’t have the spare time and energy 😅). Nonetheless, I hope these fundamentals will help with your understanding of text-to-media generation and its future advances.</p>
+
+<p>Did I misunderstand or misrepresent any of the concepts or papers? If so, please <a href="https://twitter.com/eugeneyan" target="_blank">reach out</a>!</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/1503.03585" target="_blank">Deep Unsupervised Learning using Nonequilibrium Thermodynamics</a></li>
+  <li><a href="https://arxiv.org/abs/1907.05600" target="_blank">Generative Modeling by Estimating Gradients of the Data Distribution (NCSN)</a></li>
+  <li><a href="https://arxiv.org/abs/2006.09011" target="_blank">Improved Techniques for Training Score-Based Generative Models</a></li>
+  <li><a href="https://arxiv.org/abs/2006.11239" target="_blank">Denoising Diffusion Probabilistic Models (DDPM)</a></li>
+  <li><a href="https://arxiv.org/abs/2010.02502" target="_blank">Denoising Diffusion Implicit Models (DDIM)</a></li>
+  <li><a href="https://arxiv.org/abs/2102.09672" target="_blank">Improved Denoising Diffusion Probabilistic Models</a></li>
+  <li><a href="https://arxiv.org/abs/2103.00020" target="_blank">Learning Transferable Visual Models From Natural Language Supervision (CLIP)</a></li>
+  <li><a href="https://arxiv.org/abs/2102.12092" target="_blank">Zero-Shot Text-to-Image Generation (DALL·E)</a></li>
+  <li><a href="https://arxiv.org/abs/2012.09841" target="_blank">Taming Transformers for High-Resolution Image Synthesis (VQGAN)</a></li>
+  <li><a href="https://arxiv.org/abs/2204.06125" target="_blank">Hierarchical Text-Conditional Image Generation with CLIP Latents (DALL·E 2)</a></li>
+  <li><a href="https://arxiv.org/abs/2205.11487" target="_blank">Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding (Imagen)</a></li>
+  <li><a href="https://www.assemblyai.com/blog/how-imagen-actually-works/" target="_blank">How Imagen Actually Works</a></li>
+  <li><a href="https://arxiv.org/abs/1910.10683">Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer (T5)</a></li>
+  <li><a href="https://arxiv.org/abs/2105.05233" target="_blank">Diffusion Models Beat GANs on Image Synthesis (classifier-guidance)</a></li>
+  <li><a href="https://arxiv.org/abs/2207.12598" target="_blank">Classifier-Free Diffusion Guidance</a></li>
+  <li><a href="https://arxiv.org/abs/2112.10741" target="_blank">GLIDE: Towards Photorealistic Image Generation and Editing with Text-Guided Diffusion Models</a></li>
+  <li><a href="https://arxiv.org/abs/2112.10752" target="_blank">High-Resolution Image Synthesis with Latent Diffusion Models (Stable Diffusion)</a></li>
+</ul>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Nov 2022). Text-to-Image: Diffusion, Text Conditioning, Guidance, Latent Space. eugeneyan.com.
+        https://eugeneyan.com/writing/text-to-image/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2022diffusion,
+  title   = {Text-to-Image: Diffusion, Text Conditioning, Guidance, Latent Space},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2022},
+  month   = {Nov},
+  url     = {https://eugeneyan.com/writing/text-to-image/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

@@ -1,0 +1,1412 @@
+<div id="readability-page-1" class="page"><div>
+      <p>
+        The International Obfuscated C Code Contest results were announced this last weekend,
+        and I was thrilled to see that  <a href="https://www.ioccc.org/2024/carlini/index.html">my entry</a> was among the winners.
+        In this article I want to walk through what it is:
+        a feature-complete gate-level emulator for the Intel 4004 that's capable of emulating the original
+        Busicom 141-pf calculator ROM---the application for which the 4004 was originally designed.
+      </p>
+        
+<p>
+To make things exciting, this program doesn't emulate the 4004 the "normal" way.
+Instead, this program is actually just a logic gate simulator, but where I've designed an entire
+4004 as circuit (microcoded for space!) that's embedded in the program and then emulated.
+And because we're 50 years in the future, this gate-level emulated calculator
+runs at a few hundred instructions per second which
+is actually fast enough to be usable, just as long as you're not in a hurry.
+</p>
+
+<p>
+  This is part two in a two (or maybe three?) part series of posts.
+  <a href="https://nicholas.carlini.com/writing/2025/minihdl-python-hardware-description-dsl.html">Last time</a>,
+  I explained the design of <a href="https://github.com/carlini/miniHDL">miniHDL</a>,
+  a small python DSL that allows you to build and design circuits.
+  This time, I'm going to use miniHDL to design my 4004 (along with an intel 4003,
+  4002, and 4001), and then write some scaffolding so that it has the correct "hardware" to
+  run the original program ROM,
+  and then somehow crush a 15,000 byte program and 200,000 byte circuit into the below &lt;4004 bytes.
+  <a href="https://github.com/carlini/intel-4004-in-4004-bytes-of-c">Source code, as always, is on GitHub.</a>
+</p>
+
+<div>
+<p><span>#include</span><span>&lt;stdlib.h&gt;</span></p>
+<p><span>#include</span><span>&lt;stdio.h&gt;</span></p>
+<p><span>#include</span><span>&lt;fcntl.h&gt;</span></p>
+
+<p><span>typedef</span><span> </span><span>int</span><span> </span><span>_</span><span>;</span></p>
+<p><span>#define</span><span> </span><span>P</span><span> 1&lt;&lt;24</span></p>
+<p><span>#define</span><span> </span><span>Z</span><span> </span><span>while</span><span>(</span></p>
+<p><span>#define</span><span> </span><span>W</span><span> </span><span>for</span><span>(i=0;i&lt;K;i++)</span></p>
+<p><span>#define</span><span> </span><span>A</span><span> *Q++</span></p>
+
+<p><span>char</span><span>*</span><span>Q</span><span> = </span><span>"7JD</span><span>^A^[</span><span>!</span><span>^X</span><span>^.{Z</span><span>^\</span><span>25</span><span>^V</span><span>ZA</span><span>^X</span><span>T$C</span><span>^W</span><span>==</span><span>^E</span><span>JjUX</span><span>^E</span><span>W&lt;|}/*</span><span>^B</span><span>7;(bz</span><span>^D</span><span>z).%;y=F4,</span><span>^Z</span><span>W}</span><span>^K^S</span><span>e%</span><span>^^^K</span><span>pV1JU <span>&nbsp; </span>e</span><span>^Y</span><span>/</span><span>^[</span><span>Q</span><span>^H</span><span>y=</span><span>^C^[</span><span>hSf</span><span>^Z^?</span><span>n}jW</span><span>^R</span><span>.</span><span>^?</span><span>P!E</span><span>^R</span><span>&lt;SO</span><span>^T</span><span>NBKuhWy&lt;e:db</span><span>^Y</span><span>W9'0=/aB(K</span><span>^^</span><span>nZ!</span><span>^Y</span><span>nh,Ye=+</span><span>^C</span><span>v`</span><span>^K</span><span>o</span><span>^N</span><span>!3</span><span>^O</span><span>}%</span><span>^Q</span><span> ,L.5[M#e</span><span>^S</span><span>-</span><span>^R</span><span>={</span><span>^_</span><span>o</span><span>^U</span><span>z2G(a!jz?</span><span>^N</span><span>QY+QA$4@S6_</span><span>^R</span><span>AV</span><span>^F^Q</span><span>lVO</span><span>^^</span><span>yv</span><span>^V</span><span>&gt;</span><span>^U</span><span>D</span><span>^_^V</span><span>z</span><span>^_</span><span>8N</span><span>^S^[</span><span>KM[A?i~&lt;,oHaa</span><span>^W</span><span>9</span><span>^D</span><span>V3</span><span>^H</span><span>8c</span><span>^B^[</span><span> <span>&nbsp; </span>zEK[</span><span>^\^P</span><span>-</span><span>^A</span><span>Z5*K</span><span>^H</span><span>&gt; u{^~XN8}QsGf$nd</span><span>^U^T</span><span>N&lt;],5d}hWs;5</span><span>^T</span><span>Ta</span><span>^\^N</span><span>[</span><span>^_</span><span>5-VHje6</span><span>^S</span><span>DjM</span><span>^O^X</span><span>&amp;',K</span><span>^G</span><span>d$w</span><span>^L</span><span>tV-</span><span>^C</span><span>Z</span><span>^N</span><span>J</span><span>^S</span><span>nj</span><span>^V</span><span>E={</span><span>^P</span><span>?=c*</span><span>^V</span><span>T</span><span>^B^C</span><span>b(2I$</span><span>^K</span><span>Pq9</span><span>^R</span><span>&amp;</span><span>^^</span><span>RW</span><span>^L</span><span>u:E11qqH5</span><span>^S</span><span>uPx</span><span>^D^^</span><span>D</span><span>^L</span><span>9Xk&gt;V&lt;</span><span>^H^X</span><span>~k</span><span>^E</span><span>Ae</span><span>^]</span><span>@Su}D&amp;F6</span><span>^H</span><span>;</span><span>^G^W</span><span>X,</span><span>^D^]^T</span><span>V]#K</span><span>^Y</span><span>,9XS&gt;Y-Dt@-3T</span><span>^Z</span><span>SJ,</span><span>^Q</span><span>(+7</span><span>^W</span><span>$-X</span><span>^L</span><span>]]]q</span><span>^N</span><span>b}</span><span>^?</span><span>g</span><span>^[^R</span><span>uzz</span><span>^O</span><span>v@</span><span>^T</span><span>8'R[NIEZB66w~</span><span>^G</span><span>{A1CC@</span><span>^W^X</span><span>M]</span><span>^W</span><span>.</span><span>^S</span><span>xq|`'</span><span>^F</span><span>/oFlk</span><span>^_</span><span>W</span><span>^G^Q</span><span>DVg{`wx[uE0,</span><span>^C</span><span>YQ</span><span>^H</span><span>5</span><span>^N</span><span>%</span><span>^R</span><span>W3,</span><span>^?</span><span>_Q</span><span>^O</span><span>N/*</span><span>^K</span><span>s`8 ?]J/wfT_/</span><span>^P</span><span>j]EdLMfgdeJ4xL5</span><span>^]</span><span>x</span><span>^G</span><span>!5$k)iB.b`*</span><span>^F</span><span>@P6B5bj</span><span>^[</span><span>^x'+</span><span>^H</span><span>~=9p</span><span>^V</span><span>`0L1Fu[Su</span><span>^F</span><span>uV.</span><span>^[^E</span><span>%C7*oI0</span><span>^W</span><span>b</span><span>^P</span><span>V</span><span>^D</span><span>gIA</span><span>^G</span><span>'!v</span><span>^P</span><span>:R)_</span><span>^D</span><span>(:qd}B@</span><span>^B</span><span>K`$1.</span><span>^H^H</span><span>#6PD;cTvjR</span><span>^_</span><span>0v</span><span>^_</span><span>'&gt;C</span><span>^F</span><span>u &amp;</span><span>^L^Y^^^B^B</span><span>9ck8</span><span>^]</span><span>3Y</span><span>^P</span><span>4]FJ*Jz,# </span><span>^W^D</span><span>1}Y$ZK</span><span>^U</span><span>U~L?y</span><span>^Q</span><span>`N</span><span>^]</span><span>z</span><span>^R</span><span>%</span><span>^G</span><span>b/</span><span>^^</span><span>rD</span><span>^G</span><span>g</span><span>^L^W</span><span>~z</span><span>^H</span><span>_K</span><span>^R</span><span>i</span><span>^B</span><span>A0<span>&nbsp; </span>]89@jD$YLfG&amp;8</span><span>^Q</span><span>zDNy?p1L2vp</span><span>^?^H</span><span>ZkLO$;</span><span>^F</span><span>nxG2r&lt;tf@J[W.MCn$h!B</span><span>^T</span><span>1</span><span>^Y^K^D</span><span>H6G(Sv</span><span>^K</span><span>4)nB7</span><span>^X</span><span>_</span><span>^?</span><span>x</span><span>^T</span><span>sQ</span><span>^C</span><span>({Duth]kt&gt;=k</span><span>^C</span><span>%Duq</span><span>^W</span><span>[-nVqG.&amp;NEXWs</span><span>^U</span><span>:</span><span>^?</span><span>Xj#</span><span>^Y</span><span>.t</span><span>^A</span><span>J2g</span><span>^[</span><span>!Q</span><span>^O</span><span>&gt;X(jK</span><span>^B</span><span>{cTC(Vk</span><span>^X</span><span>~</span><span>^P</span><span>YS?U</span><span>^Y</span><span>;5</span><span>^Y^L^T</span><span>0&amp;</span><span>^V</span><span>N*e</span><span>^C</span><span>U</span><span>^N</span><span>aY</span><span>^U</span><span>vDYdJtV3q</span><span>^V</span><span>&amp;NGn</span><span>^Z^P^Q^B</span><span>t&gt;G6</span><span>^N</span><span>{BR%F</span><span>^Q^U</span><span>BYLeP</span><span>^Z</span><span>x</span><span>^_</span><span>q</span><span>^A</span><span>J(&amp;L%`T</span><span>^K</span><span>,f^</span><span>^K</span><span>Q^O</span><span>^N</span><span>V</span><span>^Z^?</span><span>6.T;})1S8QCg}g4k]/</span><span>^W</span><span>c:bb/&gt;|x</span><span>^Y</span><span>0</span><span>^E</span><span>^</span><span>^G</span><span>$</span><span>^]</span><span>Pn=</span><span>^E</span><span>K</span><span>^D</span><span>4joC</span><span>^A</span><span>^'N1HH($,eow</span><span>^[</span><span>1-</span><span>^A</span><span>INyY</span><span>^Z</span><span>YthdT=T$o+o)n</span><span>^[</span><span>cyCO</span><span>^F</span><span>}:</span><span>^F^L</span><span>vdZ</span><span>^H</span><span> <span>&nbsp; </span>7s7</span><span>^Q^B</span><span>d`5</span><span>^C</span><span>h.tLtvIow|VL)</span><span>^?</span><span>~k# OrdL</span><span>^N</span><span>7 </span><span>^[</span><span>}z|w</span><span>^H</span><span>Z@ <span>&nbsp; </span>Q3</span><span>^D^[</span><span>pcQ</span><span>^K</span><span>)</span><span>^B</span><span>U</span><span>^G</span><span>`Gw{</span><span>^A^R</span><span>X</span><span>^_</span><span>;</span><span>^D</span><span>-82pL</span><span>^Z</span><span>^4L</span><span>^]^U</span><span>SNBW</span><span>^O^B^V^]</span><span>Ua</span><span>^A</span><span>(X</span><span>^S</span><span>2</span><span>^F</span><span>&amp;</span><span>^C^Z^\</span><span>e?Q</span><span>^L</span><span>@6c/KzQ</span><span>^Q</span><span>9x</span><span>^N</span><span>S|k@gP</span><span>^T^H</span><span>$=Bgn]</span><span>^R</span><span>,</span><span>^\^T</span><span>glLOW&amp;</span><span>^E</span><span>Ta{Ck</span><span>^Z</span><span>I,!&amp;tP!Tz</span><span>^K</span><span>MzqM</span><span>^C^O^P</span><span>o</span><span>^_</span><span>TGHe</span><span>^H</span><span>s_ v</span><span>^T^O^H</span><span>UGWt</span><span>^E</span><span>f</span><span>^T</span><span>&amp;V|o`</span><span>^H</span><span>[GR</span><span>^Y^\</span><span>Hm$</span><span>^?^_</span><span>X</span><span>^Q</span><span>5GI</span><span>^[</span><span>gE</span><span>^P</span><span>me</span><span>^A</span><span>5:</span><span>^H</span><span>1!</span><span>^Q^Q</span><span>B&amp;?5e@</span><span>^A</span><span>&amp;WB</span><span>^D</span><span>-J</span><span>^[</span><span>r</span><span>^S</span><span>%[b:iv=</span><span>^F</span><span>yr<span>&nbsp; </span>E;</span><span>^O</span><span>`</span><span>^W</span><span>sVol`P^</span><span>^Y</span><span>)</span><span>^\</span><span>g</span><span>^^</span><span>~</span><span>^?</span><span>)l=*$<span>&nbsp; </span>e8</span><span>^D^?</span><span>l6</span><span>^K</span><span>&gt;j1]8%GQl</span><span>^A^K</span><span>+MU&lt;M b,qb</span><span>^Y</span><span>#:</span><span>^D</span><span>=</span><span>^_^G</span><span>&amp;fC5nCj</span><span>^^</span><span>tpk/8b</span><span>^D</span><span>&amp;n!83CvF`(&lt;uK</span><span>^^^B</span><span>H=kaf)</span><span>^\</span><span>(c*[</span><span>^D</span><span>-;zvb_`R</span><span>^\^Z</span><span>T</span><span>^D</span><span>T</span><span>^Z</span><span>XVF}</span><span>^B</span><span>`id~</span><span>^E</span><span>.b,93n</span><span>^S</span><span>d_</span><span>^H</span><span>STrl</span><span>^^</span><span>.e0</span><span>^T</span><span>*</span><span>^\</span><span>;</span><span>^R^H</span><span>cx $qu</span><span>^O</span><span>Zq</span><span>^_</span><span>88sP</span><span>^\</span><span>ky.*@</span><span>^?</span><span>q.</span><span>^P</span><span>f9`W</span><span>^K^O</span><span>K6</span><span>^N</span><span>A</span><span>^N</span><span>\</span><span>?#Yi</span><span>^H</span><span>j</span><span>^O</span><span>#</span><span>^D</span><span>`</span><span>^K</span><span>yp(L</span><span>^Q</span><span>(jz</span><span>^D</span><span>u</span><span>^U</span><span>]kVCWIOM~%}&amp;QhCK</span><span>^Q^K^[^W</span><span>S/uY5B</span><span>^E</span><span>9[s*cptY?-]9U</span><span>^C</span><span>y</span><span>^?</span><span>O</span><span>^T</span><span>}}j/-3~oMn</span><span>^C</span><span>A{(p</span><span>^B</span><span>u</span><span>^?</span><span>=</span><span>^W</span><span>`'%w1Jw?o</span><span>^U</span><span>dzb</span><span>^_</span><span>:Ok?@7&gt;nN</span><span>^H</span><span>O9s=A,</span><span>^R^Y</span><span>$</span><span>^R^[</span><span>C</span><span>^L</span><span>$-'9(2</span><span>^W</span><span>b'</span><span>^F^B^S</span><span>ST</span><span>^Y^A</span><span>EIx(yq&amp;Iyf</span><span>^G</span><span> D</span><span>^C</span><span>g</span><span>^O</span><span>9@:a^</span><span>^T</span><span>n/+(pe~</span><span>^G</span><span>?</span><span>^O^P^_</span><span>3Ahh&lt;*jX^</span><span>^H</span><span>B7</span><span>^K^B</span><span>4Wt</span><span>^K</span><span>7R&gt;*</span><span>^U^K^X</span><span>zAl</span><span>^B</span><span>'eV</span><span>^F</span><span>006X=PgrDIE!),0</span><span>^_^A</span><span>v%y</span><span>^U^C</span><span>7</span><span>^^</span><span>9/8Vx)NAC</span><span>^N^S</span><span>(5O</span><span>^]^X</span><span>7</span><span>^]^T</span><span>W</span><span>^Z</span><span>k$i}</span><span>^G</span><span>?p?C^l-</span><span>^G^C</span><span>UQ@C6</span><span>^O</span><span>3/</span><span>^T</span><span>T!</span><span>^W^P</span><span>4zJ</span><span>^P</span><span>X?H</span><span>^?^Y^L^U</span><span>f1n</span><span>^F</span><span>oL:</span><span>^A^A^A</span><span>"</span><span>;</span></p>
+
+<p><span>_</span><span> </span><span>i</span><span>,</span><span>q</span><span>[P],</span><span>B</span><span>[P],</span><span>R</span><span>[P],</span><span>l</span><span>[9],*</span><span>z</span><span>,</span><span>K</span><span>,</span><span>I</span><span>,</span><span>m</span><span>[P],</span><span>p</span><span>,</span><span>D</span><span>=123,</span><span>S</span><span>,</span><span>n</span><span>,</span><span>g</span><span>,*</span><span>t</span><span>[P],</span><span>k</span><span>[P],</span><span>c</span><span>,</span><span>e</span><span>,</span><span>E</span><span>,*</span><span>u</span><span>,</span><span>y</span><span>,</span><span>F</span><span>; </span><span>char</span><span> </span><span>T</span><span>[P],*</span><span>v</span><span>; </span><span>long</span><span> </span><span>C</span><span>=1; </span><span>_</span><span>*</span><span>w</span><span>(</span><span>_</span><span>*</span><span>Q</span><span>){ </span><span>_</span><span> </span><span>N</span><span>,*</span><span>f</span><span>=Q,*</span><span>o</span><span>,</span><span>p</span><span>; Z(N=A)&lt;9){ </span><span>_</span><span> </span><span>a</span><span>=(z-B)/4,</span><span>b</span><span>=0; o=Q-1; </span><span>if</span><span>(N&lt;6){ *z=N; K=1+(N&gt;1)+(N&gt;4); W{ I=A; N=z[i+1]=I&lt;2e5?a-I:m[I=I-2e5]; </span><span>if</span><span>(N)t[N][k[N]++]=a; } z+=4; } </span><span>else</span><span> </span><span>if</span><span>(N^7){ I=A; K=A; </span><span>W</span><span> </span><span>m</span><span>[i]=a+=A; K=P; </span><span>W</span><span> </span><span>R</span><span>[i]=q[i]; w(R+l[I]); } </span><span>else</span><span>{ a=0; I=--A; p=K=A; </span><span>if</span><span>(I){ W{ b+=Q[p]; f[a+=A]+=b; } Q=f; } </span><span>else</span><span> Q+=p*2; } f=o; } </span><span>return</span><span> Q; } </span><span>_</span><span> </span><span>s</span><span>(</span><span>_</span><span> </span><span>O</span><span>){ </span><span>if</span><span>(C&lt;D){ C*=D; p*=D; K=A; p+=(K-1-(K&gt;10)-(K&gt;13)-(K&gt;34)-(K&gt;92)); } </span><span>_</span><span>*</span><span>x</span><span>=B+O*2; K=C*-~*x/(*x+x[1]+2); I=p&gt;=K; p-=K*I; C=I?C-K:K; x[I]++; </span><span>return</span><span> I; } </span><span>_</span><span> </span><span>h</span><span>(</span><span>_</span><span> </span><span>K</span><span>,</span><span>_</span><span> </span><span>O</span><span>){ </span><span>_</span><span> </span><span>g</span><span>=1&lt;&lt;K,</span><span>f</span><span>=1; O*=99; Z!s(++K+O)); K--; </span><span>W</span><span> </span><span>f</span><span>=f*2|s(O); </span><span>return</span><span> f-g; } </span><span>void</span><span> </span><span>d</span><span>(</span><span>_</span><span> </span><span>H</span><span>,</span><span>_</span><span> </span><span>O</span><span>){ </span><span>for</span><span>(p=0; p&lt;H; p++){ K=1&lt;&lt;O; </span><span>W</span><span> </span><span>B</span><span>[g++*4+1]=R[i]&gt;&gt;p&amp;1; } } </span><span>_</span><span> </span><span>main</span><span>(</span><span>_</span><span> </span><span>x</span><span>,</span><span>char</span><span>**</span><span>O</span><span>){ </span><span>if</span><span>(x&lt;2)exit(42); fcntl(0,4,O_NONBLOCK); </span><span>_</span><span>*</span><span>Q</span><span>=q,</span><span>K</span><span>,</span><span>i</span><span>,</span><span>j</span><span>=h(9,0); Z j--){ </span><span>if</span><span>(s(1)){ z=Q-h(4,2)-1; K=h(1,3)+1; </span><span>W</span><span> </span><span>A</span><span>=*z++; } </span><span>else</span><span> A=(1-2*s(8))*h(3,9); } Q=q; K=S=A; v=T+A; n=A; </span><span>W</span><span> </span><span>t</span><span>[i]=malloc(7e4); K=A; </span><span>W</span><span> </span><span>l</span><span>[i]=A; I=A; z=B; Q=w(q+I); g=A; </span><span>FILE</span><span>*</span><span>J</span><span>=fopen(O[1],</span><span>"r"</span><span>); K=4096; </span><span>W</span><span> </span><span>R</span><span>[i]=fgetc(J); d(8,12); g=A; K=16; W{ j=256; Z j--)R[j]=Q[j*16+i]; d(6,8); } u=Q+4096; </span><span>unsigned</span><span> </span><span>long</span><span>*</span><span>f</span><span>=calloc(S,16),</span><span>G</span><span>; Z 1){ </span><span>_</span><span> </span><span>r</span><span>,</span><span>M</span><span>=0,</span><span>g</span><span>,*</span><span>Q</span><span>; Z M&lt;S){ K=3; Z K--){ I=1&lt;&lt;6*K; g=M/I; G=f[y+S/64*K+g/64]&gt;&gt;g%64; Z G&amp;1){ M=M-M%I+I; G/=2; K=0; } } Q=B+M*4; r=A; i=T[A]; K=T[A]; I=T[A]; p=T[M]; T[M]=r&lt;2?i^r:r&lt;4?r^3?i|K:i&amp;K:r^5?i^K:i?K:I; </span><span>if</span><span>(p^T[M]){ I=k[M]; Z I--){ g=t[M][I]; K=3; </span><span>W</span><span> </span><span>f</span><span>[(y^S*(g&lt;=M))+S/64*i+(g&gt;&gt;6*-~i)]&amp;=~(1L&lt;&lt;(g&gt;&gt;6*i)%64); } } M++; } K=S/16; </span><span>W</span><span> </span><span>f</span><span>[y+i]=-1L; y^=S; { </span><span>char</span><span>*</span><span>Q</span><span>=v; </span><span>if</span><span>(A){ F|=A; K=A; I=!A; E+=I&amp;!K; </span><span>if</span><span>(K&amp;I&amp;A){ K=18; putchar(32+F*13); </span><span>W</span><span> </span><span>putchar</span><span>(</span><span>u</span><span>[i*18+*(</span><span>_</span><span>*)(T+n+((i+3)%18-(i&gt;15))*21)%18]); F=0; puts(</span><span>""</span><span>); } } </span><span>if</span><span>(E-c&gt;128){ c=E; e=!e; I=e?0:u[325+getchar()]; K=8; </span><span>W</span><span> </span><span>A</span><span>=I&gt;&gt;i&amp;1; } } } }</span></p>
+</div>
+
+
+<br>
+<h2>A very brief primer on the Busicom 141-pf and Intel 4004</h2>
+
+<p>
+The Intel 4004 is an exceptionally simple CPU by modern standards.
+It is a 4-bit processor,
+with 16 general purpose registers.
+There are a total of just 45 instructions, and many of them are nearly identical to others,
+so in practice there are more like only 20 unique instructions.
+It's accumulator-based, which means that almost all instructions either operate on a special 4-bit accumulator,
+or load data into the accumulator or transfer it out.
+And the program counter can address up to 12 bits of ROM.
+All in, this makes it one of the simpler instruction sets out in the world,
+which makes sense given its age.
+</p>
+
+<p>
+You can attach three other chips to the 4004 CPU that provide:
+</p>
+
+<ul>
+<li>ROM, via an Intel 4001: This stores the program code to be executed, or any other read-only data.</li>
+<li>RAM, via an Intel 4002: This gives additional storage of more than just the 4*16 bits from the registers.</li>
+<li>A shift register, via an Intel 4003, to temporarily hold a queue of data which can be attached to physical hardware to help manage I/O.</li>
+</ul>
+
+<p>
+The 4004 was originally built for use in the Busicom 141-pf calculator.
+While initially the 4004 was going to be application-specific just to make the calculator possible,
+some forward looking engineers at Intel decided to build a general-purpose
+chip that could perform arbitrary calculations, and then just program the chip
+to be a calculator. And thus was born the general-purpose microprocessor.
+</p>
+
+<p>
+The Busicom calculator itself is a fairly simple device.
+It has an 8x4 keypad the operator can use to enter numbers or perform numerical
+calculations,
+and an output tape on which the result of the calculation is printed.
+The keypad is simple and looks familiar to any calculator today.
+But the output works through an esoteric (by today's standards) mechanism.
+A spinning print-drum rotates continuously above a paper tape;
+when the calculator wishes to print a number, it strikes hammers from one of the 18 columns
+at the exact moment the print drum has the desired number above the paper tape,
+and then advances the tape to be visible to the operator.
+</p> 
+
+
+<h2>Overall structure of the program</h2>
+
+
+<p>
+The program is split, roughly, into three distinct components:
+</p>
+
+<ol>
+<li>First, it takes a compressed string and decompresses it to recover a circuit that,
+   when executed, emulates the Intel 4004 (and a few Intel 4001s, 4002s, and 4003s).
+   As part of this process, my code inserts the provided program ROM from argv[1] into the circuit.</li>
+
+<li>Then, the program actually emulates the decompressed circuit by computing the output of each gate
+   in a loop, effectively running the CPU and associated RAM/ROM chips. (With a few associated tricks
+   to make things run fast.)</li>
+
+<li>Finally, the program simulates the original calculator hardware and handles converting the input
+   text from ascii text passed via stdin to the original hardware keyboard presses, and also
+   converting the shift register causing hammers to strike paper tape back to ascii outputs.</li>
+</ol>
+
+<p>
+The remainder of this section documents the implementation of each of these three components.
+Here's a small visual to show what's going on.
+</p>
+
+<pre><code>        │    │       
+        │    │ Compressed circuit (hard-coded), and ROM (via argv[1])
+        ▼    ▼
+   ┌──────────────┐ 
+   │  Decompress  │ via LZ decompression; arithmetic encoding; and special circuit-compression
+   └──────────────┘
+          │       
+          │ gate-level description (~200 k gates)
+          ▼
+   ┌──────────────┐ 
+   │  Emulation   │ a simple loop that re-calculates each gate based on its inputs
+   └──────────────┘
+        │   ▲
+        │   │ if circuit indicates that I/O is necessary
+        ▼   │                           
+   ┌──────────────┐      (processed to turn ascii to key-presses)
+   │  I/O Handler │  ◀──────────────────────────────────────────── stdin
+   └──────────────┘    
+          │        (processed to turn hammer strikes to ascii)
+          └───────────────────────────────────────────────────────▶ stdout</code></pre>
+
+
+<h2>Decompressing the compressed circuit representation (part 1)</h2>
+
+<p>
+The circuit is compressed twice. At the outer level is an LZ-compressor with arithmetic encoding,
+and then on the inner level is a special-purpose logic-gate compressor that allows creating
+small sub-circuits that can be called.
+</p>
+
+<p>
+The first part of the decompression is the more straightforward of the two.
+The data is compressed with a special-purpose LZ-style compressor that I wrote which,
+instead of being bit- or byte-level, operates on unbounded integers as the data stream.
+  The decompressor itself fits in just 107 bytes
+  (plus some utilities I'll define in a bit). Let's walk through how it works.
+</p>
+
+<h3>Defining a new LZ77 format</h3>
+
+<p>
+Okay so let's get started with the basic setup of my compreressor.
+Instead of being a bit-level compress (like LZMA) or byte-level compressor (like GZip),
+this is a variably-sized int level compressor.
+That is, it directly processes a sequence of arbitrary-sized integers.
+</p>
+
+<p>
+My compression format starts with an integer representing the number of
+total "operations" in the compressed file.
+The format itself is just a sequnce of operations.
+Each operation is one of the following:
+
+</p><ol>
+  <li>
+LITERAL: the next integer being stored is directly the integer that should be
+written to the output. A single bit indicates if the value is positive or negative.
+</li>
+
+  <li>
+MATCH: the next two integers represent how many bytes back to go, and then
+how many bytes of prior output to next copy to the output.
+  </li>
+</ol>
+
+<p>
+  Let's walk through an example. If compressed intput stream was the following
+  <code>[0, 0, 8, 0, 1, 12, 1, 2, 2]</code>
+  Then this would represent the following:
+</p>
+
+<ul>
+<li>0: a boolean that indicates the first operation is a literal
+<ul>
+<li>0: the literal is a positive number</li>
+<li>8: we're storing the number 8</li>
+</ul>
+</li>
+<li>0: The second operation is also a literal
+<ul>
+<li>1: the literal is a negative number</li>
+<li>12: we're storing the number -12</li>
+</ul>
+</li>
+<li>1: Now we're going to copy some bytes
+<ul>
+<li>2: Start by backing up two bytes (to the initial 8)</li>
+<li>4: And then copy two bytes. So we repeat 8 and -12</li>
+</ul>
+</li>
+</ul>
+
+<p>
+  This finally decodes to the sequence <code>[8, -12, 8, -12]</code>
+</p>
+
+
+<p>
+  Now you may say "But Nicholas that's longer than just storing the original sequence".
+  And yes, for this toy case it is, but for longer inputs that have a lot of repeats
+  it makes a big difference.
+</p>
+
+
+
+<h3>Building an LZ77 decompressor</h3>
+
+<p>
+The entire reason I set up this file format this way is because of how easy it is to decompress.
+The decompressor is, almost literally, just the following:
+</p>
+
+
+<div>
+<p><span>int</span><span> </span><span>output_circuit</span><span>[big];</span></p>
+<p><span>void</span><span> </span><span>lz</span><span>() {</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span>* </span><span>ptr</span><span> = output_circuit;</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> </span><span>num_bytes</span><span> = get_integer();</span></p>
+
+<p><span><span>&nbsp; </span></span><span>while</span><span> (num_bytes--) {</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>int</span><span> </span><span>is_match_op</span><span> = get_bit();</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> (is_match_op) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>int</span><span>* </span><span>ref</span><span> = ptr - get_integer();</span></p>
+
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>int</span><span> </span><span>copy_len</span><span> = get_integer() + 1;</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>i</span><span> = 0; i &lt; copy_len; i++) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>*ptr++ = *ref++;</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>}</span></p>
+<p><span><span>&nbsp; &nbsp; </span>} </span><span>else</span><span> {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>*ptr++ = (1-2*get_bit()) * get_integer();</span></p>
+<p><span><span>&nbsp; &nbsp; </span>}</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+<p><span>}</span></p>
+</div>
+
+<p>
+  where the command get_integer turns a sequence of bits into an integer with a <a href="https://en.wikipedia.org/wiki/Golomb_coding">Golomb encoding</a>:
+</p>
+
+<div>
+<p><span>int</span><span> </span><span>get_integer</span><span>(</span><span>int</span><span> </span><span>length</span><span>, </span><span>int</span><span> </span><span>ctx</span><span>) {</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> </span><span>subtract_it</span><span> = 1&amp;lt;&amp;lt;length;</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> </span><span>result_ans</span><span> = 1;</span></p>
+<p><span><span>&nbsp; </span>ctx*=99;</span></p>
+<p><span><span>&nbsp; </span></span><span>while</span><span> (!get_bit(++length+ctx));</span></p>
+<p><span><span>&nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>i</span><span> = 0; i &lt; length-1; i++) {</span></p>
+<p><span><span>&nbsp; &nbsp; </span>result_ans = result_ans*2 | get_bit(ctx);</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+<p><span><span>&nbsp; </span></span><span>return</span><span> result_ans - subtract_it;</span></p>
+<p><span>}</span></p>
+</div>
+
+<p>
+And that's literally all there is to it.
+(We'll return, in just a moment, to how we actually implement get_bit.)
+</p>
+
+
+<h3>Building an LZ77 compressor</h3>
+
+<p>
+Okay well now we have our own LZ77 <i>de</i>compressor,
+but that isn't much good without a compressor to go along with it.
+How are we going to do that?
+</p>
+
+<p>
+  Turns out LZ77 compression is actually a rather simple algorithm to implement
+  through dynamic programming.
+  We'll process the data one token at a time, at every moment
+  in time remembering the best way to compress the data up to and including this token.
+  And then, we'll try to extend this match by one more token either by just adding a literal
+  byte, or continuing a match object one further.
+</p>
+
+<p>
+So let's suppose you've compressed the string S[:K] and then want to add one more token S[K].
+There are a just two operations you could take:
+</p>
+
+<ol>
+  <li>
+    You could just use the compressed output up to this point and tack this token on the end, i.e., compress(S[:K]) + [('Literal', S[K])]
+  </li>
+  <li>
+    Alternatively, if it turns out the last K tokens (denoted S[K:]) are already contained somewhere else in the string S[:K], we might want to output compress(S[:K]) + [('Match', where_it_is, K)].
+  </li>
+</ol>    
+
+<p>
+Now if you know anything about algorihtmic complexity you might say:
+But Nicholas, isn't this an O(N^3) compression algorithm?
+Why yes. Yes it is. But do you know the thing about asymptotic analysis?
+As long as it runs fast enough for your purpose it really doesn't matter.
+And given that I'm only ever compressing a sequence that's roughly 10000
+ints long, a cubic algorithm is actually entirely reasonable.
+      </p>
+
+<h3>Arithmetic Coding</h3>
+
+<p>
+  Now let's turn to the 
+  arithmetic encoding algorithm.
+  Actually, this algorithm just lifts directly from Fabrice Bellard's wonderful submission to
+IOCCC 2018, as un-obfuscated by Andrew Kensler, with a few tweaks of my own to reduce its length,
+and to cut out some features I don't need. Briefly, arithmetic encoding keeps a history of
+how likely each bit was to be zero or one, and then uses this prior to inform the decoding of
+the output stream. This version of arithmetic encoding uses a base-1968 encoding abusing the
+fact that IOCCC counts whitespace special, and IOCCC doesn't allow use of high-bit codepoints.
+</p>
+
+<div>
+<p><span>int</span><span> </span><span>get_bit</span><span>(</span><span>int</span><span> </span><span>ctx</span><span>) {</span></p>
+<p><span><span>&nbsp; </span></span><span>if</span><span> (range &lt; radix) {</span></p>
+<p><span><span>&nbsp; &nbsp; </span>range *= radix;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>fraction *= radix;</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>tmp = *bitstream++;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>fraction += (tmp - 1 - ( tmp &gt; 10 ) - ( tmp &gt; 13 ) - ( tmp &gt; 34 ) - ( tmp &gt; 92 )) &lt;&lt; 4;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>tmp = *bitstream++;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>fraction += tmp &lt; 33 ? ( tmp ^ 8 ) * 2 % 5 : ( tmp ^ 6 ) % 3 * 4 + ( *bitstream++ ^ 8 ) * 2 % 5 + 4;</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> *</span><span>counts</span><span> = history_buffer + ctx * 2;</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> </span><span>split</span><span> = range * -~*counts / (*counts + counts[ 1 ] + 2);</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> </span><span>the_bit</span><span> = fraction &gt;= split;</span></p>
+<p><span><span>&nbsp; </span>fraction -= split*the_bit;</span></p>
+<p><span><span>&nbsp; </span>range = the_bit ? range-split : split;</span></p>
+
+<p><span><span>&nbsp; </span>counts[the_bit]++;</span></p>
+<p><span><span>&nbsp; </span></span><span>return</span><span> the_bit;</span></p>
+<p><span>}</span></p>
+</div>
+
+
+<h3>Decompressing the compressed circuit representation (part 2)</h3>
+
+<p>
+Once the first level of decompression is complete, the circuit now appears like a sequence
+of integers that represent the logic gates. It's now time to actually expand this out to
+the logic gates themselves. Specifically, each logic gate is given a unique
+integer {DIRECT_WIRE, NOT, OR, AND, XOR, MUX} and then this operation is followed by the
+input gates. To improve compressibility, the input gates are expressed in a relative indexing.
+</p>
+
+<p>
+So, as an example of this, consider the following circuit:
+</p>
+
+<pre><code>v0: NOT v4
+v1: OR v0, v0
+v2: OR v1, v1
+v3: OR v2, v2
+v4: OR v3, v3</code></pre>
+
+<p>
+This circuit acts like a clock of sorts, with the four entries v0..v3 cycling through between
+0s to 1s. This circuit would be represented with the following sequence:
+</p>
+
+<p>
+Instead of each gate referencing other gates by their absolute position,
+the program has each gate reference gates based on how many gates backwards (or forwards)
+we should go. So the above circuit becomes the following:
+</p>
+
+<pre><code>0: NOT +4
+1: OR -1, -1
+2: OR -1, -1
+3: OR -1, -1
+4: OR -1, -1</code></pre>
+
+<p>
+By storing delta-encoded, 
+because most gates reference other gates that are at least fairly nearby,
+we usually only have to store a somewhat smaller constant, reducing the
+size of the circuit by roughly a factor of two.
+And so instead of requiring 18 bits for each reference, it only takes
+7.7 bits. But the much more important win is that now this allows for
+more advanced forms of compression.
+</p>
+
+<p>
+The major gain is that LZ-compression now can repeat the `OR -1, -1` many
+times for free. A more minor gain is a special-purpose repeat handler built in
+to the gate-uncompression. Specifically, the program implements a special instruction
+called REPEAT that means "go back one entry and repeat that one again,
+possibly making a constant change to its value". This second part is what
+makes repeat valuable even though we already have LZ compression.
+</p>
+
+<p>
+As an example, suppose we had a circuit that looked like this
+</p>
+
+<pre><code>v0: v0 &amp; v10
+v1: v1 &amp; v10
+v2: v2 &amp; v10
+...
+v9: v9 &amp; v10</code></pre>
+
+<p>
+Then we could express this as
+</p>
+
+<pre><code>v0: v0 &amp; v10
+REPEAT the above instruction 9 times, incrementing argument 2 by 1</code></pre>
+
+<p>
+Note we're incrementing argument 2 because after delta-encoding the
+access to the value of gate 10 is what's changing.
+</p>
+
+<p>
+The implementation of this is relatively straightforward, and relies on
+modifying the instruction stream as its being processed. 
+Specifically, the decode function is defined as below.
+Initially we read off the number of times to run the REPEAT loop,
+then we have a somewhat nasty compressed loop that
+</p>
+
+<div>
+<p><span>int</span><span>* </span><span>decode</span><span>(</span><span>int</span><span>* </span><span>data_stream</span><span>) {</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span>* </span><span>prev_start</span><span>;</span></p>
+<p><span><span>&nbsp; </span></span><span>// ... </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; </span></span><span>if</span><span> (*data_stream++ == 6) </span><span>// repeat </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// A repeat is a loop that runs the prior instruction a variable number of times,<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// and also allows for updating the arguments to the prior instruction by a<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// constant scalar on each step. </span><span><span>&nbsp;</span></span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>// To implement this, we use some self-modifying code: </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// 1. Decrement the argument that says how many repeats to do<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// 2. Adjust the other arguments from the prior instruction as necessary </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// 3. Go back 2 instructions if the counter is greater than zero.<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>//<span>&nbsp; &nbsp; </span>(on the next iteration of the loop we'll modify the arguments again).<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>int</span><span> </span><span>number_of_times_to_duplicate</span><span> = *data_stream++;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>num_change = tmp = *data_stream++;</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> (number_of_times_to_duplicate) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>i</span><span> = 0; i &lt; tmp; i++) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>int</span><span> </span><span>increment_constant</span><span> = data_stream[*data_stream++];</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>prev_start[*data_stream++] += increment_constant;</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>}</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>data_stream = prev_start;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>} </span><span>else</span><span> {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>data_stream += num_change * 2;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>}</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+<p><span>}</span></p>
+</div>
+
+
+<p>
+Finally, there's one more special code that acts like a function call, and says
+"go copy that small sub-circuit defined somewhere else to here. This behaves
+similarly to repeat. The program defines five of these sub-circuits that are
+used throughout the program; the most important of these being a full adder,
+but also a single register (so it can be duplicated 256 times) and various helper
+circuits.
+</p>
+
+<p>
+The implementation of the function-call decoding is again fairly simple:
+the program pulls off the function ID to be called, the number of arguments it
+takes, and then sets a global `arguments` array with these arguments.
+Then, we just jump to the relevant function and start decoding from there.
+(With a tiny twist: because functions can have REPEAT ops, and REPEAT uses
+in-place self-modifying code to work, we have to actually make a complete
+copy of the function and then execute it so that we can call it multiple times
+without breaking REPEAT.)
+</p>
+
+
+<div>
+<p><span>int</span><span>* </span><span>decode</span><span>(</span><span>int</span><span>* </span><span>data_stream</span><span>) {</span></p>
+<p><span><span>&nbsp; </span>...</span></p>
+<p><span><span>&nbsp; </span></span><span>if</span><span> (*data_stream++ == 7) { </span><span>// function call<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// A function call goes and runs a small number of instructions and returns back.<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// Nested functions aren't possible. </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// So to call a function, we just set the global arguments buffer with the correct arguments,<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// write out the data of the function, and then call cluster() on that location. </span><span><span>&nbsp;</span></span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>int</span><span> </span><span>which_function</span><span> = *data_stream++;</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>int</span><span> </span><span>num_args</span><span> = *data_stream++;</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>i</span><span> = 0; i &lt; num_args; i++) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>arguments[i] = *data_stream++;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>}</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>// Copy to buf the current compressed ops<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// we'd like to just do a reference, </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// but if the called function uses loops then they modify the code in-place<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>// so we have to copy before the function call </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>i</span><span> = 0; i &lt; BIG; i++) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>buf[i] = prog_src[i];</span></p>
+<p><span><span>&nbsp; &nbsp; </span>}</span></p>
+<p><span><span>&nbsp; &nbsp; </span>decode(buf+functions[which_function]);</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+<p><span>}</span></p>
+</div>
+
+<p>
+After compression, the entire circuit of 200,000 gates is crammed down to just over 1000
+bytes. How's that for an efficient compression algorithm?
+</p>
+
+
+<h3>Decompressing the compressed circuit representation (part 3)</h3>
+
+<p>
+The final part of decompressing the compressed circuit is to load the program ROM
+from argv[1] and insert it into the circuit. This is relatively simple; the circuit
+contains a big MUX tree that encodes placeholders for the program ROM, and so all
+the code does is directly edit the placeholder variables that will be used to load the ROM
+with the following simple function.
+</p>
+
+<div>
+<p><span>// buf contains the program text that is to be inserted into the circuit </span><span><span>&nbsp;</span></span></p>
+<p><span>// gates is the array that has the actual logic gates<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>void</span><span> </span><span>fix_const_help</span><span>(</span><span>int</span><span> </span><span>depth</span><span>, </span><span>int</span><span> </span><span>writesize</span><span>) {</span></p>
+<p><span><span>&nbsp; </span></span><span>for</span><span> (i = 0; i &lt; depth; i++) {</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>j</span><span> = 0; j &lt; 1&amp;lt&amp;lt;writesize; j++) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>// byte offset*4 is necessary because gates can have up to 3 arguments </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>// and so are represented as [operation], [arg1], [arg2], [arg3] </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>// this ensures we are writing into the proper location each time<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>gates[byte_offset++*4+1] = buf[j]&gt;&gt;i&amp;1;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>}</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+<p><span>}</span></p>
+</div>
+
+<p>
+(In an identical manner, this is also how the microcode is written in to the circuit so that each
+instruction can be implemented with the extra simple circuit.)
+</p>
+
+
+<h3>Emulating the instructions</h3>
+
+<p>
+The second component of the program is an emulator to actually run each of the (now decompressed)
+AND/OR/NOT/XOR gates that are used as primitive building blocks to implement the circuit.
+This is by far the simplest portion of the circuit, and is just a compressed switch statement
+that selects the command we're running and does the correct corresponding action. Again,
+the weird compression is necessary to save space.
+</p>
+
+<div>
+<p><span>command = insns[ctr*4];</span></p>
+
+<p><span>// Load the potential arguments for this instruction.<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>arg1 = gate_value[insns[ctr*4+1]];</span></p>
+<p><span>arg2 = gate_value[insns[ctr*4+2]];</span></p>
+<p><span>arg3 = gate_value[insns[ctr*4+3]];</span></p>
+
+<p><span>// We have six possible commands REF, NOT, OR, AND, XOR, MUX </span><span><span>&nbsp;</span></span></p>
+<p><span>// Here we're going to evaluate with a series of ternary ops.<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>gate_value</span><span>[ctr] = command&lt;2 ?</span></p>
+<p><span><span>&nbsp; </span>arg1^command </span><span>// either 0 (DIRECT) or 1 (NOT) </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; </span>:</span></p>
+<p><span><span>&nbsp; </span></span><span>// either 2 (OR), 3 (AND), 4 (XOR), or 5 (MUX) </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; </span>command&lt;4 ?</span></p>
+<p><span><span>&nbsp; &nbsp; </span>command^3 ?</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>arg1|arg2 :</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>arg1&amp;arg2</span></p>
+<p><span><span>&nbsp; &nbsp; </span>:</span></p>
+<p><span><span>&nbsp; &nbsp; </span>command^5 ?</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>arg1^arg2 :</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>arg1?arg2:arg3;</span></p>
+
+</div>
+
+<p>
+This loops basically forever until the user gets bored and kills the process.
+</p>
+
+
+<h3>Handling input and output</h3>
+
+<p>
+Finally, we need to be able to actually hook this circuit to the outside world.
+Inside the circuit I set aside one "wire" whose only purpose is to
+signal to the outside world that it wants to take some action. Think of this like
+a trap in an operating system, but at the hardware level: whenever the circuit
+wants to take some action in the outside world, it pulls one of the "wires" high
+for a single clock cycle and the C program watches for this to handle the response.
+The entirety of this trap handler is implemented as below, explained in more
+detail as follows.
+</p>
+
+
+<div>
+<p><span><span>&nbsp; </span></span><span>if</span><span> (gate_value[trap_id]) {</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>int</span><span> </span><span>is_write</span><span> = gate_value[trap_id+1];</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>int</span><span> </span><span>rom_or_ram</span><span> = !gate_value[trap_id+2];</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>jcn_counter += rom_or_ram &amp; !is_write;</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> (is_write &amp; rom_or_ram &amp; gate_value[trap_id+3]) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>i</span><span> = 0; i &lt; 18; i++) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>int</span><span> </span><span>idx</span><span> = ((i+3)%18-(i&gt;15));</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>putchar(charset[i*18+*(</span><span>int</span><span>*)(gate_value+print_uid+idx*21)%18]);</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>}</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>puts(</span><span>""</span><span>);</span></p>
+<p><span><span>&nbsp; &nbsp; </span>}</span></p>
+
+<p><span><span>&nbsp; </span></span><span>// Every 128 JCN instructions we should send the next keypress.<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; </span></span><span>// 128 is hard-coded in the circuit. Don't change. </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; </span></span><span>if</span><span> (jcn_counter - reset_key_matrix &gt; 128) {</span></p>
+<p><span><span>&nbsp; &nbsp; </span>reset_key_matrix = jcn_counter;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>read_or_reset = !read_or_reset;</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>int</span><span> </span><span>read_char</span><span> = read_or_reset ? 0 : charset[325 + getchar()];</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>i</span><span> = 0; i &lt; 8; i++) {</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span></span><span>// this is where the circuit expects the input data to be written<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; </span>gate_value[trap_id+8+i] = read_char&gt;&gt;i&amp;1;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>}</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+</div>
+
+<p>
+A trap can be for one of two reasons:
+</p>
+
+<ul>
+<li>First, it be because the program wants to read some data from the outside world.
+  When connected to the Busicom calculator, the 4004 will either want to read any
+  key that might be pressed by the user on the input, or will want to read a single
+  bit to detect when the spinning printer drum has advanced to the next location.</li>
+
+<li>And second, it can be because the program wants to write some data to make a change
+  to the outside world. The 4004 uses writes to strike the hammers against the print
+  drum, advance the paper tape (a "new line"), and to energize one of the 10 possible
+  lines of the keyboard to enable that corresponding line to be read.</li>
+</ul>
+
+<p>
+The program contains two compressed lookup tables to enable this functionality.
+First, it remaps the ASCII characters that the C program reads with getchar()
+to (row, column) locations of the corresponding key on the physical keyboard.
+For example, the number 9, 6, and 3 are at location (4,0), (4,1) and (4,2).
+This lookup table encodes each ASCII character into a six bit number, which
+itself is then compressed along with the circuit using the same LZ compression.
+</p>
+
+<p>
+The program also contains a lookup table to map each of the hammer-strike outputs
+to ASCII characters that can be putchar()'d. This table, if implemented in the naive
+manner, would be fairly straightforward, because each print drum just repeats the
+numbers 0 to 9 in order (two columns of the drum contain special characters).
+To enable a much more efficient lookup, the data is stored permuted according
+to the following permutation {0, 1, 6, 7, 2, 3, 0, 0, 12, 13, 8, 9, 14, 15, 10, 11, 4, 5}.
+</p>
+
+<p>
+The purpose of permuting the data in this way (and storing some data duplicated! notice
+that 0 is stored several times) is that now we can read it out of memory much more
+concisely, with the following line:
+</p>
+
+<div>
+<p><span><span>&nbsp; </span></span><span>for</span><span> (</span><span>int</span><span> </span><span>idx</span><span> = 0; idx &lt; 18; idx++) {</span></p>
+<p><span><span>&nbsp; &nbsp; </span>putchar(charset[i*18+*(</span><span>int</span><span>*)(circuit_memory+offset+idx*21)%18]);</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+</div>
+
+<p>
+Specifically, for each of the 18 drum locations, we print the character at that drum.
+`charset[i*18]` offsets us to the correct drum. The remaining constant is where the
+magic happens: circuit_memory is normally an array of uint8; by casting to (int*)
+we can load four values at a time, which as it happens is exactly the number of index
+bits we need. What we get is then an integer like 0x01000101. And it turns out that if
+you multiply this number by 21 and then take the result mod 18, you end up exactly
+being able to index into that permuted ASCII table.
+</p>
+
+<p>
+(This is just one of the many pieces of the program that has to be implemented
+in convoluted ways to cut down on program length. I'll try to omit most of the rest
+for brevity.)
+</p>
+
+<p>
+Now there's one final question: when to make input available. On the original
+calculator, the print drum was actually spinning and so that set the rate of inputs
+that were pushed to the circuit. But we have no actual spinning drum and so we
+need to decide the rate that input will be passed. Instead of making running
+based on wall-clock time, the C program does something somewhat confusing, and
+tracks the number of conditional jump operations that have been issued.
+Every 128 conditional jumps (JCN's) that branch on the 4004's TEST pin, it makes one
+more character of STDIN available to the program. This is the fastest rate
+possible at which the ROM can handle input without dropping characters.
+</p>
+
+
+
+<h3>Making it go fast(er)</h3>
+
+<p>
+The CPU itself has over 200,000 gates (I'll describe why in detail later---but it's to
+save space when compressed).
+Now given that we have to loop over every gate 16 times for one tick of the clock,
+and each instruction takes 16 inner clocks of the circuit,
+we're going to run into a problem.
+If we would like it to run at anything faster than one instruction per second,
+we'll have to make some changes while still keeping things in our space constraint.
+</p>
+
+<p>
+As has been said many times before,
+you can't make computers perform the same amount of work faster.
+You can only make them do less.
+</p>
+
+<p>
+So the program does just that. Instead of re-calculating every gate on every iteration of the loop,
+it keeps track of which inputs have changed last time, and then only re-calculates the
+gates whose input changed during the prior round.
+This requires that when we first load the circuit off of disk that we build a table in
+memory for which gates depend on which others. In order to minimize space here, this is
+a dense table with shape 200,000 x 70,000 (it's 70,000 wide because
+there's exactly one gate---the clock---that 64k other gates depend on).
+</p>
+
+<p>
+Once we've built the table the logic gets somewhat complicated. The program maintains a
+3-deep hierarchical bitmask to indicate how far can be skipped ahead. At each level
+is an array of 64-bit words where each bit corresponds to whether or not there is any
+gate that needs to be updated at the next level "down" in the tree. (So, for example,
+at the lowest level if a bit is 0 anywhere then that gate doesn't need to be updated;
+at the second level if a bit is 0 then all of the 64 bits below it don't need to be
+updated, and at the highest level the 64*64 bits below don't need to be updated.)
+</p>
+
+<p>
+The logic to actually set the bits that need to be updated is as follows. Initially
+needs_update is set to 0xFFFFFFFFFFFFFFFF and then bits are cleared when gates they
+depend on are changed
+</p>
+
+<div>
+<p><span>int</span><span> </span><span>num_depends</span><span> = depends_ctr[ctr];</span></p>
+<p><span>while</span><span> (num_depends--) {</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> </span><span>gate</span><span> = depends[ctr][num_depends];</span></p>
+
+</div>
+
+<p>
+This compressed code isn't that hard to reason about. First we select the right address
+by taking the gate index and dividing by 2^(6*(depth-1)). Then, we select the bit
+address within the word by looking at the remaining bits in the gate. We do this for all
+three depths, and make sure to only ever clear bits, so the needs_update gets sparser
+and sparser as the circuit goes forward.
+</p>
+
+<p>
+And the corresponding logic to check if we need to process the current
+data is implemented here.
+Again this works by just masking out to check if all of the bits in needs_update are zero,
+and skips if any are set to 1.
+If a bit at the lowest level of the tree is 1 then it skips one gate forward;
+if a bit at the medium level is 1 then it skips 64 gates forward,
+and at the highest level 64*64 gates forward.
+This function looks simple, but there are several
+cases that are all magically handled here in very subtle ways.
+Try to figure out why it's exactly right!
+</p>
+
+<div>
+<p><span><span>&nbsp; &nbsp; </span>needs_update[total_gate_count/64*depth + (gate&gt;&gt;6*-~depth)] &amp;= ~(1L&lt;&lt;(gate&gt;&gt;6*depth)%64);</span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+<p><span>}</span></p>
+
+<p><span>for</span><span> (</span><span>int</span><span> </span><span>depth</span><span> = 3; depth--&gt;0; ) {</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> </span><span>divide</span><span> = 1&amp;lt;&amp;lt;6*depth;</span></p>
+<p><span><span>&nbsp; </span></span><span>int</span><span> </span><span>gate</span><span> = ctr/divide;</span></p>
+
+<p><span><span>&nbsp; </span></span><span>unsigned</span><span> </span><span>long</span><span> </span><span>tmpll</span><span> = needs_update[total_gate_count/64*depth + gate/64] &gt;&gt; gate%64;</span></p>
+<p><span><span>&nbsp; </span></span><span>while</span><span> (tmpll&amp;1) {</span></p>
+<p><span><span>&nbsp; &nbsp; </span>ctr = ctr - ctr%divide + divide;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>tmpll/=2;</span></p>
+<p><span><span>&nbsp; &nbsp; </span>gate = 0; </span><span>// break out of the above loop </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; </span>}</span></p>
+<p><span>}</span></p>
+</div>
+
+<p>
+This ends up giving about a 100x-500x performance boost on average, and allows the
+emulated 4004 to run at a few hundred instructions per second, which isn't all that bad!
+(But even at 100x speed it still takes roughly a minute for the calculator to perform
+the addition of two numbers. Slow, but actually only 60x slower than the original
+calculator that took one second to do the same addition.)
+</p>
+
+<p>
+And thus concludes how the actual C program itself works. There are a lot more tricks
+going on, but this is hopefully enough detail to understand most of the important pieces.
+</p>
+
+
+<h2>How the circuit works</h2>
+
+<p>
+The primary CPU construction is exceptionally simple, in order to keep it as small
+as possible.
+</p>
+
+<p>
+The CPU is a load-store stack(like) RISC machine that encodes each of the Intel 4004
+instructions as a sequence of at most 16 micro-ops.
+Therefore, each clock cycle of the circuit performs 1/16th of a 4004 instruction.
+The program maintains a 4-bit counter to keep track the current micro-op that's
+executing, and a 96-bit shift register that holds each of the 6-bit micro-ops
+that correspond to the current instruction.
+</p>
+
+<p>
+The program maintains 65536 (2^16) bits of ROM split equally into two 32768-bit banks.
+The first of these stores the program code: up to 4096 (2^12) 8-bit
+Intel 4004 instructions.
+The second bank stores a lookup table mapping each of the 256 possible
+8-bit instructions to a 96-bit micro-op vector encoding the 16 6-bit micro-ops.
+</p>
+
+<p>
+The ALU itself is implemented as a 3-deep queue.
+On every clock cycle, 
+each micro-op pushes one value to the top of the queue, and the last value falls off
+the back. (Think of this like a stack machine, but a queue is simpler to wire than a stack.)
+Each micro-op can index into exactly one register,
+and either load its current value to the top of the queue or replace the current register
+with the value with whatever is on the top of the queue.
+Alternatively, each micro-op can perform some computation using the values in the queue.
+</p>
+
+<p>
+The register file for the CPU holds 256 twelve-bit ints.
+This might seem somewhat counterintuitive because the 4004 is a 4-bit machine,
+but consistent patterns are more easily compressed with LZ compression,
+and 12-bit registers are required for the program counter already, so it's cheaper
+to make everything a 12-bit register.
+The first 16 of these registers hold the 16 four-bit general purpose registers for the Intel 4004
+(the upper 8 bits are ignored).
+The next 16 registers hold a few special-purpose registers:
+</p>
+
+<ul>
+<li>The 4-bit accumulator</li>
+<li>The 1-bit carry flag (when an ADD overflows)</li>
+<li>The 12-bit program program counter</li>
+<li>Three 12-bit program counter stack registers for call/return support</li>
+<li>A 8-bit RAM pointer indicating which RAM address we want to update</li>
+<li>A 12-bit temporary register for holding some intermediate state</li>
+</ul>
+
+<p>
+The remaining 224 registers hold RAM values of the Intel 4002, discussed later.
+</p>
+
+<p>
+To keep the micro-ops space-efficient, they are 6-bits each.
+Micro-ops that begin with a 1 index into 32 different possible queue-operation.
+The most commonly used micro-ops include operations to
+</p>
+
+<ul>
+<li>ADD the top two values on the queue (with a carry of 0, 1, or from the carry flag)</li>
+<li>INCREMENT the top value of the queue</li>
+<li>DOUBLE the top value of the queue</li>
+<li>NEGATE the top value of the queue</li>
+<li>MUX to conditionally keep either the top or second-to-top value.</li>
+<li>BIT_SHIFT_RIGHT_4 the top value on the queue</li>
+<li>BIT_SHIFT_LEFT_4 the top value on the queue</li>
+</ul>
+
+<p>
+Micro-ops that begin with a 01 read from a register and load it into the register file,
+and micro-ops that start with 00 take the top value of the queue and write it to a register.
+Because this leaves just 4-bits to index into a register file with 256 entries,
+these 4-bits actually index into a lookup table that decide how the register should be
+located. Some of these ops, for example, allow for
+</p>
+
+<ul>
+<li>Direct indexing to 8 special purpose registers ACC/CARRY/TMP/RAM_ADDR/PC/PC1/PC2/PC3</li>
+<li>Direct indexing into the general-purpose register specified in the low-4 bits of the 4004 instruction</li>
+<li>Direct into the next register after the one specified in the low-4 bits of the 4004 instruction</li>
+<li>Indirect indexing that loads whatever is pointed to by the special RAM_ADDR instruction</li>
+</ul>
+
+<p>
+The rest of the ALU then just consists of a few multiplexers to decide how to route the data
+around either loading from the RAM to storing the queue, loading from the queue and storing to the queue,
+or loading from the queue and storing to RAM.
+</p>
+
+<h3>Defining the circuit</h3>
+
+<p>
+  The main circuit is built using <a href="https://github.com/carlini/miniHDL">miniHDL</a>,
+  the Python DSL I built in the last post.
+  For the remainder of this post, you don't need to have read the last post completely,
+  but some familiarity with circuit design would be valuable.
+</p>
+
+<p>
+As I mentioned last time, here's the design of a full adder:
+</p>
+
+<div>
+<p><span>@make_circuit</span><span>(</span><span>"full adder"</span><span>)</span></p>
+<p><span>def</span><span> </span><span>full_add</span><span>(in1, in2, in3):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>low1</span><span> = in1^in2</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>low2</span><span> = low1^in3</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>high</span><span> = (in1 &amp; in2) | (low1 &amp; in3)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> low2, high</span></p>
+
+<p><span>@make_circuit</span><span>(</span><span>"add_16"</span><span>)</span></p>
+<p><span>def</span><span> </span><span>add</span><span>(in1, in2, carry):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>out</span><span> = []</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> a,b </span><span>in</span><span> </span><span>zip</span><span>(in1.bits, in2.bits):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>c</span><span>, </span><span>carry</span><span> = full_add(a, b, carry)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>out.append(c)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> Bits(out)</span></p>
+</div>
+
+<p>
+When compressed this circuit actually is compressed to just the following few bytes:
+</p>
+
+<pre><code>function_1:
+4, 200000, 200001  // First XOR (idxs &gt;200000 are argument indexs)
+4, 1, 200002       // Second XOR with the prior result and arg2
+3, 200000, 200001  // Now compute the AND of the first two args
+3, 3, 200002       // And also AND with the third argument
+2, 2, 1            // Finally take the OR and return this.
+
+main:
+
+// Initialize variables here
+
+6, 0, 3, -10, 4, 5    // FUNCTION CALL to the full adder
+7, 4, 2, 3, 2, -4, 8  // REPEAT the call to the add routine </code></pre>
+
+<p>
+Notice the value of the function call and REPEAT together allow for much more efficient
+compression than would otherwise be possible.
+</p>
+
+
+<h4>Register File</h4>
+
+<p>
+  The register file is probably the most complicated component of the CPU.
+  Unlike last time where I designed a register file just to be simple,
+  here I'm going to redesign it to be small when compressed.
+  To begin,
+the circuit implement a function `to_onehot` that takes an 8-bit integer and outputs
+a 256-bit output that's zero everywhere except the index of the 8-bit integer.
+(So, for example `to_onehot(00000010)` will return `[0 0 1 0 0 ... 0 0 0]`.
+</p>
+
+
+<div>
+<p><span>def</span><span> </span><span>to_onehot</span><span>(reg):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>out</span><span> = []</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>counter</span><span> = Bits([const(0) </span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(</span><span>len</span><span>(reg.value))])</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span># 16 NOPs here for ... reasons.<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span>[const(0) </span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(16)]</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>eq_by_inc</span><span>(counter):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>return</span><span> inc(counter), ~any_set(counter^reg)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> i </span><span>in</span><span> </span><span>range</span><span>(256):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>counter</span><span>, </span><span>to_return</span><span> = eq_by_inc(counter)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>out.append(to_return)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> Bits(out)</span></p>
+</div>
+
+<p>
+Notice again that this program is aiming for the minimum description length not
+the minimum number of gates.
+Putting 256 full adders here, each of which could be an incrementer,
+which aren't even necessary because you could just do this with a
+few MUXes, may seem wasteful.
+But the reason I'm doing it this way is that I already need an adder circuit,
+so re-using it is basically free, and so why build an incrementer when
+you can just re-use the adder for free. And why build any new multiplexing
+stuff when you can just repeat 256 adders mostly for free.
+LZ compression really does give us so many opportunities for optimization.
+</p>
+
+
+<p>
+The next step is to build a single register
+</p>
+
+<div>
+<p><span>def</span><span> </span><span>one_reg</span><span>(clock, enable_write, do_write, data, output1):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>out</span><span> = dff(data, clock &amp; enable_write &amp; do_write, 12)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> out</span></p>
+</div>
+
+<p>
+And finally, we're done! We can write our register file:
+</p>
+
+<div>
+<p><span>def</span><span> </span><span>regfile</span><span>(clock, which_reg, data, enable_reg_write):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>mem</span><span> = []</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>mem_set</span><span> = []</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>reg_onehot</span><span> = to_onehot(which_reg).value</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> i </span><span>in</span><span> </span><span>range</span><span>(256):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>out</span><span> = one_reg(clock, enable_reg_write, reg_onehot[i], data)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>mem.append(out)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> mem</span></p>
+</div>
+
+<h4>The ALU</h4>
+
+<p>
+The final component of the circuit is the ALU. For this we need the actual
+queue where the operations will take place, defined like this:
+</p>
+
+<div>
+<p><span>queue_in</span><span> = Bits([Signal() </span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(12)])</span></p>
+
+<p><span>queue</span><span> = [queue_in]</span></p>
+
+<p><span>spacer</span><span> = Bits([Signal() </span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(12)])</span></p>
+
+<p><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(3):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>clock_inner</span><span> = clock_inner.clone()</span></p>
+<p><span><span>&nbsp; &nbsp; </span>queue.append(dff(queue[-1], clock_inner, 12))</span></p>
+</div>
+
+<p>
+The spacer here is again an example of how wasting space actually saves space.
+Because each iteration of the loop, when unrolled, has a d-flip-flop that refers
+to gates that were defined exactly 24 gates above, by placing a 12-gate "nop"
+we can make the circuit compress better.
+</p>
+
+<p>
+Finally, we have to define the actual lookup table that the ALU uses.
+This is the least-clean part of the circuit, and is truly awful to look at.
+It just takes each of the different possible results we might want, and
+extracts out the correct one. See, I'll show you:
+</p>
+
+<div>
+<p><span>output_table</span><span> = [</span></p>
+<p><span><span>&nbsp; &nbsp; </span>zero,</span></p>
+<p><span><span>&nbsp; &nbsp; </span>Bits([alu_op.value[0]^x </span><span>for</span><span> x </span><span>in</span><span> queue_a]),</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>add_result, add_result,</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>Bits(queue_b.value[4:8] + [const(0)]*8).clone(),</span></p>
+<p><span><span>&nbsp; &nbsp; </span>mux(u_op.value[0], daa, Bits(kbp(*queue_a.value[:4])+[const(0)]*8).clone()),</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>mux_result, mux_result,</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>Bits(queue_a.value[:8] + addr.value[8:]).clone(),</span></p>
+<p><span><span>&nbsp; &nbsp; </span>from_rom,</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>full_jcn, full_jcn,</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>queue_a_plus,</span></p>
+<p><span><span>&nbsp; &nbsp; </span>queue_a_plus,</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>add_two, add_two</span></p>
+<p><span>]</span></p>
+
+<p><span>alu_output</span><span> = Bits([do_mux16(Bits(u_op.value[1:5]),</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>*[x.value[i] </span><span>for</span><span> x </span><span>in</span><span> output_table]) </span><span>for</span><span> i </span><span>in</span><span> </span><span>range</span><span>(12)])</span></p>
+</div>
+
+
+<h4>The Input/Output circuitry</h4>
+
+<p>
+The last piece of the circuit is the part that handles input and output. This is
+relatively simple, all things considered. It mainly consists of a two 4003 shift
+registers to handle the printing, and a 4003 shifter to handle the keyboard reading.
+</p>
+
+<p>
+But first, it's necessary to talk about the part of the circuitry that enables I/O
+passing back and forth data between the C program and the circuit. Here's the
+implementation of the special operations as defined in the circuit:
+</p>
+
+<div>
+<p><span># First, we need to figure out if we want to TRAP. </span><span><span>&nbsp;</span></span></p>
+<p><span># TRAP is a special u-op that can be identified with this bitmask. </span><span><span>&nbsp;</span></span></p>
+<p><span>trap_possible</span><span> = (u_op.value[5] &amp; u_op.value[4] &amp; ~u_op.value[3] &amp; u_op.value[1])</span></p>
+<p><span># Next, we need to figure out the reason. Is it trap because of RAM/ROM read/write?<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>trap_ramrom</span><span> = u_op.value[2] | u_op.value[0]</span></p>
+<p><span># Alternatively, maybe it's a trap because we're reading the TEST pin via JCN. </span><span><span>&nbsp;</span></span></p>
+<p><span>trap_jcn_flag_set</span><span> = insn_stream.value[0]</span></p>
+
+<p><span># The C program will now directly inspect these values.<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span># A trap acutally happens if we have the right u-op, and one of these conditions </span><span><span>&nbsp;</span></span></p>
+<p><span>trap</span><span> = trap_possible &amp; (trap_ramrom | trap_jcn_flag_set)</span></p>
+<p><span># Is it a write? or a read?<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>trap_is_write</span><span> = u_op.value[2].clone()</span></p>
+<p><span># Is it the ram? or the rom? </span><span><span>&nbsp;</span></span></p>
+<p><span>trap_rom_or_ram</span><span> = u_op.value[0].clone()</span></p>
+<p><span># which register are we referencing in the trap? </span><span><span>&nbsp;</span></span></p>
+<p><span>which_reg</span><span> = Bits(regs[RAM_REG].value[4:8])</span></p>
+<p><span># And what's the data value? </span><span><span>&nbsp;</span></span></p>
+<p><span>data</span><span> = Bits(acc.value[3:4]).clone()</span></p>
+
+<p><span># The C program will finally write here, with the value of any button. </span><span><span>&nbsp;</span></span></p>
+<p><span>pressed_button</span><span> = Bits([Signal() </span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(12)])</span></p>
+<p><span>pressed_button.connect(pressed_button)</span></p>
+</div>
+
+<p>
+The way this works is that the circuit will pull the `trap` variable high to
+indicate that it wants to do something. Then, as shown earlier, the C program
+will actually handle whatever needs to be done.
+Finally, after this returns back, it's the circuit's turn to handle the input
+from the C program. This happens as follows:
+</p>
+
+
+<p>
+The printer shifter is just a completely naive implementation connected directly
+to the ROM output port:
+</p>
+
+<div>
+<p><span>printer_clock.connect(rom_output.value[2])</span></p>
+<p><span>keyboard_clock.connect(rom_output.value[0])</span></p>
+
+<p><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(21):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>printer_clock</span><span> = printer_clock.clone()</span></p>
+<p><span><span>&nbsp; &nbsp; </span>printer_shift.append(dff(printer_shift[-1], printer_clock))</span></p>
+<p><span>printer_shift</span><span> = Bits(printer_shift[1:]).clone()</span></p>
+</div>
+
+<p>
+This holds the hammers that are going to be struck when the corresponding command
+is given, and when that happens, they update en-mass a bunch of flip-flops that
+hold the current value that's going to be printed to stdout. This is the actual
+logic that computes the gates that was already shown above.
+</p>
+
+<div>
+<p><span>which_print</span><span> = []</span></p>
+<p><span>for</span><span> i </span><span>in</span><span> </span><span>range</span><span>(20):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>out</span><span> = dff_circ(store_print_row, printer_shift.value[i])</span></p>
+<p><span><span>&nbsp; &nbsp; </span>which_print.append(out)</span></p>
+
+<p><span>which_print</span><span> = Bits(</span><span>sum</span><span>([x.value </span><span>for</span><span> x </span><span>in</span><span> which_print], []))</span></p>
+</div>
+
+<p>
+The keyboard handling actually cheats, and doesn't use a 4003 at all. Instead,
+because the Busicom calculator guarantees that only one bit is active at a time,
+it just stores the location of the active bit, and then whenever the first bit
+of rom_output is cleared it reset the row back to zero. This saves a bunch
+of space in the circuit without breaking any functionality (for the Busicom).
+</p>
+
+<div>
+<p><span>keyboard_counter</span><span> = Bits([Signal() </span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(12)])</span></p>
+<p><span>keyboard_counter.connect(dff(mux(rom_output.value[1],</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>inc(keyboard_counter),</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>Bits([zero]*12)),</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>keyboard_clock,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>12))</span></p>
+</div>
+
+<h3>The Micro-Op Table</h3>
+
+<p>
+The final component of the circuit is the micro-op lookup table that defines how
+each of the instructions should be implemented. Most instructions are relatively
+straightforward to implement. The simplest instructions are trivial. For example,
+to implement the LDM instruction that takes the low-4 bits of the instruction and
+sets the accumulator to that value it decodes in this way.
+</p>
+
+<div>
+<p><span>LOAD IMMEDIATE_4 </span><span>// load the contents of the low-4 bits of the 4004 instruction<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE ACC<span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// and directly store this into the accumulator register<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>LOAD PC<span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// load the 12-bit program counter to the queue </span><span><span>&nbsp;</span></span></p>
+<p><span>INC<span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// increment this value on the top of the stack </span><span><span>&nbsp;</span></span></p>
+<p><span>STORE PC <span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// store the updated program counter<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+</div>
+
+<p>
+Notice that the last three micro-ops actually tell the CPU how to advance to the
+next instruction. Most of the time this is obvious, but for jump and call instructions,
+this allows the program to handle them specially without any extra circuitry. I will
+show an example of that briefly, but first let me show another example of a slightly
+more complex op. Here, for example, is the encoding of the instruction IAC that
+increments the contents of the accumulator (and then writes an overflow to
+the carry flag).
+</p>
+
+<div>
+<p><span>LOAD ACC <span>&nbsp; &nbsp; &nbsp; </span></span><span>// push the accumulator onto the front of the queue </span><span><span>&nbsp;</span></span></p>
+<p><span>INC<span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// increment the top value on front of the queue<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE ACC<span>&nbsp; &nbsp; &nbsp; </span></span><span>// store the top value on the queue to the accumulator<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>SHIFT_RIGHT_4<span>&nbsp; </span></span><span>// shift the top of the stack right by 4 bits (to get the high bit) </span><span><span>&nbsp;</span></span></p>
+<p><span>STORE CARRY<span>&nbsp; &nbsp; </span></span><span>// store that shifted value into the carry flag </span><span><span>&nbsp;</span></span></p>
+<p><span>LOAD PC<span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// load the 12-bit program counter to the queue </span><span><span>&nbsp;</span></span></p>
+<p><span>INC<span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// increment this value on the top of the stack </span><span><span>&nbsp;</span></span></p>
+<p><span>STORE PC <span>&nbsp; &nbsp; &nbsp; </span></span><span>// store the updated program counter<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+</div>
+
+<p>
+Now let's show some complicated instructions. Here's the definition of the instruction JUN
+(a direct jump), for example. First its important to understand that this function
+is encoded as `0100AAAA BBBBBBBB`, where `0100` is the op-code to jump, and then
+the value AAAABBBBBBBB is the 12-bit jump target. Because instructions are 8 bits,
+this is actually represented with AAAA as the low four bits of the original
+instruction, and BBBBBBBB as the entire next instruction.
+</p>
+
+<div>
+<p><span>LOAD PC <span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// load the current program counter address<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>INC <span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// increment it so we can look at the next byte<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE PC<span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// <span>&nbsp; </span>and store it so that loads now refer to the next instruction<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>LOAD IMMEDIATE_4<span>&nbsp; </span></span><span>// load the four lower bits of the *original* instruction<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>SHIFTLEFT4<span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// shift left 4 times<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>SHIFTLEFT4<span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// shift left 4 times again, for a total of 8<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>LOAD IMMEDIATE_8<span>&nbsp; </span></span><span>// load the low 8 bits of the jump target<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>ADD <span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// compute (low-4 of instruction) &lt;&lt; 8 + (low-8 of next byte)<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE PC<span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// this is the jump target, go there </span><span><span>&nbsp;</span></span></p>
+</div>
+
+<p>
+Other instructions are even more complicated than this. For example, the JMS
+instruction is what we'd think of now as a CALL, but instead of pushing the
+return address to a stack in memory (what memory??) the 4004 has a built-in
+4-deep call stack in registers. So the JMS instruction has to handle the stack
+operations directly
+</p>
+
+<div>
+<p><span>LOAD PC2 <span>&nbsp; &nbsp; </span></span><span>// Start the stack shift, </span><span><span>&nbsp;</span></span></p>
+<p><span>STORE PC3<span>&nbsp; &nbsp; </span></span><span>// <span>&nbsp; </span>moving PC2 to PC3. </span><span><span>&nbsp;</span></span></p>
+<p><span>LOAD PC1 <span>&nbsp; &nbsp; </span></span><span>// Continue the stack shift,<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE PC2<span>&nbsp; &nbsp; </span></span><span>// <span>&nbsp; </span>moving PC1 to PC2. </span><span><span>&nbsp;</span></span></p>
+<p><span>LOAD PC<span>&nbsp; &nbsp; &nbsp; </span></span><span>// Now load the current PC<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>INC<span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// <span>&nbsp; </span>increment to get the next instruction<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE PC <span>&nbsp; &nbsp; </span></span><span>// <span>&nbsp; </span>and store it into the PC </span><span><span>&nbsp;</span></span></p>
+<p><span>STORE PC1<span>&nbsp; &nbsp; </span></span><span>// <span>&nbsp; </span>and also store it onto the PC stack<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>LOAD IMM <span>&nbsp; &nbsp; </span></span><span>// First load the low nibble from the instruction (i.e., *PC) </span><span><span>&nbsp;</span></span></p>
+<p><span>SHIFTLEFT4 <span>&nbsp; </span></span><span>// Shift this value left 4 bits </span><span><span>&nbsp;</span></span></p>
+<p><span>SHIFTLEFT4 <span>&nbsp; </span></span><span>// And then shift another 4 bits so it's now *PC &lt;&lt; 8 </span><span><span>&nbsp;</span></span></p>
+<p><span>LOAD IMMBYTE </span><span>// Now load the following byte *(PC+1)<span>&nbsp; </span></span><span><span>&nbsp;</span></span></p>
+<p><span>ADD<span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// Add (*PC &lt;&lt; 8) + *(PC+1) </span><span><span>&nbsp;</span></span></p>
+<p><span>STORE PC <span>&nbsp; &nbsp; </span></span><span>// And finally store this value into the PC </span><span><span>&nbsp;</span></span></p>
+</div>
+
+<p>
+But perhaps the most complicated instruction is the FIN instruction,
+encoded as 0011RRR0, which fetches the values in ROM pointed to by the
+the 0th general purpose register (for the low-4 bits) and the first
+(for the high-4 bits), and stores that into the register pair RRR0
+(for the low-4 bits of the word) and RRR1 (for the high-4 bits of the word).
+Here's the encoding of this instruction:
+</p>
+
+<div>
+<p><span>LOAD PC <span>&nbsp; &nbsp; &nbsp; </span></span><span>// Load the PC to the queue<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE TMP <span>&nbsp; &nbsp; </span></span><span>// Save it aside so that we can come back later<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>LOAD R1 <span>&nbsp; &nbsp; &nbsp; </span></span><span>// Load contents of general purpose register 0 to the queue<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>LOAD R0 <span>&nbsp; &nbsp; &nbsp; </span></span><span>// And now load the contents of register 1 to the queue<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>MAKEBYTE<span>&nbsp; &nbsp; &nbsp; </span></span><span>// A special instruction that computes queue[0]&lt;&lt;4 + queue[1]<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>PCHIGH<span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// Another special instruction that computes (PC&amp;F00) | queue[0] </span><span><span>&nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// At this point, the top of the queue has the new address to load </span><span><span>&nbsp;</span></span></p>
+<p><span>STORE PC<span>&nbsp; &nbsp; &nbsp; </span></span><span>// Actually write this value to the top of the queue </span><span><span>&nbsp;</span></span></p>
+<p><span>LOAD IMMBYTE<span>&nbsp; </span></span><span>// Load whatever's pointed to by the PC to the queue </span><span><span>&nbsp;</span></span></p>
+<p><span>STORE REG1<span>&nbsp; &nbsp; </span></span><span>// Store the low 4 bits to the register RRR1 </span><span><span>&nbsp;</span></span></p>
+<p><span>SHIFTRIGHT4 <span>&nbsp; </span></span><span>// Shift the value on the queue to the right 4 bits<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE REG <span>&nbsp; &nbsp; </span></span><span>// And finally store this to the value to the register RRR0<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>LOAD PC <span>&nbsp; &nbsp; &nbsp; </span></span><span>// load the 12-bit program counter to the queue<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>INC <span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>// increment this value on the top of the stack<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span>STORE PC<span>&nbsp; &nbsp; &nbsp; </span></span><span>// store the updated program counter </span><span><span>&nbsp;</span></span></p>
+</div>
+
+<p>
+And with that, we've completed our tour of the circuitry too.
+There are other instructions, but they are fairly obvious.
+And there are other tricks in the circuitry,
+but we're getting quite long already. So let's just call that a wrap.
+</p>
+
+
+<h2>Limitations</h2>
+
+<p>
+To the best of my knowledge, this is a nearly feature-complete implementation of
+the Intel 4004 and the original Busicom calculator should run more or less exactly
+as it did fifty years ago.
+</p>
+
+<p>
+There are a few limitations with the CPU that should never matter in practice:
+</p>
+
+<ul>
+<li>I didn't implement the DCL instruction. This instruction allows you to switch
+  I/O when you have more than one different devices attached to the ROM gates.
+  But the Busicom ROM does not call this instruction and so it is omitted for space.</li>
+<li>The 4004 only can listen to ROM port 0; again not a problem for the original ROM,
+  but other ROM files may not run correctly if they use more than this.</li>
+<li>If you type numbers in STDIN too fast (faster than 10 numbers per minute or so)
+  the processor won't be able to keep up with you. So please be patient.</li>
+</ul>
+
+
+<h2>Keybindings</h2>
+
+<p>
+The calculator has mostly typical keybindings for entering digits 0..9 and
+for computing addition `+`, multiplication `+`, subtraction `-`, and division `/`.
+Then there are special keys that perform the other calculator functions:
+</p>
+
+<ul>
+<li>M acts like M+ and adds to the memory</li>
+<li>m acts like m- and subtracts from the memory</li>
+<li>r acts like RM and is the recall memory function</li>
+<li>o is a special sub-total function that has various uses</li>
+<li>S computes the square root function</li>
+</ul>
+
+<h2>Example calculations</h2>
+
+<p>
+You might want to try a few of these example calculations. On my computer these
+take somewhere between 3 and 10 minutes to complete.
+</p>
+
+<ul>
+<li>Calculate 2+3: `2+3+=` (should return 5)</li>
+<li>Calculate 85*72: `85*72=` (should return 6120)</li>
+<li>Calculate 85*72*4: `85*72*o4=" (should return 24480)</li>
+<li>Calculate 85/72: `85/72=` (should return 1.1805555555555)</li>
+<li>Use the memory functions `5M4Mr` (should return 9)</li>
+<li>Memory with multiply `12*5=M3Mr` (should return 63)</li>
+<li>Calculate square roots: `2S` (should return 1.4142135623730)</li>
+<li>Use the sub-totals: `1+2+o5+o=` (should return 8)</li>
+</ul>
+
+<p>
+Longer calculations can be performed but should be done without the use of echo,
+because the Busicom ROM only can hold only a limited number of buffered
+keystrokes at a time. Care must be taken to not get unlucky when entering
+keystrokes manually or else the wrong calculation will be performed. (This is
+not a bug in the above C program, but a bug in the original ROM, which had
+subtle timing race conditions that in practice were not real problems because
+the calculator ran several thousand times faster than this emulated version
+does.)
+</p>
+
+
+<h2>Conclusion</h2>
+
+<p>
+  If one were to rank programs by human-hours-per-byte, this program would be certainly
+  top the ranking for the all the code I've ever written.
+  I didn't keep good track of this, but I'd estimate I spent probably a few hundred hours
+  over the last four years working on it.
+  (Honestly I felt kind of empty after submitting the code back in June.
+  I've been working on this since almost the start of the pandemic,
+  and whenever I felt like I had to take a break from my large (mostly Python) actual work
+  this was the perfect place to come and fiddle with the bytes of a program that fits
+  comfortably on a single piece of paper.)
+</p>
+
+      <p>
+        I don't think I'll have anything to submit to the IOCCC next year,
+        or at least I don't have a plan to submit anything right now,
+        but I had a great time with it again this year.
+        If you liked this, I'd encourage you to go take a look at the
+        <a href="https://www.ioccc.org/2024/#inventory">other winners</a>,
+        which are similarly clever and deraged C programs.
+      </p>
+  
+
+    </div></div>

@@ -1,0 +1,170 @@
+---
+title: Agentic Skill Decay
+link: https://addyosmani.com/blog/agentic-skill-decay/
+source: addyosmani-com
+published: 2026-08-31T00:00:00Z
+updated: 2026-08-31T00:00:00Z
+first_seen: 2026-09-27T19:29:15.293681927Z
+summary: Agents can finish the task without teaching you anything. Building expertise now has to be deliberate.
+content: extracted
+html: 2026-08-31-agentic-skill-decay.html
+preview:
+  file: 2026-08-31-agentic-skill-decay.preview-59d925475ba7.webp
+  width: 256
+  height: 143
+  color: '#323434'
+images:
+- source: https://addyosmani.com/assets/images/agentic-skill-decay/06.webp
+  original:
+    file: 2026-08-31-agentic-skill-decay.image-c1a8875a02b1.webp
+    width: 1600
+    height: 892
+  variants:
+  - file: 2026-08-31-agentic-skill-decay.image-3d6a75e0a208.webp
+    width: 320
+    height: 178
+  color: '#030808'
+- source: https://addyosmani.com/assets/images/agentic-skill-decay/01.webp
+  original:
+    file: 2026-08-31-agentic-skill-decay.image-f3fc6ebac4a3.webp
+    width: 1600
+    height: 900
+  variants:
+  - file: 2026-08-31-agentic-skill-decay.image-0ce0975569a2.webp
+    width: 320
+    height: 180
+  color: '#141414'
+- source: https://addyosmani.com/assets/images/agentic-skill-decay/02.webp
+  original:
+    file: 2026-08-31-agentic-skill-decay.image-7e3decdfc037.webp
+    width: 1600
+    height: 900
+  variants:
+  - file: 2026-08-31-agentic-skill-decay.image-c8c6e2ceca1e.webp
+    width: 320
+    height: 180
+  color: '#151413'
+- source: https://addyosmani.com/assets/images/agentic-skill-decay/03.webp
+  original:
+    file: 2026-08-31-agentic-skill-decay.image-05b319d3f751.webp
+    width: 1600
+    height: 900
+  variants:
+  - file: 2026-08-31-agentic-skill-decay.image-7babbef960df.webp
+    width: 320
+    height: 180
+  color: '#151415'
+- source: https://addyosmani.com/assets/images/agentic-skill-decay/04.webp
+  original:
+    file: 2026-08-31-agentic-skill-decay.image-16e11501ded1.webp
+    width: 1600
+    height: 900
+  variants:
+  - file: 2026-08-31-agentic-skill-decay.image-02ede6f7aa87.webp
+    width: 320
+    height: 180
+  color: '#0c0c0c'
+- source: https://addyosmani.com/assets/images/agentic-skill-decay/05.webp
+  original:
+    file: 2026-08-31-agentic-skill-decay.image-940bdcb500f3.webp
+    width: 1600
+    height: 900
+  variants:
+  - file: 2026-08-31-agentic-skill-decay.image-73a6255314ec.webp
+    width: 320
+    height: 180
+  color: '#161413'
+---
+
+**Mastery still comes from doing the reps.**
+
+Before agents, I got my reps as part of writing code: try different approaches out, debug what went wrong, review other’s code, read a lot. Agents can skip much of that work, so **building your reps has to be deliberate**.
+
+If I was new to the industry, I’d try to form a hypothesis before prompting. Ask “why” a lot, read the diffs, try to predict what might fail. Occasionally try to work through the problem myself manually.
+
+![Slide titled Mastery still comes from the reps: they used to arrive on their own, now you have to go and get them. The top row shows how the reps used to arrive as a side effect of writing code: try an approach, watch it fail, trace the bug, read someone's fix, carry the lesson. The bottom row shows what an agent does with the same problem, going from the problem straight through to a working patch in minutes, with watch it fail, trace the bug and read someone's fix greyed out. So put the reps back on purpose: form a hypothesis before you prompt, ask why and keep asking it, read the diffs, predict what might still fail, and occasionally work it through by hand. Footer: I still use agents aggressively, I just don't want the issue to close while my mental model stays where it was.](https://addyosmani.com/assets/images/agentic-skill-decay/01.webp)
+
+In my experience, **good agent work depends on two abilities**:
+
+1. **Deep expertise:** you understand the problem domain well enough to define a good outcome. Understanding your user/product/business is part of this.
+2. **Applied judgment:** use your taste to turn this into a clear, testable plan by choosing the right context, constraints, tests and verification.
+
+To build these the skills I’d practice are decision making, specifying, steering and verifying.
+
+![Slide titled Good agent work rests on two abilities: the agent writes the patch, and these two decide whether it was worth writing. The first is deep expertise, meaning what should happen: you understand the domain well enough to define a good outcome, including who the user is and what they need, how the system actually behaves, and which edge case would make the feature useless. The second is applied judgment, meaning what would convince me it happened: taste turned into a clear, testable plan, including the right context to hand it, the constraints it must not cross, and the tests and verification that make good concrete enough to check. So the four skills worth practising are decision making, choosing what is worth doing; specifying, making the outcome explicit; steering, correcting it mid-flight; and verifying, deciding the evidence is enough.](https://addyosmani.com/assets/images/agentic-skill-decay/02.webp)
+
+## The reps I actually did
+
+When I got started in software engineering, I very much felt like I had no idea what I was doing. I was having a lot of fun building, a lot of fun trying things out, failing, learning from my mistakes, and each time getting a little further and further in my journey. And every time I failed, I tried to take that as another building block in becoming a better engineer. And so all of this work was me doing the reps. It’s the way that I learned JavaScript. It’s the way that I learned how to program in C++ and build desktop applications. It’s how I learned how to tune the performance of graphics intensive applications, all of these types of things.
+
+Building up the reps, very often I would go into a task with some sort of hypothesis or an idea, even if it was, like, super wrong about how things might work. I would try out what I thought could work, and when it didn’t work, I would then go to Stack Overflow or search the web for different documentation and absorb some knowledge. Maybe read some books if it was a very esoteric topic. I would then continue on my journey. And you do that enough times and you start to build out expertise, especially once you start doing this for real and trying it out on real world projects that go beyond hobbyist stuff that you might be doing at the weekends.
+
+Most of the judgment I use today came from thousands of small reps like these: debugging failures, reviewing other people’s code, and living with abstractions that looked good until a real system pushed back. Agents can now skip much of that work. **If you’re three years into your career, plausible code may arrive faster than your ability to judge it.**
+
+## The short-circuit
+
+Now, I think that for many people who are getting started with AI, you can short-circuit a lot of the learning journey. You can go very quickly from, hey, here’s a problem, to, well, hey, here’s the solution, or here’s the outcome of the overall task, while skipping all of those things that would otherwise have built up your knowledge base, or helped educate you about, you know, don’t do that thing, this is why you don’t do that thing, do this thing, and help you reason about the trade-offs. And I think that this is one of those areas where it’s going to require junior engineers especially to be proactive about their educational journey.
+
+I’ve also talked to a few different AI labs. Many of the main players in AI right now are very focused on helping you accomplish an outcome or get an answer as quickly as possible, and they don’t necessarily help you in your education journey unless you’re specific about that being one of your goals. Like, there’s a difference in me saying, hey, help me build an app for scheduling, and, help me build an app for scheduling and teach me how to do it as we’re going, going one step to another. Most people don’t do the second one of those things. And part of it is not knowing that that is an option. Part of it is perhaps thinking, well, hey, these days there are all these velocity expectations and there’s this pressure to ship fast and just move on to the next thing. But I do think that in order to become better engineers, to continue having this expertise that improves our taste and our judgment, you do have to go out of your way to build up mastery.
+
+## A completed task is not necessarily a rep
+
+I think that with any kind of critical thinking, with any type of problem that you have, it’s useful to have a hypothesis about the solution, an idea about what it might look like: the shape of it if we’re just talking about logic and code, how it might look and feel and interact if it’s a piece of UI. **When a task is finished, it doesn’t necessarily mean that you have learned something.** It just means that the task has been finished. You have to almost look out for those learning opportunities, or you can ask your agent to summarize as it’s building or at the very end: what are the key learnings from this that would help me as an intermediate developer, or as a junior developer, increase my knowledge base or improve how I think about problems? And you can keep doing that. You just have to be proactive about your learning journey.
+
+For me, there are several things that I’ve been able to use AI for these days, and more complex 3D graphics programming is definitely one of those. I’m not an expert. And there are definitely times when I try to make sure I’m asking the AI, okay, so can you explain how this thing works? Can you teach me about this concept you just implemented? Can you help me reason about how these different elements connect? And I think that because I want to learn, and I have that desire to learn, I am pairing with my agent in order to do that. If you’re not necessarily trying to learn, you lose opportunities there.
+
+A completed task not being a rep is also something that happens when there aren’t mistakes in the process. When there are mistakes, you start to think, okay, well, why did it go wrong? What could be better? What am I not thinking about? And it forces you to reflect. When things go right, there’s not really a teaching moment there. You just think, okay, well, the work’s done, I’m just going to move on to the next task. And so, especially if you’re junior, you want to be looking for those opportunities to keep leveling up.
+
+There was a [2026 study by Anthropic](https://www.anthropic.com/research/AI-assistance-coding-skills) looking at junior engineers learning a particular Python library, Trio. **People who used AI assistants scored 50% on a follow-up quiz against 67% for the group who were working by hand.** And within the AI group, the strong results came from those who asked conceptual questions and requested explanations rather than treating the model as a code vending machine. This ties back to what I was saying: if you are just using AI to generate output and generate outcomes, but you’re not using it as a pair, you’re not using it to try improving your critical thinking skills, your knowledge skills, your understanding of how things work, you can end up in this situation where you largely don’t understand how things work, but you’re just good at prompting. And that means you’re perhaps not really going to be so good at the verification side of things. It doesn’t surprise me too much that people who asked questions and requested explanations did better. Those people probably had a lot more reflection on how things worked, how it connects to other things that they know. They pattern match, they start to build up residue about, okay, well, this is how this thing works, this is how I reason about it, these are the gaps in my knowledge. And so seeing that 17% difference kind of makes sense to me. Of course, this was a short-term study of just one Python library, so I wouldn’t say it’s conclusive necessarily, but it was still very interesting.
+
+This is still how I work when I’m learning something unfamiliar. I try to keep myself in the loop. I form a hypothesis before prompting. I ask why, inspect the diff, predict what might fail, and give the agent a concrete way to verify its work. Occasionally I work through a small problem by hand. I want the agent to close the task while my mental model still moves.
+
+![Slide titled Four places to slow down: an agent closes the gap from problem to patch fast enough that the learning is easy to miss. Along a timeline from a problem to a patch, where the agent goes straight across, there are four interventions. Before you prompt, write down what you think is wrong, forming the hypothesis first, then letting the agent test it and finding out whether you were right. While it works, ask why a lot, not just what it changed but why that approach, what it ruled out, and what it assumed about the system. When the patch lands, read the diff and ask what could still fail, the single highest-value minute in the whole loop and the easiest to skip. And every so often, work it through by hand, especially in a part of the stack you are still learning, which is slow and the only way some things go in. The point is not to use agents less: before agents the reps arrived as a side effect of writing code, and now they have to be deliberate.](https://addyosmani.com/assets/images/agentic-skill-decay/03.webp)
+
+## Use them aggressively anyway
+
+I don’t know how long code-level expertise will remain as valuable as it is today. Models are improving too quickly for much certainty. I also don’t think the answer is to avoid agents or romanticize typing every line. I use them aggressively. On some days I have five or ten sessions running, and I once caught myself asking the wrong project to add dark mode. That mistake clarified the constraint: **agent throughput scales faster than my attention.**
+
+## A thousand hours in the performance panel
+
+I can think of things that I had to spend thousands of hours to get right. Performance optimization is one of those areas where, back in the day, you didn’t always have a whole lot of great blog posts or books that you could consult. There was some decent, very classic literature on these topics that would maybe touch on memory or how to think about hardware and constraints. But you take something like web performance optimization, JavaScript optimization, heap optimization, all of these things, there weren’t always great articles about these things. And so you would build your reps by going into the Chrome developer tools, using the performance panel to run a trace of a page or an application, interact with it, try to find, like, where is the slowness? And then trying to drill down and come up with a hypothesis of, okay, well, it looks like this is the area of the flame graph where most of the problem seems to be. Or this is where maybe, in the memory panel, I’m not allowing garbage to be collected, or anything like that. In my time, you had to have gone through the gauntlet of making enough mistakes, attempting to find out the root cause, that you built up this knowledge, this esoteric at times knowledge, about what worked and what didn’t.
+
+These days, a similar flow would be one where you’d have the DevTools MCP go and do the performance profiling for you with your agent, and figure things out, and then come up with the fix for you itself. And so you don’t necessarily then build up that expertise in performance quite as much.
+
+## You can only prompt what you can imagine
+
+When I scroll through Twitter these days, I am always impressed with how much imagination and creativity is in my feed. So many designers, creative people sharing amazing shaders, amazing games, UI, immersive experiences that they are building that is now even more so possible. Like, the tech was there, but imagination is now the ceiling. It’s much, much more accessible for you to build these things much more quickly. But you have to have that imagination in order to have the idea in the first place and tell your agent to build it. And then you have to have that expertise to verify it. **So verification is the floor and imagination is the ceiling.**
+
+![Slide titled Verification is the floor, imagination is the ceiling: the tech was already there, and these two are what actually bound you now. The ceiling is imagination, because you can only prompt what you can picture and the idea has to exist before an agent can build it, so raising it makes more possible to ask for. The floor is verification, because you can only keep what you can confirm is good, which means noticing it is wrong and knowing why, so raising it makes more safe to keep. Everything you can actually ship sits in between. The example in the middle is the 3D album site, first pass: it rendered, but it also used the wrong interaction pattern and performed badly on mobile, and it took expertise to notice and then a hypothesis about why. Caption: if you can think it, you can make it, and whether you should keep it is the other skill.](https://addyosmani.com/assets/images/agentic-skill-decay/04.webp)
+
+I remember, for an upcoming album site (I do music), I wanted some of the homepage to be these 3D objects that were interactive, that are part of the experience. Things like 3D CD players, and I think I had a vinyl record player in there as well, maybe a tape player, some 90s nostalgia. Now, the initial versions not only didn’t look amazing, but they didn’t follow the right interaction pattern. They didn’t perform as well on mobile. And so I had to first of all have the expertise to notice that it was buggy in some way. Maybe any user would notice that. But then I had a hypothesis about why that might be. And I could then go and either profile it myself or ask my agent to profile it and figure out what happened, what went wrong. Maybe there was just some way in which the interaction logic was written that wasn’t great. And so I think that your imagination is really important, but then so is your expertise. Both of these things are important. If you can think it, you can make it.
+
+## Does the next generation need the expertise?
+
+There is a valid question about, like, hey, if an agent can do these tasks, and increasingly well, do humans need to build up that expertise? Does the next generation need to build up expertise in some of these esoteric areas? And I think that, at least today, where that still becomes useful is places where the agents don’t do a perfect job, where their work does need to be checked. Where you ask something to optimize a particular loop, an animation, a scheduling routine, or anything like that, and maybe it does that at the cost of something else. And if you don’t know what to spot, or you don’t know how to read the implementation and understand what was done, you can end up shipping something that actually doesn’t do what you want.
+
+**Skills and MCPs can encode a useful workflow. They cannot tell you when its assumptions no longer fit your system.**
+
+There was an [Anthropic study of around 400,000 Claude Code sessions](https://www.anthropic.com/research/claude-code-expertise) that looked at expertise as being this task-specific thing. And it found that having even intermediate expertise about the task that you were trying to complete increased the chances of you reaching verified success with that task, rather than someone who is a little bit more novice. It doesn’t mean that you have to have a decade of experience across the stack, but it does mean that **you need to understand the problem domain enough to recognize what good means**. We sometimes talk about that these days in terms of taste, and I’ve written about this before. This is also one reason, when I read the [Claude Code best practices guide](https://code.claude.com/docs/en/best-practices), I’m very happy to see that it starts off talking about verification: testing, using screenshots, other signals that give your agent something that it can continue to iterate against, and gives you evidence to review instead of just some simple summary saying that the task is complete. Having expertise helps you shape clay much better than someone who doesn’t have a lot of expertise but can maybe shape something that looks okay.
+
+And this all comes back to having that expertise to be able to verify the work, to be able to judge the agent’s work. And so I’m hopeful that we can continue to invest in mastery and invest in craftsmanship, even as software engineering continues to rise in the abstractions that we’re using to build software.
+
+## The return on expertise is going up
+
+I feel like software engineering fundamentals are going to continue to be important. Expertise is going to continue to be important. And now that the floor has been raised, AI is also increasing the return on the skills that people have, on the expertise that people have. People who are junior stop being junior by shipping real things and making mistakes, learning, building the reps. Experts kind of have an intuition about what to build, how to verify it, how to make sure that you know it’s good, it’s not broken, it’s going to be maintainable, it’s going to scale, it’s going to work in the different contexts or platforms. And especially now that so many people are able to just prompt and bring an idea into being, making it high quality and good enough to ship, delightful, and something that is maintainable and isn’t going to break in production, those skills are going to continue being important.
+
+I run into this at least a couple of times every week. It’s so easy now to prompt any kind of app, any kind of feature. For example, I’m building a text editor at the moment, not from scratch. The idea for this is to be sort of a writing aid that highlights opportunities for your grammar to be better, or to not be using AI style writing, that type of thing. And a frontier model was able to generate me, with a lot of back and forth, a nice and okay looking UI. It wasn’t amazing. And it had a bunch of issues, such as it didn’t have the optimal use of screen real estate. It didn’t have good color contrast. It didn’t have a good scrolling model. All of these things that I know because I’ve made these mistakes before, I’ve built up the expertise. But if you don’t have that expertise, you might just prompt something, put it out into the world, and then stop. And you don’t know what’s better, because you haven’t put in the time to build up that expertise.
+
+## Put the lesson where the next agent can find it
+
+One of the things that I tell people I mentor is that when you work with an agent, you should be making it better, and it should be making you better. And what that means is that every day, there should be some sort of cycle where you’re getting things added to lessons or to memory or something so that it’s able to improve. Because otherwise, **every time that you’re starting a new session, it can feel like you’re onboarding a new hire that has amnesia**. They’re not necessarily going to remember the subtleties of your business, your product, your team, your users, or any of that stuff. And so this is why we end up capturing so much in not just skills, but context and all the stuff that we try to give our agents. And we need to be careful about things that are actually useful and actually specific to problems versus things that we just think are making things better. And so I always encourage people to see, how can you make sure that you are teaching your agent more, and making sure that every day it’s getting better and you’re getting better?
+
+If you are in a chat window and you happen to be solving a problem, like, let’s say that you discover some subtle scrolling bug in a UI component that you’re working on. You work with your agent, you go back and forth, and there’s a lesson somewhere in there that you could potentially use in the future. Now, maybe that lesson will get added to memory. Maybe it won’t. And especially if it’s a long session that has compacting, that full lesson may not necessarily go in there. So that lesson could disappear when the chat window dies. While if you instead try to codify things like specific lessons, tests, lint rules, anything, especially that is small enough that it can be codified in your repo, it can teach future agents. And I found that personally very helpful. If I learn a lesson, I take a few minutes to review and see, is this worth adding to my lessons.md, or asking my agent to add it to its memory, or something that’s just going to keep it sticky? Because I don’t want lessons to disappear. I’m going to forget personally, I’m going to move on to the next problem. This comes up all the time for me. It can be everything from, hey, I have a particular preference for how I approach UI, to how I approach writing components, to how I approach performance, all kinds of things. And if there’s a subtle way in which I address a problem, I want my agent to remember that, or have a way to remember it, rather than me having to continue restating this every single time.
+
+Very often we treat our agents as something that’s going to remember everything that we do, and that’s not necessarily the case. Even if the agent has got a memory system, you can’t necessarily fully rely on it to recall all of the interesting things that you were maybe trying to learn, or the way that you like working, or the way that you would approach verification. And so it is okay to start capturing more of these things in markdown files. Just be very, very careful and cautious that you’re not over investing in that as a strategy. I always liked this idea of a dual loop. **A good rep where you learn should sharpen you, and it should sharpen your agent.** And when you have some hypothesis that was maybe corrected, you consider if that correction warrants becoming a linting rule, some type constraint, a documentation convention or a test, just so that it can stick around and benefit you in the future.
+
+![Slide titled A good rep should sharpen both of you, otherwise every new session is onboarding a new hire with amnesia. A correction worth keeping, such as a subtle bug, a wrong assumption or a preference, feeds two loops. The first sharpens you: ask why it went wrong and pattern match it against what you already know, because this is the residue that becomes judgment and it only forms if you stop to look. The second sharpens your agent, but only if you put it somewhere durable, since a chat window dies and compaction eats the rest, so it belongs in lessons.md, a lint rule, a type constraint, a doc convention or a test. One caution: be careful not to over-invest in markdown as the strategy, and capture what is genuinely specific to your problems rather than everything you suspect might help. Caption: when you work with an agent, you should be making it better, and it should be making you better.](https://addyosmani.com/assets/images/agentic-skill-decay/05.webp)
+
+## The outer loop
+
+So I think what all of this means with respect to mastery is: invest in your expertise and in your craftsmanship. Do the reps, make mistakes, learn from them. You will over time be able to figure out what deserves to exist. You’ll be able to start writing up plans, refining plans, coming up with some definition for what done means, and also planning out for those places where humans are going to stay in the loop to check on correctness, safety, or user impact. That is going to be largely the outer loop I think engineers are going to need to own today. We’re going to keep seeing AI moving engineering further up the abstraction layers. And **the more agents that I can run, the more care I need to choose where my limited time, taste, and judgment goes.**

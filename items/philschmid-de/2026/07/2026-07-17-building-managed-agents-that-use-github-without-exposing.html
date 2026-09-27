@@ -1,0 +1,202 @@
+<div id="readability-page-1" class="page"><div><p>You can run the GitHub CLI (<code>gh</code>) inside a Gemini API <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agents">Managed Agents</a> without exposing your GitHub Personal Access Token (PAT) to the sandbox.</p>
+<p>The <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agent-environment#network-configuration">Network Configuration</a> egress proxy injects your real token into outbound requests. The agent uses a dummy token locally, so the real token never enters the sandbox.</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li><strong>Dummy token</strong>: The agent exports <code>GH_TOKEN="dummy"</code> inside the sandbox to satisfy <code>gh</code>'s local auth checks.</li>
+<li><strong>Interception</strong>: The egress proxy intercepts requests to <code>api.github.com</code> or <code>github.com</code>.</li>
+<li><strong>Transformation</strong>: The proxy replaces the dummy token in the <code>Authorization</code> header with your real token.</li>
+<li><strong>Security</strong>: The real token remains in the control plane and is never visible inside the sandbox.</li>
+</ol>
+<p><img src="https://www.philschmid.de/static/blog/managed-agents-gh/mermaid.jpg" alt="Egress proxy injects GitHub token"></p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>
+<p><strong>Gemini API Key</strong>: Get your key from <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/">Google AI Studio</a>.</p>
+</li>
+<li>
+<p><strong>GitHub Personal Access Token (PAT)</strong>: I recommend a <strong>Fine-grained PAT</strong> restricted to the specific repositories your agent needs.</p>
+<p>To create one:</p>
+<ol>
+<li>Go to GitHub -&gt; <strong>Settings</strong> -&gt; <strong>Developer settings</strong> -&gt; <strong>Personal access tokens</strong> -&gt; <strong>Fine-grained tokens</strong> or click <a target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new">here</a>.</li>
+<li>Click <strong>Generate new token</strong>.</li>
+<li>Under <strong>Repository access</strong>, select your target repositories.</li>
+<li>Under <strong>Permissions</strong> -&gt; <strong>Repository permissions</strong>, configure:
+<ul>
+<li><strong>Contents</strong>: <code>Access: Read and write</code> (to clone and push code).</li>
+<li><strong>Pull requests</strong>: <code>Access: Read and write</code> (to open, review, and comment on PRs).</li>
+<li><strong>Issues</strong>: <code>Access: Read and write</code> (to create and comment on issues).</li>
+</ul>
+</li>
+<li>Click <strong>Generate token</strong> and copy it. It won't be shown again.</li>
+</ol>
+</li>
+</ul>
+<h2 id="example">Example</h2>
+<p>This Python example spins up the agent in an isolated, ephemeral Linux environment, configures the network allowlist with header transformations, and runs <code>gh</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import base64
+import os
+from google import genai
+ 
+# GitHub PAT from host
+GITHUB_PAT = os.environ.get("GITHUB_PAT")
+if not GITHUB_PAT:
+    raise ValueError("Set GITHUB_PAT environment variable on the host.")
+ 
+# Base64-encode for Git HTTPS auth
+git_auth_str = f"x-oauth-basic:{GITHUB_PAT}"
+git_auth_base64 = base64.b64encode(git_auth_str.encode("utf-8")).decode("utf-8")
+ 
+client = genai.Client()
+ 
+# Shim: auto-installs gh, injects dummy token, ensures git HTTPS and no prompt
+shim_script = """#!/bin/bash
+REAL_GH="/workspace/gh_install/bin/gh"
+ 
+if [ ! -f "$REAL_GH" ]; then
+    echo "GitHub CLI not found. Installing to /workspace/gh_install..." &gt;&amp;2
+    mkdir -p /workspace/gh_install
+    curl -sSLo /workspace/gh_install/gh.tar.gz https://github.com/cli/cli/releases/download/v2.40.1/gh_2.40.1_linux_amd64.tar.gz &gt;&amp;2
+    tar --no-same-owner -xf /workspace/gh_install/gh.tar.gz -C /workspace/gh_install --strip-components=1 &gt;&amp;2
+    rm -f /workspace/gh_install/gh.tar.gz &gt;&amp;2
+    echo "GitHub CLI installed." &gt;&amp;2
+fi
+ 
+export GH_TOKEN="dummy_token_to_bypass_cli_check"
+export GIT_TERMINAL_PROMPT=0
+"$REAL_GH" config set git_protocol https &gt;/dev/null 2&gt;&amp;1 || true
+exec "$REAL_GH" "$@"
+"""
+ 
+agent_prompt = """
+Use the GitHub CLI wrapper at `/workspace/bin/gh` to show the logged in user info, and clone the repository 'octocat/Spoon-Knife' to '/workspace/Spoon-Knife'.
+"""
+ 
+interaction = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input=agent_prompt,
+    environment={
+        "type": "remote",
+        "sources": [
+            {
+                "type": "inline",
+                "content": shim_script,
+                "target": "/workspace/bin/gh"
+            }
+        ],
+        "network": {
+            "allowlist": [
+                {
+                    "domain": "api.github.com", # GitHub API 
+                    "transform": [{"Authorization": f"Bearer {GITHUB_PAT}"}]
+                },
+                {
+                    "domain": "github.com", # Git over HTTPS rule
+                    "transform": [{"Authorization": f"Basic {git_auth_base64}"}]
+                },
+                {
+                    "domain": "*"
+                }
+            ]
+        }
+    }
+)
+ 
+print(interaction.output_text)
+# Logged in as philschmid; cloned octocat/Spoon-Knife to /workspace/Spoon-Knife</code></pre></div></figure>
+<p>GitHub uses different auth schemes depending on the request. API calls to <code>api.github.com</code> expect a <code>Bearer</code> token, while Git operations against <code>github.com</code> require base64-encoded <code>Basic</code> auth.</p>
+<p>The wildcard entry (<code>"domain": "*"</code>) lets the sandbox reach everything else, e.g. downloading the <code>gh</code> binary, fetching release assets, etc. You can lock this down to specific domains like <code>objects.githubusercontent.com</code> if you prefer tighter controls.</p>
+<h2 id="persistent-github-agent">Persistent "GitHub agent"</h2>
+<p>To make the agent autonomous and avoid setup delays, you can create a managed agent that auto-installs the <code>gh</code> CLI. It reuses the environment after the first interaction to keep the installed <code>gh</code> binary across calls.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import base64
+import os
+from google import genai
+ 
+# GitHub PAT from host
+GITHUB_PAT = os.environ.get("GITHUB_PAT", "TOKEN_HERE")
+ 
+git_auth_str = f"x-oauth-basic:{GITHUB_PAT}"
+git_auth_base64 = base64.b64encode(git_auth_str.encode("utf-8")).decode("utf-8")
+ 
+client = genai.Client()
+ 
+system_instruction = """
+You are a senior code reviewer. You have access to the GitHub CLI via a shim wrapper script at `/workspace/bin/gh`.
+First run `chmod +x /workspace/bin/gh` so that the wrapper script is executable. Then always use `/workspace/bin/gh` (or `bash /workspace/bin/gh`) for any GitHub operations.
+Do NOT use the standard `gh` command directly, as it will not have the correct authentication token.
+"""
+ 
+# Shim: auto-installs gh, injects dummy token, forces HTTPS and disables interactive prompts
+shim_script = """#!/bin/bash
+REAL_GH="/workspace/gh_install/bin/gh"
+ 
+if [ ! -f "$REAL_GH" ]; then
+    echo "GitHub CLI not found. Installing to /workspace/gh_install..." &gt;&amp;2
+    mkdir -p /workspace/gh_install
+    curl -sSLo /workspace/gh_install/gh.tar.gz https://github.com/cli/cli/releases/download/v2.40.1/gh_2.40.1_linux_amd64.tar.gz &gt;&amp;2
+    tar --no-same-owner -xf /workspace/gh_install/gh.tar.gz -C /workspace/gh_install --strip-components=1 &gt;&amp;2
+    rm -f /workspace/gh_install/gh.tar.gz &gt;&amp;2
+    echo "GitHub CLI installed." &gt;&amp;2
+fi
+ 
+export GH_TOKEN="dummy_token_to_bypass_cli_check"
+export GIT_TERMINAL_PROMPT=0
+"$REAL_GH" config set git_protocol https &gt;/dev/null 2&gt;&amp;1 || true
+exec "$REAL_GH" "$@"
+"""
+ 
+client.agents.create(
+    id="github-reviewer-agent",
+    base_agent="antigravity-preview-05-2026",
+    base_environment={
+        "type": "remote",
+        "sources": [
+            {
+                "type": "inline",
+                "content": shim_script,
+                "target": "/workspace/bin/gh"
+            },
+            {
+                "type": "inline",
+                "content": system_instruction,
+                "target": "/AGENTS.md"
+            }
+        ],
+        "network": {
+            "allowlist": [
+                {
+                    "domain": "api.github.com",
+                    "transform": [{"Authorization": f"Bearer {GITHUB_PAT}"}]
+                },
+                {
+                    "domain": "github.com",
+                    "transform": [{"Authorization": f"Basic {git_auth_base64}"}]
+                },
+                {"domain": "*"}
+            ]
+        }
+    }
+)</code></pre></div></figure>
+<p>The first interaction clones the base environment and triggers <code>gh</code> installation.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">interaction_1 = client.interactions.create(
+    agent="github-reviewer-agent",
+    input="Which GitHub user is logged in?",
+    environment="remote",
+)
+ 
+print(interaction_1.output_text)
+# ... currently logged-in GitHub user is **philschmid**.</code></pre></div></figure>
+<p>For subsequent calls, pass <code>interaction_1.environment_id</code> to reuse the same container, keeping the installed <code>gh</code> binary and inheriting the network transforms. Optionally pass <code>previous_interaction_id=interaction_1.id</code> as well if you want to retain conversation history across turns.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">interaction_2 = client.interactions.create(
+    agent="github-reviewer-agent",
+    input="View the pull request #12 in repository 'octocat/Spoon-Knife' and summarize the changes.",
+    environment=interaction_1.environment_id,
+    previous_interaction_id=interaction_1.id
+)
+ 
+print(interaction_2.output_text)
+# Based on the inspection of pull request #12 in the</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>You can give Managed Agents access to GitHub without putting secrets in the sandbox. A dummy token satisfies <code>gh</code> locally, and the egress proxy injects the real PAT on the way out.</p>
+<p>For more on Managed Agents, environments, and network transforms, see the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agents">Managed Agents docs</a> and <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agent-environment#network-configuration">Network configuration</a>.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

@@ -1,0 +1,331 @@
+<div id="readability-page-1" class="page"><div><p>Large Language Models (LLMs) continued their important role in 2024, with several major developments completely outperforming previous models. The focus continued to more smaller, more powerful models from companies like Meta, Qwen, or Google. These models not only became more powerful, but also more efficient. We got Llama models as small as 1B parameters outperforming Llama 2 13B.</p>
+<p>LLMs can now handle many tasks out-of-the-box through prompting, including chatbots, question answering, and summarization. However, for specialized applications requiring high accuracy or domain expertise, fine-tuning remains a powerful approach to achieve higher quality results than prompting alone, reduce costs by training smaller, more efficient models, and ensure reliability and consistency for specific use cases.</p>
+<p>Contrary to last years guide <a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/fine-tune-llms-in-2024-with-trl">How to Fine-Tune LLMs in 2024 with Hugging Face</a> this guide focuses more on optimization, distributed training and being more customizable. This means support for different PEFT methods from Full-Finetuning to QLoRA and Spectrum, optimizations for faster and more efficient training, with <a target="_blank" rel="noopener noreferrer" href="https://github.com/Dao-AILab/flash-attention">Flash Attention</a> or <a target="_blank" rel="noopener noreferrer" href="https://github.com/linkedin/Liger-Kernel">Liger Kernels</a> and how to scale training to multiple GPUs using DeepSpeed.</p>
+<p>This guide is created using a script rather than notebook. If you are compeltely new to fine-tuning LLMs, I recommend you to start with the <a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/fine-tune-llms-in-2024-with-trl">How to Fine-Tune LLMs in 2024 with Hugging Face</a> guide and then come back to this guide.</p>
+<p>You will learn how to:</p>
+<ol>
+<li><a href="#1-define-a-good-use-case-for-fine-tuning">Define a good use case for fine-tuning</a></li>
+<li><a href="#2-setup-development-environment">Setup the development environment</a></li>
+<li><a href="#3-create-and-prepare-the-dataset">Create and prepare the dataset</a></li>
+<li><a href="#4-fine-tune-the-model-using-trl-and-the-sfttrainer-with-qlora">Fine-tune the model using <code>trl</code> and the <code>SFTTrainer</code> with QLoRA as example</a></li>
+<li><a href="#5-test-model-and-run-inference">Test and evaluate the model using GSM8K</a></li>
+</ol>
+<p><strong>What is Qlora?</strong></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/papers/2305.14314">QLoRA (Quantized Low-Rank Adaptation)</a> enables efficient fine-tuning of LLMs using 4-bit quantization and minimal parameter updates, reducing resource needs but potentially impacting performance due to quantization trade-offs.</p>
+<p><strong>What is Spectrum?</strong></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/papers/2406.06623">Spectrum</a> is a fine-tuning method that identifies the most informative layers of a LLM using Signal-to-Noise Ratio (SNR) analysis and selectively fine-tunes them, offering performance comparable to full fine-tuning with reduced resource usage, especially in distributed training setups.</p>
+<p><em>Note: This guide is designed for consumer GPUs (24GB+) like the NVIDIA RTX 4090/5090 or A10G, but can be adapted for larger systems.</em></p>
+<h2 id="1-define-a-good-use-case-for-fine-tuning">1. Define a good use case for fine-tuning</h2>
+<p>Open LLMs became more powerful and smaller in 2024. This often could mean fine-tuning might not be the first choice to solve your problem. Before you think about fine-tuning, you should always evaluate if prompting or already fine-tuned models can solve your problem. Create an evaluation setup and compare the performance of existing open models.</p>
+<p>However, fine-tuning can be particularly valuable in several scenarios. When you need to:</p>
+<ul>
+<li>Consistently improve performance on a specific set of tasks</li>
+<li>Control the style and format of model outputs (e.g., enforcing a company's tone of voice)</li>
+<li>Teach the model domain-specific knowledge or terminology</li>
+<li>Reduce hallucinations for critical applications</li>
+<li>Optimize for latency by creating smaller, specialized models</li>
+<li>Ensure consistent adherence to specific guidelines or constraints</li>
+</ul>
+<p>As an example, we are going to use the following use case:</p>
+<blockquote>
+<p>We want to fine-tune a model, which can solve high-school math problems to teach students how to solve math problems.</p>
+</blockquote>
+<p>This can be a good use case for fine-tuning, as it requires a lot of domain-specific knowledge about math and how to solve math problems.</p>
+<p><em>Note: This is a made-up example, as existing open models already can solve this task.</em></p>
+<h2 id="2-setup-development-environment">2. Setup development environment</h2>
+<p>Our first step is to install Hugging Face Libraries and Pyroch, including trl, transformers and datasets. If you haven't heard of trl yet, don't worry. It is a new library on top of transformers and datasets, which makes it easier to fine-tune, rlhf, align open LLMs.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Install Pytorch &amp; other libraries
+%pip install "torch==2.4.1" tensorboard flash-attn "liger-kernel==0.4.2" "setuptools&lt;71.0.0" "deepspeed==0.15.4" openai "lm-eval[api]==0.4.5"
+ 
+# Install Hugging Face libraries
+%pip install  --upgrade \
+  "transformers==4.46.3" \
+  "datasets==3.1.0" \
+  "accelerate==1.1.1" \
+  "bitsandbytes==0.44.1" \
+  "trl==0.12.1" \
+  "peft==0.13.2" \
+  "lighteval==0.6.2" \
+  "hf-transfer==0.1.8"</code></pre></div></figure>
+<p>We will use the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/models">Hugging Face Hub</a> as a remote model versioning service. This means we will automatically push our model, logs and information to the Hub during training. You must register on the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/join">Hugging Face</a> for this. After you have an account, we will use the <code>login</code> util from the <code>huggingface_hub</code> package to log into our account and store our token (access key) on the disk.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from huggingface_hub import login
+ 
+login(token="", add_to_git_credential=True) # ADD YOUR TOKEN HERE</code></pre></div></figure>
+<h2 id="3-create-and-prepare-the-dataset">3. Create and prepare the dataset</h2>
+<p>Once you've determined that fine-tuning is the right solution, you'll need a dataset. Most datasets are now created using automated synthetic workflows with LLMs, though several approaches exist:</p>
+<ul>
+<li><strong>Synthetic Generation with LLMs</strong>: Most common approach using frameworks like <a target="_blank" rel="noopener noreferrer" href="https://distilabel.argilla.io/">Distilabel</a> to generate high-quality synthetic data at scale</li>
+<li><strong>Existing Datasets</strong>: Using public datasets from <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/datasets">Hugging Face Hub</a></li>
+<li><strong>Human Annotation</strong>: For highest quality but most expensive option</li>
+</ul>
+<p>The <a target="_blank" rel="noopener noreferrer" href="https://github.com/mlabonne/llm-datasets">LLM Datasets</a> provides an overview of high-quality datasets to fine-tune LLMs for all kind of purposes. For our example, we'll use <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/datasets/microsoft/orca-math-word-problems-200k">Orca-Math</a> dataset including 200,000 Math world problems.</p>
+<p>Modern fine-tuning frameworks like <code>trl</code> support standard formats:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">// Conversation format
+{
+    "messages": [
+        {"role": "system", "content": "You are..."},
+        {"role": "user", "content": "..."},
+        {"role": "assistant", "content": "..."},
+    ]
+}
+// Instruction format
+{"prompt": "&lt;prompt text&gt;", "completion": "&lt;ideal generated text&gt;"}
+ </code></pre></div></figure>
+<p><em>Note: If you are interested in a guide on how to create high-quality datasets, let me know.</em></p>
+<p>To prepare our datasets we will use the Datasets library and then convert it into the the conversational format, where we include the schema definition in the system message for our assistant. We'll then save the dataset as jsonl file, which we can then use to fine-tune our model.</p>
+<p><em>Note: This step can be different for your use case. For example, if you have already a dataset from, e.g. working with OpenAI, you can skip this step and go directly to the fine-tuning step.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from datasets import load_dataset
+ 
+# Create system prompt
+system_message = """Solve the given high school math problem by providing a clear explanation of each step leading to the final solution.
+ 
+Provide a detailed breakdown of your calculations, beginning with an explanation of the problem and describing how you derive each formula, value, or conclusion. Use logical steps that build upon one another, to arrive at the final answer in a systematic manner.
+ 
+# Steps
+ 
+1. **Understand the Problem**: Restate the given math problem and clearly identify the main question and any important given values.
+2. **Set Up**: Identify the key formulas or concepts that could help solve the problem (e.g., algebraic manipulation, geometry formulas, trigonometric identities).
+3. **Solve Step-by-Step**: Iteratively progress through each step of the math problem, justifying why each consecutive operation brings you closer to the solution.
+4. **Double Check**: If applicable, double check the work for accuracy and sense, and mention potential alternative approaches if any.
+5. **Final Answer**: Provide the numerical or algebraic solution clearly, accompanied by appropriate units if relevant.
+ 
+# Notes
+ 
+- Always clearly define any variable or term used.
+- Wherever applicable, include unit conversions or context to explain why each formula or step has been chosen.
+- Assume the level of mathematics is suitable for high school, and avoid overly advanced math techniques unless they are common at that level.
+"""
+ 
+# convert to messages 
+def create_conversation(sample):
+  return {
+    "messages": [
+      {"role": "system", "content": system_message},
+      {"role": "user", "content": sample["question"]},
+      {"role": "assistant", "content": sample["answer"]}
+    ]
+  }  
+ 
+# Load dataset from the hub
+dataset = load_dataset("microsoft/orca-math-word-problems-200k", split="train")
+ 
+# Convert dataset to OAI messages
+dataset = dataset.map(create_conversation, remove_columns=dataset.features, batched=False)
+ 
+print(dataset[345]["messages"])
+ 
+# save datasets to disk 
+dataset.to_json("train_dataset.json", orient="records")</code></pre></div></figure>
+<h2 id="4-fine-tune-the-model-using-trl-and-the-sfttrainer-with-qlora">4. Fine-tune the model using <code>trl</code> and the <code>SFTTrainer</code> with QLoRA</h2>
+<p>We are now ready to fine-tune our model. We will use the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/trl/sft_trainer">SFTTrainer</a> from <code>trl</code> to fine-tune our model. The <code>SFTTrainer</code> makes it straightfoward to supervise fine-tune open LLMs. The <code>SFTTrainer</code> is a subclass of the <code>Trainer</code> from the <code>transformers</code> library and supports all the same features, including logging, evaluation, and checkpointing, but adds additiional quality of life features, including:</p>
+<ul>
+<li>Dataset formatting, including conversational and instruction format</li>
+<li>Training on completions only, ignoring prompts</li>
+<li>Packing datasets for more efficient training</li>
+<li>PEFT (parameter-efficient fine-tuning) support including Q-LoRA, or Spectrum</li>
+<li>Preparing the model and tokenizer for conversational fine-tuning (e.g. adding special tokens)</li>
+<li>distributed training with <code>accelerate</code> and FSDP/DeepSpeed</li>
+</ul>
+<p>We prepared a <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/deep-learning-pytorch-huggingface/blob/main/training/scripts/run_sft.py">run_sft.py</a> scripts, which supports providing a yaml configuration file to run the fine-tuning. This allows you to easily change the model, dataset, hyperparameters, and other settings. This is done by using the <code>TrlParser</code>, which parses the yaml file and converts it into the <code>TrainingArguments</code> arguments. That way we can support Q-LoRA, Spectrum, and other PEFT methods with the same script. See Appendix A for execution examples for different models and PEFT methods and distributed training.</p>
+<blockquote>
+<p>Question: Why don't we use frameworks like <a target="_blank" rel="noopener noreferrer" href="https://github.com/axolotl-ai-cloud/axolotl">axolotl</a>?</p>
+</blockquote>
+<p>That's a great question! Axolotl is a fantastic framework, it is used by many open source builders and is well tested. However, it is good to know how to do things manually. This will give you a better understanding of the inner workings and how it can be customized. Especially when you ran into an issue or want to extend the scripts and add new features.</p>
+<p>Before we can start our training lets take a look at our <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/deep-learning-pytorch-huggingface/blob/main/training/scripts/run_sft.py">training script</a>. The script is kept very simple and is easy to understand. This should help you understand, customize and extend the script for your own use case. We define <code>dataclasses</code> for our arguments. Every argument can then be provided either via the command line or by providing a yaml configuration file. That way we have better type safety and intellisense support.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># ....
+ 
+@dataclass
+class ScriptArguments:
+    dataset_id_or_path: str
+    ...
+# ....</code></pre></div></figure>
+<p>We can customize behavior for different training methods and use them in our script with <code>script_args</code>. The training script is separated by <code>#######</code> blocks for the different parts of the script. The main training function:</p>
+<ol>
+<li>Logs all hyperperparameters</li>
+<li>Loads the dataset from Hugging Face Hub or local disk</li>
+<li>Loads the tokenizer and model with our training strategy (e.g. Q-LoRA, Spectrum)</li>
+<li>Initializes the <code>SFTTrainer</code></li>
+<li>Starts the training loop (optionally continue training from a checkpoint)</li>
+<li>Saves the model and optionally pushes it to the Hugging Face Hub</li>
+</ol>
+<p>Below is an example recipe of how we can fine-tune a <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/deep-learning-pytorch-huggingface/blob/main/training/receipes/llama-3-1-8b-qlora.yaml">Llama-3.1-8B model with Q-LoRA</a>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>YAML</span></p><pre><code data-language="yaml"># Model arguments
+model_name_or_path: Meta-Llama/Meta-Llama-3.1-8B
+tokenizer_name_or_path: Meta-Llama/Meta-Llama-3.1-8B-Instruct
+model_revision: main
+torch_dtype: bfloat16
+attn_implementation: flash_attention_2
+use_liger: true
+bf16: true
+tf32: true
+output_dir: runs/llama-3-1-8b-math-orca-qlora-10k-ep1
+ 
+# Dataset arguments
+dataset_id_or_path: train_dataset.json
+max_seq_length: 1024
+packing: true
+ 
+# LoRA arguments
+use_peft: true
+load_in_4bit: true
+lora_target_modules: "all-linear"
+# important as we need to train the special tokens for the chat template of llama 
+lora_modules_to_save: ["lm_head", "embed_tokens"] # you might need to change this for qwen or other models
+lora_r: 16
+lora_alpha: 16
+ 
+# Training arguments
+num_train_epochs: 1
+per_device_train_batch_size: 8
+gradient_accumulation_steps: 2
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+learning_rate: 2.0e-4 
+lr_scheduler_type: constant
+warmup_ratio: 0.1
+ 
+# Logging arguments
+logging_strategy: steps
+logging_steps: 5
+report_to:
+- tensorboard
+save_strategy: "epoch"
+seed: 42
+ 
+# Hugging Face Hub 
+push_to_hub: true
+# hub_model_id: llama-3-1-8b-math-orca-qlora-10k-ep1 # if not defined same as output_dir
+hub_strategy: every_save</code></pre></div></figure>
+<p>This config works for single-GPU training and for multi-GPU training with DeepSpeed (see Appendix for full command). If you want to use Spectrum check the <a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/Appendix">Appendix</a> for more information.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">!python scripts/run_sft.py --config receipes/llama-3-1-8b-qlora.yaml</code></pre></div></figure>
+<p>I ran several experiments with different optimization strategies, including Flash Attention, Liger Kernels, Q-Lora, and the Spectrum method to compare the time it takes to fine-tune a model. The results are summarized in the following table:</p>
+<div><table><thead><tr><th>Model</th><th>Train samples</th><th>Hardware</th><th>Method</th><th>train sequence length</th><th>per device batch size</th><th>&nbsp;gradient accumulation</th><th>packing</th><th>&nbsp;Flash Attention</th><th>Liger Kernels</th><th>est. optimization steps</th><th>est. train time</th></tr></thead><tbody><tr><td>Llama-3.1-8B</td><td>10,000</td><td>1x L4 24GB</td><td>Q-LoRA</td><td>1024</td><td>1</td><td>2</td><td>❌</td><td>❌</td><td>❌</td><td>5000</td><td>~360 min</td></tr><tr><td>Llama-3.1-8B</td><td>10,000</td><td>1x L4 24GB</td><td>Q-LoRA</td><td>1024</td><td>2</td><td>2</td><td>✅</td><td>❌</td><td>❌</td><td>1352</td><td>~290 min</td></tr><tr><td>Llama-3.1-8B</td><td>10,000</td><td>1x L4 24GB</td><td>Q-LoRA</td><td>1024</td><td>2</td><td>4</td><td>✅</td><td>✅</td><td>❌</td><td>676</td><td>~220 min</td></tr><tr><td>Llama-3.1-8B</td><td>10,000</td><td>1x L4 24GB</td><td>Q-LoRA</td><td>1024</td><td>4</td><td>4</td><td>✅</td><td>✅</td><td>✅</td><td>338</td><td>~135 min</td></tr><tr><td>Llama-3.1-8B</td><td>10,000</td><td>4x L4 24GB</td><td>Q-LoRA</td><td>1024</td><td>8</td><td>2</td><td>✅</td><td>✅</td><td>✅</td><td>84</td><td>~33 min</td></tr><tr><td>Llama-3.1-8B</td><td>10,000</td><td>8x L4 24GB</td><td>Q-LoRA</td><td>1024</td><td>8</td><td>2</td><td>✅</td><td>✅</td><td>✅</td><td>42</td><td>~18 min</td></tr><tr><td>Llama-3.1-8B</td><td>10,000</td><td>8x L4 24GB</td><td>Spectrum (30%)</td><td>1024</td><td>8</td><td>2</td><td>✅</td><td>✅</td><td>✅</td><td>42</td><td>~21 min</td></tr></tbody></table></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Q-Lora included training the embedding layer and the lm_head, as we use the Llama 3.1 chat template and in the base model the special tokens are not trained.</li>
+<li>For distributed training Deepspeed (0.15.4) with ZeRO3 and Hugging Face Accelerate was used.</li>
+<li>Spectrum with 30% SNR layers took slightly longer than Q-Lora, but achieves 58% accuracy on GSM8K dataset, which is 4% higher than Q-Lora.</li>
+</ul>
+<p>Using Q-LoRA only saves the trained adapter weights. If you want to use the model as standalone model, e.g. for inference you might want to merge the adapter and base model. This can be done using the following command:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">!python scripts/merge_adapter_weights.py --peft_model_id runs/llama-3-1-8b-math-orca-qlora-10k-ep1 --push_to_hub True --repository_id llama-3-1-8b-math-orca-qlora-10k-ep1-merged</code></pre></div></figure>
+<h2 id="5-test-model-and-run-inference">5. Test Model and run Inference</h2>
+<p>After the training is done we want to evaluate and test our model. As we trained our model on solving math problems, we will evaluate the model on <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/datasets/openai/gsm8k">GSM8K</a> dataset. GSM8K (Grade School Math 8K) is a dataset of 8.5K high quality linguistically diverse grade school math word problems. The dataset was created to support the task of question answering on basic mathematical problems that require multi-step reasoning.</p>
+<p>Evaluating Generative AI models is not a trivial task since 1 input can have multiple correct outputs. If you want to learn more about evaluating generative models, check out:</p>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/evaluate-llm">Evaluate LLMs and RAG a practical example using Langchain and Hugging Face</a>.</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/evaluate-llms-with-lm-eval-and-tgi-vllm">Evaluate LLMs using Evaluation Harness and Hugging Face TGI/vLLM</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/llm-evaluation">LLM Evaluation doesn't need to be complicated</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/evaluate-llm-mixeval">Evaluating Open LLMs with MixEval: The Closest Benchmark to LMSYS Chatbot Arena</a></li>
+</ul>
+<p>We are going to use <a target="_blank" rel="noopener noreferrer" href="https://github.com/EleutherAI/lm-evaluation-harness">Evaluation Harness</a> an open-source framework to evaluate language models on a wide range of tasks and benchmarks. The frameworks support evaluating models behind OpenAI compatible API endpoints, those can be locally or remotely. This super helpful as we can evaluate our model in the same environment we will use for production.</p>
+<p>We are going to use <a target="_blank" rel="noopener noreferrer" href="https://github.com/huggingface/text-generation-inference">Text Generation Inference (TGI)</a> for testing and deploying our model. TGI is a purpose-built solution for deploying and serving Large Language Models (LLMs). TGI enables high-performance text generation using Tensor Parallelism and continous batching. If you are or want to use vLLM you can check the Appendix on how to start the inference server.</p>
+<p><em>Note: Make sure that you have enough GPU memory to run the container. Restart kernel to remove all allocated GPU memory from the notebook.</em></p>
+<p>We will start the on 1 GPU detached. Meaning we can can continue to use the notebook while the container is running. If you have more GPUs you can change the <code>--gpus</code> and <code>--num-shard</code> flags to the number of GPUs.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">%%bash
+ 
+num_gpus=1
+model_id=philschmid/llama-3-1-8b-math-orca-spectrum-10k-ep1 # replace with your model id
+ 
+docker run --name tgi --gpus ${num_gpus} -d -ti -p 8080:80 --shm-size=2GB \
+  -e HF_TOKEN=$(cat ~/.cache/huggingface/token) \
+  ghcr.io/huggingface/text-generation-inference:3.0.1 \
+  --model-id ${model_id} \
+  --num-shard ${num_gpus}
+ </code></pre></div></figure>
+<p>Our container will now start in the background and download the model from Hugging Face Hub. We can check the logs to see the progress with <code>docker logs -f tgi</code>.</p>
+<p>Once our container is running we can send requests using the <code>openai</code> or <code>huggingface_hub</code> sdk. Here we ll use the <code>openai</code> sdk to send a request to our inference server. If you don't have the <code>openai</code> sdk installed you can install it using <code>pip install openai</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from openai import OpenAI
+ 
+# create client 
+client = OpenAI(base_url="http://localhost:8080/v1",api_key="-")
+ 
+system_message = """Solve the given high school math problem by providing a clear explanation of each step leading to the final solution.
+ 
+Provide a detailed breakdown of your calculations, beginning with an explanation of the problem and describing how you derive each formula, value, or conclusion. Use logical steps that build upon one another, to arrive at the final answer in a systematic manner.
+ 
+# Steps
+ 
+1. **Understand the Problem**: Restate the given math problem and clearly identify the main question and any important given values.
+2. **Set Up**: Identify the key formulas or concepts that could help solve the problem (e.g., algebraic manipulation, geometry formulas, trigonometric identities).
+3. **Solve Step-by-Step**: Iteratively progress through each step of the math problem, justifying why each consecutive operation brings you closer to the solution.
+4. **Double Check**: If applicable, double check the work for accuracy and sense, and mention potential alternative approaches if any.
+5. **Final Answer**: Provide the numerical or algebraic solution clearly, accompanied by appropriate units if relevant.
+ 
+# Notes
+ 
+- Always clearly define any variable or term used.
+- Wherever applicable, include unit conversions or context to explain why each formula or step has been chosen.
+- Assume the level of mathematics is suitable for high school, and avoid overly advanced math techniques unless they are common at that level.
+"""
+ 
+messages = [
+    {"role": "system", "content": system_message},
+    {"role": "user", "content": "Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How many clips did Natalia sell altogether in April and May?"},
+]
+expected_answer = "72"
+ 
+# Take a random sample from the dataset and remove the last message and send it to the model
+response = client.chat.completions.create(
+	model="orca",
+	messages=messages,
+	stream=False, # no streaming
+	max_tokens=256,
+)
+response = response.choices[0].message.content
+ 
+# Print results
+print(f"Query:\n{messages[1]['content']}")
+print(f"Original Answer:\n{expected_answer}")
+print(f"Generated Answer:\n{response}")</code></pre></div></figure>
+<p>Awesome that looks great! Now we can evaluate our model with the <a target="_blank" rel="noopener noreferrer" href="https://github.com/EleutherAI/lm-evaluation-harness">Evaluation Harness</a>.</p>
+<p><em>Note: Make sure to change the model id to your fine-tuned model.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">!lm_eval --model local-chat-completions \
+  --tasks gsm8k_cot \
+  --model_args model=philschmid/llama-3-1-8b-math-orca-spectrum-10k-ep1,base_url=http://localhost:8080/v1/chat/completions,num_concurrent=8,max_retries=3,tokenized_requests=False \
+  --apply_chat_template \
+  --fewshot_as_multiturn</code></pre></div></figure>
+<p>Wow, 54% accuracy with only using 10k samples is pretty good! We successfully validated that our model can solve math problems. Now, don't forget to stop your container once you are done.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">!docker stop tgi
+!docker rm tgi</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>This guide provides the foundation for fine-tuning LLMs in 2025. The modular training scripts and configurations make it easy to adapt to your specific use case, whether you're training on a single GPU or scaling across multiple nodes.</p>
+<p>If you encounter issues, have questions, or want to contribute improvements to the training pipeline, please open a PR on the repository.</p>
+<h2 id="appendix">Appendix</h2>
+<p>The Appendix contains additional commands and documentation on how to run distributed training, inference and how to use Spectrum.</p>
+<h2 id="distributed-training">Distributed Training</h2>
+<h3 id="deepspeed--q-lora">Deepspeed + Q-LoRA</h3>
+<p>Note: change the <code>num_processes</code> to the number of GPUs you want to use.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">accelerate launch --config_file configs/accelerate_configs/deepspeed_zero3.yaml --num_processes 8 scripts/run_sft.py --config receipes/llama-3-1-8b-qlora.yaml</code></pre></div></figure>
+<h2 id="inference">Inference</h2>
+<h3 id="vllm">vLLM</h3>
+<p>Note: Replace the model id with your fine-tuned model.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">docker run --runtime nvidia --gpus all \
+    -p 8000:8000 \
+    vllm/vllm-openai --model philschmid/llama-3-1-8b-math-orca-qlora-10k-ep1-merged </code></pre></div></figure>
+<h2 id="spectrum">Spectrum</h2>
+<p>Spectrum uses Signal-to-Noise Ratio (SNR) analysis to select the most useful layers for fine-tuning. It provides scripts and pre-run scanned for different models. If your model isn't scanned it will prompt you for the batch size to use for scanning. Batch size of 4 for 70b models requires 8xH100. But popular models like Llama 3.1 8B are already scanned. You can find the scanned models <a target="_blank" rel="noopener noreferrer" href="https://github.com/cognitivecomputations/spectrum/tree/main/model_snr_results">here</a>.</p>
+<p>The script will generate a yaml configuration file in the <code>model_snr_results</code> with the name of the model and the top-percent, e.g. for <code>meta-llama/Llama-3.1-8B</code> and <code>30</code> it will generate it at <code>snr_results_meta-llama-Meta-Llama-3.1-8B_unfrozenparameters_30percent.yaml</code>.</p>
+<ul>
+<li><code>--model-name</code>: Specify the local model path or the Hugging Face repository.</li>
+<li><code>--top-percent</code>: Specify the top percentage of SNR layers you want to retrieve.</li>
+</ul>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># clone spectrum
+git clone https://github.com/cognitivecomputations/spectrum.git
+cd spectrum
+# generate yaml configuration
+python3 spectrum.py --model-name meta-llama/Meta-Llama-3.1-8B --top-percent 30
+# Top 30% SNR layers saved to snr_results_meta-llama-Meta-Llama-3.1-8B_unfrozenparameters_30percent.yaml
+cd ..</code></pre></div></figure>
+<p>After the yaml configuration is generated we can use it to fine-tune our model. We need to define the yaml configuration file in our train config yaml file and provide the path to the yaml file as <code>spectrum_config_path</code>. Take a look at <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/deep-learning-pytorch-huggingface/blob/main/training/receipes/llama-3-1-8b-spectrum.yaml">receipes/llama-3-1-8b-spectrum.yaml</a> for an example.</p>
+<p>Then we can start the training with the following command for single GPU training:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">CUDA_VISIBLE_DEVICES=0 python scripts/run_sft.py --config receipes/llama-3-1-8b-spectrum.yaml</code></pre></div></figure>
+<p><em>Note: Spectrum requires a more memory than Q-Lora. According to the paper ~30-50GB on a single GPU.</em></p>
+<p>For multi-GPU training with FSDP and Deepspeed you can use the following command:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">accelerate launch --config_file configs/accelerate_configs/deepspeed_zero3.yaml --num_processes 8 scripts/run_sft.py --config receipes/llama-3-1-8b-spectrum.yaml</code></pre></div></figure>
+<p><em>Note: Training on 8x L4 GPUs with Spectrum takes ~21 minutes. Q-Lora on the same config took 18 minutes.</em></p>
+<p>Results:</p>
+<ul>
+<li>Spectrum model trained for 1 epoch with 30% SNR layers on GSM8K dataset achieved 58% accuracy, which is 4% higher than Q-Lora.</li>
+<li>Spectrum model trained for 3 epochs with 30% SNR layers on GSM8K dataset achieved 60% accuracy.</li>
+</ul></div></div>

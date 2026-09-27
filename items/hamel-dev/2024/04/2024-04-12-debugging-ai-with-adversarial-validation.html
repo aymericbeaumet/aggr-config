@@ -1,0 +1,91 @@
+<div id="readability-page-1" class="page"><div id="quarto-content">
+
+
+    
+
+<main id="quarto-document-content">
+
+
+
+
+  
+
+
+
+<nav id="TOC-body" role="doc-toc">
+    <h2 id="toc-title">Table Of Contents</h2>
+   
+  <ul>
+  <li><a href="#how-it-works" id="toc-how-it-works">How It Works</a></li>
+  <li><a href="#minimal-example-ft_drift" id="toc-minimal-example-ft_drift">Minimal Example: <code>ft_drift</code></a></li>
+  </ul>
+</nav>
+<p>For years, I’ve relied on a straightforward method to identify sudden changes in model inputs or training data, known as “drift.” This method, Adversarial Validation<a href="#fn1" id="fnref1" role="doc-noteref"><sup>1</sup></a>, is both simple and effective. The best part? <strong>It requires no complex tools or infrastructure.</strong></p>
+<p>Examples where drift can cause bugs in your AI:</p>
+<ol type="1">
+<li>Your data for <a href="https://hamel.dev/blog/posts/evals/index.html">evaluations</a> are materially different from the inputs your model receives in production, causing your evaluations to be misleading.</li>
+<li>Updates to prompts, functions, RAG, and similar elements aren’t incorporated into your fine-tuning or training data, leading to unexpected model behavior in production.</li>
+</ol>
+<p>No matter how careful you are, bugs can still slip through the cracks. A a high ROI activity is to routinely audit all your AI/ML projects for drift.</p>
+<section id="how-it-works">
+<h2 data-anchor-id="how-it-works">How It Works</h2>
+<div>
+<div>
+
+<p><span>Warning</span>Uncool Warning
+</p>
+</div>
+<p>This method is so simple that it might seem uncool. You aren’t going to impress any data scientists. Despite this, it’s too valuable to ignore.</p>
+</div>
+<p>This slide from <a href="https://www.youtube.com/watch?v=GHk5HMW4XMA">my talk on MLOps tools</a> explains the technique behind Adversarial Validation<a href="#fn2" id="fnref2" role="doc-noteref"><sup>2</sup></a>:</p>
+<div>
+<figure>
+<p><img src="https://hamel.dev/blog/posts/drift/images/drift_tfx.png"></p>
+<figcaption>Slide</figcaption>
+</figure>
+</div>
+<p>The process is as follows:</p>
+<ol type="1">
+<li>Collect two datasets to compare. For example:
+<ul>
+<li>Training data from two different fine-tuning runs</li>
+<li>Training data vs.&nbsp;evaluation data</li>
+<li>Training data vs.&nbsp;production data (organized into the same format)</li>
+<li>Data from two different time-periods</li>
+</ul></li>
+<li>Create features from the dataset. A basic example that creates features from <a href="https://platform.openai.com/tokenizer">tokens</a> is illustrated <a href="https://github.com/hamelsmu/ft-drift/blob/main/ft_drift/model.py">here</a>.<a href="#fn3" id="fnref3" role="doc-noteref"><sup>3</sup></a></li>
+<li>Give dataset #1 a label of 0 and dataset #2 a label of 1.</li>
+<li>Fit a binary classifier (random forest, logistic regression, etc) to discriminate between the two datasets.</li>
+<li>If the classifier demonstrates sufficient predictive power (ex: AUC &gt;=0.60), we know there is drift.</li>
+<li>If you used an interpretable model (like logistic regression, random forest, etc.), you can inspect feature importance metrics to understand the root cause of the drift. If you use a more complex model (like a neural network), you can use <a href="https://shap.readthedocs.io/en/latest/">SHAP values</a> or other methods to understand what is causing the drift. I recommend starting with a simple interpretable model.</li>
+</ol>
+<div>
+<div>
+
+<p>
+Warning
+</p>
+</div>
+<p>If this process doesn’t detect drift, it doesn’t mean there isn’t drift. It just means that we couldn’t detect it with the model and features we used.</p>
+</div>
+</section>
+<section id="minimal-example-ft_drift">
+<h2 data-anchor-id="minimal-example-ft_drift">Minimal Example: <code>ft_drift</code></h2>
+<p>I work with lots of folks who are fine-tuning models using the OpenAI API. I’ve created a small CLI tool, <a href="https://github.com/hamelsmu/ft-drift/"><code>ft_drift</code></a>, that detects drift between two <a href="https://platform.openai.com/docs/guides/fine-tuning">multi-turn chat formatted</a> jsonl files. Currently, <code>ft_drift</code> only detects drift in prompt templates, schemas and other token-based drift (as opposed to semantic drift). However, this is a good starting point to understand the general concept of adversarial validation. Here is a demo of this tool at work:</p>
+<p><img src="https://hamel.dev/blog/posts/drift/images/drift_cli.gif"></p>
+<p>The demo is from a real-world example where an unintentional change in a prompt template caused unexpected behavior in a model. The demo shows the tool detecting a difference between two datasets, <code>file_a.jsonl</code> and <code>file_b.jsonl</code>. Afterward, a table of important tokens that account for the drift are shown, such as <code>END-UI-FORMAT</code>, <code>UI-FORMAT</code>, etc. We were able to apply the tool and quickly find the root cause of the issue. The modeling code is embarrassingly simple and located at <a href="https://github.com/hamelsmu/ft-drift/blob/main/ft_drift/model.py"><code>ft_drift/model.py</code></a>. The point is you don’t need sophisticated techniques to get started. You can then take this approach further by adding embeddings to your features to also detect semantic drift. Similarly, you could add additional features by hand like the number of conversation turns, length of messages, etc.</p>
+
+
+</section>
+
+
+<section id="quarto-appendix" role="doc-endnotes"><h2>Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>I first learned of this technique in 2016 from <a href="https://fastml.com/adversarial-validation-part-two/">this blog post</a> by Zygmunt Zając. Throughout the years, I’ve seen this technique used in a variety of contexts, sometimes with different names.<a href="#fnref1" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This slide uses the word “skew” which is interchangeable with “drift” in this context.<a href="#fnref2" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>For classic ML, if you are already training a model on this data, you likely have a feature engineering pipeline that you can reuse.<a href="#fnref3" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></main> 
+
+</div></div>

@@ -1,0 +1,197 @@
+---
+title: 'Foundries vs Navigators: Lowering the Cost of Science'
+link: https://www.latent.space/p/foundries-vs-navigators-lowering
+source: latent-space
+published: 2026-09-24T15:03:16Z
+updated: 2026-09-24T15:03:16Z
+first_seen: 2026-09-27T19:29:15.293681927Z
+authors:
+- Adrian Sanborn
+summary: 'Guest Post: In science, thinking has gotten cheap but doing has not. This asymmetry is reshaping how research companies operate, largely inconspicuously.'
+content: extracted
+html: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.html
+preview:
+  file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.preview-29b96d94c889.webp
+  width: 256
+  height: 133
+  color: '#f8f8f7'
+images:
+- source: https://substackcdn.com/image/fetch/$s_!-Em5!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc4f2dad0-1897-4b86-aa39-f4772f76e474_1591x828.png
+  original:
+    file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-a1098949e45f.png
+    width: 1591
+    height: 828
+  variants:
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-4af09b44a0d3.webp
+    width: 320
+    height: 167
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-dd24f5a4c1bc.webp
+    width: 640
+    height: 333
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-4693150b0ab4.webp
+    width: 960
+    height: 500
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-2dc4b2e4d6c9.webp
+    width: 1591
+    height: 828
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!-Em5!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc4f2dad0-1897-4b86-aa39-f4772f76e474_1591x828.png
+  original:
+    file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-52c346f22a18.jpg
+    width: 1456
+    height: 758
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!fXvB!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fd6882dd6-1780-46dd-87e0-5c5bc7cb257f_2048x1863.png
+  original:
+    file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-76b734074fb4.png
+    width: 1456
+    height: 1324
+  variants:
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-9b4539ff8ce1.webp
+    width: 320
+    height: 291
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-4e501ba229b3.webp
+    width: 640
+    height: 582
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-8be4034cc5a4.webp
+    width: 960
+    height: 873
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-f54f72c19aeb.webp
+    width: 1280
+    height: 1164
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-67f49cf3144d.webp
+    width: 1456
+    height: 1324
+  color: '#fcfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!Jk3K!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F4d52ab82-6e2d-40c9-baa9-b617237383ff_2322x999.png
+  original:
+    file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-16bd4e07bc6a.png
+    width: 1456
+    height: 626
+  variants:
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-f7501f7f3bda.webp
+    width: 320
+    height: 138
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-55d44c502ea1.webp
+    width: 640
+    height: 275
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-29936f9b7b36.webp
+    width: 960
+    height: 413
+  - file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-7261658de729.webp
+    width: 1456
+    height: 626
+  color: '#f3f3f3'
+- source: https://substackcdn.com/image/fetch/$s_!X95l!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F895a8715-d9e6-41d6-8d5a-92bd41efe8a9_2143x776.png
+  original:
+    file: 2026-09-24-foundries-vs-navigators-lowering-the-cost-of-science.image-da9cf5547697.jpg
+    width: 1456
+    height: 527
+  color: '#fdfdfd'
+---
+
+*What does the future of science look like in the world of AI? Anthropic has some [lofty goals for science](https://www.nytimes.com/2026/09/17/technology/dario-amodei-anthropic-essays-ai.html) and is even [opening a wet lab](https://techcrunch.com/2026/09/18/anthropic-is-operating-a-lab-that-conducts-biology-experiments/). Meanwhile a [quiet transformation](https://ai.google/static/documents/AI-in-Science.pdf)* [1](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-1) *is happening all across AI x Science.*
+
+*In this guest post, [Adrian Sanborn](https://x.com/AdrianSanborn) talks about the less flashy but more immediate ways he sees AI transforming front-line scientific research in his own company, Endura Therapeutics.*
+
+*Adrian did a CS PhD at Stanford and spent much of it running experiments at the bench, which makes him one of the rare people who can tell you what an LLM is doing to a codebase and to a wet lab. Enjoy!*
+
+Language models have transformed how software gets built. Writing code, wrangling data, and architecting systems now move at a speed unthinkable three years ago.
+
+When the product is software and the result is verifiable, cheaper coding turns directly into more software and more builders. [2](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-2) But in science, everything is ultimately gated by physical experiments that take days or weeks to verify anything. Knowledge work around the experiment has become dramatically faster while AI has done little for the throughput of the experiment itself. **Thinking got cheap and doing did not**.
+
+We think the biotech industry has adapted in two ways:
+
+[![](https://substackcdn.com/image/fetch/$s_!-Em5!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc4f2dad0-1897-4b86-aa39-f4772f76e474_1591x828.png "")](https://substackcdn.com/image/fetch/$s_!-Em5!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc4f2dad0-1897-4b86-aa39-f4772f76e474_1591x828.png)
+
+- **Foundries** **shrink the cost of doing.** They industrialize the measurement, using new technology to generate data an order of magnitude faster than before. Xaira, NewLimit, Octant, Tahoe, and Endura accomplish this with next-generation sequencing and multiplexing; Insitro, Eikon, and Noetik with high-throughput microscopy; Lila and Periodic Labs with physical automation, just to name a few. AI makes that data legible and predictive, but the differentiating asset is the experimental data itself.
+
+- **Navigators** **spend the surplus of thinking.** The AI models sit in the ordinary machinery of the company, driving better decisions and faster processes. They increasingly govern how the work is conducted, what tools get built, and which questions are worth an experiment. A proprietary model or a massive dataset are not required, only a willingness to evolve how the company works.
+
+Building a foundry is a genuine strategic commitment that takes capital, years, and a bet on a particular technology. Foundries are easy to see: the technology captures the imagination, the connection to AI is immediate, and there is always some new model or dataset to announce. Navigators are invisible by comparison because the gains are operational and nobody issues a press release about a path they decided against. But navigation is available to every company. The prominent change is happening at a few dozen companies, while the inconspicuous one is happening at all of them.
+
+Navigation runs fastest at early-stage startups, which have no legacy to shed: no history of software contracts, standardized processes, calcified org structure, or compliance regime. They are also under pressure to move fast with very little. When a better way to work appears, it simply becomes the new normal.
+
+The impact shows up everywhere. Experiments iterate faster when analysis takes an hour instead of a week. A category of software that would have been licensed for six figures becomes a one-day build. Disease programs get chosen from 500 candidates where a team could ordinarily evaluate five. Here’s what it looks like from the inside.
+
+There is a structural tension in experimental science that software engineering has no real equivalent for. In engineering, requirements that change every few weeks are a symptom of poor planning. In research, they are the objective. The purpose of an experiment is to learn something, and that learning changes what the next experiment should be. [3](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-3) If an approach has not evolved in six months, it means nothing is being discovered.
+
+A new experiment’s protocol will evolve a dozen times in the first year, and every one of those changes propagates into the analysis. Each measurement has to be processed, normalized, and interpreted with code that tracks the experiment closely. Historically this analysis was done by a second person, creating a seam between the person who understands what the experiment is measuring and the person who understands what the code is doing. From this friction arises the tendency to propose fewer experimental changes to avoid analysis rework, which compounds into options left unexplored.
+
+Now that writing code is fast, adapting the analysis to a modified protocol is an afternoon’s work rather than a project. **The experiment is no longer constrained by the burden of changing the analysis pipeline.** Experiments can be agile when flexibility is cheap and problems can be easily fixed; in other words, **science gets to “move fast and break things.”**
+
+The same shift also applies one layer up, to interpretation. An interactive visualization dashboard can now be built in minutes, down from days.
+
+[![](https://substackcdn.com/image/fetch/$s_!fXvB!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fd6882dd6-1780-46dd-87e0-5c5bc7cb257f_2048x1863.png "")](https://substackcdn.com/image/fetch/$s_!fXvB!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fd6882dd6-1780-46dd-87e0-5c5bc7cb257f_2048x1863.png)
+
+*An internal dashboard at Endura Therapeutics, built in a few hours.*
+
+The most visible consequence is access. Previously, when every experiment was analyzed by the computational person, results waited in a queue. Now the scientist who ran the experiment and has the context presents their own results. The data is no longer gatekept behind someone else’s Python notebooks.
+
+Every software interface has an opinion. A data system decides which comparisons are one click away and which require hunting. Every lab needs somewhere to store and display its data, and the opinion embedded in that system ends up shaping what that lab notices.
+
+For two decades that opinion was formed by someone else: a handful of vendors who build lab software that acts as the system of record. These vendors build one system for a thousand labs and necessarily design toward the lowest common denominator. Everyone accepted the approximation, because developing your own was more work than any lab could justify.
+
+This is no longer true. A data portal built in-house accommodates the quirks of the data that no commercial product would have anticipated, and is exactly as complex as the team needs, growing as their questions do. Browsing and exploring become simple and effortless, which changes behavior. Consider how little time anyone would spend on social media if seeing the next post required switching tabs and copy-pasting. Patterns that have been sitting in separate slide decks start to surface.
+
+Implementation takes just one day, but deciding what the portal should do can take weeks. Those design discussions turn out to be critical, because deciding what belongs on a single screen forces a team to articulate which comparisons actually drive its decisions. **When you buy a software platform you outsource not only the engineering but the question of** ***how*** **you accomplish your goals.**
+
+There are tradeoffs: an in-house portal is less polished and there is no support team to call. Larger organizations, with layers of validation requirements and contractual obligations, will still struggle to follow in these footsteps. But software companies have long understood that the best internal tools come from engineers embedded alongside the people who use them. Now every research team can be its own forward-deployed engineer.
+
+The old rule was “never build what you can buy”. The new rule is **build the tools that shape how you think.**
+
+Choosing which diseases to pursue is the most consequential decision a drug company makes. Everything is downstream of this decision and built to accommodate the specifics of the disease biology and its market. The choice is effectively irreversible, with a single successful program requiring about a decade and a billion dollars, so the decision gets diligenced carefully. A typical process convenes a group of internal and outside experts who gather, synthesize, and debate the scientific and market evidence for a month or more.
+
+That process assumes you already know which five diseases you’re arguing about. We didn’t have this shortlist at my company, Endura, because of the unique mechanism of our medicines. We’re developing CRISPR in a pill: a drug, taken in the convenience of your home, that forms a chemical scar on one specific genetic message and shuts off production of a disease-causing protein. [4](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-4) Finding these drugs required developing a new DNA sequencing method that reads those scars across every gene at once, so a single experiment returns candidate drugs across hundreds of diseases. Instead of starting from five diseases, we had to triage the entire map of disease. [5](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-5)
+
+We built a two-stage triage and pointed a fleet of LLM research agents at it. The first pass covered about 500 disease targets, generating the equivalent of a three-page report on each and filtering on foundational questions: is the disease prevalent enough to justify our efforts, is the problem already addressed by existing drugs, and would the target-lowering effect of our drug actually relieve the disease. The second pass, on the roughly 100 remaining disease targets, produced the equivalent of thirty pages each, working through disease biology and the competitive landscape thoroughly. We wrote the second-pass prompts to behave like a skeptical expert rather than a summarizer: name the programs that failed, why each failed, and what would have to be true for us to succeed where they didn’t. This level of detail is necessary because, as in any market, the clearly good targets are crowded. Arriving at a defensible position means finding the specific disease and the specific reason our drug will do something that existing approaches cannot.
+
+[![](https://substackcdn.com/image/fetch/$s_!Jk3K!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F4d52ab82-6e2d-40c9-baa9-b617237383ff_2322x999.png "")](https://substackcdn.com/image/fetch/$s_!Jk3K!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F4d52ab82-6e2d-40c9-baa9-b617237383ff_2322x999.png)
+
+At the old rate, the first stage would have required about one person-year of reading, and the second closer to a century of expert time. The second pass still gets checked against primary sources and selected programs receive the full human diligence it always would have. [6](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-6) But a search this broad, at this depth, simply was not possible a year ago.
+
+[![](https://substackcdn.com/image/fetch/$s_!X95l!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F895a8715-d9e6-41d6-8d5a-92bd41efe8a9_2143x776.png "")](https://substackcdn.com/image/fetch/$s_!X95l!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F895a8715-d9e6-41d6-8d5a-92bd41efe8a9_2143x776.png)
+
+In research, the expensive mistakes are the unknown ones. A team commits to a direction and finds out it was wrong months later when the experiment comes back negative. Often a specialist could have said so in a sentence: that pathway has been tried, this readout has never predicted anything, that company faltered on that patient population. Access to this kind of **expert-level depth at scale is a game changer exactly because being told “no” early is so valuable in research.**
+
+Everything above happened at Endura — flexible and dynamic analysis, internal tools built in a day, a search across 500 diseases — and it is just the beginner version of navigation. Each subsequent generation of language models removes constraints we had taken for granted. Soon we could entirely skip building an analysis pipeline or data dashboard. Instead, a scientist will ask the question she actually has and the analysis and interface to answer it will be assembled from scratch. Software stops being a work product and becomes something that appears around the question. [7](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-7)
+
+Access to expertise at this scale opens work nobody could attempt before. One clear example is drug repurposing, where a drug already proven safe in humans turns out to act on a disease mechanism nobody was looking at. The published literature is enormous, and some number of useful conclusions are sitting in it right now, unfound because no single person has read the right combination of papers. But a model can digest it all and, with the right prompting, connect the dots. A whole ecosystem of companies is now forming around that bet, and pharma and investors are running their own versions. [8](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-8) What remains to be seen is whether this produces three new drugs or 300.
+
+The navigators are testimony that the most accelerating AI in science right now is not a model trained on scientific data at all. It is the one that helps a scientist or executive figure out what is worth doing every Monday morning.
+
+*[Adrian Sanborn](https://www.linkedin.com/in/adrian-sanborn/) is CEO and co-founder of [Endura Therapeutics](https://enduratx.com/). He was a founding member of Atomic AI, where he led the biology side of the technology platform and defined the company’s therapeutic strategy. He holds a PhD in computer science from Stanford, most of which he spent at the bench in Roger Kornberg’s biochemistry lab. He is [@AdrianSanborn](https://x.com/AdrianSanborn) on X.*
+
+*Many thanks to Brandon Anderson, swyx, and Lauren Richardson for reviewing drafts of this post and providing critical feedback.*
+
+[1](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-anchor-1)
+
+While this blog was being polished, [this paper](https://ai.google/static/documents/AI-in-Science.pdf) came out that talks about early insights in AI x Science. We were excited to see many of our insights were observed empirically!
+
+[2](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-anchor-2)
+
+This is the Jevons paradox, named for the 1865 observation that more efficient steam engines increased coal consumption rather than reducing it. The software version: every drop in the cost of writing code has so far been followed by more software rather than fewer engineers.
+
+[3](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-anchor-3)
+
+Software product development actually also has workflows that emphasize learning and borrow the word “experiment.” Product teams run A/B tests, ship behind feature flags, and treat a release as a hypothesis about what users want.
+
+[4](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-anchor-4)
+
+Most genetic medicines like CRISPR are large molecules that cannot get into cells on their own. They reach only a few tissues, and getting them there means an infusion, an injection, or, for the brain, a needle into the spinal canal. Small molecule drugs in a pill format travel through the body on their own and can be swallowed. When Roche launched an oral drug for spinal muscular atrophy, families steadily switched to it from an injected medicine that already worked.
+
+[5](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-anchor-5)
+
+Most companies have good reasons to set a therapeutic area first, dictated by their pre-existing scientific expertise, clinical relationships, and business priorities. Our approach allow us to start broad to find the most productive direction and then build that depth afterwards.
+
+[6](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-anchor-6)
+
+Language models are not perfect, and at this scale some reports contained errors. This is tolerable because a mistake in the first pass only means a missed opportunity, not time lost chasing a bad idea.
+
+[7](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-anchor-7)
+
+Analysis generated on demand has an unresolved problem: reproducibility. If the code behind a figure was assembled for one question, its provenance is weaker than a versioned pipeline’s.
+
+[8](https://www.latent.space/p/foundries-vs-navigators-lowering#footnote-anchor-8)
+
+For example, Edison Scientific is built close to this premise, and the team behind Metsera engaged its AI Scientist system to generate new company ideas.

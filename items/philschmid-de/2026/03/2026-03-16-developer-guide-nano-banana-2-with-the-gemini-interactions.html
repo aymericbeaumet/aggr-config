@@ -1,0 +1,145 @@
+<div id="readability-page-1" class="page"><div><p><a target="_blank" rel="noopener noreferrer" href="https://blog.google/innovation-and-ai/technology/ai/nano-banana-2/">Nano Banana 2</a> (<code>gemini-3.1-flash-image-preview</code>) is our latest image generation model. It runs at Gemini Flash speed with the capabilities of Nano Banana Pro's world knowledge, precise text rendering, and subject consistency across up to 14 reference images. It comes with a new <strong>Grounding with Google Image Search</strong> feature that lets the model retrieve real images from the web and use them as visual context during generation.</p>
+<p>This Developer Guide uses the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">Interactions API</a>, our next-generation unified interface for Gemini, to build a <strong>personalized Japan travel brochure</strong>. In 4 code snippets, you'll go from a simple text prompt to a search-grounded, personalized image—compositing a real person into a photorealistic scene of Kyoto, informed by live Google Search results.</p>
+<ol>
+<li><strong>Text → Image:</strong> Pure creative generation</li>
+<li><strong>+ Google Search (web):</strong> Real-world factual grounding</li>
+<li><strong>+ Google Search (web + images):</strong> Visual accuracy from retrieved images</li>
+<li><strong>+ Reference photo:</strong> Subject-consistent personalization</li>
+</ol>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">pip install google-genai
+export GEMINI_API_KEY="your-api-key"</code></pre></div></figure>
+<p>You can create and manage all your Gemini API Keys from <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/api-keys">Google AI Studio</a>.</p>
+<h2 id="1-text-to-image">1. Text to Image</h2>
+<p>Describe what you want, get an image back. Nano Banana 2 handles photorealism, text rendering, and complex compositions without any tools.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import base64
+from google import genai
+ 
+client = genai.Client()
+ 
+interaction = client.interactions.create(
+    model="gemini-3.1-flash-image-preview",
+    input=f"""A cinematic travel poster for Kyoto, Japan in autumn. Cherry-red maple leaves 
+frame a traditional wooden torii gate at golden hour. The text 'KYOTO' is rendered in 
+elegant serif typography at the bottom. Photorealistic, warm tones, 35mm film look.""",
+)
+ 
+images = [output for output in interaction.outputs if output.type == "image"]
+with open("01_kyoto_poster.png", "wb") as f:
+    f.write(base64.b64decode(images[0].data))</code></pre></div></figure>
+<p><img src="https://www.philschmid.de/static/blog/nano-banana-2-interactions-api/01_kyoto_poster.jpg" alt="01_kyoto_poster.png"></p>
+<h2 id="2-text-to-image-with-google-search-web-search">2. Text to Image with Google Search (Web Search)</h2>
+<p>Adding a <code>google_search</code> tool makes the model search the web for factual information before generating.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import base64
+from google import genai
+ 
+client = genai.Client()
+ 
+interaction = client.interactions.create(
+    model="gemini-3.1-flash-image-preview",
+    input=f"""Search for the top 5 landmarks to visit in Kyoto, Japan. Then create a beautiful 
+illustrated travel map poster showing these landmarks with their real names labeled. Use a 
+vintage hand-drawn cartography style with warm earth tones. Title it 'KYOTO WALKING GUIDE'.""",
+    tools=[
+        {
+            "type": "google_search",
+            "search_types": ["web_search"]
+        }
+    ]
+)
+ 
+images = [output for output in interaction.outputs if output.type == "image"]
+with open("02_kyoto_map.png", "wb") as f:
+    f.write(base64.b64decode(images[0].data))</code></pre></div></figure>
+<p><img src="https://www.philschmid.de/static/blog/nano-banana-2-interactions-api/02_kyoto_map.jpg" alt="02_kyoto_map.jpg"></p>
+<p>The model now searches for actual Kyoto landmarks and uses their real names and descriptions. It still imagines what they look like, though. For visual accuracy, the model needs to see reference images.</p>
+<h2 id="3-text-to-image-with-google-search-web--image-search">3. Text to Image with Google Search (Web + Image Search)</h2>
+<p>Nano Banana 2 adds Image Search as a new search type alongside Web Search, controlled via the <code>search_types</code> parameter. The model retrieves actual photographs from Google Image Search and uses them as visual references during generation.</p>
+<p>With text-only search, the model knows Fushimi Inari has orange torii gates. With Image Search, it sees exactly what they look like.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import base64
+from google import genai
+ 
+client = genai.Client()
+ 
+interaction = client.interactions.create(
+    model="gemini-3.1-flash-image-preview",
+    input=f"""Search for what Fushimi Inari Shrine in Kyoto looks like. Then generate a stunning 
+photorealistic travel poster of Fushimi Inari's famous orange torii gate tunnel at sunset with 
+a light rain falling. Include the text 'FUSHIMI INARI' in a clean, modern sans-serif font at 
+the bottom.""",
+    tools=[
+        {
+            "type": "google_search",
+            "search_types": ["web_search", "image_search"]
+        }
+    ]
+)
+ 
+images = [output for output in interaction.outputs if output.type == "image"]
+with open("03_fushimi_inari.png", "wb") as f:
+    f.write(base64.b64decode(images[0].data))</code></pre></div></figure>
+<p><img src="https://www.philschmid.de/static/blog/nano-banana-2-interactions-api/03_fushimi_inari.jpg" alt="03_fushimi_inari.jpg"></p>
+<p>You can also use <code>image_search</code> on its own without <code>web_search</code>:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">tools=[{"type": "google_search", "search_types": ["image_search"]}]</code></pre></div></figure>
+<p>The brochure now has factually accurate, visually faithful renderings of real landmarks. Next: adding a real person to the scene.</p>
+<h2 id="4-text--image-to-image-with-google-search-web--image-search">4. Text + Image to Image with Google Search (Web + Image Search)</h2>
+<p>We can combine a <strong>reference photo</strong> of a person with text instructions and search grounding. Nano Banana 2 preserves the person's appearance from the reference image in the generated output.</p>
+<p>We provide a headshot and ask the model to place the person into the Arashiyama bamboo grove, with Image Search ensuring the scene matches the real location.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import base64
+from google import genai
+ 
+client = genai.Client()
+ 
+image_data = base64.b64encode(open("assets/headshot.png", "rb").read()).decode()
+ 
+interaction = client.interactions.create(
+    model="gemini-3.1-flash-image-preview",
+    input=[
+        {
+            "type": "text",
+            "text": f"""Search for what the Arashiyama bamboo grove in Kyoto looks like. Then 
+generate a photo of this person (from the provided image) standing in the Arashiyama bamboo 
+grove during golden hour. They are wearing a casual travel outfit and looking up at the 
+towering bamboo stalks with a sense of wonder. Photorealistic, cinematic lighting, shallow 
+depth of field."""
+        },
+        {
+            "type": "image",
+            "data": image_data,
+            "mime_type": "image/png"
+        }
+    ],
+    tools=[
+        {
+            "type": "google_search",
+            "search_types": ["web_search", "image_search"]
+        }
+    ]
+)
+ 
+images = [output for output in interaction.outputs if output.type == "image"]
+with open("04_arashiyama_portrait.png", "wb") as f:
+    f.write(base64.b64decode(images[0].data))</code></pre></div></figure>
+<p><img src="https://www.philschmid.de/static/blog/nano-banana-2-interactions-api/04_arashiyama_portrait.jpg" alt="04_arashiyama_portrait.jpg"></p>
+<p>This single API call combines three Nano Banana 2 capabilities:</p>
+<ul>
+<li><strong>Subject consistency:</strong> Preserves the person's appearance from the reference photo</li>
+<li><strong>Image Search grounding:</strong> Retrieves real images of the bamboo grove for visual accuracy</li>
+<li><strong>Web Search grounding:</strong> Pulls factual context about the location</li>
+</ul>
+<h2 id="tips--best-practices">Tips &amp; Best Practices</h2>
+<ul>
+<li>The same prompt produces different images on each run.</li>
+<li>Some prompts may be blocked by safety filters. If your prompt is rejected, try adjusting the description.</li>
+<li>The <code>search_types</code> parameter with <code>image_search</code> requires the <code>gemini-3.1-flash-image-preview</code> model specifically.</li>
+<li>Subject consistency works best with clear, well-lit headshots. The model can maintain resemblance for up to 5 characters and 14 reference objects.</li>
+</ul>
+<h2 id="other-resources">Other Resources</h2>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://blog.google/innovation-and-ai/technology/ai/nano-banana-2/">Nano Banana 2 Blog Post</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/image-generation">Image Generation Documentation</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">Interactions API Documentation</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/prompts/new_chat?model=gemini-3.1-flash-image-preview">Try in AI Studio</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/pricing#gemini-3.1-flash-image-preview">Pricing</a></li>
+</ul>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

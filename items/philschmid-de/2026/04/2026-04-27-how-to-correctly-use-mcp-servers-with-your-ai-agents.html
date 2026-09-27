@@ -1,0 +1,71 @@
+<div id="readability-page-1" class="page"><div><p>MCP servers are not dead. But blindly enabling them bloats your context, which leads to higher cost and worse performance. Unlike Agent Skills, MCP servers don't come with progressive disclosure out of the box. It is your responsibility to select the tools needed for the task at hand. Here are two proven patterns on how to correctly use MCP servers and avoid the bloat.</p>
+<h2 id="1-explicit-mcp-servers-inline-tool-injection">1. Explicit MCP Servers: Inline Tool Injection</h2>
+<p>MCP servers stay <strong>opt-in</strong>. Servers are referenced in your prompt with an <code>@mention</code>, and the agent resolves, fetches, and injects the tools before the model request.</p>
+<p><img src="https://www.philschmid.de/static/blog/use-mcp-servers/mcp-inline.png" alt="Explicit MCP Servers: Inline Tool Injection"></p>
+<p>Writing <code>@github</code> or <code>@slack</code> in a prompt triggers the agent to:</p>
+<ol>
+<li><strong>Resolve</strong> the <code>@mention</code> to a registered MCP server URL</li>
+<li><strong>Fetch</strong> tool schemas from the server</li>
+<li><strong>Inject</strong> them into the <code>tools[]</code> array of the API request</li>
+<li><strong>Forward</strong> everything to the model, which decides what to call</li>
+</ol>
+<p>Nothing loads unless requested. The tool surface stays small.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>TypeScript</span></p><pre><code data-language="typescript">// Pseudo-code
+async function handlePrompt(prompt: string) {
+  // Detect @mentions in the prompt
+  const mentions = parseMentions(prompt); // ["@github", "@slack"]
+  
+  // Resolve each mention to an MCP server
+  const servers = mentions.map(m =&gt; mcpServers.resolve(m));
+  
+  // Fetch tool schemas from each server
+  const mcpTools = await Promise.all(
+    servers.map(s =&gt; s.listTools())
+  );
+  
+  // Inject into the API request alongside native tools
+  const response = await llmCall({
+    prompt,
+    tools: [...nativeTools, ...mcpTools],
+  });
+  
+  // handle response, call tools, etc ... 
+}</code></pre></div></figure>
+<p><strong>When to use this:</strong> MCP usage is occasional and user-driven. Someone asks a question that needs Slack or GitHub data, they <code>@mention</code> the server, and it gets pulled in for that request only. Keeps costs low and avoids tool noise on tasks that don't need external integrations.</p>
+<h2 id="2-subagent-mcp-servers">2. Subagent MCP Servers</h2>
+<p>MCP servers are declared in subagents definition and automatically available at runtime alongside native tools like <code>read_file</code> or <code>run_command</code>.</p>
+<p><img src="https://www.philschmid.de/static/blog/use-mcp-servers/mcp-subagent.png" alt="Subagent MCP Servers"></p>
+<p>Each subagent has its own configuration that declares its model, tools,... and optional MCP servers.
+You can scope MCP servers to specific tools using <code>allowed_tools</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>YAML</span></p><pre><code data-language="yaml"># Pseudo-code: code_reviewer.md
+---
+name: code-reviewer
+model: gemini-3-flash
+mcp_servers:
+  - url: https://github-mcp.example
+    allowed_tools:
+      - list_pulls
+      - list_reviews
+      - get_diff
+---
+You are a code reviewer. Review open PRs...</code></pre></div></figure>
+<p>The main agent registers subagents. When invoked, each subagent connects to its declared MCP servers and merges those tools with native ones.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>TypeScript</span></p><pre><code data-language="typescript">// Pseudo-code
+ 
+// Register subagents as tools for the orchestrator
+const codeReviewer = createSubagent("./agents/code_reviewer.md");
+const slackMonitor = createSubagent("./agents/slack_monitor.md");
+ 
+async function handlePrompt(prompt: string) {
+ 
+  // pre-processing ...
+ 
+  const response = await llmCall({
+    prompt,
+    tools: [...nativeTools, codeReviewer, slackMonitor],
+  });
+ 
+  // handle response, call tools, etc ...
+}</code></pre></div></figure>
+<p><code>allowed_tools</code> gives you least-privilege scoping without forking the MCP server.</p>
+<p><strong>When to use this:</strong> The use case dictates the tools. A code review agent always needs GitHub, a support agent always needs Zendesk. The MCP servers are part of what the agent <em>is</em>, not something a user opts into per request. <code>allowed_tools</code> keeps each agent scoped to what it actually needs.</p></div></div>

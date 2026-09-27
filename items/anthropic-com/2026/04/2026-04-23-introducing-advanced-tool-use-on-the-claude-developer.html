@@ -1,0 +1,195 @@
+<div id="readability-page-1" class="page"><article><div data-theme="ivory"><p>The future of AI agents is one where models work seamlessly across hundreds or thousands of tools. An IDE assistant that integrates git operations, file manipulation, package managers, testing frameworks, and deployment pipelines. An operations coordinator that connects Slack, GitHub, Google Drive, Jira, company databases, and dozens of MCP servers simultaneously.</p><p>To <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener noreferrer">build effective agents</a>, they need to work with unlimited tool libraries without stuffing every definition into context upfront. Our blog article on using <a href="https://www.anthropic.com/engineering/code-execution-with-mcp" target="_blank" rel="noopener noreferrer">code execution with MCP</a> discussed how tool results and definitions can sometimes consume 50,000+ tokens before an agent reads a request. Agents should discover and load tools on-demand, keeping only what's relevant for the current task.</p><p>Agents also need the ability to call tools from code. When using natural language tool calling, each invocation requires a full inference pass, and intermediate results pile up in context whether they're useful or not. Code is a natural fit for orchestration logic, such as loops, conditionals, and data transformations. Agents need the flexibility to choose between code execution and inference based on the task at hand.</p><p>Agents also need to learn correct tool usage from examples, not just schema definitions. JSON schemas define what's structurally valid, but can't express usage patterns: when to include optional parameters, which combinations make sense, or what conventions your API expects.</p><p>Today, we're releasing three features that make this possible:</p><ul><li><strong>Tool Search Tool, </strong>which allows Claude to use search tools to access thousands of tools without consuming its context window</li><li><strong>Programmatic Tool Calling</strong>, which allows Claude to invoke tools in a code execution environment reducing the impact on the model’s context window</li><li><strong>Tool Use Examples</strong>, which provides a universal standard for demonstrating how to effectively use a given tool</li></ul><p>In internal testing, we’ve found these features have helped us build things that wouldn’t have been possible with conventional tool use patterns. For example,<strong> <a href="https://www.claude.com/claude-for-excel" target="_blank" rel="noopener noreferrer">Claude for Excel</a> </strong>uses Programmatic Tool Calling to read and modify spreadsheets with thousands of rows without overloading the model’s context window.</p><p>Based on our experience, we believe these features open up new possibilities for what you can build with Claude.</p><h2 id="tool-search-tool">Tool Search Tool</h2><h3 id="the-challenge">The challenge</h3><p>MCP tool definitions provide important context, but as more servers connect, those tokens can add up. Consider a five-server setup:</p><ul><li>GitHub: 35 tools (~26K tokens)</li><li>Slack: 11 tools (~21K tokens)</li><li>Sentry: 5 tools (~3K tokens)</li><li>Grafana: 5 tools (~3K tokens)</li><li>Splunk: 2 tools (~2K tokens)</li></ul><p>That's 58 tools consuming approximately 55K tokens before the conversation even starts. Add more servers like Jira (which alone uses ~17K tokens) and you're quickly approaching 100K+ token overhead. At Anthropic, we've seen tool definitions consume 134K tokens before optimization.</p><p>But token cost isn't the only issue. The most common failures are wrong tool selection and incorrect parameters, especially when tools have similar names like <code>notification-send-user</code> vs. <code>notification-send-channel</code>.</p><h3 id="our-solution">Our solution</h3><p>Instead of loading all tool definitions upfront, the Tool Search Tool discovers tools on-demand. Claude only sees the tools it actually needs for the current task.</p><div><figure><img alt="Tool Search Tool diagram" loading="lazy" width="1999" height="1125" decoding="async" data-nimg="1" srcset="https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2Ff359296f770706608901eadaffbff4ca0b67874c-1999x1125.png&amp;w=2048&amp;q=75 1x, https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2Ff359296f770706608901eadaffbff4ca0b67874c-1999x1125.png&amp;w=3840&amp;q=75 2x" src="https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2Ff359296f770706608901eadaffbff4ca0b67874c-1999x1125.png&amp;w=3840&amp;q=75"><figcaption><em>Tool Search Tool preserves 191,300 tokens of context compared to 122,800 with Claude’s traditional approach.</em></figcaption></figure></div><p>Traditional approach:</p><ul><li>All tool definitions loaded upfront (~72K tokens for 50+ MCP tools)</li><li>Conversation history and system prompt compete for remaining space</li><li>Total context consumption: ~77K tokens before any work begins</li></ul><p>With the Tool Search Tool:</p><ul><li>Only the Tool Search Tool loaded upfront (~500 tokens)</li><li>Tools discovered on-demand as needed (3-5 relevant tools, ~3K tokens)</li><li>Total context consumption: ~8.7K tokens, preserving 95% of context window</li></ul><p>This represents an 85% reduction in token usage while maintaining access to your full tool library. Internal testing showed significant accuracy improvements on MCP evaluations when working with large tool libraries. Opus 4 improved from 49% to 74%, and Opus 4.5 improved from 79.5% to 88.1% with Tool Search Tool enabled.</p><h3 id="how-the-tool-search-tool-works">How the Tool Search Tool works</h3><p>The Tool Search Tool lets Claude dynamically discover tools instead of loading all definitions upfront. You provide all your tool definitions to the API, but mark tools with <code>defer_loading: true</code> to make them discoverable on-demand. Deferred tools aren't loaded into Claude's context initially. Claude only sees the Tool Search Tool itself plus any tools with <code>defer_loading: false</code> (your most critical, frequently-used tools).</p><p>When Claude needs specific capabilities, it searches for relevant tools. The Tool Search Tool returns references to matching tools, which get expanded into full definitions in Claude's context.</p><p>For example, if Claude needs to interact with GitHub, it searches for "github," and only <code>github.createPullRequest</code> and <code>github.listIssues</code> get loaded—not your other 50+ tools from Slack, Jira, and Google Drive.</p><p>This way, Claude has access to your full tool library while only paying the token cost for tools it actually needs.</p><p><strong>Prompt caching note: </strong>Tool Search Tool doesn't break prompt caching because deferred tools are excluded from the initial prompt entirely. They're only added to context after Claude searches for them, so your system prompt and core tool definitions remain cacheable.</p><p><strong>Implementation:</strong></p><div><pre><code>{
+  "tools": [
+    // Include a tool search tool (regex, BM25, or custom)
+    {"type": "tool_search_tool_regex_20251119", "name": "tool_search_tool_regex"},
+
+    // Mark tools for on-demand discovery
+    {
+      "name": "github.createPullRequest",
+      "description": "Create a pull request",
+      "input_schema": {...},
+      "defer_loading": true
+    }
+    // ... hundreds more deferred tools with defer_loading: true
+  ]
+}
+</code></pre></div><p>For MCP servers, you can defer loading entire servers while keeping specific high-use tools loaded:</p><div><pre><code>{
+  "type": "mcp_toolset",
+  "mcp_server_name": "google-drive",
+  "default_config": {"defer_loading": true}, # defer loading the entire server
+  "configs": {
+    "search_files": {
+"defer_loading": false
+    }  // Keep most used tool loaded
+  }
+}</code></pre></div><p>The Claude Developer Platform provides regex-based and BM25-based search tools out of the box, but you can also implement custom search tools using embeddings or other strategies.</p><h3 id="when-to-use-the-tool-search-tool">When to use the Tool Search Tool</h3><p>Like any architectural decision, enabling the Tool Search Tool involves trade-offs. The feature adds a search step before tool invocation, so it delivers the best ROI when the context savings and accuracy improvements outweigh additional latency.</p><p><strong>Use it when:</strong></p><ul><li>Tool definitions consuming &gt;10K tokens</li><li>Experiencing tool selection accuracy issues</li><li>Building MCP-powered systems with multiple servers</li><li>10+ tools available</li></ul><p><strong>Less beneficial when:</strong></p><ul><li>Small tool library (&lt;10 tools)</li><li>All tools used frequently in every session</li><li>Tool definitions are compact</li></ul><h2 id="programmatic-tool-calling">Programmatic Tool Calling</h2><h3 id="the-challenge">The challenge</h3><p>Traditional tool calling creates two fundamental problems as workflows become more complex:</p><ul><li><strong>Context pollution from intermediate results</strong>: When Claude analyzes a 10MB log file for error patterns, the entire file enters its context window, even though Claude only needs a summary of error frequencies. When fetching customer data across multiple tables, every record accumulates in context regardless of relevance. These intermediate results consume massive token budgets and can push important information out of the context window entirely.</li><li><strong>Inference overhead and manual synthesis</strong>: Each tool call requires a full model inference pass. After receiving results, Claude must "eyeball" the data to extract relevant information, reason about how pieces fit together, and decide what to do next—all through natural language processing. A five tool workflow means five inference passes plus Claude parsing each result, comparing values, and synthesizing conclusions. This is both slow and error-prone.</li></ul><h3 id="our-solution">Our solution</h3><p>Programmatic Tool Calling enables Claude to orchestrate tools through code rather than through individual API round-trips. Instead of Claude requesting tools one at a time with each result being returned to its context, Claude writes code that calls multiple tools, processes their outputs, and controls what information actually enters its context window.</p><p>Claude excels at writing code and by letting it express orchestration logic in Python rather than through natural language tool invocations, you get more reliable, precise control flow. Loops, conditionals, data transformations, and error handling are all explicit in code rather than implicit in Claude's reasoning.</p><h4 id="example-budget-compliance-check">Example: Budget compliance check</h4><p>Consider a common business task: "Which team members exceeded their Q3 travel budget?"</p><p>You have three tools available:</p><ul><li><code>get_team_members(department)</code> - Returns team member list with IDs and levels</li><li><code>get_expenses(user_id, quarter)</code> - Returns expense line items for a user</li><li><code>get_budget_by_level(level)</code> - Returns budget limits for an employee level</li></ul><p><strong>Traditional approach</strong>:</p><ul><li>Fetch team members → 20 people</li><li>For each person, fetch their Q3 expenses → 20 tool calls, each returning 50-100 line items (flights, hotels, meals, receipts)</li><li>Fetch budget limits by employee level</li><li>All of this enters Claude's context: 2,000+ expense line items (50 KB+)</li><li>Claude manually sums each person's expenses, looks up their budget, compares expenses against budget limits</li><li>More round-trips to the model, significant context consumption</li></ul><p><strong>With Programmatic Tool Calling</strong>:</p><p>Instead of each tool result returning to Claude, Claude writes a Python script that orchestrates the entire workflow. The script runs in the Code Execution tool (a sandboxed environment), pausing when it needs results from your tools. When you return tool results via the API, they're processed by the script rather than consumed by the model. The script continues executing, and Claude only sees the final output.</p><div><figure><img alt="Programmatic tool calling flow" loading="lazy" width="1999" height="1491" decoding="async" data-nimg="1" srcset="https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F65737d69a3290ed5c1f3c3b8dc873645a9dcc2eb-1999x1491.png&amp;w=2048&amp;q=75 1x, https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F65737d69a3290ed5c1f3c3b8dc873645a9dcc2eb-1999x1491.png&amp;w=3840&amp;q=75 2x" src="https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F65737d69a3290ed5c1f3c3b8dc873645a9dcc2eb-1999x1491.png&amp;w=3840&amp;q=75"><figcaption>Programmatic Tool Calling enables Claude to orchestrate tools through code rather than through individual API round-trips, allowing for parallel tool execution.</figcaption></figure></div><p>Here's what Claude's orchestration code looks like for the budget compliance task:</p><div><pre><code>team = await get_team_members("engineering")
+
+# Fetch budgets for each unique level
+levels = list(set(m["level"] for m in team))
+budget_results = await asyncio.gather(*[
+    get_budget_by_level(level) for level in levels
+])
+
+# Create a lookup dictionary: {"junior": budget1, "senior": budget2, ...}
+budgets = {level: budget for level, budget in zip(levels, budget_results)}
+
+# Fetch all expenses in parallel
+expenses = await asyncio.gather(*[
+    get_expenses(m["id"], "Q3") for m in team
+])
+
+# Find employees who exceeded their travel budget
+exceeded = []
+for member, exp in zip(team, expenses):
+    budget = budgets[member["level"]]
+    total = sum(e["amount"] for e in exp)
+    if total &gt; budget["travel_limit"]:
+        exceeded.append({
+            "name": member["name"],
+            "spent": total,
+            "limit": budget["travel_limit"]
+        })
+
+print(json.dumps(exceeded))</code></pre></div><p>Claude's context receives only the final result: the two to three people who exceeded their budget. The 2,000+ line items, the intermediate sums, and the budget lookups do not affect Claude’s context, reducing consumption from 200KB of raw expense data to just 1KB of results.</p><p>The efficiency gains are substantial:</p><ul><li><strong>Token savings</strong>: By keeping intermediate results out of Claude's context, PTC dramatically reduces token consumption. Average usage dropped from 43,588 to 27,297 tokens, a 37% reduction on complex research tasks.</li><li><strong>Reduced latency</strong>: Each API round-trip requires model inference (hundreds of milliseconds to seconds). When Claude orchestrates 20+ tool calls in a single code block, you eliminate 19+ inference passes. The API handles tool execution without returning to the model each time.</li><li><strong>Improved accuracy</strong>: By writing explicit orchestration logic, Claude makes fewer errors than when juggling multiple tool results in natural language. Internal knowledge retrieval improved from 25.6% to 28.5%; <a href="https://arxiv.org/abs/2311.12983" target="_blank" rel="noopener noreferrer">GIA benchmarks</a> from 46.5% to 51.2%.</li></ul><p>Production workflows involve messy data, conditional logic, and operations that need to scale. Programmatic Tool Calling lets Claude handle that complexity programmatically while keeping its focus on actionable results rather than raw data processing.</p><h3 id="how-programmatic-tool-calling-works">How Programmatic Tool Calling works</h3><h4 id="1-mark-tools-as-callable-from-code">1. Mark tools as callable from code</h4><p>Add code_execution to tools, and set allowed_callers to opt-in tools for programmatic execution:</p><div><pre><code>{
+  "tools": [
+    {
+      "type": "code_execution_20250825",
+      "name": "code_execution"
+    },
+    {
+      "name": "get_team_members",
+      "description": "Get all members of a department...",
+      "input_schema": {...},
+      "allowed_callers": ["code_execution_20250825"] # opt-in to programmatic tool calling
+    },
+    {
+      "name": "get_expenses",
+ 	...
+    },
+    {
+      "name": "get_budget_by_level",
+	...
+    }
+  ]
+}</code></pre></div><p>The API converts these tool definitions into Python functions that Claude can call.</p><h4 id="2-claude-writes-orchestration-code">2. Claude writes orchestration code</h4><p>Instead of requesting tools one at a time, Claude generates Python code:</p><div><pre><code>{
+  "type": "server_tool_use",
+  "id": "srvtoolu_abc",
+  "name": "code_execution",
+  "input": {
+    "code": "team = get_team_members('engineering')\n..." # the code example above
+  }
+}</code></pre></div><h4 id="3-tools-execute-without-hitting-claudes-context">3. Tools execute without hitting Claude's context</h4><p>When the code calls get_expenses(), you receive a tool request with a caller field:</p><div><pre><code>{
+  "type": "tool_use",
+  "id": "toolu_xyz",
+  "name": "get_expenses",
+  "input": {"user_id": "emp_123", "quarter": "Q3"},
+  "caller": {
+    "type": "code_execution_20250825",
+    "tool_id": "srvtoolu_abc"
+  }
+}</code></pre></div><p>You provide the result, which is processed in the Code Execution environment rather than Claude's context. This request-response cycle repeats for each tool call in the code.</p><h4 id="4-only-final-output-enters-context">4. Only final output enters context</h4><p>When the code finishes running, only the results of the code are returned to Claude:</p><div><pre><code>{
+  "type": "code_execution_tool_result",
+  "tool_use_id": "srvtoolu_abc",
+  "content": {
+    "stdout": "[{\"name\": \"Alice\", \"spent\": 12500, \"limit\": 10000}...]"
+  }
+}</code></pre></div><p>This is all Claude sees, not the 2000+ expense line items processed along the way.</p><h3 id="when-to-use-programmatic-tool-calling">When to use Programmatic Tool Calling</h3><p>Programmatic Tool Calling adds a code execution step to your workflow. This extra overhead pays off when the token savings, latency improvements, and accuracy gains are substantial.</p><p><strong>Most beneficial when:</strong></p><ul><li>Processing large datasets where you only need aggregates or summaries</li><li>Running multi-step workflows with three or more dependent tool calls</li><li>Filtering, sorting, or transforming tool results before Claude sees them</li><li>Handling tasks where intermediate data shouldn't influence Claude's reasoning</li><li>Running parallel operations across many items (checking 50 endpoints, for example)</li></ul><p><strong>Less beneficial when:</strong></p><ul><li>Making simple single-tool invocations</li><li>Working on tasks where Claude should see and reason about all intermediate results</li><li>Running quick lookups with small responses</li></ul><h2 id="tool-use-examples">Tool Use Examples</h2><h3 id="the-challenge">The challenge</h3><p>JSON Schema excels at defining structure–types, required fields, allowed enums–but it can't express usage patterns: when to include optional parameters, which combinations make sense, or what conventions your API expects.</p><p>Consider a support ticket API:</p><div><pre><code>{
+  "name": "create_ticket",
+  "input_schema": {
+    "properties": {
+      "title": {"type": "string"},
+      "priority": {"enum": ["low", "medium", "high", "critical"]},
+      "labels": {"type": "array", "items": {"type": "string"}},
+      "reporter": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "contact": {
+            "type": "object",
+            "properties": {
+              "email": {"type": "string"},
+              "phone": {"type": "string"}
+            }
+          }
+        }
+      },
+      "due_date": {"type": "string"},
+      "escalation": {
+        "type": "object",
+        "properties": {
+          "level": {"type": "integer"},
+          "notify_manager": {"type": "boolean"},
+          "sla_hours": {"type": "integer"}
+        }
+      }
+    },
+    "required": ["title"]
+  }
+}</code></pre></div><p>The schema defines what's valid, but leaves critical questions unanswered:</p><ul><li><strong>Format ambiguity: </strong>Should <code>due_date</code> use "2024-11-06", "Nov 6, 2024", or "2024-11-06T00:00:00Z"?</li><li><strong>ID conventions: </strong>Is <code>reporter.id</code> a UUID, "USR-12345", or just "12345"?</li><li><strong>Nested structure usage: </strong>When should Claude populate <code>reporter.contact</code>?</li><li><strong>Parameter correlations: </strong>How do <code>escalation.level</code> and <code>escalation.sla_hours</code> relate to priority?</li></ul><p>These ambiguities can lead to malformed tool calls and inconsistent parameter usage.</p><h3 id="our-solution">Our solution</h3><p>Tool Use Examples let you provide sample tool calls directly in your tool definitions. Instead of relying on schema alone, you show Claude concrete usage patterns:</p><div><pre><code>{
+    "name": "create_ticket",
+    "input_schema": { /* same schema as above */ },
+    "input_examples": [
+      {
+        "title": "Login page returns 500 error",
+        "priority": "critical",
+        "labels": ["bug", "authentication", "production"],
+        "reporter": {
+          "id": "USR-12345",
+          "name": "Jane Smith",
+          "contact": {
+            "email": "jane@acme.com",
+            "phone": "+1-555-0123"
+          }
+        },
+        "due_date": "2024-11-06",
+        "escalation": {
+          "level": 2,
+          "notify_manager": true,
+          "sla_hours": 4
+        }
+      },
+      {
+        "title": "Add dark mode support",
+        "labels": ["feature-request", "ui"],
+        "reporter": {
+          "id": "USR-67890",
+          "name": "Alex Chen"
+        }
+      },
+      {
+        "title": "Update API documentation"
+      }
+    ]
+  }</code></pre></div><p>From these three examples, Claude learns:</p><ul><li><strong>Format conventions</strong>: Dates use YYYY-MM-DD, user IDs follow USR-XXXXX, labels use kebab-case</li><li><strong>Nested structure patterns</strong>: How to construct the reporter object with its nested contact object</li><li><strong>Optional parameter correlations</strong>: Critical bugs have full contact info + escalation with tight SLAs; feature requests have reporter but no contact/escalation; internal tasks have title only</li></ul><p>In our own internal testing, tool use examples improved accuracy from 72% to 90% on complex parameter handling.</p><h3 id="when-to-use-tool-use-examples">When to use Tool Use Examples</h3><p>Tool Use Examples add tokens to your tool definitions, so they’re most valuable when accuracy improvements outweigh the additional cost.</p><p><strong>Most beneficial when:</strong></p><ul><li>Complex nested structures where valid JSON doesn't imply correct usage</li><li>Tools with many optional parameters and inclusion patterns matter</li><li>APIs with domain-specific conventions not captured in schemas</li><li>Similar tools where examples clarify which one to use (e.g., <code>create_ticket</code> vs <code>create_incident</code>)</li></ul><p><strong>Less beneficial when:</strong></p><ul><li>Simple single-parameter tools with obvious usage</li><li>Standard formats like URLs or emails that Claude already understands</li><li>Validation concerns better handled by JSON Schema constraints</li></ul><h2 id="best-practices">Best practices</h2><p>Building agents that take real-world actions means handling scale, complexity, and precision simultaneously. These three features work together to solve different bottlenecks in tool use workflows. Here's how to combine them effectively.</p><h3 id="layer-features-strategically">Layer features strategically</h3><p>Not every agent needs to use all three features for a given task. Start with your biggest bottleneck:</p><ul><li>Context bloat from tool definitions → Tool Search Tool</li><li>Large intermediate results polluting context → Programmatic Tool Calling</li><li>Parameter errors and malformed calls → Tool Use Examples</li></ul><p>This focused approach lets you address the specific constraint limiting your agent's performance, rather than adding complexity upfront.</p><p>Then layer additional features as needed. They're complementary: Tool Search Tool ensures the right tools are found, Programmatic Tool Calling ensures efficient execution, and Tool Use Examples ensure correct invocation.</p><h3 id="set-up-tool-search-tool-for-better-discovery">Set up Tool Search Tool for better discovery</h3><p>Tool search matches against names and descriptions, so clear, descriptive definitions improve discovery accuracy.</p><div><pre><code>// Good
+{
+    "name": "search_customer_orders",
+    "description": "Search for customer orders by date range, status, or total amount. Returns order details including items, shipping, and payment info."
+}
+
+// Bad
+{
+    "name": "query_db_orders",
+    "description": "Execute order query"
+}</code></pre></div><p>Add system prompt guidance so Claude knows what's available:</p><div><pre><code>You have access to tools for Slack messaging, Google Drive file management, 
+Jira ticket tracking, and GitHub repository operations. Use the tool search 
+to find specific capabilities.</code></pre></div><p>Keep your three to five most-used tools always loaded, defer the rest. This balances immediate access for common operations with on-demand discovery for everything else.</p><h3 id="set-up-programmatic-tool-calling-for-correct-execution">Set up Programmatic Tool Calling for correct execution</h3><p>Since Claude writes code to parse tool outputs, document return formats clearly. This helps Claude write correct parsing logic:</p><div><pre><code>{
+    "name": "get_orders",
+    "description": "Retrieve orders for a customer.
+Returns:
+    List of order objects, each containing:
+    - id (str): Order identifier
+    - total (float): Order total in USD
+    - status (str): One of 'pending', 'shipped', 'delivered'
+    - items (list): Array of {sku, quantity, price}
+    - created_at (str): ISO 8601 timestamp"
+}</code></pre></div><p>See below for opt-in tools that benefit from programmatic orchestration:</p><ul><li>Tools that can run in parallel (independent operations)</li><li>Operations safe to retry (idempotent)</li></ul><h3 id="set-up-tool-use-examples-for-parameter-accuracy">Set up Tool Use Examples for parameter accuracy</h3><p>Craft examples for behavioral clarity:</p><ul><li>Use realistic data (real city names, plausible prices, not "string" or "value")</li><li>Show variety with minimal, partial, and full specification patterns</li><li>Keep it concise: 1-5 examples per tool</li><li>Focus on ambiguity (only add examples where correct usage isn't obvious from schema)</li></ul><h2 id="getting-started">Getting started</h2><p>These features are available in beta. To enable them, add the beta header and include the tools you need:</p><div><pre><code>client.beta.messages.create(
+    betas=["advanced-tool-use-2025-11-20"],
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=4096,
+    tools=[
+        {"type": "tool_search_tool_regex_20251119", "name": "tool_search_tool_regex"},
+        {"type": "code_execution_20250825", "name": "code_execution"},
+        # Your tools with defer_loading, allowed_callers, and input_examples
+    ]
+)</code></pre></div><p>For detailed API documentation and SDK examples, see our:</p><ul><li><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool" target="_blank" rel="noopener noreferrer"><span>D</span>ocumentation</a> and <a href="https://github.com/anthropics/claude-cookbooks/blob/main/tool_use/tool_search_with_embeddings.ipynb" target="_blank" rel="noopener noreferrer">cookbook</a> for Tool Search Tool</li><li><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling" target="_blank" rel="noopener noreferrer">Documentation</a> and <a href="https://github.com/anthropics/claude-cookbooks/blob/main/tool_use/programmatic_tool_calling_ptc.ipynb" target="_blank" rel="noopener noreferrer">cookbook</a> for Programmatic Tool Calling</li><li><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/implement-tool-use#providing-tool-use-examples" target="_blank" rel="noopener noreferrer">Documentation</a> for Tool Use Examples</li></ul><p>These features move tool use from simple function calling toward intelligent orchestration. As agents tackle more complex workflows spanning dozens of tools and large datasets, dynamic discovery, efficient execution, and reliable invocation become foundational.</p><p>We're excited to see what you build.</p><h2 id="acknowledgements">Acknowledgements</h2><p>Written by Bin Wu, with contributions from Adam Jones, Artur Renault, Henry Tay, Jake Noble, Noah Picard, Sam Jiang, and the Claude Developer Platform team. This work builds on foundational research by Chris Gorgolewski, Daniel Jiang, Jeremy Fox and Mike Lambert. We also drew inspiration from across the AI ecosystem, including <a href="https://github.com/9600dev/llmvm" target="_blank" rel="noopener noreferrer">Joel Pobar's LLMVM</a>, <a href="https://blog.cloudflare.com/code-mode/" target="_blank" rel="noopener noreferrer">Cloudflare's Code Mode</a> and <a href="https://www.anthropic.com/engineering/code-execution-with-mcp" target="_blank" rel="noopener noreferrer">Code Execution as MCP</a>. Special thanks to Andy Schumeister, Hamish Kerr, Keir Bradwell, Matt Bleifer and Molly Vorwerck for their support.<br></p></div></article></div>

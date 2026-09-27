@@ -1,0 +1,46 @@
+<div id="readability-page-1" class="page"><div><p>What if you could optimize a model overnight without any ML experience? What if an AI agent runs hundreds of training experiments autonomously, keeping only the improvements?
+That is the idea behind <a target="_blank" rel="noopener noreferrer" href="https://github.com/karpathy/autoresearch">autoresearch</a>. You give an AI agent a training script and a metric. It edits the code, runs a short experiment, checks if the metric improved, keeps or discards, and repeats. <a target="_blank" rel="noopener noreferrer" href="https://x.com/karpathy/status/2031135152349524125">Karpathy</a> used it to squeeze 11% more speed out of his GPT-2 training. <a target="_blank" rel="noopener noreferrer" href="https://x.com/tobi/status/2030771823151853938">Tobi Lütke</a>, Shopify's CEO, trained a 0.8B model overnight that outscored his previous 1.6B.</p>
+<h2 id="how-autoresearch-works">How Autoresearch Works</h2>
+<p>An LLM agent that can edit training code, runs a short experiment, checks if the metric improved, and repeats, without human involvement.</p>
+<p><img src="https://www.philschmid.de/static/blog/autoresearch/mermaid.png" alt="mermaid"></p>
+<p><strong>Design constraints that make it work:</strong></p>
+<ul>
+<li><strong>Fixed 5-min time budget.</strong> Results stay comparable regardless of what the agent changes.</li>
+<li><strong>Single file scope.</strong> Agent edits <code>train.py</code> only. Data prep and evaluation are locked down.</li>
+<li><strong>Git as memory.</strong> Each experiment is a commit. The agent reads branch history to plan what to try next.</li>
+<li><strong>Binary keep/discard.</strong> No human judgment needed.</li>
+</ul>
+<p>Roughly 12 experiments/hour. Around 100 overnight.</p>
+<h2 id="two-early-experiments">Two Early Experiments</h2>
+<p>Both examples below are small-scale and early. The setups are minimal, the models are small, and neither is a controlled study. But they show where this is headed.</p>
+<h3 id="karpathy-700-experiments-on-nanochat">Karpathy: 700 experiments on nanochat</h3>
+<p>Karpathy pointed autoresearch at <a target="_blank" rel="noopener noreferrer" href="https://github.com/karpathy/nanochat">nanochat</a>, his already well-tuned GPT-2 training codebase. Over two days the agent ran ~700 experiments and found ~20 real improvements. Stacked together, time-to-GPT-2 dropped from 2.02 to 1.80 hours (11% faster). The agent caught things Karpathy had missed:</p>
+<ul>
+<li>Parameterless QKNorm had no scaler multiplier, making attention too diffuse</li>
+<li>Value Embeddings had no regularization applied</li>
+<li>Banded attention window was too conservative</li>
+<li>AdamW betas, weight decay schedule, and initialization were all suboptimal</li>
+</ul>
+<p>All improvements transferred from depth-12 to depth-24 models.</p>
+<h3 id="tobi-lütke-query-expansion-overnight">Tobi Lütke query expansion overnight</h3>
+<p>Tobi adapted the pattern for a query-expansion model for the <a target="_blank" rel="noopener noreferrer" href="https://github.com/tobi/qmd">QMD Open source project</a>:</p>
+<ol>
+<li>Told an AI agent to read the autoresearch repo and build a version for QMD. Get training data from tobi/qmd github.</li>
+<li>Went to sleep</li>
+<li>Woke up to a <strong>0.8B model scoring 19% higher</strong> than the previous <strong>1.6B model</strong> after 37 experiments in 8 hours</li>
+</ol>
+<p>A smaller model outperformed one twice its size. He then pointed the same loop at a reranker and beat that baseline too.</p>
+<h2 id="how-to-apply-this">How to apply this</h2>
+<p>The loop hinges on your eval. If the metric is gamed or leaky, the model looks better on paper and fails in production. Your eval set must be held out completely — the agent never touches it, never trains on it, never sees it during optimization. You need a training script the agent can modify, training data (manually labeled or synthetic), and a metric that reflects what the model will actually do in production.</p>
+<p>When experiments run 100x faster than a human can manage, your eval becomes the bottleneck. Static benchmarks get saturated. Build your eval pipeline so it can evolve, refresh from real production data, harder edge cases.</p>
+<p>The pattern fits search ranking, product categorization, clinical NER, fraud scoring, contract extraction, intent classification, and similar tasks. Small models work well — training runs finish in minutes and improvements transfer when you scale up. Open models like Gemma are a good starting point: small enough for a single GPU, performant for production tasks, commercially licensed.</p>
+<h3 id="how-this-differs-from-gepa-and-prompt-optimizers">How this differs from GEPA and prompt optimizers</h3>
+<p><a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2501.09361">GEPA</a> (Genetic-Pareto prompt evolution, ICLR 2026) optimizes <em>prompts</em> using genetic evolution and reflection. It works on frozen models and APIs where you cannot change weights.</p>
+<p>Autoresearch optimizes <em>weights</em> — it modifies training code, architectures, and hyperparameters to produce a better model.</p>
+<ul>
+<li><strong>GEPA / prompt optimization:</strong> No training. Works on frozen models and APIs.</li>
+<li><strong>Autoresearch / weight optimization:</strong> Changes the model itself. Requires training infra and data.</li>
+</ul>
+<p>For teams building domain SLMs, both layers compound.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

@@ -1,0 +1,208 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/showing-settings-from-macos-menu-bar-items/hero.png" alt="" loading="lazy"><p>Opening a settings window from a macOS menu bar app should be trivial. It’s not. After spending hours debugging, I’m documenting the gotchas to save you the same frustration.</p>
+<h2 id="the-problem">The Problem</h2>
+<p>SwiftUI provides <a href="https://developer.apple.com/documentation/swiftui/settingslink"><code>SettingsLink</code></a> for opening settings:</p>
+<pre><code data-language="swift">MenuBarExtra("Test", systemImage: "star.fill") {
+    SettingsLink {
+        Text("Open settings") 
+    }
+}</code></pre>
+<p>Simple, right? Except it doesn’t work reliably in <a href="https://developer.apple.com/documentation/swiftui/menubarextra"><code>MenuBarExtra</code></a>. The documentation doesn’t mention this limitation.</p>
+<p>According to Apple’s documentation, <code>SettingsLink</code> should “open the app’s settings scene when activated.” However, this assumes your app is already active and has proper window management context - assumptions that don’t hold for menu bar apps.</p>
+<h2 id="why-it-fails">Why It Fails</h2>
+<p>Menu bar apps operate differently from regular macOS apps:</p>
+<ul>
+<li><strong>No dock icon by default</strong> - They use <a href="https://developer.apple.com/documentation/appkit/nsapplication/activationpolicy/accessory"><code>NSApplication.ActivationPolicy.accessory</code></a></li>
+<li><strong>Not “active” in the traditional sense</strong> - They don’t appear in the app switcher</li>
+<li><strong>Windows may appear behind other apps</strong> - Without proper activation, windows lack focus</li>
+<li><strong>No SwiftUI graph loaded</strong> - Settings needs some SwiftUI view initalized and the menu bar uses AppKit under the hood.</li>
+</ul>
+<p>The root issue is that <a href="https://developer.apple.com/documentation/appkit/nsapplication"><code>NSApplication</code></a> treats menu bar apps as background utilities, not foreground applications. This affects how windows are ordered and receive events.</p>
+<h2 id="the-evolution-of-workarounds">The Evolution of Workarounds</h2>
+<h3 id="the-old-way">The Old Way</h3>
+<p>This is how it used to work. Private API, but widely used and simple:</p>
+<pre><code data-language="swift">if #available(macOS 13, *) {
+    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+} else {
+    // macOS 12 or earlier
+    NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+}</code></pre>
+<p>This stopped working in Sonoma (14) with the error: “Please use SettingsLink for opening the Settings scene.” Apple deprecated these selectors in favor of SwiftUI’s scene-based approach, but didn’t account for the unique challenges of menu bar apps.</p>
+<h3 id="the-opensettings-environment-action">The openSettings Environment Action</h3>
+<p>Apple provides an <a href="https://developer.apple.com/documentation/swiftui/opensettingsaction"><code>openSettings</code> environment action</a> for programmatic access (available since macOS 14.0+):</p>
+<pre><code data-language="swift">struct MyView: View {
+    @Environment(\.openSettings) private var openSettings
+
+    var body: some View {
+        Button("Open Settings") {
+            openSettings()
+        }
+    }
+}</code></pre>
+<p>This currently works on macOS 15, but doesn’t work on macOS Tahoe (26). The logic needs an existing SwiftUI render tree, and simply calling the environment variable does nothing if none is found.</p>
+<p>The workaround? As horrible as it sounds, a <em>hidden window</em>. Of course, that comes with its own issues, unless you massage the window that it’s really off-screen and ideally also doesn’t react to touches.</p>
+<h2 id="hide--seek">Hide &amp; Seek</h2>
+<p>Now, this works, however the window will open in the <em>background</em>, and no amount of <code>makeKeyAndOrderFront(nil)</code> will help. Trust me. I (and <a href="https://steipete.me/posts/2025/claude-code-is-my-computer/">Claude</a>) tried plenty variations.</p>
+<p>The real reason? macOS doesn’t allow a window to become selected when there’s no Dock icon. And since it’s common to hide the Dock icon for pure Menu Bar apps, that’s a problem.</p>
+<p>The workaround? Show the Dock icon just before calling <code>openSettings()</code> and then hiding it again. In a way, this is also convenient for the user as the Icon now represents the “app” - the visible window, and once that closes, we hide the Dock icon again. (via calling <code>NSApp.setActivationPolicy(.accessory)</code>). Of course the whole thing requires some delays to really work, so let me present you the final, working solution (I apologize in advance):</p>
+<h2 id="the-working-solution">The Working Solution</h2>
+<p>Here’s the minimal implementation for macOS 14 and higher, using Swift 6:</p>
+<pre><code data-language="swift">// Hidden window to provide context
+struct HiddenWindowView: View {
+    @Environment(\.openSettings) private var openSettings
+    
+    var body: some View {
+        Color.clear
+            .frame(width: 1, height: 1)
+            .onReceive(NotificationCenter.default.publisher(for: .openSettingsRequest)) { _ in
+                Task { @MainActor in
+                    // Show dock icon for window focus
+                    NSApp.setActivationPolicy(.regular)
+                    try? await Task.sleep(for: .milliseconds(100))
+                    
+                    // Activate and open
+                    NSApp.activate(ignoringOtherApps: true)
+                    openSettings()
+                    
+                    // 2. No window ordering - After openSettings(), you might need additional window management to ensure
+                    // it comes to front:
+                    try? await Task.sleep(for: .milliseconds(200))
+                    if let settingsWindow = findSettingsWindow() {
+                        settingsWindow.makeKeyAndOrderFront(nil)
+                        settingsWindow.orderFrontRegardless()
+                    }
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .settingsWindowClosed)) { _ in
+                // Restore menu bar app state when settings closes
+                NSApp.setActivationPolicy(.accessory)
+            }
+    }
+}
+
+// Window identifier for settings
+static let settingsWindowIdentifier = "com.apple.SwiftUI.Settings"
+
+/// Finds the settings window using multiple detection methods
+static func findSettingsWindow() -&gt; NSWindow? {
+    // Try multiple methods to find the window
+    return NSApp.windows.first { window in
+        // Check by identifier
+        if window.identifier?.rawValue == settingsWindowIdentifier {
+            return true
+        }
+        
+        // Check by title
+        if window.isVisible &amp;&amp; window.styleMask.contains(.titled) &amp;&amp;
+           (window.title.localizedCaseInsensitiveContains("settings") ||
+            window.title.localizedCaseInsensitiveContains("preferences")) {
+            return true
+        }
+        
+        // Check by content view controller type
+        if let contentVC = window.contentViewController,
+           String(describing: type(of: contentVC)).contains("Settings") {
+            return true
+        }
+        
+        return false
+    }
+}
+
+// App structure
+@main
+struct MenuBarApp: App {
+    var body: some Scene {
+        MenuBarExtra("My App", systemImage: "star.fill") {
+            Button("Settings...") {
+                NotificationCenter.default.post(name: .openSettingsRequest, object: nil)
+            }
+            .keyboardShortcut(",", modifiers: .command)
+        }
+        
+        // Required Settings scene
+        Settings {
+            SettingsView()
+                .onDisappear {
+                    NotificationCenter.default.post(name: .settingsWindowClosed, object: nil)
+                }
+        }
+        
+        // Hidden window for context
+        Window("Hidden", id: "HiddenWindow") {
+            HiddenWindowView()
+        }
+        .windowResizability(.contentSize)
+        .defaultSize(width: 1, height: 1)
+    }
+}
+
+extension Notification.Name {
+    static let openSettingsRequest = Notification.Name("openSettingsRequest")
+    static let settingsWindowClosed = Notification.Name("settingsWindowClosed")
+}</code></pre>
+<p>The <a href="https://developer.apple.com/documentation/foundation/notificationcenter"><code>NotificationCenter</code></a> approach decouples the menu action from the window context, allowing the hidden window to handle the actual settings opening.</p>
+<p>For a production-ready implementation with all edge cases (yes, there are some more…) handled, see <a href="https://github.com/amantus-ai/vibetunnel/blob/2a63599ce0b09d139ddc9954f41f2a5840264f9f/mac/VibeTunnel/Utilities/SettingsOpener.swift#L4">VibeTunnel’s SettingsOpener.swift</a>.</p>
+<h2 id="scene-order-matters-unfortunately">Scene Order Matters (Unfortunately)</h2>
+<p>While implementing @steipete’s solution described above, I (@matejkob) discovered another gotcha: <strong>the order of scenes in your App’s body actually affects whether this workaround functions correctly</strong>.</p>
+<p>The working example shown earlier has the scenes in this order:</p>
+<ol>
+<li><code>MenuBarExtra</code></li>
+<li><code>Settings</code></li>
+<li><code>Window</code> (hidden)</li>
+</ol>
+<p>However, I found that if you arrange them like this (which seems equally logical):</p>
+<pre><code data-language="swift">var body: some Scene {
+    MenuBarExtra("My App", systemImage: "star.fill") {
+        ContentView()
+    }
+    .menuBarExtraStyle(.menu)
+    
+    Settings {
+        SettingsView()
+            .onDisappear {
+                NotificationCenter.default.post(name: .settingsWindowClosed, object: nil)
+            }
+    }
+    
+    // Hidden window for settings context
+    Window("Hidden", id: "HiddenWindow") {
+        HiddenWindowView()
+    }
+    .windowResizability(.contentSize)
+    .defaultSize(width: 100, height: 100)
+}</code></pre>
+<p>The hidden window won’t be “visible” to the SwiftUI environment system (at least not on macOS Sequoia 15.5), and the <code>openSettings()</code> call will fail silently. However, moving the hidden <code>Window</code> scene <strong>before</strong> the <code>Settings</code> scene makes it work perfectly:</p>
+<pre><code data-language="swift">var body: some Scene {
+    // Hidden window for settings context - MUST come before Settings
+    Window("Hidden", id: "HiddenWindow") {
+        HiddenWindowView()
+    }
+    .windowResizability(.contentSize)
+    .defaultSize(width: 100, height: 100)
+    
+    MenuBarExtra("My App", systemImage: "star.fill") {
+        ContentView()
+    }
+    .menuBarExtraStyle(.menu)
+    
+    Settings {
+        SettingsView()
+            .onDisappear {
+                NotificationCenter.default.post(name: .settingsWindowClosed, object: nil)
+            }
+    }
+}</code></pre>
+<p>This suggests that SwiftUI’s scene resolution and environment propagation happens in declaration order, and the <code>@Environment(\.openSettings)</code> action in the hidden window needs its context established before the <code>Settings</code> scene is processed.</p>
+<p>Whether this is an Xcode build system quirk, a SwiftUI implementation detail, or intended behavior is unclear from Apple’s documentation. What is clear is that <strong>the hidden window must be declared before the Settings scene</strong> for this workaround to function reliably.</p>
+<p>This adds yet another layer of undocumented complexity to what should be a simple operation - not only do we need a hidden window and activation policy juggling, but we also need to carefully order our scene declarations to avoid mysterious failures.</p>
+<h2 id="understanding-the-workaround">Understanding the Workaround</h2>
+<p>The hidden window serves multiple purposes:</p>
+<ul>
+<li>Provides a valid window context for the <code>openSettings</code> environment action</li>
+<li>Allows us to temporarily switch activation policies without visual disruption</li>
+<li>Gives us a place to handle the complex timing orchestration</li>
+</ul>
+<p>The dock icon manipulation (switching between <a href="https://developer.apple.com/documentation/appkit/nsapplication/activationpolicy/accessory"><code>.accessory</code></a> and <a href="https://developer.apple.com/documentation/appkit/nsapplication/activationpolicy/regular"><code>.regular</code></a>) is necessary because macOS only brings windows to the front reliably for apps with dock icons.</p>
+<h2 id="fin">Fin</h2>
+<p>What should be a one-liner in other frameworks requires careful orchestration in SwiftUI. The combination of <a href="https://developer.apple.com/documentation/swiftui/menubarextra"><code>MenuBarExtra</code></a>, <a href="https://developer.apple.com/documentation/swiftui/settings"><code>Settings</code></a> scenes, and <a href="https://developer.apple.com/documentation/swiftui/opensettingsaction"><code>openSettings</code></a> wasn’t designed with the unique constraints of menu bar apps in mind.</p>
+<p>This shouldn’t be so hard. Opening a settings window is one of the most basic operations any app needs to perform. The fact that it requires hidden windows, activation policy juggling, and precise timing delays in 2025 is a testament to how menu bar apps remain second-class citizens in SwiftUI. Until Apple addresses these fundamental issues, we’re stuck with these workarounds.</p></article></div>

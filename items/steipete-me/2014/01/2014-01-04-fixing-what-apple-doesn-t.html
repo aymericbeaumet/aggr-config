@@ -1,0 +1,13 @@
+<div id="readability-page-1" class="page"><article id="article"><p>It’s one of those days where Apple’s sloppiness on iOS 7 is driving me nuts. Don’t get me wrong; I have a lot of respect in pulling off something as big as iOS 7 in such a short amount of time. It’s just that I see what’s coming in iOS 7.1 and so many annoyances of iOS 7 still aren’t fixed.</p>
+<blockquote lang="en"><p>Can’t stand Apple’s missing attention to detail in iOS 7. I’m just going to hack and patch this myself. <a href="http://t.co/Nnd176rPlz">pic.twitter.com/Nnd176rPlz</a></p>— Peter Steinberger (@steipete) <a href="https://twitter.com/steipete/statuses/419462996617097216">January 4, 2014</a></blockquote>
+
+<p>No, I’m not talking about the offset arrow, <a href="https://twitter.com/steipete/status/419463332190781440">the background</a> — I already made peace with that. But the offset label just looks like crap. (rdar://15748568) And since it’s still there in iOS 7.1b2, let’s fix that.</p>
+<p>First off, we need to figure out how the class is called. We already know that it’s inside the printer controller. A small peak with Reveal is quite helpful:</p>
+<img src="https://steipete.me/images/posts/UIPrinterSearchingView.png">
+<p>So <code>UIPrinterSearchingView</code> is the culprit. Some more inspection shows that it’s fullscreen and the internal centering code is probably just broken or was somehow hardcoded. Let’s swizzle <code>layoutSubviews</code> and fix that. <a href="https://github.com/nst/iOS-Runtime-Headers/blob/d4cb1012a73d8126ab51fa951d4b4150e4c2d115/Frameworks/UIKit.framework/UIPrinterSearchingView.h">When looking up the class via the iOS-Runtime-Headers, it seems quite simple</a>, so our surgical procedure should work out fine:</p>
+
+<p>Let’s run this again:</p>
+<blockquote lang="en"><p>Ah, much better. <a href="http://t.co/8yqoa6lrXU">pic.twitter.com/8yqoa6lrXU</a></p>— Peter Steinberger (@steipete) <a href="https://twitter.com/steipete/statuses/419469468562366464">January 4, 2014</a></blockquote>
+
+<p>Done! Now obviously this is a bit risky — things could look weird if Apple greatly changes this class in iOS 8, so we should test the betas and keep an eye on this. But the code’s written defensively enough that it should not crash. I’m using some internal helpers from <a href="http://pspdfkit.com">PSPDFKit</a> that should be obvious to rewrite — comment on the gist if you need more info.</p>
+<p>Best thing: The code just won’t change anything if Apple ever decides to properly fix this.</p></article><div data-astro-cid-c5a5jkvp=""><p data-astro-cid-c5a5jkvp="">New posts, shipping stories, and nerdy links straight to your inbox.</p><p data-astro-cid-c5a5jkvp="">2× per month, pure signal, zero fluff.</p></div></div>

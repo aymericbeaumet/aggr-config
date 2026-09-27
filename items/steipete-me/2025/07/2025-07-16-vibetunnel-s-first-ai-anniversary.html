@@ -1,0 +1,91 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/vibetunnel-first-anniversary/header.png" alt="" loading="lazy"><p>It’s been one month since we <a href="https://steipete.me/posts/2025/vibetunnel-turn-any-browser-into-your-mac-terminal/">released the first version of VibeTunnel</a> - let’s call it VibeTunnel’s first anniversary!</p>
+<p>VibeTunnel is an app that turns your web browser into a terminal for your Mac (or Linux), perfect for running agents like claude code or gemini from anywhere. Because these slot machines aren’t addictive enough already!</p>
+<blockquote>
+<p><strong>TL;DR</strong> – 2.8k commits, 147k LOC, Mac/Linux/npm releases, 1.0 coming late July. Agents + humans = 🚀</p>
+</blockquote>
+<h2 id="growth--velocity">Growth &amp; Velocity</h2>
+<p>Let’s start with some hard data. VibeTunnel has grown from <strong>4,012 lines of code</strong> in b1 to <strong>147,226 lines</strong> in b11 – that’s a 37x increase in just one month! Through <strong>2,842 commits</strong> from 32 contributors, we’ve built something that might convince non-believers that large projects can indeed be built with agents.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Release</th><th>Date</th><th>Total LOC</th><th>Tests</th><th>Mac</th><th>Web</th></tr></thead><tbody><tr><td>beta.1</td><td>Jun 17</td><td>4,012</td><td>0</td><td>0</td><td>4,012</td></tr><tr><td>beta.3</td><td>Jun 23</td><td>49,133</td><td>8,324</td><td>14,266</td><td>18,082</td></tr><tr><td>beta.6</td><td>Jul 3</td><td>106,263</td><td>27,890</td><td>20,305</td><td>61,554</td></tr><tr><td>beta.10</td><td>Jul 15</td><td>144,021</td><td>36,079</td><td>34,462</td><td>83,009</td></tr><tr><td>beta.11</td><td>Jul 16</td><td>147,226</td><td>37,430</td><td>34,959</td><td>83,894</td></tr></tbody></table>
+<p>The pace has been intense: <strong>436 commits</strong> in the explosive growth phase (beta.2 to beta.3) where we added Mac and iOS apps, averaging <strong>126 commits per release</strong>. Test coverage improved dramatically, and we even went full circle through Rust, Go, to Node as server backends, with plans to <a href="https://github.com/amantus-ai/vibetunnel/pull/297">bring Rust back</a>. And aren’t languages really just implementation details, when you have agents?</p>
+<h2 id="memorable-milestones">Memorable Milestones</h2>
+<h3 id="terminal-title-management-b6">Terminal Title Management (b6)</h3>
+<p>My personal fav feature landed in b6: the <code>vt title</code> command. As a maniac who runs multiple Claudes in parallel, I needed a way to track what each agent is up to. <a href="https://steipete.me/posts/command-your-claude-code-army-reloaded/">This feature</a> lets you dynamically update session names from within the terminal, and then vt updates the title of your terminal window.</p>
+<h3 id="the-node-pty-fork-b9">The Node-pty Fork (b9)</h3>
+<p>We had to <a href="https://github.com/amantus-ai/vibetunnel/pull/304">fork Microsoft’s node-pty</a>. Using VibeTunnel randomly caused crashes in VS Code - which should be completely unrelated. After some gnarly debugging, I found a thread-safety issue and some totally unnecessary socket code. Forked it and things are better now, eliminating the random crashes that were frustrating early adopters. Eventually though that code will be burned and replaced with Rust.</p>
+<h3 id="repository-discovery-b10">Repository Discovery (b10)</h3>
+<p>Once the core features were stable, I could focus more on the Mac side. The new <a href="https://github.com/amantus-ai/vibetunnel/pull/274">session picker automatically scans your project folder</a> and shows your git repos. Small feature, but so convenient - saving developers 10-20 seconds per session start!</p>
+<h2 id="key-lessons">Key Lessons</h2>
+<h3 id="agents-need-railguards">Agents Need Railguards</h3>
+<p>In the beginning we’ve been vibing this project pretty hard and just pushed to main, full chaos mode. It worked quite well, but as the project grew, structure is needed. We started adding tests once we felt the pain of things breaking all the time, and there’s still work to do to increase test coverage. Tests are even more important with agents, since you can’t trust them. They’ll eventually break stuff and prompt that everything’s great and ready to ship.</p>
+<h3 id="agents-need-thinking">Agents Need Thinking</h3>
+<p>I approach almost every new feature with a prompt that includes an issue, plenty of brabble from me in how I think that feature should be tackled, and then I add “ultrathink, make a plan first and give me at least 3 options”. Then either I pick one of the options or add more info to further refine the plan, before agents do anything. This is much more effective than just letting them run loose without a plan - as they’ll usually pick the simplest one, with the most technical debt.</p>
+<h3 id="pathfinder-principle">Pathfinder Principle</h3>
+<p>I prefer opportunistic refactoring - fixing related issues while you’re in the code anyway. <a href="https://github.com/amantus-ai/vibetunnel/pull/345">Consider this PR</a>: I could have merged the bandaid fix, but then opted to not only fix the root issue, but completely overhaul how messages are sent in the unix socket.</p>
+
+<p>Key lesson: Even “good first issues” can hide complexity. <a href="https://github.com/amantus-ai/vibetunnel/pull/298">This PR</a> fixed keyboard capture on macOS, but broke it elsewhere. The real fix took days of research across all platforms. Now we have <a href="https://github.com/amantus-ai/vibetunnel/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22">“good first issues”</a> that are actually good first issues, and a <a href="https://discord.gg/3Ub3EUwrcR">Discord</a> to coordinate the vibing.</p>
+<h3 id="its-not-just-code">It’s Not Just Code</h3>
+<p>Agents help with code, but product management, support, and documentation still need human touch - people want to read my voice, not just my intent.</p>
+<h2 id="thank-you">Thank You!</h2>
+<p>VibeTunnel wouldn’t be where it is today without our amazing contributors:</p>
+<p><strong>Core Team</strong>: <a href="https://github.com/badlogic">Mario Zechner</a> (291 commits) and <a href="https://github.com/mitsuhiko">Armin Ronacher</a> (132 commits) who helped build the foundation and shaped the architecture.</p>
+<p><strong>Major Contributors</strong>: <a href="https://github.com/manuelmaly">Manuel Maly</a> (72), <a href="https://github.com/hjanuschka">Helmut Januschka</a> (55), and <a href="https://github.com/jhurray">Jeff Hurray</a> (36) for their significant contributions.</p>
+<p><strong>Community Heroes</strong>: Billy Irwin, Igor Tarasenko, David, Thomas Ricouard, Piotr, hewigovens, Clay Warren, Chris Reynolds, Madhava Jay, Michi Hoffmann, Raghav Sethi, Tao Xu, Devesh Shetty, Jan Remeš, Luis Nell, Luke, Marek Šuppa, Sandeep Aggarwal, Zhiqiang Zhou, and noppe - every contribution matters!</p>
+<p><strong>Our Robot Overlords</strong>: Claude, Cursor, and Devin - in all honesty tho, it’s 98% Claude 🤖.</p>
+<p>Whether you fixed a typo, squashed a bug, or built entire features - thank you for vibing with us! 🚀</p>
+<h2 id="looking-forward">Looking Forward</h2>
+<p>We just shipped beta 11 and a standalone npm with Linux support and the bug list is slowing down. 1.0 ships end of July, followed by the iOS app and some wild ideas in the pipeline: Agent Mode, Apple Watch app, voice mode. The future of terminal access is bright!</p>
+<p>Oh, and one more thing - we’re creating a VibeTunnel organization! As the project grows beyond its scrappy startup phase, we’ll be moving the repository to its own org. This will help us better manage the ecosystem of tools, plugins, and integrations that are starting to emerge around VibeTunnel.</p>
+<p>Since agents can’t eat cake, I made them a different present: VibeTunnel is now on <a href="https://vt.sh">vt.sh</a>! If you haven’t tried it yet, now’s the perfect time - <a href="https://github.com/amantus-ai/vibetunnel/releases">download the Mac app</a> and post a picture on Twitter of the weirdest place you’re vibin’!</p></article></div>

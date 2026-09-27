@@ -1,0 +1,35 @@
+<div id="readability-page-1" class="page"><div><p>When people talk about AI agents "closing the loop," they usually mean the agent verifies its own work before responding, which can be confusing as "If the tool call loop is hardcoded, how does the model decide to verify its work?"</p>
+<p>Short answer: <strong>The loop is hardcoded. What the model does <em>inside</em> the loop is not.</strong></p>
+<p>Every agent framework runs roughly the same cycle: model generates → if tool call, execute it → feed result back → model generates again → repeat until the model returns text (no more tool calls). That loop is scaffolding. It's the same for every agent.</p>
+<p>The difference is what the model <em>chooses to do</em> within that loop. A model that "closes the loop" doesn't need a special loop, it uses the existing one to call verification tools <em>before</em> deciding it's done.</p>
+<h2 id="the-inner-loop-agent-verifies-its-own-work">The inner loop: agent verifies its own work</h2>
+<p>The <strong>inner loop</strong> is what happens during a single task, before the agent responds to user with a text. The agent writes code, runs the tests, reads the error, fixes the edge case, re-runs and only then generates a text response for the user. It's the tight feedback cycle between the model and its tools.</p>
+<p><strong>Example:</strong> You ask "fix the failing test in <code>auth.ts</code>."</p>
+<p>A weak agent edits the file and says "Done!" A strong agent edits → creates tests → runs the tests → sees a failure → fixes the edge case → runs again → sees green → then responds. Same infrastructure, different behavior.</p>
+<p><strong>Bad agent</strong> — edits and stops:</p>
+<p><img src="https://www.philschmid.de/static/blog/inner-loop-vs-outer-loop/bad-agent.png" alt="bad-agent"></p>
+<p><strong>Good agent</strong> — verifies before responding:</p>
+<p><img src="https://www.philschmid.de/static/blog/inner-loop-vs-outer-loop/good-agent.png" alt="bad-agent"></p>
+<p>Both agents use the exact same hardcoded tool loop. The difference is the good agent <em>chose</em> to create/call verfications before responding. Nothing forced it to.</p>
+<p>Where does that choice come from? Today, mostly from the system prompt ("always run tests after code changes"). Increasingly, from post-training — e.g. test pass/fail as a reward signal, so the model internalizes the verify step.</p>
+<h2 id="the-outer-loop-learning-across-turns">The outer loop: learning across turns</h2>
+<p>The <strong>outer loop</strong> is what happens across multiple turns/sessions between the user and the agent over time. The user gives the agent a task, it works on it (inner loop), returns a result, and then the user comes back with the next task. The question is: did the agent learn anything from the last turn?</p>
+<p>Without persistent memory, every turn is a clean slate. The agent that failed on pagination yesterday will fail on it again today.</p>
+<p><img src="https://www.philschmid.de/static/blog/inner-loop-vs-outer-loop/outer-loop.png" alt="outer-loop"></p>
+<p>Almost no agent does this natively today. The outer loop requires persistent state, skills, rules files, or notes that survive between turns and sessions. Some early examples:</p>
+<ul>
+<li><strong>AGENTS.md:</strong> Manual persistent instructions the user writes for future turns</li>
+<li><strong>Session handoff documents:</strong> Structured summaries an agent writes for follow-up work</li>
+<li><strong>SKILL.md:</strong> Agent analyzes failures and auto-generates Skills so the next task doesn't repeat mistakes</li>
+</ul>
+<p>The inner loop is about reliability within a task. The outer loop is about getting smarter over time.</p>
+<h2 id="tldr">TL;DR</h2>
+<ul>
+<li><strong>The loop is hardcoded.</strong> Every agent has the same generate → tool call → feed back cycle.</li>
+<li><strong>What the agent does inside the loop is learned.</strong> A good agent calls verification tools before responding. A weak one just stops.</li>
+<li><strong>Inner loop</strong> = verify within a task (write tests, run them, read files back, check against original ask).</li>
+<li><strong>Outer loop</strong> = carry lessons across turns (persistent memory, skills, rules files).</li>
+<li><strong>Closing the loop ≠ new infrastructure.</strong> It's the agent making better decisions within existing infrastructure.</li>
+</ul>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

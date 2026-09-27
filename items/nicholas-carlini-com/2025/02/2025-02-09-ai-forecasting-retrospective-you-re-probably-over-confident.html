@@ -1,0 +1,782 @@
+<div id="readability-page-1" class="page"><p>
+            Late last year, I published an article asking readers to <a href="https://nicholas.carlini.com/writing/2024/forecasting-ai-future.html">make 30 forecasts about the future of AI</a> in 2027 and 2030---from whether or not you could buy a robot to do your laundry, to predicting the valuation of leading AI labs, to estimating the likelihood of an AI-caused catastrophe.
+        </p><p>
+          But I did something slightly different with these questions.
+          Instead of asking "how many math theorems will an AI solve?"
+            I asked for a 90% confidence interval on the number of theorems solved.
+          In this post I'll analyze the distributions of peoples's answers,
+          because it's still too early to grade the correctness.
+          Here's an example question, and its answer distribution:
+        </p><p>
+            <i>
+              “The best off-the-shelf AI system will have scored better than between X% and Y% of all other participants (with a 90% confidence interval) in a widely recognized competitive programming contest”
+            </i>
+        </p><p>
+          Now what you'll notice is that, <i>regardless</i> of what the answer ends up being in 2027,
+          AT MOST HALF OF PEOPLE CAN BE RIGHT.
+          Despite the fact that I asked people to give 90% confidence intervals,
+          and <i>anyone</i> could have just given the range [0, 100],
+          people decided to instead give really narrow ranges.
+          (To say nothing of OpenAI's <a href="https://openai.com/index/openai-o3-mini/">recent o3 results</a>
+          that likely score 90%+.)
+        </p><p>
+          This overconfidence is consistent across all questions,
+          and it really highlights a growing worry I have:
+          almost everyone (even people who read my website!)
+          appears overconfident about where things are going---be
+          it those saying AGI is coming and we're all going to be unemployed,
+          or those who say that LLMs will never be able to do anything useful and this whole AI thing is a NFT-style fad.
+        </p><p>
+          In the remainder of this article I am going to talk about the specific details of questions
+          in the forecast, and how people's answers compare.
+          I also gave people the opportunity to write a short explanation of their reasoning
+          (and asked permission to share this reasoning),
+          and so I'll give some of the most interesting responses people gave here.
+        </p><p>
+          But first!
+          If you have not yet taken the survey, I think you would get a lot more out of this post
+          if you answer at least some of the questions on the forecast before continuing.
+          Forecasting is the best way to check your beliefs,
+          and I think future-you will appreciate having a record of what 2025-you thought.
+          The remainder of this article will assume you have done this.
+        </p><div id="restOfBlog">
+
+
+          <h2>A question-by-question breakdown</h2>
+
+          <p>
+            I asked thirty questions, and will now go through them in turn and highlight a few of the
+            more interesting answer distributions and  responses people gave.
+            Because it's been just a few months since I asked these questions,
+            I'm not going to actually try and give resolutions to them yet.
+            Maybe in 2026 I'll start to resolve questions early if the answers are clear.
+          </p>
+
+          <p>
+            Let's begin!
+          </p>
+
+<h3>AGI Lab Valuation</h3>
+<center>
+    <i>The most valuable "AI Lab" (e.g., OpenAI, Anthropic, Mistral, DeepMind if it were spun out of Google)  will be between $X and $Y billion USD (90% confidence interval)
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q1_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q1_2030.png"></p>
+
+          <p>
+            This question has a lot of variance in the answers.
+            (Note the log scale on the y-axis.)
+            A few people are willing to put some probability on 20 trillion
+            dollar valuations, and others on ~almost zero.
+          </p>
+
+          <p>
+            I was very surprised by how narrow many ranges were for this question.
+            At least a few people seem confident enough in their predictions that they are willing to
+            say they have a 90% confidence the most valuable labs will be worth between exactly 300 and 500 billion dollars.
+            But like: this seems a very narrow range?
+            (Although I like whoever was the person who put a range of 2 billion to 20 trillion.)
+          </p>
+
+          <p>
+            I thought it was interesting that the "middle" answer that falls within most people's
+            confidence intervals for 2030 is actually lower
+            than the middle answer for 2027. I can't explain that.
+          </p>
+
+          <p>
+            One of the more common comments I saw when people gave low answers were people saying "the tech [will] become commoditized" or people who just think that we'll just "have AI takeover by 2030" and so the labs will be worth nothing.
+          </p>
+    
+
+    
+<h3>AI Lab Collapse</h3>
+<center>
+    <i>There is an X% chance that at least one of OpenAI, Anthropic, or DeepMind will be functionally dead
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q2_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q2_2030.png"></p>
+
+          <p>
+            It was interesting to see that people basically don't think that anything will change
+            much by 2027, but by 2030 people are much more confident something will go wrong with
+            at least one of the labs.
+            I tend to agree here.
+            But there were several comments of the form: "railroads also failed competition will cause some to die", which seems basically right to me? But it's hard to say. 2027 is not far off, and dying is often slow (until it's not).
+          </p>
+
+    
+<h3>AI Workers</h3>
+<center>
+    <i>The revenue generated by "AI workers" across all jobs (e.g., programmers, lawyers, accountants, cooks, plumbers, teachers, etc.) in the prior year is between $X billion and $Y billion USD (90% confidence interval)
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q3_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q3_2030.png"></p>
+
+          <p>
+            This question had a bunch of tighter guesses that surprised me.
+            I was expecting even wider ranges in part because I have no idea how I'm going to even be
+            able to get a good estimate of this in 2027.
+          </p>
+
+          <p>
+            Also perhaps regretable is that I capped the upper bound of the question at $3 trillion dollars, and by 2030
+            a good number of people thought it would be at (or exceed) that value. I think this is
+            not unreasonable, and probably in retrospect I should have made the upper bound higher.
+            I don't remember what my prediction here was (that'll be the focus of my next
+            article, and I don't want to spoil it for myself).
+          </p>
+
+    
+<h3>AI Revenue Model</h3>
+<center>
+    <i>There is an X% chance that a highly-popular state-of-the-art AI system is supported by advertising
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q4_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q4_2030.png"></p>
+
+
+          <p>
+            It's fascinating how people are confident this won't happen before 2027,
+            but most people agree it will by 2030.
+            I have nothing new to offer here.
+            My favorite commentary on this was the person who said “god i really hope not”.
+          </p>
+
+    
+<h3>Recursive Self Improvement</h3>
+<center>
+    <i>There is a X% chance that most of the improvements in the best AI systems will be a direct result of the prior generation of AI systems (and not due to humans researchers)
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q5_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q5_2030.png"></p>
+
+          <p>
+            I'm surprised how many people think this won't happen,
+            but also think that AI labs will be valued at tens of trillions of dollars.
+            In order for a company to be worth 10x more than any company is at this moment,
+            and for that to happen in two years, I'd imagine some kind of self-improvement
+            would be a necessary prerequisite.
+          </p>
+
+
+    
+<h3>Proving Theorems</h3>
+<center>
+    <i>Between X and Y famous unproven mathematical conjectures (inclusive, 90% confidence interval) have been proven by an AI system
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q6_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q6_2030.png"></p>
+
+          <p>Most people seem skeptical here, and many respondents seem to think that "zero" is a likely answer.
+            I think this is probably right,
+            and would put at least 10% probability on LLMs not advancing much more in the next two years.
+          </p>
+          <p>
+            This seems to be captured in the comments people gave here, saying
+            "Barring a shift in how AI "reasons" I don't think this will happen. It will be interesting to be wrong here." and "LLMs are great at predicting what we already know and these things are by and large not great at novel reasoning."</p>
+    
+<h3>Competitive Programming</h3>
+<center>
+    <i>The best off-the-shelf AI system will have scored better than between X% and Y% of all other participants (with a 90% confidence interval) in a widely recognized competitive programming contest
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q7_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q7_2030.png"></p>
+
+          <p>This is the question we're closest to resolving already. OpenAI's
+          o3 model on CodeForces is now in the top 1% of humans. We haven't seen
+            it compete yet, but I would be more surprised if in 2027 it doesn't
+            score first place than anything else.
+            (But I also wouldn't be surprised if it was "only" top 5%. You should have wide error bars!)
+          </p>
+
+          <p>
+            But maybe what surprised me most is the people who had, at the high end,
+            a guess with less than top-50%. Even when I launched these forecasting questions,
+            I think o1 would probably have been in the top 50% of some competitive programming contest.
+            So they're probably just (confidently) wrong even as of when they made the prediction.
+          </p>
+
+          <p>
+            And to some extent I can't fault them. Things change so fast that it can be really hard to
+            keep track of what's going on. If the last time you looked at this AI thing was early 2023
+            and played around with GPT-3.5 you'd (rightly) believe they were pretty bad at programming.
+          </p>
+
+    
+<h3>Displacing Jobs</h3>
+<center>
+    <i>The creation of "AI Employees" causes mass job displacement, resulting in an unemployment rate of between X% and Y% in the United States (90% confidence interval)
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q8_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q8_2030.png"></p>
+
+          <p>
+            Putting answers around 3% basically means things stay as they are, and not much changes.
+            Even in 2030, people put numbers basically at the same value.
+            On one hand it doesn't surprise me that this is roughly where the median is,
+            by and large "things will stay the same as they are" is a good guess.
+            But there are a lot of people where 4% is outside of their 90% confidence interval.
+            If any of these people were to be right, with 10%+ unemployment, that would be a huge deal.
+          </p>
+
+    
+<h3>Self Driving Trips</h3>
+<center>
+    <i>Self-driving cars have made between X million and Y million (90% confidence interval) trips in the prior year
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q9_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q9_2030.png"></p>
+
+          <p>
+            This one I find fascinating. In particular, I expected more people to put "zero" within their
+            confidence intervals, which seems entirely possible to me if something bad happens before
+            2027 and governments step in and make it illegal. I think there's a fairly low probability
+            of this happening, but it's probably greater than 5% probable?
+          </p>
+
+          <p>Someone also left my favorite comment of the entire survey on this one: "Maybe no self-driving cars in 2029 because [we're all] dead".
+            Which, if you're someone who believes in Doom, I guess is a reasonable reason to put zero as an answer.
+            (I suppose this does also tell you something about
+            my audience.)
+          </p>
+
+    
+
+    
+<h3>Robot Helper</h3>
+<center>
+    <i>There is a X% chance that I will be able to purchase an off-the-shelf robot for under USD 100,000 that can perform at least one household task  that requires the ability to grasp and manipulate objects (e.g., wash dishes, make a meal, fold laundry)
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q10_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q10_2030.png"></p>
+
+          <p>
+            It's at first maybe surprising that almost no one thinks we'll have this by 2027,
+            but half of the people who answered this forecast said 10% unemployment in the US is possible.
+            The commentary, unsurprisingly, explains why:
+            "Reality is hard!" and "Robotics is really hard and making it cheap is even harder."
+            Maybe this is true, but it feels like if we can solve novel math problems,
+            we can just use this to solve robotics? I don't know.
+          </p>
+
+    
+<h3>Cost per word</h3>
+<center>
+    <i>An AI system that benchmarks at least as well as current state-of-the-art systems costs $X USD to $Y USD (90% confidence interval) to write a million output words (~10 books)
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q11_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q11_2030.png"></p>
+
+          <p>I think people here were far too pesimistic. Even just looking at the recent <a href="https://api-docs.deepseek.com/">DeepSeek v3</a> (which doesn't quite reach OpenAI's 4o or Anthropic's 3.5-sonnet levels) but costs just $1 per million tokens, I think anyone who didn't include $1 in their answer is probably going to be wrong. I'll just quote someone who gave the answer I'd give here: "Costs of training and using a LLM has fallen DRAMATICALLY and capabilities have increased DRAMATICALLY in the last 2 years. I think it'll be rill [sic] cheap."</p>
+
+          <p>
+            I basically agree with this: and I'm very surprised people didn't have guesses maybe 5-10x lower on average.
+          </p>
+
+    
+<h3>Reviewing AI Work</h3>
+<center>
+    <i>Between X% and Y% of humans are employed in jobs that mostly consist of reviewing/supervising the output of AI systems
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q12_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q12_2030.png"></p>
+
+          <p>
+            Most people who put numbers on the lower end were again talking about
+            non-white-collar jobs, and paired with the fact people think robotics will be hard,
+            explains the generally low answers.
+            But also: look at these people confident in 25%+!
+          </p>
+
+          <p>
+            This question will, I think, be hard for me to accurately evaluate.
+            I also expected this would cause people to increase their margins of error.
+          </p>
+
+<h3>Expert Performance</h3>
+<center>
+    <i>There is a X% chance that the best AI systems will out-perform PhDs and top experts in most problem-solving tasks
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q13_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q13_2030.png"></p>
+
+          <p>
+            I think here I'll just highlight two conflicting comments that I think explain the main debate:
+            one person said
+            "AI is as smart as a dumb person; which I don't think smart people are fundamentally different from."
+            and another said
+            "2027 is right around the corner, and problem solving (expansive thinking) is still lagging far behind summarization or referencing materials (internal thinking)."
+          </p>
+            
+    
+<h3>Open Source Release</h3>
+<center>
+    <i>The delay from the best "closed-source" model release to it being reproduced in an "open source" model
+  will be between X and Y months (90% confidence interval)
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q14_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q14_2030.png"></p>
+
+          <p>
+            This one is I think one of the hardest to predict given the number of factors at play
+            that would impact what will happen.
+            It also shows: the error bars here are generally pretty wide.
+          </p>
+
+          <p>
+            People's answers are also wildly different in why they made their predictions:
+            ranging from
+            "It will catch up because the closed source race is slowing down", to
+            "Larger and larger resources are needed to train models, including increasingly rarefied training data..."
+            to
+            "If inference is the way forward then open weight LLMs become harder to create and not easier bc they require more compute."
+          </p>
+
+<h3>Playing Board Games</h3>
+<center>
+    <i>There is a X% chance that an off-the-shelf AI system can, if provided the rules to an arbitrary turn-based board game,  play roughly as well as a casual player of the game
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q15_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q15_2030.png"></p>
+
+          <p>
+            I found the bimodal distribution of answers here interesting. Most people are either very confident
+            that it won't happen or very confident that it will.
+            The commentary reflects the different reasons you could have here,
+            with some people commenting on the fact that it's "hard in practice to extend AI to new domains"
+            but others just saying "This probably already can happen."
+            (You also get a mix of people saying "Most casual players are bad at games LOL even though I don't really trust LLM ability at novel challenges")
+          </p>
+
+    
+<h3>Agents</h3>
+<center>
+    <i>There is a X% chance that the majority of consumer AI applications will operate autonomously on multi-step tasks rather than by just answering user questions as chatbots
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q16_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q16_2030.png"></p>
+
+
+          <p>
+            Seems like people don't really believe in the "year of the agent" as being pushed by the large tech companies.
+            I don't blame them, and taking the human out of the loop seems super dangerous to me.
+            But when has the potential harm of a technology ever stopped it from being developed?
+            So maybe it'll happen to everyone's dismay.
+          </p>
+
+    
+<h3>Power Consumption</h3>
+<center>
+    <i>Between X% and Y% (90% confidence interval) of all power generation in the United States will be dedicated to AI training/inference
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q17_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q17_2030.png"></p>
+
+
+          <p>
+            I am surprised how few people put 1% in their confidence interval.
+            If this whole AI thing doesn't take off,
+            and the labs either fail or people just stop using LLMs as much,
+            then anything above 1% seems excessively high for a lower bound.
+            And I think that seems like a reasonable scenario.
+          </p>
+
+    
+<h3>Training Cost</h3>
+<center>
+    <i>Between X billion and Y billion US dollars (90% confidence interval) will be spent to train a new state-of-the-art AI system
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q18_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q18_2030.png"></p>
+
+
+          <p>
+            This one again has a bunch of possible things that could impact the cost of training a new model.
+            Maybe we find a much better training algorithm.
+            Maybe the AI bubble pops and we stop spending so much money on it.
+            What I found most interesting in the distribution of answers is that people who
+            believed the costs could become very large (e.g., tens of billions of dollars) tended
+            to have much wider margins of error compared to people who were <i>very</i> confident
+            no training run would reach above a billion dollars.
+          </p>
+
+    
+<h3>Transformers are all you need?</h3>
+<center>
+    <i>There is a X% chance that the best AI system will be recognizable as (a slight modification of) the transformer-based Large Language Models (LLMs) we use in 2024
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q19_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q19_2030.png"></p>
+
+
+          <p>
+            Personally I think this distribution is one of the more well calibrated ones.
+            Transformers feel like they'll stick around for a while longer, I wouldn't say
+            with 100% probability, but relatively high.
+          </p>
+
+          <p>
+            What I found most interesting about this question is how much it flips when you go
+            from 2027 to 2030: all of a sudden people go from almost certain that transformers
+            will be the dominant architecture to highly confident that they won't be.
+            Three years isn't that long of a time for this change to happen in,
+            but then again, transformers are only a handful of years old so maybe it makes sense.
+          </p>
+
+    
+<h3>AI Damage</h3>
+<center>
+    <i>An AI system will cause between X thousand and Y thousand deaths (90% confidence interval),  or between X and Y billion dollars (also 90% confidence interval) in damage, within a 3-day period
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q20_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q20_2030.png"></p>
+
+          <p>
+            This question is again really interesting in how it seems like everyone who was willing to
+            assume there could be a million deaths or a trillion dollars in damage was also willing to
+            believe there could be zero deaths or zero dollars in damage.
+          </p>
+
+          <p>
+            When people explained why their answers were so low, a lot of people
+            focused on saying something like "AI systems will not be directly plugged into large critical infrastructure in less than 6 years...".
+            I really hope they're right! But I'm not sure I believe it.
+          </p>
+
+          <p>
+            Maybe not unsurprisingly, the damage numbers go up quite a bit when you move from 2027 to 2030,
+            but even still a bunch of people basically believe there won't be any catastrophic events caused by AI.
+            Again I really hope they're right.
+          </p>
+
+    
+<h3>CBRN Risk</h3>
+<center>
+    <i>There is a X% chance that an AI system exists that can meaningfully improve the ability of non-expert humans to perform sophisticated cyber attacks, develop biological or nuclear weapons, or otherwise cause severe harm
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q21_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q21_2030.png"></p>
+
+
+          <p>
+            I found this one surprising to compare to the prior question.
+            The majority of people here seem to think that AI systems won't be able to
+            significantly improve the ability of non-experts to cause harm,
+            but then in the prior question the majority of people had damage numbers above
+            a few billion dollars.
+            So I guess these people believe experts will cause damage with AI systems?
+            I'd be curious to talk to someone who believes this to understand where they're coming from.
+          </p>
+
+    
+<h3>Concentration of Power</h3>
+<center>
+    <i>There is a X% chance that the impact of AI has significantly, and discontinuously, increased the concentration of power or wealth
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q22_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q22_2030.png"></p>
+
+          <p>
+            This is actually the risk I'm most worried about and believe will happen with
+            the highest likelihood.
+            But some people just flat out commented "No way." as their only explanation.
+          </p>
+
+<h3>Trust in AI</h3>
+<center>
+    <i>There is a X% chance that people will regularly ask AI systems answers to questions, or plans to achieve some goal, and even if the answer seems unreasonable, believe it because they assume the AI system "knows best"
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q23_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q23_2030.png"></p>
+
+
+          <p>
+            I think the discrepancy between 2027 and 2030 is interesting here, too:
+            almost everyone thinks that by 2030 most people will trust AI systems to give them
+            the best answer, but in 2027 it's a lot more split.
+          </p>
+
+    
+<h3>AI Fiction</h3>
+<center>
+    <i>An AI system has 'authored' between X and Y (inclusive, 90% confidence interval) high-quality fiction books that have appeared on the New York Times best seller list
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q24_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q24_2030.png"></p>
+
+          <p>
+            This question is interesting to compare to the one about how many math theorems will be proven for the
+            first time by an AI system: the distributions seem surprisingly similar?
+            I would have expected that people might be optimistic either on the
+            case that they could be useful for doing artsy-writing, or that they could be useful for doing math,
+            but not both.
+          </p>
+
+    
+
+    
+<h3>AI Influencers</h3>
+<center>
+    <i>The largest AI social media account will have between X% and Y% (90% confidence interval) the views/followers of the largest human on that platform
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q25_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q25_2030.png"></p>
+
+
+          <p>
+            About a third of people think that by 2030 the most popular influencer will be an AI system.
+            That would be a truly wild world to live in.
+          </p>
+
+    
+<h3>Movie Production</h3>
+<center>
+    <i>There is a X% chance that an AI system could produce a high-quality live-action hour-long movie given a rough script
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q26_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q26_2030.png"></p>
+
+          <p>
+            Interestingly, people seem to think that this is harder than writing fiction.
+            Maybe that's because models are known to be good at text, currently?
+            But I'd say that long-term coherence is the challenging part for both,
+            and it feels like there's less coherence needed to make a good movie than write a book from scratch.
+          </p>
+
+          <p>
+            On the other hand, there's probably less economic incentive to make movies with AI than to make
+            an AI system that's fantastic at working with text. So maybe this explains things completely.
+          </p>
+
+    
+<h3>Hallucinations</h3>
+<center>
+    <i>There is a X% chance that state-of-the-art AI systems still regularly "hallucinate" incorrect solutions to problems
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q27_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q27_2030.png"></p>
+
+          <p>I'll highlight two comments here.
+            First, someone who said "This might be the single most important thing for AI to get right.",
+            which I agree with.
+            And second, the person who said
+            "to quote karpathy: "I always struggle a bit with I'm asked about the "hallucination problem" in LLMs. Because, in some sense, hallucination is all LLMs do. They are dream machines."" who
+            I also agree with.
+            Taken together: seems bad?
+          </p>
+    
+<h3>Jailbreaks</h3>
+<center>
+    <i>There is a X% chance that an open-weight state-of-the-art AI system exists that can reliably withstand jailbreaking and "prompt injection" attacks  by both human and automated adversaries
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q28_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q28_2030.png"></p>
+
+          <p>
+            Again people are pessimistic about progress in these kinds of hard problems.
+            I tend to agree.
+          (I appreciate the one person whose entire response was the word <a href="https://x.com/elder_plinius">pliny</a>.)
+          </p>
+
+    
+<h3>Pause</h3>
+<center>
+    <i>There is a X% chance that there has been a 6+ month pause on AI development where companies are prevented from training more capable models
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q29_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q29_2030.png"></p>
+
+          <p>
+            Well this seems like people don't think it will happen,
+            but there are a few people who have put nearly-100% probabilities on it happening by 2030.
+          </p>
+            
+
+          <p>
+            There's a whole <a href="https://en.wikipedia.org/wiki/PauseAI">Pause AI</a> movement,
+            which I guess people are pessimistic about?
+          </p>
+
+    
+<h3>Manhattan Project</h3>
+<center>
+    <i>There is a X% chance that the US or China has created a public AI "Manhattan Project" to pursue AI, AGI, AI Safety, or other AI-related goals
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q30_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q30_2030.png"></p>
+
+
+          <p>
+            Again look at both 2027 and 2030. It seems like people are very confident that we'll try to do this by 2030,
+            presumably because governments are slow and it takes a while to get things going.
+            On the other hand, if the AGI thing doesn't work out, we almost definitely won't see this happen.
+            So the high degree of confidence in the answer "yes" is surprising to me.
+          </p>
+
+          <p>
+            (To clarify: the recent <a href="https://openai.com/index/announcing-the-stargate-project/">stargate announcement</a> isn't government money, and so does not count.)
+          </p>
+
+    
+<h3>Concerns about AI</h3>
+<center>
+    <i>In a national poll, between X% and Y% of the US population (with a 90% confidence interval) ranks "concerns about AI" as a top societal issue
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q31_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q31_2030.png"></p>
+
+          <p>
+            I'll begin by quoting the person who said "Historically the most important is basically always below 20, so it would have to be a huge crisis to get much higher. Also plausible there are no polls.".
+            I agree; I think getting 20% would be enormous,
+            but it seems like most people actually think this will happen!
+            I'd be curious to hear the reason why people think this will happen,
+            if it's because of job loss or something else.
+          </p>
+
+    
+<h3>Useless Questions</h3>
+<center>
+    <i>Between X and Y (inclusive, 90% confidence interval) of the questions in this forecast are so misguided that their resolution is uninteresting
+</i>
+    </center>
+
+
+<p><img src="https://nicholas.carlini.com/writing/2025/qs_fig/q32_2027.png">
+<img src="https://nicholas.carlini.com/writing/2025/qs_fig/q32_2030.png"></p>
+
+          <p>The final question I asked was what fraction of questions I asked were just bad questions.
+            I'm glad to see the number is relatively small, so maybe I didn't waste everyones' time
+            asking so many.
+            On the other hand some people seem like they think I may have done a truly terrible
+            job with these! I guess that may be possible, who knows.</p>
+
+          <p>
+            Also: I appreciate whoever wrote as the comment "Haha".
+          </p>
+
+    <br>
+    <h2>Concluding Thoughts</h2>
+
+          <p>
+            This is part 2.5 in a 3-part series I decided to write about "AI".
+            In the <a href="https://nicholas.carlini.com/writing/2024/how-i-use-ai.html">first post</a>
+            I wrote about how I'm using these recent models to advance my own research.
+            Then, last time, I asked people to
+            forecast <a href="https://nicholas.carlini.com/writing/2024/forecasting-ai-future.html">how they think the future of AI will go</a>.
+            This post, as you just saw, was a summary of those predictions.
+            Next time I plan to finish the series by talking about how I think the future of AI will go
+            and what risks I'm worried about.
+          </p>
+    
+          <p>
+            If you haven't <a href="https://nicholas.carlini.com/writing/2024/forecasting-ai-future.html">made your own forecasts yet</a>,
+            I honestly believe this is approximately ~the most useful thing you can spend thirty minutes on today.
+            And not because my particular questions are fantastic,
+            but because this field is changing so fast that I think it is
+            extremely important to be willing to humble yourself and make falsifiable predictions.
+            So if you don't like these questions above,
+            I'd encourage you to (publicly!) make as many falsifiable predictions as you can,
+            so that your future self can keep your past self honest.
+          </p>
+
+          <p>
+            And with that said, I'll see you next time to talk about my own predictions.
+            (And, in a year, I'll hopefully be able to actually start to resolve some of these questions
+            one way or the other.)
+          </p>
+          
+        </div></div>

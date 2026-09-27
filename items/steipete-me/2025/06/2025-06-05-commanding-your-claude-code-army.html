@@ -1,0 +1,69 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/commanding-your-claude-code-army/header.png" alt="" loading="lazy"><blockquote>
+<p><strong>Update</strong>: There’s a better solution now! Check out <a href="https://steipete.me/posts/2025/command-your-claude-code-army-reloaded/">Command Your Claude Code Army, Reloaded</a> for VibeTunnel integration that gives Claude automatic title management.</p>
+</blockquote>
+<p><strong>TL;DR</strong>: Running multiple Claude Code instances? Here’s a ZSH trick to keep your terminal titles organized and your sanity intact.</p>
+<p>I’ll admit it - I’ve become a <a href="https://www.anthropic.com/claude-code">Claude Code</a> power user. At any given moment, I have at least three instances running: one for writing blog posts, another fixing that “quick” bug that’s now in hour three, and a third doing something I definitely forgot about. My terminal looks like a Claude Code convention.</p>
+<h2 id="the-problem-too-many-claudes-not-enough-context">The Problem: Too Many Claudes, Not Enough Context</h2>
+<p><a href="https://ghostty.org/">Ghostty</a> (yes, with two T’s - it’s my favorite terminal) only shows the process name in the title. When you have six tabs all saying “claude”, finding the right one becomes a game of terminal roulette.</p>
+<p>This is especially painful when you’re running Claude with the <code>--dangerously-skip-permissions</code> flag (yes, I live dangerously - see my post about <a href="https://steipete.me/posts/2025/claude-code-is-my-computer/">Claude Code being my computer</a>). The last thing you want is to accidentally run the wrong command in the wrong directory with full system permissions.</p>
+<p>To make matters worse, Claude Code has a habit of changing the terminal title to whatever it feels like - usually something unhelpful like “Running command…” or just “claude”. It’s like having a helpful assistant who keeps reorganizing your desk while you’re trying to work.</p>
+<h2 id="the-solution-terminal-title-magic">The Solution: Terminal Title Magic</h2>
+<p>Here’s my approach - a clean ZSH setup that keeps terminal management code separate from my main configuration. First, I add one line to my <code>~/.zshrc</code>:</p>
+<pre><code data-language="zsh"># Source Claude wrapper with dynamic terminal title
+[ -f ~/.config/zsh/claude-wrapper.zsh ] &amp;&amp; source ~/.config/zsh/claude-wrapper.zsh</code></pre>
+<p>Then I create <code>~/.config/zsh/claude-wrapper.zsh</code> with the actual implementation:</p>
+<pre><code data-language="zsh">#!/usr/bin/env zsh
+# Simple, elegant terminal title management for Claude
+
+# Set terminal title
+_set_title() { 
+    print -Pn "\e]2;$1\a" 
+}
+
+# Claude wrapper with custom terminal title
+cly() {
+    local folder=${PWD:t}  # Just the current folder name
+    
+    # Set title to show we're running Claude
+    _set_title "$folder — Claude"
+    
+    # Start a background process to continuously reset the title
+    # (prevents Claude from changing it)
+    (
+        while true; do
+            _set_title "$folder — Claude"
+            sleep 0.5
+        done
+    ) &amp;
+    local title_pid=$!
+    
+    # Run Claude with dangerous permissions
+    "$HOME/.claude/local/claude" --dangerously-skip-permissions "$@"
+    local exit_code=$?
+    
+    # Kill the background title setter
+    kill $title_pid 2&gt;/dev/null
+    wait $title_pid 2&gt;/dev/null  # Clean up zombie process
+    
+    # Restore normal title
+    _set_title "%~"
+    
+    # Return the original exit code
+    return $exit_code
+}
+
+# Update terminal title before each prompt (using proper ZSH hooks)
+_claude_precmd() {
+    _set_title "%~"
+}
+
+# Add our precmd function to the array (doesn't overwrite existing hooks)
+if [[ -z ${precmd_functions[(r)_claude_precmd]} ]]; then
+    precmd_functions+=(_claude_precmd)
+fi</code></pre>
+<p>When I run <code>cly</code>, my terminal title changes from <code>~/Projects/blog</code> to <code>~/Projects/blog — Claude</code>. Revolutionary? No. Life-changing? Absolutely.</p>
+<blockquote>
+<p><em>Hot tip: Just ask Claude to read this blog post and set it up for you! (in yolo mode, of course)</em></p>
+</blockquote>
+<p>Now if you’ll excuse me, I need to check on my Claude instances. I think one of them is refactoring my entire codebase without asking. Again.</p>
+</article></div>

@@ -1,0 +1,73 @@
+<div id="readability-page-1" class="page"><div>
+            <p>I’ve been thinking about user experiences for LLMs. Currently, most demos interact with LLMs via chat. This is a good start, but I think we can do better. I’m not convinced most users want to interact via text. Also, I think we can provide LLMs with the context of the user, without the user having to type or voice it out.</p>
+
+<div>
+<blockquote><div lang="en" dir="ltr"><p>Will chat be the UI for most (LLM) apps?</p><p>I'm not sure. If I'm shopping for electronics or clothes, I want to look at specs &amp; images.</p><p>Also, there's context (clicks, purchases) that shouldn't have to be chatted.</p><p>Maybe agents should work on context first and chat input second.</p></div>— Eugene Yan (@eugeneyan) <a href="https://twitter.com/eugeneyan/status/1648340902010851329?ref_src=twsrc%5Etfw">April 18, 2023</a></blockquote> 
+</div>
+
+<p>Most UIs today are based on clicks: When we surf the web, we’re mostly clicking on images, links, and buttons. And for some apps, the user’s context, such as location (e.g., Google Maps), persona (e.g., Netflix), and past behavior (e.g., Amazon), are taken into account.</p>
+
+<p>Why not do the same for LLMs? Here’s how we can interact with LLMs with minimal chat. We start with clicking books of interest, then filtering them on vibes, before asking an LLM librarian for help. And even though the question entered is simple (e.g., “more books by female authors”), the LLM has our past context and can give us a personalized answer.</p>
+
+
+<p>Searching for my next book with an LLM's help; mostly clicking, minimal chatting.</p>
+
+<p>The prototype is a blend of recommendation systems, NLP, and LLMs.</p>
+
+<p>When an item is selected, similar items are retrieved via approximate nearest neighbors on item embeddings (<a href="https://eugeneyan.com/writing/real-time-recommendations/#how-to-design-and-implement-an-mvp" target="_blank">details</a>). We can <a href="https://eugeneyan.com/writing/recommender-systems-graph-and-nlp-pytorch/" target="_blank">learn item embeddings</a> by building a product graph from <a href="https://nijianmo.github.io/amazon/index.html" target="_blank">e-commerce data</a>, generating random walk sequences, and applying representation learning. If multiple items are viewed in a session, more recently viewed items are given heavier weight. The retrieved candidates are then ranked via an LTR model or heuristics.</p>
+
+<p>The vibe keywords that help us filter items are pre-cached. (Someone had the impression they were dynamically extracted via an LLM. This is not feasible now given the latency, but perhaps in the future.) We either extract these keywords from book descriptions or smartly find such data from sources such as the <a href="https://sites.google.com/eng.ucsd.edu/ucsdbookgraph/home" target="_blank">UCSD Book Graph</a>.</p>
+
+<p>Finally, chatting with the librarian is a call to an LLM, with basic storage of the user’s historical actions and chat. The app is served via FastAPI and <a href="https://eugeneyan.com/writing/how-to-set-up-html-app-with-fastapi-jinja-forms-templates/" target="_blank">Jinja templates</a>. To minimize the amount of time a user had to wait after chat input, I used the streaming API  with Python <a href="https://docs.python.org/3/library/asyncio.html" target="_blank">async</a> and <a href="https://docs.aiohttp.org/en/stable/" target="_blank">aiohttp</a> in the backend, with a bit of JavaScript in the frontend.</p>
+
+<p>• • •</p>
+
+<p>What do you think? Would you prefer to chat more, or less? Do you know of other UXes for interacting with LLMs? Please share! 🙏</p>
+
+<p>OG image prompt on MidJourney: “finding books in a magical digital library with a close up of books, in the style of contrasting tones, artifacts of online culture, innovative page design, complexity theory, bold black and whites, bold color scheme –ar 2:1”</p>
+
+<h2 id="also-see">Also see</h2>
+<ul>
+  <li><a href="https://www.youtube.com/watch?v=rd-J3hmycQs" target="_blank">Generative Interfaces Beyond Chat</a></li>
+  <li><a href="https://www.youtube.com/watch?v=JdwpVKKrL2o" target="_blank">AI UX: Beyond the Textbox</a></li>
+  <li><a href="https://wattenberger.com/thoughts/boo-chatbots" target="_blank">Why Chatbots Are Not the Future</a></li>
+  <li><a href="https://arxiv.org/abs/2303.17710" target="_blank">What Types of Questions Require Conversation to Answer? A Case Study of AskReddit Questions</a></li>
+</ul>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Apr 2023). Interacting with LLMs with Minimal Chat. eugeneyan.com.
+        https://eugeneyan.com/writing/llm-ux/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2023ux,
+  title   = {Interacting with LLMs with Minimal Chat},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2023},
+  month   = {Apr},
+  url     = {https://eugeneyan.com/writing/llm-ux/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

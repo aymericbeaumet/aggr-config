@@ -1,0 +1,121 @@
+<div id="readability-page-1" class="page"><div>
+            <p>
+              I recently broke
+              <a href="https://arxiv.org/abs/1904.08554">a defense</a>
+              to be published at
+              CCS 2020,
+              and this time I recorded my screen
+              the entire time---all two hours of it.
+              Typically when I break defenses, I'll write a short paper,
+              stick it on arXiv, and then move on.
+              Pedagogically, this isn't very useful.
+              <span><a href="#"><label for="foot">[a]</label></a>
+      	  <span>
+                  (Don't you worry, <a href="http://arxiv.org/abs/2009.10975">I did that again this time</a>, too.)
+      	  </span>
+      	</span>
+              So for this defense I thought I'd try something different.
+            </p>
+      
+            <p>
+              Below is the entire 2.5 hour session, keystroke by keystroke,
+              that I went through to break this defense.
+              The authors were kind enough to share the source code with
+              me, and before opening up their code
+              I started <a href="https://asciinema.org/">a terminal
+                screen recording program</a>
+              to capture my entire terminal session.
+              What's shown is the entire attack process, from when I
+              looked at the code for the very first time,
+              to a complete successful break of the defense.
+            </p>
+      
+            <p>
+              I added a voiceover a few days later, where I discuss
+              some of my thoughts in breaking the defense and the
+              process I typically follow.
+            </p>
+      
+            
+            <asciinema-player id="player" poster="npt:0:20" preload="preload" src="screencapture/screen.cast" theme="solarized-dark">.</asciinema-player>
+      
+            <h2>Timestamps</h2>
+            
+            <p>
+              00:00 Introducing the defense; initial code setup.<br>
+              I spent the first ~20 minutes setting up some infrastructure to make developing attacks easier.
+              There's not much interesting that happens here with an attack,
+              but I talk through the idea of the defense and describe my code setup.
+            </p>
+            <p>
+              26:28 Implement baseline attack..<br>
+              I next write a straightforward implementation of gradient descent.
+              This is just standard infinity-norm regularized PGD on the cross
+              entropy loss. Nothing interesting yet.
+            </p>
+            <p>
+              43:38 Baseline attack matches results from paper.<br>
+              I confirm the results I get match what the paper reports for its attack.
+              It's always good to make sure that I've got everything working as it
+              should to make I've made no errors--otherwise my attack results are
+              untrustworthy.
+            </p>
+            <p>
+              59:02 Begin creating stronger attack.<br>
+              I build a better loss function by tuning some parameters, and make
+              a slight modification to the loss function.
+            </p>
+            <p>
+              72:17 Break defense to AUC of 0.40.<br>
+              I confirm that what I have so far constitutes the first break of the
+              defense, with the detection accuracy now below random guessing. To
+              do this, I verify adversarial examples I generated on a clean setup
+              of the defense code.
+            </p>
+            <p>
+              73:40 Design even stronger attack.<br>
+              I next start actually modifying the attack to make perform much better.
+              The approach here splits the loss function into one of two modes,
+              depending on if the input is already adversarial or already fools
+              the detector.
+            </p>
+            <p>
+              116:15 Break defense to AUC of 0.25.<br>
+              I'm able now to bring the accuracy to far below random guessing; the
+              prior attack is much more successful and makes better use of the available
+              distortion.
+            </p>
+            <p>
+              124:54 Further improvements on the attack.<br>
+              I finally make a few modifications that adjust more attack parameters.
+              I also try some additioanl improvements that don't end up increasing
+              the attack success rate, and settle on just running the attack for longer.
+            </p>
+            <p>
+              141:55 Final attack, AUC down to 0.017.<br>
+              I give some parting thoughts on what it takes to break this defense, and defenses generally.
+            </p>
+      
+      
+            <h2>Concluding Thoughts</h2>      
+            <p>
+              I get the feeling that people vastly
+              over-estimate the difficulty of breaking published defenses.
+              Breaking defenses is often a purely mechanical process
+              without much deep thought required, and this time is no
+              different.
+              Applying standard attack techniques is more than sufficient
+              to bring accuracy to (below) chance.
+              Turning a moderately successful attack into a complete break
+              takes a little bit of work, but it's not really all that much.
+            </p>
+            <p>
+              I hope that this demonstration will have at least some effect
+              on how breaking defenses is perceived.
+              Specifically, I hope to dispel the apparent myth that
+              breaking defenses to adversarial examples is some kind of
+              black magic.
+              In most cases, defenses to advrsarial examples fail in
+              predictable ways, with fairly straightforward attacks.
+            </p>
+          </div></div>

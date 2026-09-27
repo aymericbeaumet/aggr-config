@@ -1,0 +1,61 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/understanding-codebases-with-ai-gemini-workflow/header.png" alt="" loading="lazy"><p><strong>TL;DR</strong>: Convert GitHub repos to markdown with <a href="https://repo2txt.simplebasedomain.com/">repo2txt</a>, drag into <a href="https://aistudio.google.com/prompts/new_chat">Google AI Studio</a>, and ask questions. Gemini’s massive context window makes it amazing for code comprehension.</p>
+<h2 id="the-problem">The Problem</h2>
+<p>Whenever I want to understand a new codebase, the absolute best way I found is using agents. Here’s my workflow:</p>
+<p><strong>Step 1</strong>: Go to <a href="https://repo2txt.simplebasedomain.com/">repo2txt</a> and paste in a GitHub repository URL. It gives you the full tree of the project. Select all the source code files that interest you. For the best result, skip tests, add documentation and sources. <em>Definitely skip images</em>, they’d be pulled in as base64 and will freeze your browser’s JS engine and clutter up the context.</p>
+<p><strong>Step 2</strong>: Go to <a href="https://aistudio.google.com/prompts/new_chat">Google AI Studio</a>, drag in the markdown file, and start asking questions like:</p>
+<ul>
+<li>“What’s notable about this project?”</li>
+<li>“How did they solve <strong>this thing you are curious about</strong>?”</li>
+</ul>
+<p>But this workflow isn’t just for understanding existing code, it’s become my secret weapon for creating new projects too.</p>
+<h2 id="from-idea-to-sdd">From Idea to SDD</h2>
+<p>Whenever I start a new project, I’ll paste all my ideas into AI Studio. These days I mostly dictate via <a href="https://wisprflow.ai/">Wispr Flow</a> - Gemini is incredibly good to understand and convert my ideas into a Software Design Document. During my research I’ll often find other oss projects that solve similar things, so I drag in the compiled markdown and ask Gemini things like</p>
+<blockquote>
+<p>Which edge cases are implemented here that I didn’t think of?</p>
+</blockquote>
+<h2 id="the-two-context-technique">The Two-Context Technique</h2>
+<p>Once I am happy with the output, I copy the markdown, paste it into a fresh Gemini context and ask it to take the spec apart with this specific prompt:</p>
+<blockquote>
+<p>Take this SDD apart. Give me 20 points that are underspecified, weird, or inconsistent.</p>
+</blockquote>
+<p>These questions I copy back into the original Gemini context to improve the SDD. I always return to the original context because it has the full history of how we arrived at the spec—context that would be lost in the critique window. We play this back-and-forth game for 3-5 rounds. Often Master-Gemini already has the answers as it has more context from previous discussions, sometimes I have to add new thoughts or pick the edge case option.</p>
+<p>As you iterate, you’ll notice the questions become increasingly niche—that’s your signal that the spec is becoming bulletproof. After these rounds, you’ll have a comprehensive SDD, typically around 500 lines, that captures every detail of your vision.</p>
+<h2 id="from-sdd-to-implementation">From SDD to Implementation</h2>
+<p>Once your SDD is complete, implementation becomes almost trivial:</p>
+<ol>
+<li>Save the final spec as <code>docs/spec.md</code> in your repository</li>
+<li>Open Claude Code and simply prompt: “Build spec.md”</li>
+<li>Let it run for 2-4 hours</li>
+<li>Review and iterate on the results</li>
+</ol>
+<p>The beauty of this approach is that Claude Code doesn’t need complex prompting or hand-holding—the spec contains everything it needs. The clear, detailed specification eliminates ambiguity and lets the AI focus on implementation rather than guessing your intent.</p>
+<p>Here’s <a href="https://github.com/steipete/peekaboo/blob/main/docs/spec.md">an example of the spec</a> I used to build <a href="https://www.peekaboo.boo/">Peekaboo - an MCP to give your agent eyes/screenshots</a>. The best part about Peekaboo? It uses its own agent to prevent cluttering up your context. From spec to working product: just a few hours of letting Claude Code do its thing.</p>
+<p>Wanna see me in action? Here’s <a href="https://steipete.com/posts/2025/the-future-of-vibe-coding">a video where I do the whole process from idea to final app</a>. I used Cursor back then, but would use Claude Code now, as it loops much longer without interrupts. Maybe I’ll use <a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/">Gemini CLI</a> in the future. <a href="https://x.com/steipete/status/1937919798740214023">AI moves so fast!</a></p>
+<h2 id="dealing-with-context-loss-during-refinement">Dealing with Context Loss During Refinement</h2>
+<p>One challenge you might encounter: as you refine your spec through multiple iterations, AI tools can hit their output token limits and start dropping earlier context. This “context amnesia” means critical requirements from your initial spec might disappear in later versions—a problem my friend Bruno Virlet pointed out when using Gemini for spec refinement.</p>
+<p>The solution? Instead of asking for one massive spec revision, break it down:</p>
+<ol>
+<li><strong>Generate in logical blocks</strong>: Request specific sections separately
+<ul>
+<li>“Generate the architecture overview”</li>
+<li>“Generate the API specifications”</li>
+<li>“Generate the data model requirements”</li>
+</ul>
+</li>
+<li><strong>Maintain a master document</strong>: Manually concatenate outputs, ensuring nothing gets lost</li>
+<li><strong>Create a requirements checklist</strong>: Track key features across iterations</li>
+</ol>
+<p>This block-based approach ensures you maintain control over your spec’s evolution while leveraging AI’s analytical capabilities without losing critical details in the process.</p>
+<h2 id="the-code-is-the-spec">The Code is the Spec</h2>
+<p>Heck, I restarted an old side project of mine by simply giving Gemini the whole unfinished SwiftUI project (500k tokens!) and told it to generate an SDD from that, but use web tech for it + rebuild in TypeScript. The code <strong>is</strong> the spec. (blacked out some secrets, something for a future blog post…)</p>
+<p><img src="https://steipete.me/assets/img/2025/understanding-codebases-with-ai-gemini-workflow/sweetistics-sdd.png" alt="Software Design Document in Google AI Studio" loading="lazy"></p>
+<h2 id="alternatives-deepwiki-repomix--co">Alternatives: DeepWiki, RepoMix &amp; Co</h2>
+<p>An honorable mention: <a href="https://deepwiki.com/">DeepWiki</a> is surprisingly great at understanding a codebase and includes a free agent. For example, here’s <a href="https://deepwiki.com/amantus-ai/vibetunnel">VibeTunnel on DeepWiki</a>. <a href="https://steipete.me/posts/2025/vibetunnel-turn-any-browser-into-your-mac-terminal">VibeTunnel is my current focus</a>, it turns any browser into your terminal to command your agents (like Claude Code or Gemini CLI) on the go.</p>
+<p>The downside: you can’t mix and match multiple repositories, Gemini rules for that.</p>
+<p>Honorable mentions also to <a href="https://gitingest.com/">Gitingest</a> and <a href="https://repomix.com/">Repomix</a>. They have better design, but aren’t as efficient in choosing exactly the files you want. You get better results if you keep Gemini’s context focused.</p>
+<p>As to alternatives to Google’s AI Studio, I haven’t found anything that comes close. OpenAI has great models, but they struggle with generating the comprehensive 500-line markdown files that make this workflow sing. Gemini’s massive context window and willingness to produce detailed documentation is unmatched for this use case.</p>
+<h2 id="thats-it">That’s It!</h2>
+<p>There’s a lot of people on Twitter and Mastodon that ask me about my workflows, so whenever I find a process that works for me, I’ll make a blog post and share it with you. Wanna be the first to hear about it? Follow <a href="https://twitter.com/steipete">@steipete</a> and sign up for my newsletter.</p>
+<hr>
+<p>Now go and build something amazing, or join me &amp; the <a href="https://steipete.me/posts/2025/vibetunnel-turn-any-browser-into-your-mac-terminal#motivation">VibeTunnel Team</a>.
+We’ll make sure your agents won’t know what hit them!</p></article></div>

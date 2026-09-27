@@ -1,0 +1,174 @@
+<div id="readability-page-1" class="page"><div><p>One of the key Amazon SageMaker announcements at this year's re:Invent (2023) was the new Hardware Requirements object for Amazon SageMaker endpoints. This provides granular control over the compute resources for models deployed on SageMaker, including minimum CPU, GPU, memory, and number of replicas. This allows you to optimize your model's throughput and cost by matching the compute resources to the model's requirements and allows you to deploy multiple LLMs on the same instance. Previously it was not possible to deploy multiple replicas of a LLM or multiple LLMs on a single endpoint, can limit the overall throughput of models are not compute bound, e.g. open LLMs like a single Llama 13B on p4d.24xlarge instances.</p>
+<p>In this post, we show how to use the new feature using the sagemaker sdk and <code>ResourceRequirements</code> object to optimize the deployment of Llama 13B for increased throughput and cost performance on Amazon SageMaker on a <code>p4d.24xlarge</code> instance. The <code>p4d.24xlarge</code> instance has 8x A100 GPUs 40GB, which allows us to deploy 8 replicas of Llama 13B on a single instance. You can also use this example to deploy other open LLMs like Mistral, T5 or StarCoder. Additionally it is possible to deploy multiple models on a single instance, e.g. 4x Llama 13B and 4x Mistral 7B. Check out the amazing <a target="_blank" rel="noopener noreferrer" href="https://aws.amazon.com/de/blogs/aws/amazon-sagemaker-adds-new-inference-capabilities-to-help-reduce-foundation-model-deployment-costs-and-latency/">blog post from Antje for this</a>.</p>
+<p>We are going to use the Hugging Face LLM DLC is a new purpose-built Inference Container to easily deploy LLMs in a secure and managed environment. The DLC is powered by <a target="_blank" rel="noopener noreferrer" href="https://github.com/huggingface/text-generation-inference">Text Generation Inference (TGI)</a> a scalelable, optimized solution for deploying and serving Large Language Models (LLMs). The Blog post also includes Hardware requirements for the different model sizes.</p>
+<p>In the blog will cover how to:</p>
+<ol>
+<li><a href="#1-setup-development-environment">Setup development environment</a></li>
+<li><a href="#2-retrieve-the-new-hugging-face-llm-dlc">Retrieve the new Hugging Face LLM DLC</a></li>
+<li><a href="#3-configure-hardware-requirements-per-replica">Configure Hardware requirements per replica</a></li>
+<li><a href="#4-deploy-llama-2-to-amazon-sagemaker">Deploy and Test Llama 2 on Amazon SageMaker</a></li>
+<li><a href="#5-benchmark-multi-replica-endpoint">Run performance a simple performance benchmark</a></li>
+</ol>
+<p>Lets get started!</p>
+<h2 id="1-setup-development-environment">1. Setup development environment</h2>
+<p>We are going to use the <code>sagemaker</code> python SDK to deploy Llama 2 to Amazon SageMaker. We need to make sure to have an AWS account configured and the <code>sagemaker</code> python SDK installed.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">!pip install "sagemaker&gt;=2.199.0" "transformers==4.35.2" --upgrade --quiet</code></pre></div></figure>
+<p>If you are going to use Sagemaker in a local environment. You need access to an IAM Role with the required permissions for Sagemaker. You can find <a target="_blank" rel="noopener noreferrer" href="https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html">here</a> more about it.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import sagemaker
+import boto3
+sess = sagemaker.Session()
+# sagemaker session bucket -&gt; used for uploading data, models and logs
+# sagemaker will automatically create this bucket if it not exists
+sagemaker_session_bucket=None
+if sagemaker_session_bucket is None and sess is not None:
+    # set to default bucket if a bucket name is not given
+    sagemaker_session_bucket = sess.default_bucket()
+ 
+try:
+    role = sagemaker.get_execution_role()
+except ValueError:
+    iam = boto3.client('iam')
+    role = iam.get_role(RoleName='sagemaker_execution_role')['Role']['Arn']
+ 
+sess = sagemaker.Session(default_bucket=sagemaker_session_bucket)
+ 
+print(f"sagemaker role arn: {role}")
+print(f"sagemaker session region: {sess.boto_region_name}")
+ </code></pre></div></figure>
+<h2 id="2-retrieve-the-new-hugging-face-llm-dlc">2. Retrieve the new Hugging Face LLM DLC</h2>
+<p>Compared to deploying regular Hugging Face models we first need to retrieve the container uri and provide it to our <code>HuggingFaceModel</code> model class with a <code>image_uri</code> pointing to the image. To retrieve the new Hugging Face LLM DLC in Amazon SageMaker, we can use the <code>get_huggingface_llm_image_uri</code> method provided by the <code>sagemaker</code> SDK. This method allows us to retrieve the URI for the desired Hugging Face LLM DLC based on the specified <code>backend</code>, <code>session</code>, <code>region</code>, and <code>version</code>. You can find the available versions <a target="_blank" rel="noopener noreferrer" href="https://github.com/aws/deep-learning-containers/blob/master/available_images.md#huggingface-text-generation-inference-containers">here</a></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from sagemaker.huggingface import get_huggingface_llm_image_uri
+ 
+# retrieve the llm image uri
+llm_image = get_huggingface_llm_image_uri(
+  "huggingface",
+  version="1.1.0"
+)
+ 
+# print ecr image uri
+print(f"llm image uri: {llm_image}")</code></pre></div></figure>
+<h2 id="3-configure-hardware-requirements-per-replica">3. Configure Hardware requirements per replica</h2>
+<p>Llama 2 comes in 3 different sizes - 7B, 13B &amp; 70B parameters. The hardware requirements will vary based on the model size deployed to SageMaker. Below is an example configuration for Llama 13B. In addition we tried to provide some high level overview of the different hardware requirements for the different model sizes. To keep it simple we only looked at the <code>p4d.24xlarge</code> instance type and AWQ/GPTQ quantization.</p>
+<div><table><thead><tr><th>Model</th><th>Instance Type</th><th>Quantization</th><th># replica</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-2-7b-chat-hf">Llama 7B</a></td><td><code>(ml.)p4d.24xlarge</code></td><td><code>-</code></td><td>8</td></tr><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-2-7b-chat-hf">Llama 7B</a></td><td><code>(ml.)p4d.24xlarge</code></td><td><code>GPTQ/AWQ</code></td><td>8</td></tr><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-2-13b-chat-hf">Llama 13B</a></td><td><code>(ml.)p4d.24xlarge</code></td><td><code>-</code></td><td>8</td></tr><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-2-13b-chat-hf">Llama 13B</a></td><td><code>(ml.)p4d.24xlarge</code></td><td><code>GPTQ/AWQ</code></td><td>8</td></tr><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-2-70b-chat-hf">Llama 70B</a></td><td><code>(ml.)p4d.24xlarge</code></td><td><code>-</code></td><td>2</td></tr><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-2-70b-chat-hf">Llama 70B</a></td><td><code>(ml.)p4d.24xlarge</code></td><td><code>GPTQ/AWQ</code></td><td>4</td></tr></tbody></table></div>
+<p><em>We didn't test the configurations yet. If you run into errors please let me know and I will update the blog post.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from sagemaker.compute_resource_requirements.resource_requirements import ResourceRequirements
+ 
+llama2_13b_resource_config = ResourceRequirements(
+    requests = {
+        "copies": 8, # Number of replicas
+        "num_accelerators": 1, # Number of GPUs
+        "num_cpus": 10,  # Number of CPU cores  96 // num_replica - more for management
+        "memory": 100 * 1024,  # Minimum memory in MB 1152 // num_replica - more for management
+    },
+)</code></pre></div></figure>
+<h2 id="4-deploy-llama-2-to-amazon-sagemaker">4. Deploy Llama 2 to Amazon SageMaker</h2>
+<p>To deploy <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/models?other=llama-2">meta-llama/Llama-2-13b-chat-hf</a> to Amazon SageMaker we create a <code>HuggingFaceModel</code> model class and define our endpoint configuration including the <code>hf_model_id</code>, <code>instance_type</code> and then add our <code>ResourceRequirements</code> object to the <code>deploy</code> method.</p>
+<p><em>Note: This is a form to enable access to Llama 2 on Hugging Face after you have been granted access from Meta. Please visit the <a target="_blank" rel="noopener noreferrer" href="https://ai.meta.com/resources/models-and-libraries/llama-downloads">Meta website</a> and accept our license terms and acceptable use policy before submitting this form. Requests will be processed in 1-2 days. We alternatively use the ungated weights from <code>NousResearch/Llama-2-13b-chat-hf</code>.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import json
+import uuid
+from sagemaker.huggingface import HuggingFaceModel
+from sagemaker.enums import EndpointType
+ 
+# sagemaker config
+instance_type = "ml.p4d.24xlarge"
+health_check_timeout = 300
+ 
+# Define Model and Endpoint configuration parameter
+config = {
+  'HF_MODEL_ID': "meta-llama/Llama-2-13b-chat-hf", # model_id from hf.co/models
+  'SM_NUM_GPUS': json.dumps(1), # Number of GPU used per replica
+  'MAX_INPUT_LENGTH': json.dumps(2048),  # Max length of input text
+  'MAX_TOTAL_TOKENS': json.dumps(4096),  # Max length of the generation (including input text)
+  'MAX_BATCH_TOTAL_TOKENS': json.dumps(16384),  # Limits the number of tokens that can be processed in parallel during the generation
+  'HUGGING_FACE_HUB_TOKEN': "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" # uncomment when using a private model
+  # 'HUGGING_FACE_HUB_TOKEN': "&lt;REPLACE WITH YOUR TOKEN&gt;" # uncomment when using a private model
+  # ,'HF_MODEL_QUANTIZE': "gptq", # comment in when using awq quantized checkpoint
+ 
+}
+ 
+assert config['HUGGING_FACE_HUB_TOKEN'] != '&lt;REPLACE WITH YOUR TOKEN&gt;', "You have to provide a token."
+ 
+# create HuggingFaceModel with the image uri
+llm_model = HuggingFaceModel(
+  role=role,
+  image_uri=llm_image,
+  env=config,
+)</code></pre></div></figure>
+<p>After we have created the <code>HuggingFaceModel</code> we can deploy it to Amazon SageMaker using the <code>deploy</code> method using the <code>ResourceRequirements</code> object.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Deploy model to an endpoint
+# https://sagemaker.readthedocs.io/en/stable/api/inference/model.html#sagemaker.model.Model.deploy
+llm = llm_model.deploy(
+  initial_instance_count=1, # number of instances
+  instance_type=instance_type, # base instance type
+  resources=llama2_13b_resource_config, # resource config for multi-replica
+  container_startup_health_check_timeout=health_check_timeout, # 10 minutes to be able to load the model
+  endpoint_name=f"llama-2-13b-chat-{str(uuid.uuid4())}", # name needs to be unique
+  endpoint_type=EndpointType.INFERENCE_COMPONENT_BASED # needed to use resource config
+ 
+)
+ </code></pre></div></figure>
+<p>SageMaker will now create our endpoint and deploy the model to it. This can takes a 15-25 minutes, since the replicas are deployed after each other. After the endpoint is created we can use the <code>predict</code> method to send a request to our endpoint. To make it easier we will use the <a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/apply_chat_template">apply_chat_template</a> method from transformers. This allow us to send "openai" like converstaions to our model.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from transformers import AutoTokenizer
+ 
+tok = AutoTokenizer.from_pretrained(config["HF_MODEL_ID"],use_auth_token=config["HUGGING_FACE_HUB_TOKEN"])
+ 
+# OpenAI like conversational messages
+messages = [
+  {"role": "system", "content": "You are an helpful AWS Expert Assistant. Respond only with 1-2 sentences."},
+  {"role": "user", "content": "What is Amazon SageMaker?"},
+]
+ 
+# generation parameters
+parameters = {
+    "do_sample" : True,
+    "top_p": 0.6,
+    "temperature": 0.9,
+    "top_k": 50,
+    "max_new_tokens": 50,
+    "repetition_penalty": 1.03,
+    "return_full_text": False,
+}
+ 
+res = llm.predict(
+  {
+    "inputs": tok.apply_chat_template(messages, tokenize=False),
+    "parameters": parameters
+   })
+ 
+print(res[0]['generated_text'].strip())</code></pre></div></figure>
+<blockquote>
+<p>Sure, I'd be happy to help! Amazon SageMaker is a fully managed service that provides a range of machine learning (ML) algorithms and tools to help you build, train, and deploy ML models at scale.</p>
+</blockquote>
+<h2 id="5-benchmark-multi-replica-endpoint">5. Benchmark multi-replica endpoint</h2>
+<p>To Benchmark our new endpoint we will use the same code as for the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/blog/llama-sagemaker-benchmark">"Llama 2 on Amazon SageMaker a Benchmark"</a> from <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/text-generation-inference-tests/tree/master/sagemaker_llm_container">text-generation-inference-tests</a>. When running the benchmark back then it was not possible to deploy multiple replicas of a model on a single endpoint. This limited the maximum throughput we could achieve with Llama 13B on p4d.24xlarge instances. We benchmark a typical usecase, with long inputs and short generation with a prompt length of 1000 tokens and number of generated tokens of 50.</p>
+<p>To run the benchmark we need to clone the <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/text-generation-inference-tests">text-generation-inference-tests</a> and also make sure we meet all the <code>Prerequisites</code> from the <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/text-generation-inference-tests/tree/master/sagemaker_llm_container">README</a>, including the installation of <a target="_blank" rel="noopener noreferrer" href="https://k6.io/">k6</a> which used to run the benchmark.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># check out branch with test using 1000 tokens
+!git clone -b "input-1000-gen-50"  https://github.com/philschmid/text-generation-inference-tests.git</code></pre></div></figure>
+<p>Since we already a deployed endpoint we can provide the <code>endpoint_name</code> and our hardware requirements as <code>inference_component</code>. The name of the <code>inference_component</code> can currently only be retrieved using <code>boto3</code></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">inference_component = llm_model.sagemaker_session.list_inference_components(endpoint_name_equals=llm.endpoint_name).get("InferenceComponents")[0].get("InferenceComponentName")
+endpoint_name = llm.endpoint_name</code></pre></div></figure>
+<p>Change the directory to <code>sagemaker_llm_container</code> and run the benchmark. The command below will run a load test for 90s with 300 concurrent users. The result will be saved to <code>text-generation-inference-tests/sagemaker_llm_container/{CONIFG_NAME}.json</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">!cd text-generation-inference-tests/sagemaker_llm_container &amp;&amp; python benchmark.py \
+  --endpoint_name {endpoint_name} \
+  --inference_component {inference_component} \
+  --model_id {config["HF_MODEL_ID"]} \
+  --tp_degree 1 \
+  --vu 300</code></pre></div></figure>
+<p>We ran multiple benchmarks for different concurrent users starting with 100 up to 300 and <code>MAX_BATCH_TOTAL_TOKENS</code> of 16384. Eace request sends a prompt of 1000 tokens and generates 50 tokens.
+The table below includes the total number of requests, throughput (req/sec), the median request time and the percentage of successful requests (in %).</p>
+<div><table><thead><tr><th>Model</th><th>Concurrent Users</th><th>requests</th><th>throughput (req/sec)</th><th>med. latency (sec)</th><th>request rate (%)</th></tr></thead><tbody><tr><td>Llama 13B</td><td>100</td><td>2322</td><td>24.741461/s</td><td>3.76s</td><td>100%</td></tr><tr><td>Llama 13B</td><td>150</td><td>2543</td><td>26.316863/s</td><td>5.58s</td><td>100%</td></tr><tr><td>Llama 13B</td><td>200</td><td>2648</td><td>26.720773/s</td><td>7.81s</td><td>100%</td></tr><tr><td>Llama 13B</td><td>250</td><td>2769</td><td>25.82929/s</td><td>8.89s</td><td>97%</td></tr><tr><td>Llama 13B</td><td>300</td><td>2776</td><td>25.662124/s</td><td>9.78s</td><td>100%</td></tr><tr><td>Llama 13B</td><td>350</td><td>2827</td><td>26.713271/s</td><td>12.57s</td><td>100%</td></tr><tr><td>Llama 13B</td><td>400</td><td>2880</td><td>24.161486/s</td><td>12.53s</td><td>100%</td></tr><tr><td>Llama 13B</td><td>450</td><td>2934</td><td>26.138126/s</td><td>15.69s</td><td>100%</td></tr><tr><td>Llama 13B</td><td>500</td><td>2976</td><td>26.170628/s</td><td>16.9s</td><td>100%</td></tr></tbody></table></div>
+<p>We were able to serve 500 concurrent users with a throughput of 26.17 requests per second and a median latency of 16.9 seconds without requests failing. 500 concurrent user is not the limit of the endpoint. We could increase the number of concurrent users and extend the benchmark to find the limit of the endpoint. But this is out of scope for this blog post. It is also important to respect the latency of the endpoint. If you have a latency requirement of &lt; 100s second, you can only serve 300 concurrent users.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">!rm -rf text-generation-inference-tests</code></pre></div></figure>
+<h2 id="6-clean-up">6. Clean up</h2>
+<p>To clean up, we can delete the model, endpoint and inference component for the hardware requirements.</p>
+<p><em>Note: If you have issues deleting an endpoint with an attached inference component, see: <a target="_blank" rel="noopener noreferrer" href="https://repost.aws/es/questions/QUEiuS2we2TEKe9GUUYm67kQ/error-when-deleting-and-inference-endpoint-in-sagemaker">https://repost.aws/es/questions/QUEiuS2we2TEKe9GUUYm67kQ/error-when-deleting-and-inference-endpoint-in-sagemaker</a></em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Delete Inference Component &amp; Model
+llm_model.sagemaker_session.delete_inference_component(inference_component_name=inference_component)
+llm.delete_model()</code></pre></div></figure>
+<p>we have to wait until the component is deleted before we can delete the endpoint. (can take 2minutes)</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># If this call fails, you can delete the endpoint manually using the AWS Console
+llm.delete_endpoint()</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>By leveraging the ability to deploy multiple replicas of models like Llama 13B on instances such as p4d.24xlarge, companies can serve a substantially higher number of concurrent users without compromising the stability of the service. While there is an increase in latency under heavy load, the system maintains its robustness. This balance between scalability and stability can be crucial for organizations looking to deploy LLMs in production environments.</p>
+<hr>
+<p>Thanks for reading! If you have any questions, feel free to contact me on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

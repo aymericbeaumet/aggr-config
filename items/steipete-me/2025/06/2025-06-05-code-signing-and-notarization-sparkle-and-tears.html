@@ -1,0 +1,231 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/code-signing-and-notarization-sparkle-and-tears/header.png" alt="" loading="lazy"><p><em>Or: How I Learned to Stop Worrying and Love the XPC Services</em></p>
+<p>If you’ve ever tried to implement automatic updates in a sandboxed macOS app using Sparkle, you know it can feel like trying to solve a Rubik’s cube while wearing oven mitts. After creating way too many beta releases and spending countless hours debugging cryptic authorization errors, I finally cracked the code. Here’s my step-by-step guide to code signing, notarization, and Sparkle auto-updates in sandboxed macOS apps.</p>
+<h2 id="the-setup-vibe-meter-meets-sparkle">The Setup: Vibe Meter Meets Sparkle</h2>
+<p><a href="https://vibemeter.ai">Vibe Meter</a> is a sandboxed macOS menu bar app that tracks AI service spending. When I decided to add automatic updates using Sparkle 2.x, I thought it would be straightforward. After all, Sparkle is the de facto standard for macOS app updates, right?</p>
+<p>Oh, sweet summer child.</p>
+<h2 id="act-1-the-mysterious-authorization-failure">Act 1: The Mysterious Authorization Failure</h2>
+<p>I’d already mastered code signing and notarization (its own nightmare), so I just told Claude: “Look at this repository and do what we did there.” It nailed the signing and notarization process.</p>
+<p>My first attempts seemed promising. The app built, signed, and notarized successfully. But when users tried to update, they were greeted with:</p>
+<pre><code data-language="plaintext">Error: Failed to gain authorization required to update target</code></pre>
+<p>This error is Sparkle’s polite way of saying “I can’t talk to my XPC services, and I have no idea why.”</p>
+<h2 id="act-2-the-entitlements-enigma">Act 2: The Entitlements Enigma</h2>
+<p>After digging through <a href="https://sparkle-project.org/documentation/sandboxing/">Sparkle’s documentation</a> and Console logs, I discovered my first issue: missing mach-lookup entitlements. In a sandboxed app, Sparkle uses XPC services to perform privileged operations, and these services need special permissions to communicate.</p>
+<h3 id="the-missing-piece">The Missing Piece</h3>
+<p>My entitlements file was missing a critical entry:</p>
+<pre><code data-language="xml">&lt;key&gt;com.apple.security.temporary-exception.mach-lookup.global-name&lt;/key&gt;
+&lt;array&gt;
+    &lt;string&gt;com.steipete.vibemeter-spks&lt;/string&gt;
+    &lt;string&gt;com.steipete.vibemeter-spki&lt;/string&gt;
+&lt;/array&gt;</code></pre>
+<p>But here’s the kicker - I initially only added <code>-spks</code>, thinking it stood for “Sparkle Server.” Turns out, you need BOTH:</p>
+<ul>
+<li><code>-spks</code>: Sparkle Server (for the InstallerLauncher.xpc service)</li>
+<li><code>-spki</code>: Sparkle Installer (for the Installer.xpc service)</li>
+</ul>
+<p>Missing either one results in the dreaded authorization error.</p>
+<h2 id="act-3-the-code-signing-circus">Act 3: The Code Signing Circus</h2>
+<p>Next came the code signing adventures. My notarization script was doing what seemed logical:</p>
+<pre><code data-language="bash">codesign --deep --force --sign "Developer ID" VibeMeter.app</code></pre>
+<p>But Sparkle’s documentation specifically warns against using <code>--deep</code>. Why? Because it can mess up the XPC services’ signatures. Instead, you need to sign components in a specific order.</p>
+<p>Here’s the correct approach from my <a href="https://github.com/steipete/VibeMeter/blob/main/scripts/codesign-app.sh">codesign script</a>:</p>
+<pre><code data-language="bash"># Sign XPC services first
+codesign -f -s "$SIGN_IDENTITY" -o runtime \
+    "$APP_BUNDLE/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc"
+
+# Preserve entitlements for Downloader.xpc (Sparkle 2.6+)
+codesign -f -s "$SIGN_IDENTITY" -o runtime --preserve-metadata=entitlements \
+    "$APP_BUNDLE/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc"
+
+# Sign other Sparkle components
+codesign -f -s "$SIGN_IDENTITY" -o runtime \
+    "$APP_BUNDLE/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
+
+# Then sign the framework
+codesign -f -s "$SIGN_IDENTITY" -o runtime \
+    "$APP_BUNDLE/Contents/Frameworks/Sparkle.framework"
+
+# Finally, sign the app WITHOUT --deep
+codesign --force --sign "$SIGN_IDENTITY" --entitlements VibeMeter.entitlements \
+    --options runtime VibeMeter.app</code></pre>
+<h2 id="act-4-the-bundle-id-bamboozle">Act 4: The Bundle ID Bamboozle</h2>
+<p>At one point, I thought I was being clever (or rather, <a href="https://steipete.me/posts/claude-code-is-my-computer/">Claude Code</a> thought…) by trying to manually modify the XPC services’ bundle identifiers. Big mistake.</p>
+<p>For sandboxed apps, Sparkle requires specific bundle ID suffixes:</p>
+<ul>
+<li>Use <code>-spks</code> suffix for the InstallerLauncher service</li>
+<li>Use <code>-spki</code> suffix for the Installer service</li>
+</ul>
+<p>The framework expects these exact suffixes. Use anything else, and you’ll get cryptic XPC connection errors that will make you question your career choices.</p>
+<h2 id="act-5-the-build-number-blues">Act 5: The Build Number Blues</h2>
+<p>Even after fixing all the sandboxing issues, I hit another snag. Users were seeing “You’re up to date!” when updates were clearly available. The culprit? My appcast<sup><a href="#user-content-fn-1" id="user-content-fnref-1" data-footnote-ref="" aria-describedby="footnote-label">1</a></sup> generation script was defaulting build numbers to “1”.</p>
+<p>Sparkle uses build numbers (CFBundleVersion), not version strings, to determine if an update is available. If your build numbers don’t increment, Sparkle thinks there’s nothing new.</p>
+<p>My <a href="https://github.com/steipete/VibeMeter/blob/main/scripts/generate-appcast.sh">appcast generation script</a> now properly handles this:</p>
+<pre><code data-language="bash"># Extract build number from Info.plist
+BUILD_NUMBER=$(plutil -extract CFBundleVersion raw "$INFO_PLIST")
+
+# Ensure build numbers increment correctly
+if [[ "$BUILD_NUMBER" -le "$PREVIOUS_BUILD_NUMBER" ]]; then
+    echo "Error: Build number must be greater than previous release"
+    exit 1
+fi</code></pre>
+<h2 id="the-grand-finale-it-works">The Grand Finale: It Works!</h2>
+<img src="https://steipete.me/assets/img/2025/code-signing-and-notarization-sparkle-and-tears/sparkle.png" alt="Sparkle update dialog working perfectly">
+<p>After two days of intense debugging, I finally had a working setup. My complete automation pipeline is now rock-solid, with <a href="https://github.com/steipete/VibeMeter/tree/main/scripts">comprehensive scripts</a> that handle every aspect of the process.</p>
+<h3 id="the-magic-recipe">The Magic Recipe</h3>
+<ol>
+<li><strong>Entitlements</strong>: Include BOTH <code>-spks</code> and <code>-spki</code> mach-lookup exceptions</li>
+<li><strong>Bundle IDs</strong>: Never change Sparkle’s XPC service bundle IDs</li>
+<li><strong>Code Signing</strong>: Sign XPC services individually, never use <code>--deep</code></li>
+<li><strong>Build Numbers</strong>: Always increment them, and verify your appcast</li>
+<li><strong>Info.plist</strong>: Set <code>SUEnableInstallerLauncherService = true</code> and <code>SUEnableDownloaderService = false</code><sup><a href="#user-content-fn-2" id="user-content-fnref-2" data-footnote-ref="" aria-describedby="footnote-label">2</a></sup></li>
+</ol>
+<h3 id="the-working-configuration">The Working Configuration</h3>
+<p>The XPC services themselves keep their original Sparkle bundle IDs (<code>org.sparkle-project.InstallerLauncher</code> and <code>org.sparkle-project.Downloader</code>). What we configure in the entitlements are the mach-lookup communication channels:</p>
+<pre><code data-language="xml">&lt;!-- VibeMeter.entitlements --&gt;
+&lt;key&gt;com.apple.security.app-sandbox&lt;/key&gt;
+&lt;true/&gt;
+&lt;key&gt;com.apple.security.network.client&lt;/key&gt;
+&lt;true/&gt;
+&lt;key&gt;com.apple.security.temporary-exception.mach-lookup.global-name&lt;/key&gt;
+&lt;array&gt;
+    &lt;string&gt;com.steipete.vibemeter-spks&lt;/string&gt;
+    &lt;string&gt;com.steipete.vibemeter-spki&lt;/string&gt;
+&lt;/array&gt;</code></pre>
+<h2 id="the-scripts-that-saved-my-sanity">The Scripts That Saved My Sanity</h2>
+<p>My complete build pipeline consists of several specialized scripts:</p>
+<ul>
+<li><strong><a href="https://github.com/steipete/VibeMeter/blob/main/scripts/preflight-check.sh">preflight-check.sh</a></strong>: Validates environment and prerequisites</li>
+<li><strong><a href="https://github.com/steipete/VibeMeter/blob/main/scripts/codesign-app.sh">codesign-app.sh</a></strong>: Handles the complex code signing process</li>
+<li><strong><a href="https://github.com/steipete/VibeMeter/blob/main/scripts/notarize-app.sh">notarize-app.sh</a></strong>: Manages notarization and stapling</li>
+<li><strong><a href="https://github.com/steipete/VibeMeter/blob/main/scripts/create-dmg.sh">create-dmg.sh</a></strong>: Creates and signs distribution DMGs</li>
+<li><strong><a href="https://github.com/steipete/VibeMeter/blob/main/scripts/generate-appcast.sh">generate-appcast.sh</a></strong>: Generates Sparkle appcast files</li>
+<li><strong><a href="https://github.com/steipete/VibeMeter/blob/main/scripts/release.sh">release.sh</a></strong>: Orchestrates the entire release process</li>
+</ul>
+<p>Look at this beauty! Now even Claude can do releases without messing up 🎉 I just tell it “Create a new beta release, see release.md” and it handles everything.</p>
+<pre><code data-language="bash"># Now create the release
+./scripts/release.sh stable        # For stable 1.1.0
+# OR
+./scripts/release.sh beta 1        # For 1.1.0-beta.1
+
+# Use the version script to bump versions
+./scripts/version.sh --minor       # 1.0.0 -&gt; 1.1.0
+./scripts/version.sh --major       # 1.0.0 -&gt; 2.0.0
+./scripts/version.sh --set 1.1.0   # Set specific version</code></pre>
+<p>Everything happens automatically - from building to GitHub release creation. These scripts are tuned for <a href="https://tuist.dev/">Tuist</a> and can easily be adapted for simpler setups.</p>
+<h2 id="the-notarization-nightmare">The Notarization Nightmare</h2>
+<p>Apple’s notarization process adds another layer of complexity. Notarization verifies your app is safe - you upload it to Apple’s servers for scanning, and if approved, they “staple” a ticket to your app. The process typically takes a few minutes in Apple’s notarization queue (officially called the “processing queue”). The <a href="https://github.com/steipete/VibeMeter/blob/main/scripts/notarize-app.sh">notarization script</a> uses the modern <a href="https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution"><code>notarytool</code></a> approach:</p>
+<pre><code data-language="bash"># Create ZIP for notarization (not DMG!)
+ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
+
+# Submit for notarization
+xcrun notarytool submit "$ZIP_PATH" \
+    --key "$API_KEY_PATH" \
+    --key-id "$API_KEY_ID" \
+    --issuer "$ISSUER_ID" \
+    --wait
+
+# Staple the ticket
+xcrun stapler staple "$APP_BUNDLE"
+
+# Verify everything worked
+spctl -a -t exec -vv "$APP_BUNDLE"
+xcrun stapler validate "$APP_BUNDLE"</code></pre>
+<p>Of course this needs <a href="https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution">certificates from Apple</a>. Luckily Claude is smart enough to guide you through the whole process of downloading those files and adding them to the keychain and your environment.</p>
+<h2 id="pretty-changelogs-in-sparkle">Pretty Changelogs in Sparkle</h2>
+<p>One challenge I hadn’t anticipated was making the update dialogs actually useful. Sparkle can display rich HTML changelogs, but getting from my Markdown changelog to properly formatted HTML required some creativity.</p>
+<p>The <a href="https://github.com/steipete/VibeMeter/blob/main/scripts/changelog-to-html.sh">changelog-to-html.sh script</a> extracts version-specific sections from <code>CHANGELOG.md</code> and converts them to HTML with what I call the “Poor Man’s Markdown Parser”:</p>
+<pre><code data-language="bash"># Extract version section and convert Markdown to HTML
+awk "/^## \\[$version\\]/{flag=1;next}/^## \\[/{flag=0}flag" CHANGELOG.md | \
+sed 's/^### \(.*\)/&lt;h3&gt;\1&lt;\/h3&gt;/' | \
+sed 's/^- \(.*\)/&lt;li&gt;\1&lt;\/li&gt;/' | \
+sed 's/\*\*\([^*]*\)\*\*/&lt;strong&gt;\1&lt;\/strong&gt;/g'</code></pre>
+<p>The result? Users see properly formatted changelogs with headers, lists, and styled text instead of raw Markdown. Note: This parser has limitations - it doesn’t handle nested lists, images, or links. Keep your changelogs simple or extend the parser for more complex formatting.</p>
+<h2 id="the-complete-architecture">The Complete Architecture</h2>
+<p>What emerged is a surprisingly elegant zero-infrastructure solution that leverages GitHub’s existing services:</p>
+<h3 id="github-centric-distribution">GitHub-Centric Distribution</h3>
+<ul>
+<li><strong>Releases</strong>: <a href="https://github.com/steipete/VibeMeter/releases">GitHub releases</a> host the actual DMG files</li>
+<li><strong>Appcast Hosting</strong>: <a href="https://raw.githubusercontent.com/steipete/VibeMeter/main/appcast.xml">Raw GitHub URLs</a> serve the XML feeds</li>
+<li><strong>Dual Feeds</strong>: Separate appcasts for <a href="https://github.com/steipete/VibeMeter/blob/main/appcast.xml">stable</a> and <a href="https://github.com/steipete/VibeMeter/blob/main/appcast-prerelease.xml">pre-release</a> channels</li>
+<li><strong>Version Control</strong>: Appcast files are versioned alongside the code</li>
+</ul>
+<h3 id="dynamic-channel-switching">Dynamic Channel Switching</h3>
+<p>The app includes runtime logic to switch between update channels without reinstallation. Users can choose “stable” for production releases or “pre-release” for beta access, and the app dynamically points to the appropriate appcast URL.</p>
+<img src="https://steipete.me/assets/img/2025/code-signing-and-notarization-sparkle-and-tears/vibemeter-settings.png" alt="Vibe Meter settings showing update channel options">
+<h3 id="automated-everything">Automated Everything</h3>
+<p>The <a href="https://github.com/steipete/VibeMeter/blob/main/scripts/release.sh">release.sh script</a> orchestrates the entire pipeline:</p>
+<ol>
+<li>Build and sign the app</li>
+<li>Create GitHub release with DMG</li>
+<li>Generate both appcast files with proper signatures</li>
+<li>Commit and push everything</li>
+</ol>
+<p>No separate hosting, no Jekyll setup, no additional infrastructure - just GitHub doing what it does best. The key is that <a href="https://github.com/steipete/VibeMeter/blob/main/scripts/release.sh"><code>release.sh</code></a> is the master orchestrator that calls most other scripts in sequence for a complete automated release.</p>
+<details>
+<summary>View the complete script flow architecture</summary>
+<pre><code data-language="plaintext">🚀 Main Release Flow (release.sh)
+
+release.sh
+├── 1. preflight-check.sh ────────────── Validates everything ready
+├── 2. generate-xcproj.sh ────────────── Generates Xcode project
+├── 3. build.sh ──────────────────────── Builds app with IS_PRERELEASE_BUILD flag
+├── 4. sign-and-notarize.sh ──────────── Signs &amp; notarizes app
+│   ├── codesign-app.sh ─────────────── Code signs app bundle
+│   └── notarize-app.sh ─────────────── Notarizes signed app
+├── 5. create-dmg.sh ─────────────────── Creates &amp; signs DMG
+├── 6. GitHub CLI (gh) ───────────────── Creates GitHub release
+├── 7. generate-appcast.sh ───────────── Updates appcast XML files
+└── 8. verify-appcast.sh ─────────────── Validates appcast (optional)
+
+✅ Verification Flow
+
+preflight-check.sh ───────────────────── Pre-release validation
+└── verify-prerelease-system.sh ──────── IS_PRERELEASE_BUILD system check
+
+verify-app.sh ────────────────────────── Post-build verification
+verify-appcast.sh ────────────────────── Appcast validation
+
+🔐 Manual Signing Flow
+
+sign-and-notarize.sh
+├── codesign-app.sh ──────────────────── Code sign app
+├── notarize-app.sh ──────────────────── Notarize app
+└── create-dmg.sh ────────────────────── Create distribution DMG
+
+🛠️ Utility Scripts (Called by others)
+
+- changelog-to-html.sh ← Called by update-appcast.sh
+- version.sh ← Standalone version management</code></pre>
+</details>
+<h2 id="lessons-learned">Lessons Learned</h2>
+<ol>
+<li><strong>Read the documentation carefully</strong> - But also know that it might not cover every edge case</li>
+<li><strong>Console.app is your friend</strong> - Filter by your process name and watch for XPC errors</li>
+<li><strong>Don’t be clever</strong> - Follow Sparkle’s conventions exactly</li>
+<li><strong>Test updates, not just builds</strong> - A successful build doesn’t mean updates will work</li>
+<li><strong>Automate everything</strong> - Manual processes lead to human errors</li>
+<li><strong>Version control your scripts</strong> - Build automation is as important as your app code</li>
+</ol>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>Implementing Sparkle in a sandboxed app is like solving a puzzle where the pieces keep changing shape. But once you understand the rules - respect the XPC services, get your entitlements right, and sign everything properly - it works beautifully.</p>
+<p>The irony? The final solution is actually quite simple. It’s getting there that’s the adventure. I don’t know how anyone manages to ship working macOS apps at all, honestly.</p>
+<p>Now go download <a href="https://vibemeter.ai">Vibe Meter</a> and read my dev diary on how I built it with Claude Code: <a href="https://steipete.me/posts/vibe-meter-monitor-your-ai-costs">Vibe Meter: Monitor Your AI Costs</a>.</p>
+<h2 id="resources">Resources</h2>
+<ul>
+<li><a href="https://sparkle-project.org/documentation/sandboxing/">Sparkle Sandboxing Documentation</a></li>
+<li><a href="https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution">Apple’s Code Signing Guide</a></li>
+<li><a href="https://github.com/steipete/VibeMeter">VibeMeter Source Code</a></li>
+<li><a href="https://github.com/steipete/VibeMeter/tree/main/scripts">VibeMeter Build Scripts</a></li>
+</ul>
+<hr>
+<p><em>Special thanks to the Sparkle team and Claude Code - without them, this automation pipeline wouldn’t exist.</em></p>
+<p><strong>P.S.</strong> Just <a href="https://github.com/steipete/VibeMeter/tree/main/scripts">steal my scripts</a>. It’ll save you days of debugging. ☕️</p>
+<section data-footnotes=""><h2 id="footnote-label">Footnotes</h2>
+<ol>
+<li id="user-content-fn-1">
+<p>An appcast is an RSS-like XML feed that Sparkle uses to check for updates. It contains information about available versions, download URLs, and release notes. See <a href="https://sparkle-project.org/documentation/publishing/">Sparkle’s documentation on appcasts</a> for more details. <a href="#user-content-fnref-1" data-footnote-backref="" aria-label="Back to reference 1">↩</a></p>
+</li>
+<li id="user-content-fn-2">
+<p>The Downloader service is only needed if your app doesn’t have network access. Since Vibe Meter includes the <code>com.apple.security.network.client</code> entitlement, we can disable SUEnableDownloaderService. This simplifies the setup and avoids the Downloader service’s limitations. See <a href="https://sparkle-project.github.io/documentation/sandboxing/">Sparkle’s sandboxing documentation</a> for details. <a href="#user-content-fnref-2" data-footnote-backref="" aria-label="Back to reference 2">↩</a></p>
+</li>
+</ol>
+</section></article></div>

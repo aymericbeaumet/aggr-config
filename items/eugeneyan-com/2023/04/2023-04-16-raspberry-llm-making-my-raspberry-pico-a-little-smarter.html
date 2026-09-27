@@ -1,0 +1,77 @@
+<div id="readability-page-1" class="page"><div>
+            <p>As I continue my exploration with large language models, I wondered how they might be used in a low-resource setting, such as a household appliance or a Raspberry Pico. I was also curious about how good they were with generating content in a particular style (e.g., Dr. Seuss), humour (e.g., fake WSJ quotes), and toxic (e.g., HackerNews troll comments).</p>
+
+<p>To satisfy my curiosity, I hacked on <code>raspberry-llm</code> (<a href="https://github.com/eugeneyan/raspberry-llm" target="_blank">Github</a>). It’s a simple Raspberry Pico with an e-ink screen that calls <a href="https://feeds.a.dj.com/rss/RSSWSJD.xml" target="_blank">WSJ</a> and <a href="https://hnrss.org/frontpage?points=100" target="_blank">HackerNews</a> RSS feeds, 3rd-party LLM APIs, and generates some content. It started with a rhyming clock, and then… well you’ll see.</p>
+
+<p>• • •</p>
+
+<p>While some use LLMs to disrupt industries and more,</p>
+<p>Others build ChatGPT plugins, pushing boundaries galore.</p>
+<p>Yet here I am with my Raspberry Pi loose,</p>
+<p>Using LLMs to explain headlines via Dr. Seuss.</p>
+
+<p><img src="https://eugeneyan.com/assets/headline-seuss.webp" loading="lazy" title="Image" alt="Image"></p>
+
+<p>You'll find that it can be quite witty,</p>
+<p>Making up fake quotes from celebrity.</p>
+
+<p><img src="https://eugeneyan.com/assets/headline-quote.webp" loading="lazy" title="Image" alt="Image"></p>
+
+<p>It can also pose as a hackernews troll,</p>
+<p>Slinging mean comments, and being quite an a$$hole.</p>
+
+<p><img src="https://eugeneyan.com/assets/hackernews.webp" loading="lazy" title="Image" alt="Image"></p>
+
+<p>It all started with getting it to tell the time,</p>
+<p>With a little quirk, with a little rhyme.</p>
+
+<p><img src="https://eugeneyan.com/assets/clock.webp" loading="lazy" title="Image" alt="Image"></p>
+
+
+<p>• • •</p>
+
+<p>Overall, it was a fun experience learning how to work with only 8kb of memory(!) and <a href="https://github.com/micropython/micropython" target="_blank">Micro Python</a>. Given the memory constraints, common libraries (e.g., json, xmltodict) were unavailable on the Pico. And even if they were, I couldn’t load the entire RSS feed into memory before parsing it via <code>xmltodict.parse()</code>.</p>
+
+<p>As a result, I had to <a href="https://github.com/eugeneyan/raspberry-llm/blob/main/rss.py#L26" target="_blank">parse RSS feeds character by character</a>, learn how much <a href="https://github.com/eugeneyan/raspberry-llm/blob/main/check_mem.py" target="_blank">memory was consumed</a> at each step, and do lots of <code>gc.collect()</code>. It was also fun learning to draw on an e-ink screen (the helper functions made it easier than expected).</p>
+
+<p>To try it, clone this <a href="https://github.com/eugeneyan/raspberry-llm/tree/main" target="_blank">GitHub repo</a> and update your wifi and OpenAI credentials in <a href="https://github.com/eugeneyan/raspberry-llm/blob/main/secrets.py" target="_blank">secrets.py</a>.</p>
+
+<p>OG image prompt on MidJourney: “An e-ink display connected to a raspberry pi displaying some text –ar 2:1”</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Apr 2023). Raspberry-LLM - Making My Raspberry Pico a Little Smarter. eugeneyan.com.
+        https://eugeneyan.com/writing/raspberry-llm/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2023raspberry,
+  title   = {Raspberry-LLM - Making My Raspberry Pico a Little Smarter},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2023},
+  month   = {Apr},
+  url     = {https://eugeneyan.com/writing/raspberry-llm/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

@@ -1,0 +1,7 @@
+identity = "aff89fe15310dea5e16e04f564ed753900a2cc81"
+resolved_url = "https://status.claude.com/history.atom"
+title = "Claude Status - Incident History"
+site_url = "https://status.claude.com/"
+language = "en-US"
+etag = 'W/"b3edcb54048517761ca42f335bf36d30"'
+body_hash = "1b3a9e5db63119196efd2e725141a4dbaf05b956"

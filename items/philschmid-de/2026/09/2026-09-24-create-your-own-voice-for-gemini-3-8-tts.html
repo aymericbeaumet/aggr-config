@@ -1,0 +1,82 @@
+<div id="readability-page-1" class="page"><div><p><a target="_blank" rel="noopener noreferrer" href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-8-text-to-speech/">Gemini 3.8 Flash TTS and Flash-Lite TTS</a> are now available, in the Gemini API and <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/generate-speech">AI Studio</a>. Ranking #1 on Hume's Voice Design Benchmark, and on top of <a target="_blank" rel="noopener noreferrer" href="https://voicearena.com/tts-leaderboard/us-english">Voice Arena</a> in 6 languages.</p>
+<p>Biggest new features is that you can now replicate your own voice or create a new one from a sentence. The guide below shows how to do both.</p>
+<h3 id="1-record-2-clips">1. Record 2 clips</h3>
+<p>Same mic, same room, 24kHz mono. The API compares the two recordings, so don't switch from a headset to the laptop mic between them.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># macOS. ":0" is audio device 0. To find your mic:
+# ffmpeg -f avfoundation -list_devices true -i ""
+ 
+# me.wav: 15-20s of you talking like you normally do. Explain what
+# you're building this week. Don't read, just talk.
+ffmpeg -f avfoundation -i ":0" -ac 1 -ar 24000 -t 20 me.wav
+ 
+# consent.wav: read this word for word:
+# "I am the owner of this voice and I consent to Google using this voice to create a synthetic voice model."
+ffmpeg -f avfoundation -i ":0" -ac 1 -ar 24000 -t 8 consent.wav</code></pre></div></figure>
+<p>Linux: <code>-f alsa -i default</code>. On macOS, the first run may only open the microphone permission dialog. Allow it, then run the command again.</p>
+<p>The consent sentence must be one of the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/voice-replication#consent-phrases-by-language">25 supported versions</a>, read exactly. German, for example: <em>"Ich bin der Eigentümer dieser Stimme und bin damit einverstanden, dass Google diese Stimme zur Erstellung eines synthetischen Stimmmodells verwendet."</em> The reference clip can be in any language. Use the language you want the voice to speak later.</p>
+<h3 id="2-create-the-voice-then-speak">2. Create the voice, then speak</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import base64
+from google import genai
+ 
+client = genai.Client()
+ 
+def b64(path):
+    return base64.b64encode(open(path, "rb").read()).decode()
+ 
+voice = client.voices.create(
+    store=True,  # kept in your project for 1 year, returns voice_...
+    voice={
+        "model": "gemini-3.8-flash-tts",
+        "type": "replicated",
+        "display_name": "Me",
+        "replicated": {
+            "source_audio": {"mime_type": "audio/wav", "data": b64("me.wav")},
+            "consent_audio": {"mime_type": "audio/wav", "data": b64("consent.wav")},
+        },
+    },
+)
+print(voice.id)
+ 
+interaction = client.interactions.create(
+    model="gemini-3.8-flash-tts",
+    input=[{
+        "type": "user_input",
+        "content": [{
+            "type": "text",
+            "text": "Okay so... &lt;short pause&gt; I did not record this. &lt;laugh&gt; "
+                    "Twenty seconds of audio and one consent sentence. That's it.",
+            "annotations": [{"type": "speech_metadata", "style": "casual, a bit amused"}],
+        }],
+    }],
+    response_format={"type": "audio"},
+    generation_config={"speech_config": [{"voice": voice.id}]},
+)
+ 
+# 3.8 returns a real WAV with a RIFF header. No wave-module wrapping.
+open("me_synth.wav", "wb").write(base64.b64decode(interaction.output_audio.data))</code></pre></div></figure>
+<p>Two things to notice. The text is spoken word for word. The delivery ("casual, a bit amused") goes in <code>speech_metadata.style</code>, and the short sounds go inline as <code>&lt;short pause&gt;</code> and <code>&lt;laugh&gt;</code>. The voice ID is reusable: pass it in any later request, or find it again with <code>client.voices.list(type_=["replicated"])</code>.</p>
+<p>If you don't want anything stored server-side, <code>store=False</code> returns an encrypted <code>voicekey_...</code> that you keep yourself. It works in the same <code>speech_config</code> field and expires after 7 days.</p>
+<h2 id="or-design-one-from-a-sentence">Or design one from a sentence</h2>
+<p>No recordings needed. Same call, different <code>voice</code> dict. You also get a <code>sample_audio</code> preview, so you can listen to the voice before you synthesize anything:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">voice = client.voices.create(
+    store=True,
+    voice={
+        "model": "gemini-3.8-flash-tts",
+        "type": "prompted",
+        "display_name": "Deadpan host",
+        "gender": "male",
+        "language_code": "en-US",
+        "prompted": {"input": "A dry, deadpan podcast host in his 30s, low pitch, slight German accent."},
+    },
+)
+open("preview.wav", "wb").write(base64.b64decode(voice.sample_audio.data))</code></pre></div></figure>
+<p>Then use <code>voice.id</code> exactly as above.</p>
+<h2 id="what-changed-in-prompting">What changed in prompting</h2>
+<p>If you're coming from <code>gemini-3.1-flash-tts-preview</code>, this will break your prompts, so read the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/speech-generation#prompting-guide">prompting guide</a> and the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/speech-generation#migration">migration notes</a>. The short version:</p>
+<ul>
+<li>Input text is spoken word for word. Instructions written inside the text get spoken out loud too.</li>
+<li>Delivery that lasts the whole line ("whispering", "out of breath") goes in <code>speech_metadata.style</code>. Short sounds go inline in angle brackets.</li>
+<li>Multi-speaker turns need an explicit <code>speaker</code> on every turn.</li>
+<li>Long "Audio Profile" prompts now cause voice drift. Design the persona once with the Voices API, then send short or empty <code>style</code> strings.</li>
+<li>Non-streaming (unary) responses are real WAV (<code>audio/wav</code>), so remove any code that adds a WAV header. Set <code>response_format</code> to <code>audio/l16</code> if you still want raw PCM.</li>
+</ul></div></div>

@@ -1,0 +1,390 @@
+<div id="readability-page-1" class="page"><div>
+      
+            <p>
+              <b>THIS ADVICE IS NOW OUT OF DATE.</b>
+              I ended up working with many others to write a full paper
+              with 20 pages of advice on evaluating adversarial robustness.
+              <b>READ OUR PAPER INSTEAD:</b> <a href="https://github.com/evaluating-adversarial-robustness/adv-eval-paper">On Evaluating Adversarial Robustness</a>.
+              It contains strictly more information.
+            </p>
+            <p>
+              Original content of this page follows below:
+            </p>
+              
+            
+            <p>
+              At ICML 2018, because our paper
+      	<a href="https://nicholas.carlini.com/papers/2018_icml_obfuscatedgradients.pdf">Obfuscated Gradients Give a False Sense of Security: Circumventing Defenses to Adversarial Examples</a>
+      	won best paper, we got to give two talks. While the first was a standard
+      	paper talk,
+      	in the second talk, I focused exclusively on advice for
+      	performing adversarial example defense evaluations.
+      	These recommendations are informed by the analysis we performed in our
+      	paper where we showed that over half of the defense papers
+      	accepted at ICLR 2018 were incorrect
+      	<span><a href="#"><label for="foot">[a]</label></a>
+      	  <span>
+      	    That is, the results they claimed were significantly higher than
+      	    actually delivered. See our paper for details.
+      	  </span>
+      	</span>
+      	and performed weak evaluations.
+      	<span><a href="#"><label for="foot">[b]</label></a>
+      	  <span>
+      	    More generally, it is not these papers, and these papers only,
+      	    that were performing weak evaluations. The field as a whole is.
+      	    These recommendations come from approaches I notice that
+      	    we were taking that others were (are) not.
+      	  </span>
+      	</span>
+      
+            </p>
+      
+            <p>
+      	I hope to codify some of this advice I gave in the talk here,
+      	and provide some more detail and justification behind these pieces of advice.
+      	Much of the content here should be useful not only for those performing
+      	an evaluation of an adversarial example defense, but also for those who
+      	are reading an adversarial example defense paper and would like to understand
+      	if the evaluation performed by the authors is sufficient.
+            </p>
+            
+            
+            
+            <p>
+      	The first, and by far most important, component of a defense evaluation
+      	is to attempt to evade the specific defense. After the defense has been
+      	defined, ask: what attack could possibly defeat this defense? All attacks
+      	that might work must be shown to be ineffective.
+      	An evaluation that does not attempt to do this, but does everything else
+      	listed below, is fundamentally flawed. This is true for
+      	at least two reasons.
+            </p>
+            
+            <p>
+      	First, a defense is only interesting from the perspective of a security
+      	evaluation if it withstands future attack. Showing that a defense can
+      	defeat previous attacks is a necessary, <i>but not sufficient,</i>
+      	component of an evaluation. Even if we show that a defense can stop
+      	state-of-the-art attacks not targeting this specific defense, this is
+      	not sufficient. It is crucial to actively attempt to defeat the specific
+      	defense being proposed.
+            </p>
+      
+            <p>
+      	Why is this the case? Given any fixed attack algorithm (however powerful),
+      	there are
+      	often thousands of ways to “defend” against it, and
+      	make the attack always fail, by subtly breaking the specific attack.
+      	For example, imagine I was trying to design a secure encryption algorithm
+      	and settled on <a href="https://en.wikipedia.org/wiki/ROT13">rot-13</a>
+      	(rotate each caracter forward by
+      	13 letters, so that <i>a</i> becomes <i>n</i> and <i>b</i> becomes
+              <i>o</i>). This algorithm is obviously
+      	insecure. The attack that defeats it---rotating the characters back
+      	by 13 characters---is trivial.
+            </p>
+      
+            <p>
+      	If that were the state of the world, I might claim that I can fix the
+      	problem. Instead of rotating by
+      	13 characters, I am now going to rotate by 14. (So that, now, <i>a</i> goes to
+      	<i>o</i> instead). So, is this algorithm effective?
+            </p>
+      
+            <p>
+      	Well, if we consider something secure if it defeats previous
+      	attacks, this defense does defeat the prior attack.
+      	Rotating backwards by 13 characters
+      	will no longer decrypt the messages. However, and here's the important
+      	part, this algorithm is no more secure than the prior one.
+      	Defending against
+      	prior attacks is insufficient. We now have to ask: can the attacker
+      	adapt? In this case, the answer is yes. The attacker will
+      	just rotate by 14 characters.
+            </p>
+      
+            <p>
+      	We could play this game forever,
+      	<span><a href="#"><label for="foot">[c]</label></a>
+      	  <span>
+      	    Well, not forever. There are 26 ways to do a rotation. But after
+      	    exhausting all 26 rotations, we could start with other permutations,
+      	    which are still not secure, and there are 26! of those.
+      	  </span>
+      	</span>
+      	with the defender constantly
+      	“preventing” the attack by making changes that do not
+      	actually change anything fundamentally, but stop prior attacks from
+      	working.
+            </p>
+      	    
+            <p>
+      	This is why it is exceptionally important to actively attempt to
+      	evade a defense <i>after</i> completely specifying it.
+            </p>
+      
+            <p>
+      	I said there were two reasons why it is necessary to attempt an
+      	adaptive attack: the second reason is that, even if none of
+      	the above is convincing, we have <i>already solved the problem</i> of
+      	non-adaptive attacks. Of the over 200 defense papers on arXiv, well
+      	over half of them have already introduced defenses that are effective
+      	when the attacker is constrained to apply only existing attack
+      	algorithms.
+            </p>
+      
+            <p>
+      	So, in order to make a claim that a defense improves on the state
+      	of the art, it is insufficient to only evaluate on previous attacks.
+      	That problem has already been solved a hundred times over. In order
+      	to demonstrate a defense has done more than prior defenses, it
+      	must demonstrate it is effective against future attacks, too.
+            </p>
+      
+            <p>
+      	(Finally: if none of the above is convincing and the new defense is
+      	only evaluated against prior fixed attacks, it is important <i>not</i>
+      	to compare to the numbers obtained by evaluating these prior defenses
+      	on adaptive attacks. That is, if new defense A has 90% efficacy
+      	against some set of fixed attacks, but defense B has only 10% efficacy
+      	on adaptive attacks, it is no more fair to say “defense A is 80
+      	percentage points more effective than B.” than it would be fair
+      	to say “My MLPs are better than ResNets because my MLP
+      	achieves 99% accuracy on MNIST compared to the
+      	95% accuracy of a ResNet on CIFAR.” Unfortunately, this is
+      	the most common comparison made in the literature.)
+            </p>
+            
+            
+            
+            
+            <p>
+      	How should we perform an adaptive attack? Here are some specific recommendations
+      	for types of attacks to attempt. Many of these
+      	recommendations come directly from various papers written previously.
+      	<span><a href="#"><label for="foot">[c]</label></a>
+      	  <span>
+      	    Among other papers, see
+      	    <a href="https://arxiv.org/abs/1608.04644">Towards Evaluating the Robustness of Neural Networks</a>, 
+      	    <a href="https://arxiv.org/abs/1705.07263">Adversarial Examples Are Not Easily Detected: Bypassing Ten Detection Methods</a>, and
+      	    <a href="https://arxiv.org/abs/1802.00420">Obfuscated Gradients Give a False Sense of Security: Circumventing Defenses to Adversarial Examples</a>.
+      	  </span>
+      	</span>
+            </p>
+      
+            <p>
+      	<b>Do not use Fast Gradient Sign (exclusively).</b>
+      	The <a href="https://arxiv.org/abs/1412.6572">Fast Gradient Sign</a> (FGS) attack is a simple approach to
+      	generating adversarial examples that was proposed to demonstrate the linearity
+      	of neural networks. It was never intended to be a strong attack for
+      	evaluating the robustness of a neural network, and should not be used as one.
+            </p>
+      
+            <p>
+      	Even if it were intended to be a strong attack worth defending
+      	against, there are <i>many</i> defenses which achieve near-perfect success
+      	at defending against this attack. For example, a weak version of
+      	<a href="https://arxiv.org/abs/1705.07204">adversarial
+      	  training</a>
+      	<span><a href="#"><label for="foot">[d]</label></a>
+      	  <span>
+      	    See Figure 1. The network just learns to make the gradient point the
+      	    wrong direction locally, but changes nothing globally.
+      	  </span>
+      	</span>
+      	can defend against this attack by causing <a href="https://arxiv.org/abs/1602.02697">gradient
+      	  masking</a>, where locally the gradient around a given image may point in
+      	a direction that is not useful for generating an adversarial example.
+            </p>
+      
+            <p>
+      	While evaluating against FGS can be a component of an attack evaluation, it
+      	should never be used as the only attack in an evaluation.
+            </p>
+      
+            <p>
+      	<b>Perform an iterative attack with 1000+ iterations.</b>
+      	While it is possible to perform an attack correctly with only 10 or 100 iterations of
+      	gradient descent, it requires much more thought and care. I would recommend 1000
+      	iterations as a safe starting point, but more may be necessary in some situations.
+            </p>
+            
+            <p>
+      	There is no reasonable threat model under which an attacker can compute 10 (or 100)
+      	iterations of gradient descent, but not 1000. Because the threat model must not
+      	constrain the approach an attacker takes, it is always worth evaluating against
+      	a strong attack with many iterations of gradient descent.
+            </p>
+      
+            
+            <p>
+      	<b>Start search from random offsets.</b>
+      	When performing iterative attacks, it is useful to begin the search for
+      	adversarial examples at random offsets away from the initial, source input.
+      	This can <a href="https://arxiv.org/abs/1608.04644">reduce the distortion</a>
+      	required to generate adversarial
+      	examples by 10%, and can make training on adversarial examples
+      	<a href="https://arxiv.org/abs/1706.06083">overfit
+      	  less often</a>. Doing this every time is not necessary, but doing it at least
+      	once to verify it does not significantly change results is worthwhile.
+      	I would recommend at least
+      	10 random starting points.
+            </p>
+      
+            <p>
+      	<b>Perform a transferability analysis.</b>
+      	Adversarial examples often <a href="https://arxiv.org/abs/1605.07277">transfer</a> between models. That is, an
+      	adversarial example generated against one model trained on one dataset with one
+      	architecture will often <i>also</i> be adversarial on another model, even if it is
+      	trained on a different dataset with a different architecture.
+            </p>
+      
+            <p>
+      	An adversarial example defense evaluation should attempt a transferability analysis
+      	to validate validate that the proposed defense breaks transferability. If it does
+      	not, then it is likely to not actually be a strong defense, but just appear like one.
+            </p>
+      
+            <p>
+      	To attempt a transferability analysis, take some source model and and generate
+      	adversarial examples on this source model. These adversarial examples should be
+      	generated to be classified strongly as the adversarial class. Then, take those
+      	adversarial examples and test them on the target (defended) model, and check if
+      	any of them remain adversarial.
+            </p>
+            
+            <p>
+      	What should be the source model for a transferability analysis? A good starting
+      	point is a model as similar to the defended model as possible, trained on the
+      	same training data. If the defended model adds some new layers to a baseline
+      	model, it would be good to try the baseline. I would also recommend also trying a strong
+      	<a href="https://arxiv.org/abs/1706.06083">adversarially trained model</a>, which has
+      	been shown to be a strong source model for adversarial examples.
+      	It is also <a href="https://arxiv.org/abs/1611.02770">more effective</a>
+      	to generate adversarial examples that fool an ensemble of
+      	source models, and then use those to transfer to a target model.
+            </p>
+      
+            <p>
+      	<b>Apply gradient-free attacks.</b>
+      	To ensure that the model is not causing various forms of gradient masking,
+      	it is worth attempting gradient-free attacks. There are several such proposals. I
+      	would recommend these four. <a href="https://arxiv.org/abs/1708.03999">ZOO</a> numerically estimates gradients
+      	and then performs gradient descent, making it powerful but potentially ineffective
+      	when the loss surface is very noisy. <a href="https://arxiv.org/abs/1802.05666">SPSA</a> was proposed specifically to
+      	evaluate adversarial example defenses, and has broken many. <a href="https://arxiv.org/abs/1804.08598">NES</a> is
+      	effective at generating adversarial examples with a limited number of queries, and
+      	so generates adversarial examples of higher distortion. <a href="https://arxiv.org/abs/1712.04248">Decision-only</a>
+      	adversarial example generation looks only at the top most-likely label and so is
+      	more robust to a noisy loss surface, but requires many more queries to generate
+      	high quality adversarial examples.
+            </p>
+      
+            <p>
+      	<b>Try brute-force (random search) attacks.</b>
+      	By attempting to generating adversarial examples with purely random search,
+      	by sampling completely random perturbations (with, e.g., Gaussian or uniform
+      	random noise) we can
+      	confirm that we aren't missing anything obvious. If brute-force random sampling
+      	identifies adversarial examples that other methods haven't found, this indicates
+      	that other attacks can be improved.
+            </p>
+      
+            <p>
+      	Start by sampling random points of a large distance away. Every time an adversarial
+      	example is found, limit the search for adversarial examples of strictly smaller
+      	distortion. I recommend verifying a hundred instances or so with a few hundred
+      	thousand random samples.
+            </p>
+      
+            
+            
+      
+            <p>
+      	After having performed an evaluation (consisting of at least the above steps),
+      	there are several several simple checks that will help identify potential
+      	flaws in the attacks that should be corrected.
+            </p>
+            
+            <p>
+      	<b>Evaluate against the worst attack.</b>
+      	It is important to compare defense against the worst attacks. If Defense A
+      	does better than Defense B on weaker attacks (e.g., FGS) but does worse against
+      	a stronger attack (e.g., PGD), then Defense B is the stronger defense.
+      	
+            </p>      
+      
+            <p>
+      	<b>Verify iterative attacks are better than single-step attacks.</b>
+      	Iterative attacks are strictly more powerful than single-step attacks,
+      	and so their results should be strictly superior. If an iterative attack
+      	performs worse than a single-step attack, this often indicates that the
+      	iterative attack is not correct.
+            </p>
+      
+            <p>
+      	If this is the case, one useful diagnostic test is to plot attack success
+      	rate versus number of attack iterations averaged over many attempts, to
+      	try and identify if there is a pattern.
+      	Another diagnostic is to plot the model <i>loss</i> versus the number of
+      	attack iterations for a single input. The model loss should be (mostly)
+      	decreasing at each iteration. If this is not the case, trying a smaller
+      	step size may be helpful. The model may also be <a href="https://nicholas.carlini.com/writing/2018/evaluating-adversarial-example-defenses.html">obfuscating gradients</a>.
+            </p>
+            
+            <p>
+      	<b>Verify that attack success is monotonically increasing with distortion.</b>
+      	Attacks that allow more distortion are strictly stronger than attacks that
+      	allow less distortion. If the attack success rate ever decreases as the
+      	amount of distortion allowed increases, the attack is likely flawed.
+            </p>
+      
+            <p>
+      	<b>Verify iterative attacks converge.</b>
+      	On at least a few inputs, confirm that the number of iterations of gradient
+      	descent being performed is sufficient by plotting the attack success versus the
+      	number of iterations. This plot should eventually plateau; if not, the attack
+      	has not converged and more iterations should be used. The number of iterations
+      	necessary is inversely proportional to step size and proportional to distortion
+      	allowed. Dataset complexity is often related. For example, on CIFAR-10
+      	with a maximum distortion of 8/255 (as is often done), I have always observed
+      	convergence in under 1000 iterations with a step size of 1.
+            </p>
+                  
+            <p>
+      	<b>Verify that unbounded attacks always succeed.</b>
+      	With unbounded distortion, any attack should <i>eventually</i> reach 100% success,
+      	if only by switching the input to actually be part of the other class. If unbounded
+      	attacks do not succeed, this indicates that the attack is being applied incorrectly.
+            </p>
+      
+            <p>
+      	<b>For unbounded attacks measure distortion, not success rate.</b>
+      	The correct metric for evaluating unbounded attacks is the distortion required to
+      	generate an adversarial example, not the success rate (which should always be 100%).
+      	The most useful plot is to show success rate vs. distortion, and the most useful
+      	single number is either the mean or median distance to adversarial exapmles, when
+      	using unbounded attacks. To make measuring success rate meaningful, another option
+      	is to artifically bound the attack and report any adversarial example of distance
+      	greater than some threshold a failure (as long as this threshold is stated).
+            </p>
+            
+            <p>
+      	<b>Verify white-box attacks perform better than black-box attacks.</b>
+      	Because white-box attacks are a strict superset of black-box attacks,
+      	they should perform strictly better. Black-box attacks doing better often indicates
+      	that the defense is somehow masking gradient information. This often indicates
+      	that the white-box attack could be improved to succeed more often.
+            </p>
+            
+            <p>
+      	When this happens,
+      	I suggest looking at which instances adversarial examples can be found with
+      	black-box but not white-box attacks. Check if these instances are at all
+      	related, and investigate why white-box attacks are not finding these
+      	adversarial examples.
+            </p>
+            
+            
+            </div></div>

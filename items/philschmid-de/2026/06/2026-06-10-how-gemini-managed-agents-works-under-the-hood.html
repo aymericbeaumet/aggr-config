@@ -1,0 +1,101 @@
+<div id="readability-page-1" class="page"><div><p>You can go from zero to a working agent in five lines. One API call, and the response comes back with a finished PDF, charts, and a summary.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+client = genai.Client()
+ 
+interaction = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Analyze the latest lego set data and create a PDF report with charts",
+    environment="remote",
+)
+ 
+print(interaction.output_text)</code></pre></div></figure>
+<p><strong>What most people miss:</strong> this is not a single model call that returns text. Behind that one call, a sandbox boots, skills get loaded, and the model enters a loop where it reasons, picks tools, executes code, reads the output, and repeats until the task is done.</p>
+<h2 id="the-execution-loop-step-by-step">The Execution Loop, Step by Step</h2>
+<p><code>interactions.create()</code> does more than send a prompt. It spins up a full execution environment.</p>
+<div aria-label="Architecture overview: User, Gemini API, Gemini 3.5 Flash, and Sandbox"><div><p>User</p><p>Your code</p></div><div><p>Gemini API</p><p>Orchestrator</p></div><div><p>Gemini 3.5 Flash</p><p>Reasoning</p></div><div><p>Sandbox</p><p>Linux VM</p></div></div>
+<ol>
+<li>You send a prompt to the Gemini API</li>
+<li>The API boots a sandbox, routes your prompt to the model, dispatches tool calls, and collects results</li>
+<li>Gemini 3.5 Flash plans and picks tools, looping until the task is complete</li>
+<li>Code runs inside an isolated Linux VM, not on your machine</li>
+</ol>
+<div><p>Prompt</p><p>Write a python script that prints hello world and execute it.</p></div>
+<section><p><h3>Explore each step</h3></p><div><p><strong>Request:</strong> Your prompt hits the Interactions API via HTTPS. The API accepts it and starts orchestrating the interaction server-side.</p><p><span>1 / 10</span></p></div></section>
+<h2 id="inside-the-sandbox">Inside the Sandbox</h2>
+<p>Each interaction gets its own isolated Linux container. The agent can install packages, run scripts, read and write files, and browse the web. The sandbox runs Ubuntu with 4 vCPU and 16 GB RAM. Environment compute is <strong>not billed</strong> during preview (you pay only for model tokens).</p>
+<p>Environments can persist across interactions. The first call returns an <code>environment_id</code> you pass back to keep files and state intact. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agent-environment">Environments documentation</a> for sources, networking, and lifecycle details.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Turn 1: sandbox is created
+i1 = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Install pandas and create analysis.py",
+    environment="remote",
+)
+ 
+# Turn 2: same sandbox, files persist
+i2 = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Run analysis.py on the Q1 data",
+    environment=i1.environment_id,
+    previous_interaction_id=i1.id,
+)</code></pre></div></figure>
+<h2 id="from-prompt-to-production-agent">From Prompt to Production Agent</h2>
+<p>The execution loop is the same whether you are experimenting or running in production. The difference is how much configuration you want to provide upfront.</p>
+<ol>
+<li><strong>Ad-hoc call:</strong> Send a input with <code>environment="remote"</code>.</li>
+</ol>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">interaction = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Write a Python script that prints hello world",
+    environment="remote",
+)</code></pre></div></figure>
+<ol start="2">
+<li><strong>Add instructions and skills:</strong> Use <code>system_instruction</code> or <code>AGENTS.md</code> to customize behavior and provide skills via <code>sources</code>.</li>
+</ol>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">interaction = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Analyze Q1 revenue and create a slide deck.",
+    system_instruction="You are a data analyst. Export results as PDF.",
+    environment={
+        "type": "remote",
+        "sources": [
+            {"type": "inline", "target": ".agents/AGENTS.md",
+             "content": "Always use matplotlib for charts."},
+            {"type": "inline", "target": ".agents/skills/slides/SKILL.md",
+             "content": "---\nname: slides\n---\n# Slide Maker\nCreate HTML decks."},
+        ],
+    },
+)</code></pre></div></figure>
+<ol start="3">
+<li><strong>Save as a managed agent:</strong> Once your setup is stable, persist it with <code>client.agents.create()</code>. Each invocation forks a fresh sandbox from the base environment.</li>
+</ol>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">agent = client.agents.create(
+    id="data-analyst",
+    base_agent="antigravity-preview-05-2026",
+    system_instruction="You are a data analyst. Export results as PDF.",
+    base_environment={
+        "type": "remote",
+        "sources": [
+            {"type": "repository", "source": "https://github.com/my-org/templates",
+             "target": "/workspace/templates"},
+        ],
+    },
+)</code></pre></div></figure>
+<ol start="4">
+<li><strong>Invoke by ID:</strong> Reference the agent ID on every call. Same loop, no config to repeat.</li>
+</ol>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">result = client.interactions.create(
+    agent="data-analyst",
+    input="Analyze Q1 revenue data and create a slide deck.",
+    environment="remote",
+)
+print(result.output_text)</code></pre></div></figure>
+<h2 id="where-to-go-next">Where to go next</h2>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/gemini-managed-agents-developer-guide">Managed Agents Developer Guide</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/prompts/new_chat?model=antigravity-preview-05-2026">Try in AI Studio</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/managed-agents-quickstart">Quickstart</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/custom-agents">Build Custom Agents</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agent-environment">Environments</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">Interactions API</a></li>
+</ul></div></div>

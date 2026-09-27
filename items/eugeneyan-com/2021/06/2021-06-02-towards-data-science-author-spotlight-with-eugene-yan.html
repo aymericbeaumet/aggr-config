@@ -1,0 +1,147 @@
+<div id="readability-page-1" class="page"><div>
+            <p>I was recently interviewed by Towards Data Science as part of their <a href="https://towardsdatascience.com/tagged/author-spotlights" target="_blank">Author Spotlight</a> series. They had fun questions, some of which I’ve not writen about before, so I thought I would share it here too. Have more questions? Please post it on the <a href="https://eugeneyan.com/ama/" target="_blank">AMA</a>!</p>
+
+<p>• • •</p>
+
+<h3 id="you-took-a-rather-interesting-career-path-into-data-science-from-breaking-into-the-field-with-a-psychology-degree-to-landing-a-rocketship-role-at-lazada-and-now-as-an-applied-scientist-at-amazon-could-you-share-a-bit-about-how-you-found-your-way-into-the-field">You took a rather interesting career path into data science. From breaking into the field with a Psychology degree, to landing a “rocketship” role at Lazada, and now as an Applied Scientist at Amazon. Could you share a bit about how you found your way into the field?</h3>
+
+<p>I don’t recall starting with data science as a career goal. Back then, I was mostly interested in how people perceive, decide, and behave. That’s why I got into Psychology in the first place. My initial goal after graduation was to be an industrial and organizational psychologist, to help make people more productive and happy at work. Unfortunately, there’re weren’t any roles for fresh graduates (perhaps I wasn’t good enough, haha).</p>
+
+<p>I eventually joined the <a href="https://www.mti.gov.sg" target="_blank">Ministry of Trade and Industry</a> where I focused on the investment side of things, trying to make it easier and safer for companies to invest overseas. It mostly involved negotiating investment and free trade agreements, analyzing legal text, studying arbitration cases. The travel was exciting but after a while, I missed working with data.</p>
+
+<p>In my free time, I took online courses on statistics, SQL, and R. I also interviewed for entry-level data positions and eventually landed a job at IBM as a data analyst. In my first year, I mostly worked on analytics projects such as building supply chain dashboards and scraping and analyzing Twitter data for brands. After a year, I had the opportunity to join the workforce analytics team where I worked on job demand forecasting and building an internal job recommendation engine. The work was similar to my initial goal of using data to help people at work, it just took me longer to get here.</p>
+
+<p>Nonetheless, another opportunity came to join an e-commerce startup (Lazada). I was curious how working in a startup would be like, after being in government and IBM, and leaped. I’ve written about <a href="https://eugeneyan.com/writing/psych-grad-to-data-science-lead/" target="_blank">how that happened</a> and won’t rehash it here. (Lazada eventually got acquired by Alibaba, and after another stint in a health-tech startup, I joined Amazon.)</p>
+
+<h3 id="what-is-your-favorite-project-or-a-project-youre-particularly-proud-of">What is your favorite project or a project you’re particularly proud of?</h3>
+
+<p>My first self-learning project will always be my favorite. For that project, I used data scraped from Amazon to build an ML system to <a href="https://eugeneyan.com/writing/product-categorization-api-part-3-creating-an-api/" target="_blank">classify products</a>—into thousands of categories—based on titles. The machine learning approach was Bayes-ic but it worked well (top-3 accuracy of 0.965). It eventually evolved to include <a href="https://eugeneyan.com/writing/image-categorization-is-now-live/" target="_blank">image classification</a> and <a href="https://eugeneyan.com/writing/image-search-is-now-live/" target="_blank">image search</a>. (Parts of it also got used at Lazada to help sellers categorize products.)</p>
+
+<p>I’m proud of that effort because when I started, I knew next to nothing about machine learning and programming and had to stretch (a lot) to get it working. To train and deploy the model, I had to learn how to work with AWS EC2, S3, and Route53. To serve my model, I had to learn how to wrap it in a Flask app, build a basic frontend with Bootstrap and HTML, and muck around with Nginx. For image classification and search, I had to learn how to apply deep learning for computer vision, as well as how to use pre-trained models (e.g., <a href="https://arxiv.org/abs/1409.1556" target="_blank">VGG</a>, <a href="https://arxiv.org/abs/1512.03385" target="_blank">ResNet</a>) for transfer learning.</p>
+
+<p>I spent many weekends struggling with Python, <a href="https://en.wikipedia.org/wiki/Theano_(software)" target="_blank">Theano</a>, HTML, AWS, etc. The tremendous effort I poured into the project probably explains why I’m so proud of it. What I learned from it turbocharged my learning, and the gains also spilled into my work productivity.</p>
+
+<p><img src="https://eugeneyan.com/assets/image-search-sofa-results.jpg" title="Image Search Sofa Results" loading="lazy" alt="Image Search Sofa Results"></p>
+<p>Finding similar looking sofas with "dimples".</p>
+
+<h3 id="you-have-written-many-articles-across-an-eclectic-range-of-topics-from-what-a-data-science-portfolio-shows-to-maintaining-models-in-production-and-a-series-of-guides-to-ml-learning-systems-in-industry-what-is-your-process-for-writing-and-creating-so-prolifically">You have written many articles across an eclectic range of topics, from <a href="https://eugeneyan.com/writing/data-science-portfolio-how-why-what/" target="_blank">what a data science portfolio shows</a>, to <a href="https://eugeneyan.com/writing/practical-guide-to-maintaining-machine-learning/" target="_blank">maintaining models in production</a>, and a <a href="https://eugeneyan.com/start-here/" target="_blank">series of guides to ML learning systems in industry</a>. What is your process for writing and creating so prolifically?</h3>
+
+<p>I have a list of potential topics in my notes somewhere. Whenever inspiration for an article strikes, I add to it—it’s really just a list of titles. For example, a friend recently lamented about the difficulty of educating stakeholders about what machine learning can <em>and cannot</em> do—I thought it would be an interesting topic and added it to the list. I also get questions via my <a href="https://eugeneyan.com/topic-poll/" target="_blank">topic poll</a> and <a href="https://eugeneyan.com/ama/" target="_blank">AMA</a> and chats with friends.</p>
+
+<p>Just jotting the title on that list makes me pay attention to it. And when I come across relevant material or references, I add them under those titles. Titles can stay on this list for months or years. Probably half of them won’t evolve into articles, because I might find that there’s nothing novel I can contribute to the discussion.</p>
+
+<p>Once a week, I pick a title I’m most interested to explore. Early in the week, I write a basic outline of the piece, mostly using the <a href="https://eugeneyan.com/writing/writing-docs-why-what-how/" target="_blank">Why, What, How</a> structure (the other main form being listicles). The aim is to pour whatever comes to mind into that draft and not concern about language, content, sources, etc. This takes about one to two hours.</p>
+
+<p>The next day, I scan the outline and try to rewrite it from memory. This forces me to reorganize the ideas. Sometimes, details or entire sections get left out—this suggests that they weren’t essential to the thesis. Nonetheless, I compare my previous and new outlines to make sure the new outline’s better, and I didn’t exclude anything important. I iterate on the outline once or twice—on separate days—taking one to two hours each. But if my thinking on that topic is especially muddy, I might need three or four iterations.</p>
+
+<p>Regardless of what state the outline is in, I start converting my outline into prose on Saturday morning. By this time, the outline’s fairly detailed and it’s a matter of rewriting bullet points into sentences and paragraphs. This takes anywhere from five to fifteen hours. Once that’s done, I edit it once for grammar and spelling, and another time for readability. I always ship by Sunday night.</p>
+
+<h3 id="what-are-the-things-youve-enjoyed-most-about-writing-such-articles">What are the things you’ve enjoyed most about writing such articles?</h3>
+
+<p>I enjoy how writing forces me to research and learn and summarize my thinking, especially the more technical pieces like <a href="https://eugeneyan.com/tag/teardown/" target="_blank">teardowns</a> and <a href="https://eugeneyan.com/tag/survey/" target="_blank">surveys</a>. Writing’s been an invaluable learning technique. When I try to write, gaps in my knowledge appear. This leads to more research and learning before I can complete the piece.</p>
+
+<p>I also enjoy how writing helps me reflect, collect, and structure my thoughts. This mostly applies to pieces where I write from experience, such as the <a href="https://eugeneyan.com/writing/why-read-papers/" target="_blank">benefits of reading papers</a> and <a href="https://eugeneyan.com/writing/practical-guide-to-maintaining-machine-learning/" target="_blank">how to maintain ML systems in production</a>. When the need arises for me to preach about these topics again, I’d have thought about it deeply and even have a URL to share.</p>
+
+<p>What I enjoy most about writing is how scalable it is. Writing is O(1). It takes the same effort to write for one person or 10,000. When I’ve been asked the same question multiple times, I try to write about it (e.g., <a href="https://eugeneyan.com/writing/ml-design-docs/" target="_blank">how to write ML design docs</a>, <a href="https://eugeneyan.com/writing/data-science-roles/" target="_blank">the difference between various data/ML roles</a>). As a bonus, my writing has made me new friends such as other ML practitioners, VCs, startup founders, etc, and has led to several interesting opportunities.</p>
+
+
+
+<h3 id="what-kind-of-writing-in-dsml-would-you-like-to-see-more-of">What kind of writing in DS/ML would you like to see more of?</h3>
+
+<p>(From TDS: The context of this question is the general sense that most tech articles or tutorials published online are terrible. To improve that, one of my goals as an editor is to seek out &amp; publish “<a href="http://veekaybee.github.io/2021/03/26/data-ghosts/" target="_blank">ghost knowledge</a>” from experienced practitioners versus the marginal blog post about a tutorial or student portfolio project.)</p>
+
+<p>I’m a practical person and enjoy practical content. I like content where I can learn from other’s successes or mistakes and apply them at work. That’s why I curated the <a href="https://github.com/eugeneyan/applied-ml" target="_blank">applied-ml</a> repository. Reading how other companies approach and solve ML problems has been helpful when I’m designing my own ML systems. Nonetheless, I wish people would share more about what didn’t work. Maybe not every failed experiment, but general lessons about how <em>not</em> to approach a problem would be a great timesaver.</p>
+
+<p>I also enjoy papers where authors include <a href="https://en.wikipedia.org/wiki/Ablation_(artificial_intelligence)" target="_blank">ablation studies</a>. It’s amazing (and slightly sad) how much we can do with deep learning yet know so little about how it learns.</p>
+
+<p>Along the same vein, I enjoy content about the nuts and bolts of ML systems where authors share how machine learning, engineering, and product come together to build something that helps people. We need more of such case study-type content to help the community learn how to apply ML effectively.</p>
+
+<h3 id="you-have-a-pretty-comprehensive-writing-philosophy-what-is-your-advice-to-readers-looking-to-improve-their-writing-and-also-stand-out-online-as-more-and-more-engineers-get-into-writing">You have a pretty comprehensive <a href="https://eugeneyan.com/start-here/#writing" target="_blank">writing philosophy</a>. What is your advice to readers looking to improve their writing and also stand out online as more and more engineers get into writing?</h3>
+
+<p>Start. Just start.</p>
+
+<p>I usually get two responses to that: “What if my writing is bad?” or “But I haven’t found my niche yet!”</p>
+
+<p>Don’t worry about your writing being bad. The truth is, approximately zero people are going to read your first dozen pieces (well, unless you write on a big publication like Towards Data Science 😉). So dance like nobody’s watching, and write like nobody’s reading. At the beginning, you’re writing to practice.</p>
+
+<p>Similarly, you won’t find your niche by just thinking about it. You find it by writing a lot, putting it out there, and seeing what resonates. And maybe after 20 pieces or so, you look back and see themes emerge from your body of work. You can only connect the dots looking backwards—the best way to do this is to have a lot of dots by shipping consistently.</p>
+
+<blockquote>
+  <p>You can’t connect the dots looking forward; you can only connect them looking backwards. — Steve Jobs</p>
+</blockquote>
+
+<p>That said, there are a few lessons I’ve learned about writing to make it easier and more enjoyable. I’ve <a href="https://eugeneyan.com/writing/what-i-did-not-learn-about-writing-in-school/" target="_blank">written about it in detail</a> previously and will share the key points here:</p>
+<ul>
+  <li>Writing is 80% preparation, 20% writing.</li>
+  <li>Writing is hard for everyone.</li>
+  <li>You don’t find your niche; your niche finds you.</li>
+  <li>Your writing is nothing if not useful.</li>
+  <li>Your voice is not how you write; your voice is you.</li>
+</ul>
+
+<p>I think it’s okay if your work doesn’t stand out online. Writing is both a multiplayer and single-player game. It’s multiplayer in the sense that other people can engage with and share your writing, give you feedback, and befriend you. It’s single-player because when you write, you’re learning, thinking deeply, and clarifying your thoughts. Regardless of multiplayer outcomes, you always win the single-player game.</p>
+
+<div>
+
+<blockquote><div lang="en" dir="ltr"><p>Many things in life are both single-player &amp; multi-player games.</p><p>Writing for example. Getting feedback and making new friends is multi-player; learning and clarifying your thoughts is single-player.</p><p>Regardless of multi-player outcomes, you always win the single-player game.</p></div>— Eugene Yan (@eugeneyan) <a href="https://twitter.com/eugeneyan/status/1389967622922412032?ref_src=twsrc%5Etfw">May 5, 2021</a></blockquote>
+
+</div>
+
+
+
+<p>I’d like to see the community thinking more about ML systems—instead of just ML models—and the production side of things. I get the sense that, right now, most people consider training and achieving good validation results as the finish line (à la Kaggle).</p>
+
+<p>However, there’s a lot more that needs to be done for your model to make an impact. You have to set up data pipelines, orchestrate and schedule them, deploy, test, monitor, scale infra for latency and throughput, have policies for data privacy, security, on-call, etc. All this takes time, easily 20 - 100x the time to train and validate a prototype model.</p>
+
+<div>
+
+<blockquote><p lang="en" dir="ltr">Here's a datapoint from a Quora answer: "For one project I worked on: research quality prototype: 2 person-months. Production-quality version: 117 person-months. The prototype had some extra features not seen in the production version."<a href="https://t.co/tqjlTjDgGf">https://t.co/tqjlTjDgGf</a></p>— Eugene Yan (@eugeneyan) <a href="https://twitter.com/eugeneyan/status/1387808907796512768?ref_src=twsrc%5Etfw">April 29, 2021</a></blockquote>
+
+
+<p>"The prototype had extra features not seen in the production version."</p>
+
+</div>
+
+<p>And after you’ve shipped your ML model, it’s just the starting line. You’ve to maintain it sustainably. Imagine shipping an ML app once every quarter. After a year, you’ll have four apps to maintain—how would you do that without too much operational burden?</p>
+
+<p>I also wish more data scientists focused on problem formulation. For example, to identify abuse on social networks, you could frame it as a supervised or unsupervised problem. A supervised approach will need high-quality labels. An unsupervised approach has various flavors, such as outlier detection (e.g., isolation forests) or network analysis (e.g., graph clustering of bad actors).</p>
+
+<p>How we frame problems has an outsized impact on outcomes. This also applies to choosing the right positive <em>and negative</em> labels—<a href="https://eugeneyan.com/writing/machine-learning-metagame/#more-system--training-data-design-less-model-design" target="_blank">negative sampling is an obscure art</a>. It’s also useful to think about how your loss function correlates with your offline validation metrics (recall@k, nDCG), and how that correlates with online A/B testing metrics (clicks, conversion) and downstream business metrics (revenue, customer lifetime value).</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Jun 2021). Towards Data Science - Author Spotlight with Eugene Yan. eugeneyan.com.
+        https://eugeneyan.com/speaking/tds-author-spotlight/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2021towards,
+  title   = {Towards Data Science - Author Spotlight with Eugene Yan},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2021},
+  month   = {Jun},
+  url     = {https://eugeneyan.com/speaking/tds-author-spotlight/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

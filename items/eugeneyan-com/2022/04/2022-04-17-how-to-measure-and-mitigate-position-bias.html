@@ -1,0 +1,112 @@
+<div id="readability-page-1" class="page"><div>
+            <p>Position bias happens when higher positioned items are more likely to be seen and thus clicked <em>regardless of their actual relevance</em>. This leads to lesser engagement on lower ranked items. On Google Search, users click on the first position <a href="https://www.sistrix.com/blog/why-almost-everything-you-knew-about-google-ctr-is-no-longer-valid/" target="_blank">10x more than the tenth position</a>. Similarly, we scan through Netflix’s recommendation carousels from left to right.</p>
+
+<p><img src="https://eugeneyan.com/assets/position-bias.webp" loading="lazy" title="Position bias happens when we process items from top-to-bottom or left-to-right." alt="Position bias happens when we process items from top-to-bottom or left-to-right."></p>
+<p>Position bias happens when we process items from top-to-bottom or left-to-right.</p>
+
+<p>Position bias can happen for several reasons. Perhaps we trust the algorithm and just blindly click on top results. Or perhaps we’re less likely to view lower-ranked items (i.e., presentation bias), especially if they’re on the second page of Google Search’s results. Maybe after we click the first relevant result or play the first relevant movie, we ignore the rest of the items.</p>
+
+<p>Because of position bias, it’s difficult to tell if users are engaging on recommendations because they’re truly relevant, or because the recommended item happens to rank highly. Training our models on biased historical data perpetuates the bias via a self-reinforcing feedback loop. This can lead to suboptimal outcomes where items that are more relevant but are shown in lower positions continue to get lower engagement and thus don’t improve their rank.</p>
+
+<p>Here are some notes on various ways to measure position bias. Some isolate the effect of position bias better while others are more feasible on logged data.</p>
+
+<h2 id="measuring-position-bias-via-randomness">Measuring position bias via randomness</h2>
+
+<p>The straightforward way is to <strong>shuffle (top) results uniformly at random</strong> (<em><a href="https://dl.acm.org/doi/10.1145/2911451.2911537" target="_blank">RandN</a> or RandTopN</em>). This controls for item relevance by having the same item appear in multiple positions. Thus, any difference in customer engagement can be cleanly attributed to position bias. The downside is that this adversely impacts the customer experience and is usually too costly or out of the question.</p>
+
+<p><img src="https://eugeneyan.com/assets/randtopn.webp" loading="lazy" title="Shuffling the top 4 items uniformly at random." alt="Shuffling the top 4 items uniformly at random."></p>
+<p>Shuffling the top 4 items uniformly at random.</p>
+
+<p>Another approach is to <strong>exploit the inherent randomness</strong> in item positions. We see this in historical data when we have multiple rankers in production or when the production ranker is updated frequently. This lets us to <a href="https://arxiv.org/abs/1812.05161" target="_blank">estimate position bias without intrusive interventions</a> like RandTopN. Nonetheless, unless we’re operating on a large scale with multiple rankers updating frequently, it can be hard to get such data.</p>
+
+<p>A weaker form of inherent randomness occurs when multiple widgets recommend the same item but in different positions. In the example below, the Popular on Netflix widget recommends Battleship in position 3 and Shooter in position 4 while the Trending widget recommends Battleship in position 1 and Shooter in position 6. In this approach, the context (i.e., user, item, or query) is constant. Nonetheless, other noise may seep in such as widget position or how the widget is presented (e.g., title, explanation).</p>
+
+<p><img src="https://eugeneyan.com/assets/inherent-randomness.webp" loading="lazy" title="Inherent randomness in how Battleship and Shooter are ranked for two widgets." alt="Inherent randomness in how Battleship and Shooter are ranked for two widgets."></p>
+<p>Inherent randomness in how Battleship and Shooter are ranked for two widgets.</p>
+
+<p>If we don’t have multiple widgets in production, we can consider recommendations that are ranked in different positions across different contexts. For example, in item-to-item recommendations, the same recommended item may be shown in different positions for different context items. However, as the context isn’t constant, this approach can be noisy because the same recommended item or search result has different relevance based on the context item/query.</p>
+
+<p>Despite the limitations of exploiting inherent randomness, the big advantage is that there’s no customer impact as we are measuring position bias via logged data.</p>
+
+<p>Another approach is to <strong>infer position bias via expectation maximization</strong>. One way is to <a href="https://dl.acm.org/doi/10.1145/3159652.3159732" target="_blank">model clicks via a position bias model</a>. In the model, an item is clicked only if it is examined and relevant; examination depends only on the position while relevance depends only on the context and item. Google demonstrated this approach’s effectiveness on search logs from email and file storage services where there was only a single click for most queries. To do this, they represented queries and items via features instead of IDs.</p>
+
+<p>A middle ground is to <strong>add a bit of randomness</strong> into item positions. For example, <em><a href="https://arxiv.org/abs/cs/0605037" target="_blank">Fair</a><a href="https://dl.acm.org/doi/abs/10.1145/1341531.1341545" target="_blank">Pairs</a></em> swaps items at positions <em>k</em> and <em>k+1</em> while <em><a href="https://arxiv.org/abs/1608.04468" target="_blank">RandPair</a></em> swaps items at positions <em>1</em> and <em>k</em>. Similar to <em>RandN</em>, this keeps item relevance constant so we can measure the difference in customer engagement due to position bias. One downside is that RandPair can degrade customer experience especially if <em>k</em> is large.</p>
+
+<p><img src="https://eugeneyan.com/assets/randpair.webp" loading="lazy" title="Swapping pairs of items via FairPair and RandPair." alt="Swapping pairs of items via FairPair and RandPair."></p>
+<p>Swapping pairs of items via FairPair and RandPair.</p>
+
+<p>We can also draw inspiration from <a href="https://www.sciencedirect.com/science/article/abs/pii/S0950705116302763" target="_blank">serendipity in recommendations</a> and add a random value to item positions. For example, we can add values randomly sampled from a normal distribution (e.g., <code>np.random.normal</code>) to each item’s position and re-sort them on the sum. Depending on the standard deviation, each item has the chance to gain +/- <em>x</em> positions.</p>
+
+<p>However, adding randomness to an item’s position doesn’t account for the underlying scores of the item recommendations. For example, a position 1 item that has 10x the raw score of a position 2 item is treated the same as a position 1 item that has 1.1x the score of a position 2 item.</p>
+
+<p>To address this, we can add randomness to the raw scores instead. One way is <a href="https://arxiv.org/abs/1705.10257" target="_blank">Boltzmann exploration</a> where we (i) normalize/softmax the raw scores into probabilities and then (ii) sample the recommendations (based on these probabilities) as we populate our widget starting from position 1. This gives each recommended item a chance to gain a higher position weighted by recommendation probability (which we can also use in <a href="https://eugeneyan.com/writing/counterfactual-evaluation/#evaluating-recsys-as-an-interventional-problem" target="_blank">counterfactual evaluation</a>). Unlike <em>RandTopN</em>, these approaches anchor each item to its original position before adding randomness, possibly reducing the negative customer impact.</p>
+
+<h2 id="mitigating-position-bias">Mitigating position bias</h2>
+
+<p>If we’re in the early days of building our recommender system or prioritize exploration over exploitation, adding some randomness can be a decent way to mitigate position bias while collecting click data. Because multiple items can appear in the same position (e.g., position 1), we can log which item performed better and train our models accordingly.</p>
+
+<p>If adding randomness is not an option, we can use the measured/learned position bias to debias logged data. For example, the previous Google paper used inferred position bias to train models optimized on <a href="https://dl.acm.org/doi/10.1145/3159652.3159732" target="_blank">inverse propensity weighted precision</a>.</p>
+
+<p>Alternatively, we can account for position bias by including positional features in our models. These positional features help the model learn how position affects reward. Then, during serving, we can set all items to have positional feature = 1 to negate the impact of position. More in Google’s <a href="https://developers.google.com/machine-learning/guides/rules-of-ml#rule_36_avoid_feedback_loops_with_positional_features" target="_blank">Rules of Machine Learning</a>.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Depending on the user experience (UX), the impact of position bias can vary. If we’re a large platform where customers organically view items via search, recommendations, category pages, etc. and we run several algorithms in production, the position bias from an individual algorithm gets washed out by other algorithms.</p>
+
+<p>On the other hand, if we’re launching a new platform or have a UX where the bulk of item discovery comes from a single interface (e.g., restaurant search on food delivery apps, social media feeds), IMHO it’s a good idea to measure and mitigate position bias early.</p>
+
+<p>Do you know of other ways to measure and mitigate position bias? Would love to hear them in the comments below!</p>
+
+<h2 id="references">References</h2>
+<ul>
+  <li><a href="https://arxiv.org/abs/cs/0605037" target="_blank">Minimally Invasive Randomization for Collecting Unbiased Preferences from Clickthrough Logs</a></li>
+  <li><a href="https://dl.acm.org/doi/abs/10.1145/1341531.1341545" target="_blank">An Experimental Comparison of Click Position Bias Models</a></li>
+  <li><a href="https://arxiv.org/abs/1608.04468" target="_blank">Unbiased Learning-to-Rank with Biased Feedback</a></li>
+  <li><a href="https://dl.acm.org/doi/10.1145/2911451.2911537" target="_blank">Learning to Rank with Selection Bias in Personal Search</a></li>
+  <li><a href="https://arxiv.org/abs/1812.05161" target="_blank">Estimating Position Bias without Intrusive Interventions</a></li>
+  <li><a href="https://dl.acm.org/doi/10.1145/3159652.3159732" target="_blank">Position Bias Estimation for Unbiased Learning to Rank in Personal Search</a></li>
+  <li><a href="https://arxiv.org/abs/1705.10257" target="_blank">Boltzmann Exploration Done Right</a></li>
+  <li><a href="https://www.sciencedirect.com/science/article/abs/pii/S0950705116302763" target="_blank">A Survey of Serendipity in Recommender Systems</a></li>
+</ul>
+
+
+
+<p>Thanks to Yang Xinyi for reading drafts of this.</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Apr 2022). How to Measure and Mitigate Position Bias. eugeneyan.com.
+        https://eugeneyan.com/writing/position-bias/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2022position,
+  title   = {How to Measure and Mitigate Position Bias},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2022},
+  month   = {Apr},
+  url     = {https://eugeneyan.com/writing/position-bias/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

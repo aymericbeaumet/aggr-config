@@ -1,0 +1,218 @@
+<div id="readability-page-1" class="page"><div>
+            <p>Hiring well is the highest leverage activity we can do for the mission and organization. And running effective interviews is key to hiring well. We can think of the interview process as a system: Given a candidate, assesses whether they are a good fit for the role and team. Thus, to hire well, the interview system should be reliable and valid, with minimal noise.</p>
+
+<p>In this write-up, <a href="https://jxnl.co" target="_blank">Jason</a> and I will share a few things we’ve learned about interviewing candidates for machine learning (ML) and AI roles. First, we’ll discuss <em>what</em> <a href="#what-technical-skills-to-consider">technical</a> and <a href="#what-non-technical-abilities-to-look-out-for">non-technical</a> qualities to assess. Then, we’ll share <em>how</em> to <a href="#calibrating-the-phone-screen-for-loop-success">calibrate phone screens</a>, and run the <a href="#running-the-interview-loop-and-debrief">interview loop and debrief</a>. Finally, we’ll wrap up with some tips for <a href="#for-interviewers-candidates-are-rough-diamonds">interviewers</a> and <a href="#for-hiring-managers-sell-on-mission--talent-density">hiring managers</a>, as well as our opinionated take on some traits of a good hire. (And like all our writing online, opinions our own.)</p>
+
+<h2 id="what-technical-skills-to-consider">What technical skills to consider</h2>
+
+<p><strong>For most ML/AI roles, a basic proficiency in software engineering is expected.</strong> Depending on the role, we’ve seen simple 30-60 minute coding exercises that ask a candidate to:</p>
+<ul>
+  <li>Check if 2/3D arrays meet predefined criteria (e.g., validating robot’s simulated route through a warehouse), checking for edge cases, and writing unit tests</li>
+  <li>Implement and start an inference endpoint, including input/output validation, logging, monitoring, and command to update endpoint state</li>
+  <li>Build a pipeline to process data, first in batch and then adapting it for streaming</li>
+</ul>
+
+<p>Successfully completing the coding exercise is only part of the interview. What’s more important is <em>how</em> the candidate solves it: Do they break down the problem logically, write clean, readable, maintainable code, consider edge cases, respond well to feedback, etc? There’ve been cases where a candidate completes the coding exercise but receives a “no hire” decision because <em>how</em> they solved it did not meet the bar.</p>
+
+<p><strong>Next, data literacy is a crucial yet overlooked skill for ML/AI roles.</strong> While it’s nebulous and hard to quantify, I think that at its core, data literacy means understanding and respecting the data, being proficient at data analysis, and having an intuition for when the data or analysis smells fishy.</p>
+
+<blockquote>
+  <p>One may expect Google engineering to largely consist of implementing PhD level algorithms, and while that’s sometimes true, <em>much of a search or AI engineer’s job involves looking at examples, spotting patterns, hand labelling data, and other non-scalable, in-the-weeds analysis.</em> — <a href="https://shreyans.org/google" target="_blank">shreyans.org</a></p>
+</blockquote>
+
+<p>To respect the data is to make an effort to understand it—firsthand—beyond assumptions about how it was collected and stored. For example, data-savvy engineers understand that <a href="https://eugeneyan.com/writing/testing-pipelines/#adding-new-data-or-logic--updating-pipeline-code" target="_blank">server-side and client-side logs will differ</a>. They’ll also look at rows of data, and check for missing values, outliers, and inconsistencies. They know how to clean and preprocess data to make it easier to use downstream, whether for training models or serving features. And they <a href="https://eugeneyan.com/writing/practical-guide-to-maintaining-machine-learning/#monitor-training-and-serving-data-for-contamination" target="_blank">monitor the data for contamination or drift over time</a>.</p>
+
+<p>Proficiency in data analysis goes beyond writing SQL or computing statistics. When joining tables, are we accidentally duplicating or dropping rows by incorrectly assuming that a join key is unique and complete? When computing statistics, do we only focus on aggregate stats like mean and median and thus miss crucial patterns and subgroups (see <a href="https://en.wikipedia.org/wiki/Simpson%27s_paradox" target="_blank">Simpson’s paradox</a>)? Do our data visualizations guide the audience toward accurate interpretations? Ultimately, the goal isn’t analysis per se but better decisions and actions.</p>
+
+<p>Perhaps more important is the intuition (read: skepticism) to question an analysis that seems off. This may require domain knowledge to know when the analysis contradicts our intuition and we need to dig deeper. More specifically to ML, if we look at a precision-recall curve and see precision plunging or recall spiking at a certain threshold, do we have the curiosity and drive to figure out the root cause and fix it? In general, acting on good data intuition leads to healthier data and thus better performing ML systems.</p>
+
+<blockquote>
+  <p>When the data and the anecdotes disagree, the anecdotes are usually right. It’s usually not that the data is being miscollected. It’s usually that you’re not measuring the right thing. — Jeff Bezos</p>
+</blockquote>
+
+<p>We can assess for data literacy by asking follow-up questions such as:</p>
+<ul>
+  <li>How did you wrangle the data? What issues did you face and how did you fix them?</li>
+  <li>What was a misleading summary statistic? Which were more useful than others?</li>
+  <li>What was an insightful data viz you created and why? What was the least helpful?</li>
+</ul>
+
+<p>These questions let the candidate share about mistakes they’ve made and lessons learned. This also reveals the candidate’s self-awareness, intellectual honesty, and the humility to share their past errors.  Also see Jason’s take on <a href="https://jxnl.co/writing/2024/06/02/10-ways-to-be-data-illiterate-and-how-to-avoid-them/" target="_blank">what data literacy does NOT look like</a>.</p>
+
+<p><strong>It also helps for ML/AI engineers to be comfortable with the output of opaque models.</strong> Sometimes, when software engineers first start working with ML models, they expect a level of control and predictability similar to databases or conventional APIs. But to their surprise, ML models are completely different beasts. They don’t have perfect accuracy, their predictions may change when the model is retrained on new data, they lack clear interpretability on how they arrive at outputs, and for large language models (LLMs), the output is stochastic where the same input can lead to different outputs.</p>
+
+<p>While most engineers eventually adapt to these quirks, some never get fully comfortable with the inherent uncertainty and opacity of ML. And that’s okay. They’ll probably be happier in roles that don’t involve directly building or interacting with ML models.</p>
+
+<p>Folks who’re comfortable with ML understand we can’t have full control or interpretability over most models, and that all models will reflect biases from their training data. They also know to build validators and policies to align the system’s (instead of the model’s) behavior with the needs of users and the business. We can learn about this by asking:</p>
+<ul>
+  <li>What unexpected/biased output have you seen? How did you address it, if needed?</li>
+  <li>What guardrails/policies do you have around the model to align it with the user?</li>
+  <li>If you spot bias emerging from the model, how would you mitigate it?</li>
+</ul>
+
+<p><strong>Finally, having a basic understanding of evals is key for anyone building ML-powered products.</strong> Fundamentally, machine learning is an empirical discipline. Even if an ML/AI engineer isn’t directly training models, they have a responsibility to evaluate the model they’re using whether it’s a simple decision tree, a recommender system, or an off-the-shelf LLM API. We can ask about a candidate’s experience with evals by asking:</p>
+<ul>
+  <li>How did you measure model performance over time, as it was retrained or updated?</li>
+  <li>When model performance breached predefined thresholds, how did you respond?</li>
+  <li>How did you collect the initial evaluation data and build the eval harness?</li>
+</ul>
+
+<p>To understand more about running evals for LLM-powered products, you might find these useful: (i) <a href="https://hamel.dev/blog/posts/evals/" target="_blank">Your AI Product Needs Evals</a>, (ii) <a href="https://eugeneyan.com/writing/evals/" target="_blank">Task-Specific LLM Evals that Do &amp; Don’t Work</a>, (iii) <a href="https://jxnl.co/writing/2024/02/28/levels-of-complexity-rag-applications/" target="_blank">Evaluating the n levels of RAG</a>, (iv) <a href="https://www.sh-reya.com/blog/ai-engineering-flywheel/#1-evaluation-defining-success-metrics" target="_blank">Data Flywheels for LLM Applications (Evaluation)</a></p>
+
+<p>For the increasing number of <a href="https://www.latent.space/p/ai-engineer" target="_blank">AI engineer</a> roles that apply pretrained models and APIs to build products, the above is usually sufficient. Nonetheless, for roles closer to research or applied science, we typically also assess for science breadth, depth, and application.</p>
+
+<p><strong>Science breadth interviews assess a candidate’s familiarity with various ML domains.</strong> They’re usually based on what the team needs. I tend to start with the basics of supervised and unsupervised learning (to build the candidate’s confidence) before progressing to more specialized areas such as recommender systems, language modeling, and evaluation / benchmarking. Other teams might prioritize forecasting, operations optimization, computer vision, or multi-modal models.</p>
+
+<p>While interviewing for breadth, we shouldn’t expect expertise in every area—that would be unrealistic, especially compared to the interviewer who has likely conducted the interview dozens, if not hundreds of times. Instead, the goal is to understand the candidate’s breadth of knowledge and where the gaps are. You can make a point to communicate this upfront, letting candidates know that you’ll continue probing till you reach the boundaries of their knowledge, and encourage them to call out when they’re unfamiliar with a topic so the interview can focus the time on their strengths.</p>
+
+<p>In contrast, <strong>science depth interviews invite the candidate to showcase their expertise on a project of their choice.</strong> The goal is to understand how rigorously they’ve thought about and executed on a problem. What were alternative designs or techniques considered, or what connections were drawn to adjacent fields? How did they navigate constraints and make difficult trade-offs? Can they discuss nitty-gritty details and implementation challenges? And how they they measure impact on customers and the business? Candidates who have depth in past work can likely bring similar rigor and thoughtfulness to future work.</p>
+
+<p>I’ve found depth interviews to be the hardest to conduct, especially when the candidate’s expertise is very different from my own. Candidates could be working on anything from optimizing robot navigation in a warehouse to inserting virtual ad posters into movies and livestreams. In these cases, here are questions to collect data points on the fundamentals:</p>
+<ul>
+  <li>How did you evaluate and perform error analysis on the model or system?</li>
+  <li>What were some constraints faced, and what hard trade-offs did you have to make?</li>
+  <li>How did you implement safeguards and policies around the model or system?</li>
+  <li>What was the outcome, and looking back, what would you have done differently?</li>
+</ul>
+
+<p><strong>Science application interviews challenge a candidate to apply their skills and knowledge to a practical problem</strong>, typically one directly relevant to the hiring team’s work. There’s usually no “right” solution. Instead, the focus is on the candidate’s thought process while they solve the problem, as well as the various perspectives they consider, such as science, engineering, product, and business. Often, the candidate’s questions are more insightful (on their ability) than the eventual solution proposed.</p>
+
+<p>For example, we might have a question on designing a recommendation system for <a href="https://eugeneyan.com/writing/bandits/" target="_blank">frequently changing items (e.g., ads)</a>. Most candidates explore issues like cold-start and sparse data, the need to explore-exploit, optimization metrics (e.g., impressions, clicks, conversions), and balancing between organic engagement and revenue.</p>
+
+<p>Read more about one candidate’s experience on science interviews <a href="https://medium.com/@ajinkya.pahinkar98/my-amazon-applied-science-interview-journey-f3eb1ed748a6" target="_blank">here</a>.</p>
+
+<h2 id="what-non-technical-abilities-to-look-out-for">What non-technical abilities to look out for</h2>
+
+<p>Beyond interviewing for technical skills, it helps to also consider the non-technical aspects of a candidate’s experience, especially for senior+ roles. Some dimensions to consider include ambiguity, influence, complexity, and execution (AICE).</p>
+
+<p><strong>Ambiguity is how nebulous the problem was when the candidate started working on it.</strong> Sometimes, the problem is clearly scoped with predefined success criteria, allowing them to focus on implementation. In other situations, the candidate may have to define the problem and measures of success. Also, does the problem have known solutions and best practices from industry? Or is it previously unsolved with no prior art? The level of guidance is also relevant—did the candidate operate with close supervision, or largely on their own? Finally, some problems are more narrow and focused on the technical, and thus likely less ambiguous, while others span across the business and organization.</p>
+
+<p><strong>Influence captures the scope of how the candidate collaborates and drives impact through others.</strong> A candidate’s work may primarily involve influence on their immediate team, multiple teams, multiple lines of business, or even the field and community. It also helps to understand their mechanisms of influence, such as roadmap/design reviews, office hours, advising on a project, or being a mentor. Their influence may also extend beyond technical strategy into shaping product and business decisions. Candidates who are a force multiplier elevate the output of those around them, not just their own direct contribution.</p>
+
+<p><strong>Complexity refers to the intricacy of the problem space.</strong> (Not to be confused with the complexity of the solution! Ideally, we’d solve complex problems with simple, elegant solutions.) Some problems can be isolated to a specific component or system, while others require work across multiple interdependent systems with competing constraints and trade-offs. We want to understand the level of complexity the candidate has worked on and is used to, while getting a sense of the effectiveness of their solutions.</p>
+
+<p><strong>Execution is the candidate’s ability to deliver within limited resources and timelines.</strong> We don’t only consider solutions or products that did well on an A/B test—after all, the cost of innovation is the occasional failure and we want to know how fast the candidate can fail, learn, and iterate. Also, some focus on tactical, short-term problems, while others deliver strategic solutions that solve multiple endemic problems. As part of execution, some even pioneer new approaches that are adopted across teams or industry. The scope and scale of effort required (e.g., number of teams) is also a consideration.</p>
+
+<p>As we listen to a candidate describe their experiences, we can pick up cues that indicate the level of AICE they operate on. For example, a candidate working on a project to boost subscription rates through signup bonuses may have to frequently collaborate with finance, suggesting cross-team influence. But if their manager handled most of the negotiation and debates, their influence may be more limited than it appears.</p>
+
+<p>Depending on the role and stage of the company, we may prioritize different AICE traits. An early-stage startup may prioritize ambiguity and execution while a mature tech company might need more influence and complexity management.</p>
+
+<p>Finally, it’s worth reflecting which technical and non-technical qualities can be coached, and which can only be hired. IMHO, most technical skills can be coached, while traits such as ownership, resourcefulness, and grit are likely hired. Being clear on the qualities to coach vs. hire will help with identifying candidate gaps that are truly dealbreakers.</p>
+
+<p>• • •</p>
+
+<p>So far, we’ve focused on <em>what</em> to interview for in ML/AI roles. Next, we’ll discuss <em>how</em> to calibrate the phone screen, run an interview loop, and conduct a debrief. (An interview loop typically consists of multiple interviewers who assess for various aspects.) Then, we’ll wrap up with some tips for interviewers and hiring managers.</p>
+
+<h2 id="calibrating-the-phone-screen-for-loop-success">Calibrating the phone screen for loop success</h2>
+
+<p>Before investing in an interview loop, most hiring managers conduct a phone screen. The goal is to select candidates who’ll have a high likelihood of success in the interview loop. Interview loops are costly, often requiring a game of Tetris across multiple interviewer schedules. A typical loop might involve five interviews of an hour each, plus a 30-minute pre-brief and debrief involving all interviewers. That’s 10 hours of collective time invested in a single candidate, excluding the time taken to prepare and write feedback.</p>
+
+<p>Given how costly a loop is for candidates and interviewers, a rule of thumb from <a href="https://www.goodreads.com/book/show/53138083-working-backwards" target="_blank">Working Backwards</a> is for the phone screen to be sufficiently selective. The hiring manager should advance candidates that they believe will perform well in the interview loop. Of course, we may need to recalibrate the phone screen if the pipeline is sparse or if the number of candidates making it to the loop is extremely low. But in general, a rigorous phone screen reduces the number of borderline candidates who end up struggling in the interview loop.</p>
+
+<blockquote>
+  <p>After this detailed phone screen, the hiring manager decides whether they are inclined to hire the candidate based on the data they’ve collected so far. If so, then the candidate will be invited for an in-house interview. <strong>Sometimes, the hiring manager isn’t sure about a candidate but still invites them to go through the interview loop, hoping that this will assist in the hiring decision. This is a mistake.</strong> In most cases, the questionable candidate will not get the job, and a lot of time will have been wasted in the process. <strong>The hiring manager should not bring the candidate in for the time-consuming and expensive interview loop unless they are inclined to hire them after the phone interview.</strong> — <a href="https://www.goodreads.com/book/show/53138083-working-backwards" target="_blank">Working Backwards</a></p>
+</blockquote>
+
+<h2 id="running-the-interview-loop-and-debrief">Running the interview loop and debrief</h2>
+
+<p><strong>It helps to have a pre-brief before the interview loop</strong>, especially if some interviewers are unfamiliar with role requirements or come from different teams. This is where the hiring manager can align the loop on what’s needed for the role, and what to look out for.</p>
+
+<p>For example, the loop would need to know if the role focuses more on financial analysis and A/B tests, or training and serving recsys models, or RAG and building LLM-powered user experiences. It’s also helpful to share about the level of ambiguity, influence, complexity, and execution expected for the role, or if there are any <a href="https://www.scarletink.com/p/interviewing-at-amazon-leadership-principles" target="_blank">company values</a> that interviewers should collect data points on.</p>
+
+<p><strong>For the actual interviews, we’ve found the STAR format to be effective at gathering relevant data points</strong> based on past behavior and work:</p>
+<ul>
+  <li>Situation/Task: The context and scope of the problem, including the stakes and potential impact if not acted on. Also, the candidates assigned responsibility.</li>
+  <li>Action: The role the candidate played, the challenges faced, and skills and knowledge applied. Also, were they the key driver, and how did they contribute?</li>
+  <li>Results: The quantifiable outcomes such as customer impact, new capabilities, revenue, or cost savings. Also, how did they decide on, and measure these metrics?</li>
+</ul>
+
+<p>As we guide the candidates through their STAR response, there will be opportunities to dive deeper with follow-up questions around both the technical and non-technical aspects of their work and experience:</p>
+<ul>
+  <li>Situation/Task: Data points on the ambiguity and complexity of the initial problem, and how the candidate defined the problem statement and success criteria.</li>
+  <li>Action: Data points on how the candidate influenced others, navigated constraints and trade-offs, and the challenges and technical details of their solution.</li>
+  <li>Result: Data points on execution with limited resources and under a timeline, as well as results and how they measured them.</li>
+</ul>
+
+<p>As we gather data points, it’s important to clarify the candidate’s direct contributions vs. those of the broader team. Some candidates may overstate their role while others may be overly humble. Asking targeted questions can help tease this out: “What was the hardest decision made on the project and who made that call?” or “Can you share an example of when you disagreed with the team?” Strong candidates will give nuanced responses that acknowledge the role others played while being clear about their contribution.</p>
+
+<p>Watch out for less seasoned candidates rambling or going off-tangent, especially if the question is uncomfortable. As the interviewer, our job is to steer the interview and gather the data points needed for the hiring manager to make a good decision. Thus, if the response is headed in an unproductive direction, we can politely interject and redirect: “In the interest of time, let’s move on to …” or “I’d love to dig into your role in that project …” Don’t be afraid to firmly but gently guide the candidate through the interview.</p>
+
+<p>Sometimes, a candidate’s first STAR example falls flat and doesn’t provide the data points needed for the role and level. If so, consider pivoting and asking the candidate to share another example. For instance, if we have a 15-minute block for a question and can tell that the response doesn’t demonstrate what’s needed by the 10-minute mark, make the call to cut it short and ask for another example. Sometimes, this can elicit a stronger example with solid data points across both technical and non-technical aspects, even within five minutes. Having different questions that assess for the same data point helps.</p>
+
+<p><strong>After the interview, interviewers should spend 15 - 30 minutes independently writing feedback as well as making an initial “hire” or “no hire” vote.</strong> Writing feedback independently prevents groupthink and biased individual assessments. The feedback should be anchored on data points for the specific technical and non-technical aspects the interviewer was responsible for.</p>
+
+<p><strong>Once all interviewer feedback has been logged, all interviewers get together for the debrief.</strong> (In some companies, this may just involve the hiring manager, recruiter, and a senior team member.) All interviewers spend some time to review each others’ written feedback and potentially update their initial vote based on the additional data points they now have. Sometimes, if there are conflicting data points from multiple interviewers, discussion is needed to understand the candidate better.</p>
+
+<p>Ultimately, the debrief must conclude with a decision on whether to extend an offer. The vote doesn’t necessarily need to be unanimous, but there shouldn’t be strong objections against hiring a candidate. If an interviewer feels strongly enough to say something like “I’ll quit if we hire this person,” that’s a red flag to discuss—what did the interviewer observe that others might have missed? Overall, while consensus is ideal, the hiring manager owns the final decision.</p>
+
+<h2 id="for-interviewers-candidates-are-rough-diamonds">For interviewers: Candidates are rough diamonds</h2>
+
+<p>Even for the most qualified candidates, the interview process can be daunting. Thus, making the candidate feel comfortable goes a long way in helping them perform their best. It can be as simple as offering a quick bathroom break before starting your interview, or a word of encouragement that they’re nearly done with the loop.</p>
+
+<p>It also helps to approach each interview with the mindset that the candidate is a diamond in the rough. Thus, our job is to uncover their stengths and potential. This doesn’t mean to lower the bar, but to give them the benefit of the doubt and work together to discover their abilities. You can even make this explicit in the interview intro. Let them know up front that your goal is to help the hiring manager gather as many data points as possible. This puts the interview in a collaborative mood and eases some of the interview anxiety.</p>
+
+<p>Finally, think of each candidate as a customer of your business or a user of your product. Regardless of whether we eventually hire the candidate, strive to make the interview a valuable experience that helps them grow. While they may not be the right fit now, they could be a strong hire down the road or refer other great talent your way.</p>
+
+<h2 id="for-hiring-managers-sell-on-mission--talent-density">For hiring managers: Sell on mission &amp; talent density</h2>
+
+<p>While compensation is important, it’s rarely the primary factor for in-demand candidates who likely have multiple competitive offers. Instead, consider attracting top talent via the organization’s mission, the talent density of the team, and the manager who will develop them. Thus, sell candidates on the ambitious problem they’ll solve, the opportunity to work with exceptional team members, and their personal growth.</p>
+
+<p>That said, set the right expectations. Don’t sugarcoat the role. If there’s unglamorous work that needs to be done, such as setting up data infra and pipelines, be upfront about it. Overselling the position will likely lead to disappointment and regrettable attrition. It’s better to not hire a candidate who’s not the right fit than to bring them on with incorrect expectations and have them leave within a few months.</p>
+
+<p>Finally, be prepared for hiring to take time, especially for more senior roles. In general, it takes a few months to hire a junior/mid-level IC while senior roles can take up to a year. Also, the best candidates are usually not looking out—they’re too busy learning, building, and having fun in their work. Nonetheless, it doesn’t hurt to start building relationships wherever they graze, be it meetups, conferences, hackathons, or simply online.</p>
+
+<p>• • •</p>
+
+<p>Finally, we’ll conclude with an opinionated take on the traits that strong hires have: hunger, judgment, and empathy.</p>
+
+<p><strong>Hunger</strong> shows up as having bias for action, being able to learn fast, and the grit to push through challenges. In startups, this helps candidates adapt quickly as the startup iterates toward product-market fit. In larger organizations, this helps new hires push through technical and organizational challenges that might discourage others.</p>
+
+<p>IMHO hunger is more hired than coached. While budget and time constraints can simulate urgency, it’s a poor substitute for the intrinsic drive that gets shit done.</p>
+
+<p><strong>Judgement</strong> is the hard-won intuition to distinguish between what will work and what’s a wild goose chase or dead end. Judgment helps one make pragmatic decisions, think several steps ahead, and be decisive in the face of uncertainty. In the context of ML, this could be making a design decision to focus on techniques that work well with sparse data for cold-start recommendations, or deciding not to focus on chat for LLM-powered products.</p>
+
+<p>While judgment can be cultivated, it takes time. The impact of design decisions may only become apparent after 12 - 18 months. Thus, for roles that need good judgment, it may be easier to hire for a track record of good decisions than to develop it on the job.</p>
+
+<p><strong>Empathy</strong> is the genuine interest in customers, the organization, and the team. This may show up as passion for the mission/product and how it helps customers. Empathy makes it easier to build trust, empower others, and foster productive relationships. People with empathy are also better communicators because they <a href="https://www.franklincovey.com/the-7-habits/habit-5/" target="_blank">“seek first to understand, then to be understood”</a>. This is especially crucial for senior roles who may have to influence without authority, navigate delicate organization challenges, and moderate hotly debated topics.</p>
+
+<p>Empathy is likely innate and thus mostly hired. While there are techniques to demonstrate empathy, they’re superficial if there isn’t a sincere interest in others and their challenges.</p>
+
+<p>Okay, that’s all we had. Thanks for reading this long write-up! If you’re actively looking for an ML/AI role, check out <a href="https://jobs.applied-llms.org/" target="_blank">Jason’s job board</a>. Also, what other interview practices have served you well? Please comment below or <a href="https://x.com/eugeneyan" target="_blank">DM me</a>!</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Jul 2024). How to Interview and Hire ML/AI Engineers. eugeneyan.com.
+        https://eugeneyan.com/writing/how-to-interview/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2024default,
+  title   = {How to Interview and Hire ML/AI Engineers},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2024},
+  month   = {Jul},
+  url     = {https://eugeneyan.com/writing/how-to-interview/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

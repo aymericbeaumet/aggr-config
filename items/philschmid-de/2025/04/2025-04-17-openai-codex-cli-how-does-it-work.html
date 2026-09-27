@@ -1,0 +1,165 @@
+<div id="readability-page-1" class="page"><div><p>OpenAI Codex is a open source CLI released with OpenAI o3/o4-mini to be a "chat-driven development" tool. It allows developers to use AI models via API directly in their terminal to perform coding tasks. Unlike a simple chatbot, it can read files, write files (via patches), execute shell commands (often sandboxed), and iterate based on the results and user feedback.</p>
+<p><em>Note: This overview was generated with Gemini 2.5 Pro and updated collaboratively iterated on with Gemini 2.5 Pro and myself.</em></p>
+<h2 id="core-components--workflow">Core Components &amp; Workflow</h2>
+<h3 id="user-interface-ui">User Interface (UI)</h3>
+<ul>
+<li>The interactive terminal UI is built using <code>ink</code> and <code>react</code>, offering a richer experience than plain text. Key components reside in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/"><code>src/components/</code></a>, particularly within <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/"><code>src/components/chat/</code></a>.</li>
+<li>The application entry point is <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/cli.tsx"><code>src/cli.tsx</code></a> (using <code>meow</code> for argument parsing), which sets up the main <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-chat.tsx"><code>TerminalChat</code></a> component via <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/app.tsx"><code>src/app.tsx</code></a>.</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-chat.tsx"><code>TerminalChat</code></a> manages the overall display including history, input prompts, loading states, and overlays.</li>
+<li>User input is handled by <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-chat-input.tsx"><code>TerminalChatInput</code></a> (or <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-chat-new-input.tsx"><code>TerminalChatNewInput</code></a>), supporting command history and slash commands.</li>
+<li>The conversation history is displayed by <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-message-history.tsx"><code>TerminalMessageHistory</code></a>, using components like <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-chat-response-item.tsx"><code>TerminalChatResponseItem</code></a> to render different message types.</li>
+</ul>
+<h3 id="agent-loop">Agent Loop</h3>
+<ul>
+<li>The core logic resides in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/agent-loop.ts"><code>src/utils/agent/agent-loop.ts</code></a>.</li>
+<li>The <code>AgentLoop</code> class manages the interaction cycle with the OpenAI API.</li>
+<li>It takes the user's input, combines it with conversation history and instructions, and sends it to the model.</li>
+<li>It uses the <code>openai</code> Node.js library (v4+) and specifically calls <code>openai.responses.create</code>, indicating use of the <code>/responses</code> endpoint which supports streaming and tool use.</li>
+</ul>
+<h3 id="model-interaction">Model Interaction</h3>
+<ul>
+<li>The <code>AgentLoop</code> sends the context (history, instructions, user input) to the specified model (default <code>o4-mini</code>, configurable via <code>--model</code> or config file).</li>
+<li>It requests a <em>streaming</em> response.</li>
+<li>It handles different response item types (<code>message</code>, <code>function_call</code>, <code>function_call_output</code>, <code>reasoning</code>).</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/model-utils.ts"><code>src/utils/model-utils.ts</code></a> handles fetching available models and checking compatibility.</li>
+</ul>
+<h3 id="tools--execution">Tools &amp; Execution</h3>
+<ul>
+<li>The primary "tool" defined is <code>shell</code> (or <code>container.exec</code>), allowing the model to request shell command execution. See the <code>tools</code> array in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/blob/b0ccca555685b1534a0028cb7bfdcad8fe2e477a/codex-cli/src/utils/agent/agent-loop.ts#L512"><code>src/utils/agent/agent-loop.ts</code></a>.</li>
+</ul>
+<h4 id="command-execution">Command Execution</h4>
+<ul>
+<li>When the model emits a <code>function_call</code> for <code>shell</code>, the <code>AgentLoop</code> invokes <code>handleExecCommand</code> (<a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/handle-exec-command.ts"><code>src/utils/agent/handle-exec-command.ts</code></a>).</li>
+<li>This function checks the approval policy (<code>suggest</code>, <code>auto-edit</code>, <code>full-auto</code>).</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/approvals.ts"><code>src/approvals.ts</code></a> (<code>canAutoApprove</code>) determines if the command is known-safe or needs user confirmation based on the policy.</li>
+<li>If confirmation is needed, the UI (<a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-chat-command-review.tsx"><code>TerminalChatCommandReview</code></a>) prompts the user.</li>
+<li>If approved (or auto-approved), the command is executed via <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/exec.ts"><code>src/utils/agent/exec.ts</code></a>.</li>
+</ul>
+<h4 id="sandboxing">Sandboxing</h4>
+<ul>
+<li>The execution logic in <code>handleExecCommand</code> decides <em>how</em> to run the command based on the approval policy and safety assessment.</li>
+<li><code>full-auto</code> mode implies sandboxing.</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/sandbox/"><code>src/utils/agent/sandbox/</code></a> contains the sandboxing implementations:
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/sandbox/macos-seatbelt.ts"><code>macos-seatbelt.ts</code></a>: Uses macOS's <code>sandbox-exec</code> to restrict file system access and block network calls (<code>READ_ONLY_SEATBELT_POLICY</code>). Writable paths are whitelisted.</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/sandbox/raw-exec.ts"><code>raw-exec.ts</code></a>: Executes commands directly without sandboxing (used when sandboxing isn't needed or available).</li>
+<li>Linux: The <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/blob/main/codex-cli/README.md"><code>README.md</code></a>, <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/blob/main/codex-cli/Dockerfile"><code>Dockerfile</code></a>, and <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/scripts/"><code>scripts/</code></a> indicate a Docker-based approach. The CLI runs inside a minimal container where <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/scripts/init_firewall.sh"><code>scripts/init_firewall.sh</code></a> uses <code>iptables</code>/<code>ipset</code> to restrict network access only to the OpenAI API. The user's project directory is mounted into the container.</li>
+</ul>
+</li>
+</ul>
+<h4 id="file-patching-apply_patch">File Patching (<code>apply_patch</code>)</h4>
+<ul>
+<li>The model is instructed (via the system prompt in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/agent-loop.ts"><code>src/utils/agent/agent-loop.ts</code></a>) to use a specific format like <code>{"cmd":["apply_patch","*** Begin Patch..."]}</code> when it wants to edit files.</li>
+<li><code>handleExecCommand</code> detects this pattern.</li>
+<li>Instead of running <code>apply_patch</code> as a shell command, it uses <code>execApplyPatch</code> (<a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/exec.ts"><code>src/utils/agent/exec.ts</code></a>), which calls <code>process_patch</code> from <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/apply-patch.ts"><code>src/utils/agent/apply-patch.ts</code></a>.</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/apply-patch.ts"><code>src/utils/agent/apply-patch.ts</code></a> parses the patch format and uses Node.js <code>fs</code> calls to modify files directly on the host system (or within the container on Linux).</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/parse-apply-patch.ts"><code>parse-apply-patch.ts</code></a> (likely used by the UI) helps render diffs for user review.</li>
+</ul>
+<h3 id="prompts--context-awareness">Prompts &amp; Context Awareness</h3>
+<ul>
+<li><strong>System Prompt:</strong> A long, detailed system prompt is hardcoded as <code>prefix</code> within <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/blob/b0ccca555685b1534a0028cb7bfdcad8fe2e477a/codex-cli/src/utils/agent/agent-loop.ts#L1021"><code>src/utils/agent/agent-loop.ts</code></a>. This tells the model about its role as the Codex CLI, its capabilities (shell, patching), constraints (sandboxing), and coding guidelines.</li>
+<li><strong>User Instructions:</strong> Instructions are gathered from both global (<code>~/.codex/instructions.md</code>) and project-specific (<code>codex.md</code> or similar, discovered via logic in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/config.ts"><code>src/utils/config.ts</code></a>) files. These combined instructions are prepended to the conversation history sent to the model.</li>
+<li><strong>Conversation History:</strong> The <code>items</code> array (containing <code>ResponseItem</code> objects like user messages, assistant messages, tool calls, tool outputs) is passed back to the model on each turn, providing conversational context. <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/approximate-tokens-used.ts"><code>src/utils/approximate-tokens-used.ts</code></a> estimates context window usage.</li>
+<li><strong>File Context (Standard Mode):</strong> The agent doesn't automatically read project files. It gains file context only when the model explicitly requests to read a file (e.g., via <code>cat</code>) or when file content appears in the output of a previous command (e.g., <code>git diff</code>).</li>
+<li><strong>File Context (Experimental <code>--full-context</code> Mode):</strong> This mode utilizes a distinct flow (see <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/cli_singlepass.tsx"><code>src/cli_singlepass.tsx</code></a>, <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/singlepass/"><code>src/utils/singlepass/</code></a>). It involves:
+<ul>
+<li>Walking the directory, reading, and caching files via <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/singlepass/context_files.ts"><code>src/utils/singlepass/context_files.ts</code></a>.</li>
+<li>Formatting the prompt, directory structure, and file contents into a single large request using <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/singlepass/context.ts"><code>src/utils/singlepass/context.ts</code></a>.</li>
+<li>Expecting the model to return all file changes (creations, updates, deletes, moves) in a specific Zod schema defined in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/singlepass/file_ops.ts"><code>src/utils/singlepass/file_ops.ts</code></a>.</li>
+</ul>
+</li>
+<li><strong>Configuration:</strong> Stores default model, approval mode settings, etc. Managed by <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/config.ts"><code>src/utils/config.ts</code></a>, loads from <code>~/.codex/config.yaml</code> (or <code>.yml</code>/<code>.json</code>) (not in repo).</li>
+</ul>
+<h2 id="step-by-step-manual-walkthrough-simulating-the-cli">Step-by-Step Manual Walkthrough (Simulating the CLI)</h2>
+<p>Let's imagine the user runs: <code>codex "Refactor utils.ts to use arrow functions"</code> in a directory <code>/home/user/myproject</code>.</p>
+<ol>
+<li>
+<p><strong>Initialization (<a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/cli.tsx"><code>cli.tsx</code></a>, <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/app.tsx"><code>app.tsx</code></a>):</strong></p>
+<ul>
+<li>Parse arguments: Prompt is "Refactor...", model is default (<code>o4-mini</code>), approval mode is default (<code>suggest</code>).</li>
+<li>Load config (<code>loadConfig</code> in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/config.ts"><code>src/utils/config.ts</code></a>): Read <code>~/.codex/config.yaml</code> and <code>~/.codex/instructions.md</code>.</li>
+<li>Discover and load project docs (<code>loadProjectDoc</code> in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/config.ts"><code>src/utils/config.ts</code></a>): Find <code>/home/user/myproject/codex.md</code> and read its content.</li>
+<li>Combine instructions: Merge user instructions and project docs.</li>
+<li>Check Git status (<code>checkInGit</code> in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/check-in-git.ts"><code>src/utils/check-in-git.ts</code></a>): Confirm <code>/home/user/myproject</code> is a Git repo.</li>
+<li>Render the main UI (<a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-chat.tsx"><code>TerminalChat</code></a>).</li>
+</ul>
+</li>
+<li>
+<p><strong>First API Call (<code>AgentLoop.run</code> in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/agent-loop.ts"><code>src/utils/agent/agent-loop.ts</code></a>):</strong></p>
+<ul>
+<li>Create initial input: <code>[{ role: "user", content: [{ type: "input_text", text: "Refactor..." }] }]</code>.</li>
+<li>Construct API request payload: Include system prompt (from <code>prefix</code>), combined instructions, and the user input message. Set <code>model: "o4-mini"</code>, <code>stream: true</code>, <code>tools: [...]</code>. No <code>previous_response_id</code>.</li>
+<li>Send request: Call <code>openai.responses.create(...)</code> (using the <code>openai</code> library). UI shows "Thinking...".</li>
+</ul>
+</li>
+<li>
+<p><strong>Model Response (Stream):</strong></p>
+<ul>
+<li>Assume the model decides it needs to read the file first.</li>
+<li>Stream event 1: <code>response.output_item.done</code> with <code>item: { type: "function_call", name: "shell", arguments: '{"cmd": ["cat", "utils.ts"]}', call_id: "call_1" }</code></li>
+<li>Stream event 2: <code>response.completed</code> with <code>output: [...]</code> containing the same function call, <code>id: "resp_1"</code>.</li>
+<li>Agent receives the function call. <code>onLastResponseId</code> is called with <code>"resp_1"</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Tool Call Handling (<code>handleExecCommand</code> in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/handle-exec-command.ts"><code>src/utils/agent/handle-exec-command.ts</code></a>):</strong></p>
+<ul>
+<li>Parse arguments: <code>cmd = ["cat", "utils.ts"]</code>.</li>
+<li>Check approval: <code>canAutoApprove(["cat", "utils.ts"], "suggest", ["/home/user/myproject"])</code> (in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/approvals.ts"><code>src/approvals.ts</code></a>) -&gt; returns <code>{ type: "auto-approve", reason: "View file contents", group: "Reading files", runInSandbox: false }</code>.</li>
+<li>Execute command (<code>execCommand</code> in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/handle-exec-command.ts"><code>src/utils/agent/handle-exec-command.ts</code></a>): Run <code>cat utils.ts</code> directly (no sandbox needed for safe commands). <em>Note: Assuming <code>utils.ts</code> exists at the root for this example; in reality, the model might need to specify a path like <code>src/utils.ts</code>.</em></li>
+<li>Simulate result: <code>stdout = "/* content of utils.ts */", stderr = "", exitCode = 0</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Second API Call (<code>AgentLoop.run</code> continues):</strong></p>
+<ul>
+<li>Format tool result: Create a <code>function_call_output</code> item like <code>{ type: "function_call_output", call_id: "call_1", output: '{"output": "/* content ... */", "metadata": {"exit_code": 0, ...}}' }</code>.</li>
+<li>Construct API request payload: Include system prompt, combined instructions, the <em>entire history so far</em> (user message, assistant function call request, function call output), set <code>previous_response_id: "resp_1"</code>.</li>
+<li>Send request. UI shows "Thinking...".</li>
+</ul>
+</li>
+<li>
+<p><strong>Model Response (Stream):</strong></p>
+<ul>
+<li>Assume model generates the refactored code and decides to apply it.</li>
+<li>Stream event 1: <code>response.output_item.done</code> with <code>item: { type: "function_call", name: "shell", arguments: '{"cmd": ["apply_patch", "*** Begin Patch\n*** Update File: utils.ts\n@@ ... -old +new ...\n*** End Patch"]}', call_id: "call_2" }</code>.</li>
+<li>Stream event 2: <code>response.completed</code> with <code>output: [...]</code> containing the patch function call, <code>id: "resp_2"</code>.</li>
+<li>Agent receives the patch function call. <code>onLastResponseId</code> is called with <code>"resp_2"</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Tool Call Handling (Patch):</strong></p>
+<ul>
+<li>Parse arguments: Identify <code>apply_patch</code> and extract the patch text.</li>
+<li>Check approval: <code>canAutoApprove(["apply_patch", "..."], "suggest", ["/home/user/myproject"])</code>. Since policy is <code>suggest</code>, this returns <code>{ type: "ask-user", applyPatch: { patch: "..." } }</code>.</li>
+<li>Request confirmation (<code>requestConfirmation</code>): The UI (<a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/components/chat/terminal-chat-command-review.tsx"><code>TerminalChatCommandReview</code></a>) displays the patch diff and asks "Allow command? [y/N/e/a]".</li>
+<li>User reviews and presses 'y'. <code>submitConfirmation</code> is called with <code>{ decision: ReviewDecision.YES }</code>.</li>
+<li>Execute patch (<code>execApplyPatch</code> in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/exec.ts"><code>src/utils/agent/exec.ts</code></a> -&gt; <code>process_patch</code> in <a target="_blank" rel="noopener noreferrer" href="https://github.com/openai/codex/tree/main/codex-cli/src/utils/agent/apply-patch.ts"><code>src/utils/agent/apply-patch.ts</code></a>): Reads <code>utils.ts</code>, applies the diff logic, and writes the modified content back using Node.js <code>fs.writeFileSync</code>.</li>
+<li>Simulate result: <code>stdout = "Done!", stderr = "", exitCode = 0</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Third API Call:</strong></p>
+<ul>
+<li>Format tool result: Create <code>function_call_output</code> item for the patch, <code>{ call_id: "call_2", output: '{"output": "Done!", ...}' }</code>.</li>
+<li>Construct API request: Include history + patch result, <code>previous_response_id: "resp_2"</code>.</li>
+<li>Send request.</li>
+</ul>
+</li>
+<li>
+<p><strong>Model Response (Final):</strong></p>
+<ul>
+<li>Assume model confirms the refactoring is done.</li>
+<li>Stream event 1: <code>response.output_item.done</code> with <code>item: { type: "message", role: "assistant", content: [{ type: "output_text", text: "OK, I've refactored utils.ts to use arrow functions." }] }</code>.</li>
+<li>Stream event 2: <code>response.completed</code>, <code>id: "resp_3"</code>.</li>
+<li>Agent receives the message. <code>onLastResponseId</code> called with <code>"resp_3"</code>.</li>
+<li>No more tool calls. The loop finishes for this turn. UI stops showing "Thinking...".</li>
+</ul>
+</li>
+<li>
+<p><strong>User Interaction:</strong></p>
+<ul>
+<li>The user sees the final message and the updated prompt, ready for the next command. The file <code>utils.ts</code> on their disk has been modified.</li>
+</ul>
+</li>
+</ol></div></div>

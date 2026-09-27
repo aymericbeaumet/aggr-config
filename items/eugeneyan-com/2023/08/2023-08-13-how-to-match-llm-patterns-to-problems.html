@@ -1,0 +1,111 @@
+<div id="readability-page-1" class="page"><div>
+            <p>After my previous write-up on <a href="https://eugeneyan.com/writing/llm-patterns/" target="_blank">LLM patterns</a>, I’ve received questions on how to match those patterns to various LLM problems. Thus, in this follow-up, we’ll discuss some potential problems faced when using LLMs and the patterns that help mitigate them.</p>
+
+<h2 id="external-vs-internal-llms-data-vs-non-data-patterns">External vs. internal LLMs, data vs. non-data patterns</h2>
+
+<p>Before we dive into it, I think it’s helpful to distinguish between external vs. internal LLMs.</p>
+
+<p><strong>External LLMs are models we don’t have full control over.</strong> We can’t fine-tune them, are constrained by rate/token limits, and may have concerns with sending them confidential or proprietary data. Nonetheless, they’re currently the SOTA in terms of quality and safety.</p>
+
+<p><strong>Internal LLMs are those we develop and host ourselves</strong>. While they may not have the constraints of external LLMs, we incur the cost of developing and hosting these LLMs. Also, we typically build them on top of open LLMs (unless you have a couple million to pre-train your own). Unfortunately, these open LLMs tend to be months, if not years, behind the best 3rd-party provider LLMs.</p>
+
+<p>With regard to patterns, I think it’s useful to understand the role data plays: Is data the main component or a by-product? Or is the pattern minimally related to data?</p>
+
+<p>For example, <strong>evals and fine-tuning are tied to data</strong>. We can’t do evals without gold labels or references; we can’t fine-tune without demonstration data. In contrast, patterns such as <strong>caching, defensive UX, and guardrails have more to do with infra and UI than data</strong>.</p>
+
+<p>On the other hand, patterns such as <strong>RAG and collecting user feedback lie somewhere in the middle.</strong> RAG provides data for in-context learning but needs to be backed by retrieval or search indices. User feedback helps with fine-tuning but needs to be collected via the right UX and refined via analysis and data pipelines.</p>
+
+<h2 id="matching-patterns-to-problems">Matching patterns to problems</h2>
+
+<p>Here are some LLM problems and the patterns that help address them. Since we’ve <a href="https://eugeneyan.com/writing/llm-patterns/" target="_blank">previously discussed the patterns extensively</a>, we’ll focus on the problems here.</p>
+
+<p><strong>Lack of performance metrics for our specific task.</strong> When benchmarking external and internal LLMs, we often want to—rightly or wrongly—summarize performance into a table of numbers. (Note: This is fiendishly difficult, especially for more abstract tasks where there are innumerable good outputs.) And as we tweak our systems via updating prompt templates, fine-tuning models, or improving RAG, we need a way to measure improvements or regressions. Finally, how do we measure if users like or dislike these new LLM-based features, and the impact of our tweaks?</p>
+<ul>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#evals-to-measure-performance" target="_blank">Evals</a>: To benchmark across models and measure performance with each change</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#collect-user-feedback-to-build-our-data-flywheel" target="_blank">Collect user feedback</a>: To understand what users like or dislike</li>
+</ul>
+
+<p><strong>External model performing poorly.</strong> This can be due to the model not being trained on recent data (e.g., ChatGPT’s knowledge cutoff of Sept 2021) or proprietary data within your org (e.g., internal code and documents). Other concerns include hallucinations or incorrect responses because the model lacks sufficient or the most recent context.</p>
+<ul>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#retrieval-augmented-generation-to-add-knowledge" target="_blank">RAG</a>: To provide relevant context, reducing hallucination and improving responses</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#evals-to-measure-performance" target="_blank">Evals</a>: To measure performance improvements while tuning retrieval indices</li>
+</ul>
+
+<p><strong>Internal model performing poorly.</strong> Open LLMs tend to perform poorly on specific tasks in our specific domain out of the box. This can lead to defects such as poor extraction or summarization, non-factual responses, going off-topic, or simply lack of fluency. These LLMS may also return harmful responses that we want to minimize. While the patterns that apply to external LLMs are also relevant, because it’s an internal model, we have a few more tricks at our disposal.</p>
+<ul>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#fine-tuning-to-get-better-at-specific-tasks" target="_blank">Fine-tuning</a>: To improve performance on specific tasks in our domain</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#collect-user-feedback-to-build-our-data-flywheel" target="_blank">Collect user feedback</a>: To use as user preference data for fine-tuning</li>
+</ul>
+
+<p><strong>Constraints on external models.</strong> These constraints can be technical (e.g., rate limits, latency, models being excessively fine-tuned), legal (e.g., not sending confidential or user private data, copyright over and use of external LLM output), and financial (i.e., high cost of API calls). AFAIK, there are two viable solutions: Either negotiate a contract with your external LLM provider or develop and self-host your own LLMs. I suggest saintly patience for the former and the patterns below for the latter.</p>
+<ul>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#fine-tuning-to-get-better-at-specific-tasks" target="_blank">Fine-tuning</a>: To improve performance of internal models on our specific tasks</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#evals-to-measure-performance" target="_blank">Evals</a>: To track progress of internal LLMs and compare them against external LLMs</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#collect-user-feedback-to-build-our-data-flywheel" target="_blank">Collect user feedback</a>: For fine-tuning and evaluation data</li>
+</ul>
+
+<p><strong>Latency exceeds UX requirements</strong>. Certain use cases require the entire LLM output to be available within a few hundred milliseconds, including running guardrails on the output. While streaming output helps a ton with the UX, it may not be viable for certain user experiences and interfaces (no, I’m not referring to chat).</p>
+<ul>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#caching-to-reduce-latency-and-cost" target="_blank">Caching</a>: Figuring out smart ways to generate (either in batch or asynchronously) and cache responses <em>other</em> than via semantic similarity (e.g., item IDs)</li>
+</ul>
+
+<p><strong>Unreliable or unusable model output.</strong> I categorize these as syntactic vs. semantic errors. Syntactic errors occur when the model doesn’t adhere to a specific format such as JSON or a specific sentence structure, or the generated code or SQL doesn’t run. Semantic errors occur when the model output is harmful, non-factual, off-topic, or simply incoherent.</p>
+<ul>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#guardrails-to-ensure-output-quality" target="_blank">Guardrails</a> (guidance + syntax checks): Guide LLM outputs; check for syntax errors</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#guardrails-to-ensure-output-quality" target="_blank">Guardrails</a> (semantic checks): Check for content safety, factuality, on-topic, etc.</li>
+</ul>
+
+<p><strong>Customer experience paper cuts.</strong> Machine learning models aren’t perfect—they will produce inaccurate output. The same goes for LLMs. Thus, after we’ve built a new LLM product/feature, how do we make it easy for users to explore and increase adoption? Also, how do we acknowledge that errors will happen, mitigate them, and earn trust over time?</p>
+<ul>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#defensive-ux-to-anticipate--handle-errors-gracefully" target="_blank">Defensive UX</a> (for onboarding): Anchor on familiarity and set the right expectations</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#defensive-ux-to-anticipate--handle-errors-gracefully" target="_blank">Defensive UX</a> (for paper cuts): Set the right expectations, support efficient dismissal and correction, and provide suitable attribution where available</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#collect-user-feedback-to-build-our-data-flywheel" target="_blank">Collect user feedback</a>: To understand which features work and don’t work, and to collect data for fine-tuning and evals to improve the next iteration</li>
+</ul>
+
+<p><strong>Lack of visibility on customer impact.</strong> How do we know if our models are helping or hurting? Someone shared an anecdote of running an LLM-based customer support solution in prod for two weeks before discontinuing it—an A/B test showed that losses were 12x more when using an LLM as a substitute for their support team!</p>
+<ul>
+  <li><a href="https://eugeneyan.com/writing/practical-guide-to-maintaining-machine-learning/#monitor-models-for-misbehaviour-when-retraining" target="_blank">Monitoring</a>: Track metrics such as feature usage, user opt-outs, daily users, etc.</li>
+  <li><a href="https://eugeneyan.com/writing/llm-patterns/#collect-user-feedback-to-build-our-data-flywheel" target="_blank">Collect user feedback</a>: Make it easy for customers to provide positive or negative feedback, and also analyze implicit feedback as a proxy for user engagement</li>
+</ul>
+
+<p>• • •</p>
+
+<p>Are there any key problems I’ve missed? <strong>Please <a href="https://twitter.com/eugeneyan" target="_blank">let me know!</a></strong></p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Aug 2023). How to Match LLM Patterns to Problems. eugeneyan.com.
+        https://eugeneyan.com/writing/llm-problems/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2023llm-problems,
+  title   = {How to Match LLM Patterns to Problems},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2023},
+  month   = {Aug},
+  url     = {https://eugeneyan.com/writing/llm-problems/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

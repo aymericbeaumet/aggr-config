@@ -1,0 +1,282 @@
+<div id="readability-page-1" class="page"><div><blockquote>
+<p><strong>Updated January 2026 for v0.3.0</strong> — New 3-subcommand architecture (<code>info</code>, <code>grep</code>, <code>call</code>), connection pooling daemon, and tool filtering support.</p>
+</blockquote>
+<p>The <a target="_blank" rel="noopener noreferrer" href="https://modelcontextprotocol.io/docs/getting-started/intro">Model Context Protocol (MCP)</a> is an open standard for connecting AI agents to external tools, APIs, and data sources. However, as the ecosystem grows with more powerful MCP servers, developers and agent builders are hitting a scaling bottleneck: <strong>context window bloat</strong>.</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/mcp-cli">mcp-cli</a> is a lightweight CLI that allows dynamic discovery of MCP, reducing token consumption while making tool interactions more efficient for AI coding agents.</p>
+<p>Key Features:</p>
+<ul>
+<li>🪶 Built on <a target="_blank" rel="noopener noreferrer" href="https://bun.sh/">Bun</a>, <code>mcp-cli</code> compiles to a single standalone binary.</li>
+<li>🔌 Works with both stdio (local) and HTTP (remote) MCP servers.</li>
+<li>🔍 Glob-based search across all servers <code>mcp-cli grep "*mail*" -d</code>.</li>
+<li>🤖 Designed for AI coding agents (Gemini CLI, Claude Code, etc.).</li>
+<li>⚡ Connection pooling with lazy-spawn daemon (60s idle timeout).</li>
+<li>🎛️ Tool filtering via <code>allowedTools</code> and <code>disabledTools</code> config.</li>
+<li>� Server instructions support in output.</li>
+<li>�💡 Structured error messages with recovery suggestions.</li>
+</ul>
+<h2 id="the-context-problem">The Context Problem</h2>
+<p>Every MCP server comes with tool definitions schemas describing what each tool does, its parameters, types, and descriptions. Traditional MCP integration loads all of these schemas upfront into the agent's context window.</p>
+<p>Here's what that looks like in practice:</p>
+<p><img src="https://www.philschmid.de/static/blog/mcp-cli/comparison.jpeg" alt="comparison"></p>
+<div><table><thead><tr><th>Setup</th><th>Tokens Used</th></tr></thead><tbody><tr><td>6 MCP servers, 60 tools</td><td>~47,000 tokens</td></tr><tr><td>After dynamic discovery</td><td>~400 tokens</td></tr></tbody></table></div>
+<p>That is a <strong>99% reduction</strong> in MCP-related token usage for this scenario.</p>
+<p>When working with multiple MCP servers (GitHub, databases, browser automation—tool), definitions quickly consume a third or more of the effective context. This leads to:</p>
+<ul>
+<li><strong>Reduced effective context length</strong> for actual reasoning and code generation.</li>
+<li><strong>More frequent context compactions</strong> interrupting flow.</li>
+<li><strong>Hard limits</strong> on the number of simultaneous MCP servers you can use.</li>
+<li><strong>Higher API costs</strong> due to input token overhead.</li>
+</ul>
+<h2 id="dynamic-context-discovery">Dynamic Context Discovery</h2>
+<p>The solution is dynamic context discovery. Instead of loading everything upfront (static context), agents pull in only the information they need, when they need it.</p>
+<p><img src="https://www.philschmid.de/static/blog/mcp-cli/dynamic-discovery.jpg" alt=""></p>
+<p><code>mcp-cli</code> implements this pattern for MCP:</p>
+<ul>
+<li>Step 1: "What servers exist?"     → <code>mcp-cli</code></li>
+<li>Step 2: "What are the params for tool X?"    → <code>mcp-cli info github search_repositories</code></li>
+<li>Step 3: Execute                   → <code>mcp-cli call github search_repositories '{"query": "mcp"}'</code></li>
+</ul>
+<p>Most Interactions only use a handful of tools, yet static loading consumes tokens for every tool definition. Dynamic discovery inverts this, you pay only for what you use.</p>
+<h2 id="quick-start">Quick start</h2>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/mcp-cli">mcp-cli</a> allows dynamic discovery of MCP while making tool interactions more efficient for AI coding agents.</p>
+<h3 id="1-installation">1. Installation</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># binary install
+curl -fsSL https://raw.githubusercontent.com/philschmid/mcp-cli/main/install.sh | bash
+ 
+# requires bun install
+bun install -g https://github.com/philschmid/mcp-cli</code></pre></div></figure>
+<h3 id="2-create-a-config-file">2. Create a config file</h3>
+<p>Create <code>mcp_servers.json</code> in your current directory or <code>~/.config/mcp/</code>:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
+      ]
+    },
+    "deepwiki": {
+      "url": "https://mcp.deepwiki.com/mcp"
+    }
+  }
+}</code></pre></div></figure>
+<h3 id="3-discover-available-tools">3. Discover available tools</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># List all servers and tools
+mcp-cli
+# deepwiki
+#  • read_wiki_structure
+#  • read_wiki_contents
+#  • ask_question
+#
+# filesystem
+#  • read_file
+#  • read_text_file
+#  • read_media_file
+#  • read_multiple_files
+# ...
+ 
+# With descriptions
+# mcp-cli -d</code></pre></div></figure>
+<h3 id="4-call-a-tool">4. Call a tool</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># View tool schema first
+mcp-cli info filesystem read_file
+# Tool: read_file
+# Server: filesystem
+#
+# Description:
+#  Read the complete contents of a file as text.
+#
+# Input Schema:
+# {
+#  "type": "object",
+#  "properties": {
+# ...</code></pre></div></figure>
+<h3 id="5-execute-the-tool">5. Execute the tool</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># Call the tool
+mcp-cli call filesystem read_file '{"path": "./README.md"}'</code></pre></div></figure>
+<h3 id="6-complex-commands">6. Complex commands</h3>
+<p>MCP CLI allows the model to generate commands that chain multiple tool calls together.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># Using a heredoc (no '-' needed with call subcommand)
+mcp-cli call server tool &lt;&lt;EOF
+{"content": "Text with 'single quotes' and \"double quotes\""}
+EOF
+ 
+# From a file
+cat args.json | mcp-cli call server tool
+ 
+# Using jq to build complex JSON
+jq -n '{query: "mcp", filters: ["active", "starred"]}' | mcp-cli call github search
+ 
+# Find all TypeScript files and read the first one
+mcp-cli call filesystem search_files '{"path": "src/", "pattern": "*.ts"}' \
+  | jq -r '.content[0].text | split("\n")[0]' \
+  | xargs -I {} mcp-cli call filesystem read_file '{"path": "{}"}'</code></pre></div></figure>
+<h2 id="tool-filtering">Tool Filtering</h2>
+<p>You can restrict which tools are available from a server using <code>allowedTools</code> and <code>disabledTools</code> in your config:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "allowedTools": ["read_file", "list_directory"],
+      "disabledTools": ["delete_file"]
+    }
+  }
+}</code></pre></div></figure>
+<p><strong>Rules:</strong></p>
+<ul>
+<li><code>allowedTools</code>: Only tools matching these patterns are available (supports glob: <code>*</code>, <code>?</code>)</li>
+<li><code>disabledTools</code>: Tools matching these patterns are excluded</li>
+<li><code>disabledTools</code> takes precedence over <code>allowedTools</code></li>
+<li>Filtering applies globally to all CLI operations (info, grep, call)</li>
+</ul>
+<p><strong>Examples:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># Only allow read operations
+"allowedTools": ["read_*", "list_*", "search_*"]
+ 
+# Allow all except destructive operations
+"disabledTools": ["delete_*", "write_*", "create_*"]
+ 
+# Combine: allow file operations but disable delete
+"allowedTools": ["*file*"],
+"disabledTools": ["delete_file"]</code></pre></div></figure>
+<h2 id="connection-pooling">Connection Pooling</h2>
+<p>By default, <code>mcp-cli</code> uses lazy-spawn connection pooling to avoid repeated MCP server startup latency:</p>
+<ul>
+<li><strong>Automatic</strong>: No manual start/stop needed</li>
+<li><strong>Per-server</strong>: Each MCP server gets its own daemon</li>
+<li><strong>Stale detection</strong>: Config changes trigger re-spawn</li>
+<li><strong>60s idle timeout</strong>: Configurable via <code>MCP_DAEMON_TIMEOUT</code></li>
+</ul>
+<p>Control via environment:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">MCP_NO_DAEMON=1 mcp-cli info      # Force fresh connection
+MCP_DAEMON_TIMEOUT=120 mcp-cli    # 2 minute idle timeout</code></pre></div></figure>
+<h2 id="integrating-with-ai-agents">Integrating with AI Agents</h2>
+<p><code>mcp-cli</code> is designed to be used with AI Agents and bash tools. There are two main ways to integrate it:</p>
+<h3 id="option-1-system-instructions-integration">Option 1: System Instructions Integration</h3>
+<p>Add this to your AI agent's system prompt for direct CLI access:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Xml</span></p><pre><code data-language="xml">## MCP Servers
+ 
+You have access to MCP servers via the `mcp-cli` CLI.
+ 
+Commands:
+ 
+```bash
+mcp-cli info                        # List all servers
+mcp-cli info &lt;server&gt;               # Show server tools  
+mcp-cli info &lt;server&gt; &lt;tool&gt;        # Get tool schema
+mcp-cli grep "&lt;pattern&gt;"            # Search tools
+mcp-cli call &lt;server&gt; &lt;tool&gt;        # Call tool (stdin auto-detected)
+mcp-cli call &lt;server&gt; &lt;tool&gt; '{}'   # Call with JSON args
+```
+ 
+**Both formats work:** `info &lt;server&gt; &lt;tool&gt;` or `info &lt;server&gt;/&lt;tool&gt;`
+ 
+Workflow:
+ 
+1. **Discover**: `mcp-cli info` to see available servers
+2. **Inspect**: `mcp-cli info &lt;server&gt; &lt;tool&gt;` to get the schema
+3. **Execute**: `mcp-cli call &lt;server&gt; &lt;tool&gt; '{}'` with arguments
+ 
+### Examples
+ 
+```bash
+# Call with inline JSON
+mcp-cli call github search_repositories '{"query": "mcp server"}'
+ 
+# Pipe from stdin (no '-' needed)
+echo '{"path": "./file"}' | mcp-cli call filesystem read_file
+ 
+# Heredoc for complex JSON
+mcp-cli call server tool &lt;&lt;EOF
+{"content": "Text with 'quotes'"}
+EOF
+```</code></pre></div></figure>
+<h3 id="option-2-agent-skills">Option 2: Agent Skills</h3>
+<p>For AI agents that support <a target="_blank" rel="noopener noreferrer" href="https://agentskills.io/home">Agent Skills</a> an upcoming standard for extending coding agents. mcp-cli ships with a ready-to-use skill definition.</p>
+<p>Create <code>mcp-cli/SKILL.md</code> in your agent's skills directory:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Markdown</span></p><pre><code data-language="markdown">---
+name: mcp-cli
+description: Interface for MCP (Model Context Protocol) servers via CLI. Use when you need to interact with external tools, APIs, or data sources through MCP servers.
+---
+ 
+# MCP-CLI
+ 
+Access MCP servers through the command line. MCP enables interaction with external systems like GitHub, filesystems, databases, and APIs.
+ 
+## Commands
+ 
+| Command | Output |
+|---------|--------|
+| `mcp-cli` | List all servers and tool names |
+| `mcp-cli info &lt;server&gt;` | Show tools with parameters |
+| `mcp-cli info &lt;server&gt; &lt;tool&gt;` | Get tool JSON schema |
+| `mcp-cli grep "&lt;pattern&gt;"` | Search tools by name |
+| `mcp-cli call &lt;server&gt; &lt;tool&gt; '{}'` | Call tool with arguments |
+ 
+**Both formats work:** `info &lt;server&gt; &lt;tool&gt;` or `info &lt;server&gt;/&lt;tool&gt;`
+ 
+**Add `-d` to include descriptions** (e.g., `mcp-cli info filesystem -d`)
+ 
+## Workflow
+ 
+1. **Discover**: `mcp-cli` → see available servers and tools
+2. **Explore**: `mcp-cli info &lt;server&gt;` → see tools with parameters
+3. **Inspect**: `mcp-cli info &lt;server&gt; &lt;tool&gt;` → get full JSON input schema
+4. **Execute**: `mcp-cli call &lt;server&gt; &lt;tool&gt; '{}'` → run with arguments
+ 
+## Examples
+ 
+```bash
+# List all servers and tool names
+mcp-cli
+ 
+# See all tools with parameters
+mcp-cli info filesystem
+ 
+# With descriptions (more verbose)
+mcp-cli info filesystem -d
+ 
+# Get JSON schema for specific tool
+mcp-cli info filesystem read_file
+ 
+# Call the tool
+mcp-cli call filesystem read_file '{"path": "./README.md"}'
+ 
+# Search for tools
+mcp-cli grep "*file*"
+ 
+# Complex JSON with quotes (use heredoc or stdin)
+mcp-cli call server tool &lt;&lt;EOF
+{"content": "Text with 'quotes' inside"}
+EOF
+ 
+# Or pipe from a file/command
+cat args.json | mcp-cli call server tool
+ 
+# Chain: search and read first result
+mcp-cli call filesystem search_files '{"path": "src/", "pattern": "*.ts"}' \
+  | jq -r '.content[0].text | split("\n")[0]' \
+  | xargs -I {} mcp-cli call filesystem read_file '{"path": "{}"}'
+```
+ 
+## Options
+ 
+| Flag | Purpose |
+|------|---------|
+| `-d` | Include descriptions |
+| `-c &lt;path&gt;` | Custom config file path |
+ 
+## Exit Codes
+ 
+- `0`: Success
+- `1`: Client error (bad args, missing config)
+- `2`: Server error (tool failed)
+- `3`: Network error</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>The AI Agent space is moving incredibly fast. <code>mcp-cli</code> tries to solve context tool discovery problem turning it into an iterative, just-in-time process. It allows agents to access a massive ecosystem of shared capabilities without the context bloat of static integration. Whether used within a Skill or as a standalone utility, it ensures your agent spends its tokens on reasoning, not configuration.</p>
+<p>The project is open source and designed to fit into existing workflows. Give it a try and contribute at <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/mcp-cli">github.com/philschmid/mcp-cli</a>.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

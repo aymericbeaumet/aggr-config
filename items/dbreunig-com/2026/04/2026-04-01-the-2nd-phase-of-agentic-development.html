@@ -1,0 +1,57 @@
+<div id="readability-page-1" class="page"><div itemprop="articleBody">
+    <p>Yesterday we talked about how <a href="https://www.dbreunig.com/2026/03/26/winchester-mystery-house.html">cheap code is fueling an era of idiosyncratic tooling</a>, and previously we’ve talked about <a href="https://www.dbreunig.com/2026/02/06/the-rise-of-spec-driven-development.html">the rise of spec driven development</a>. In that second piece, we ran through some of the initial examples of spec driven development with agents:</p>
+
+<blockquote>
+  <p>By far, the hardest part of starting a SDD project is creating the tests. Which is why many developers are opting for borrowing existing test sets or deriving by referencing a source of truth.</p>
+
+  <ul>
+    <li><a href="https://www.anthropic.com/engineering/building-c-compiler"><strong>Anthropic wrote a C compiler in Rust</strong></a>. They used <a href="https://gcc.gnu.org/onlinedocs/gccint/Torture-Tests.html">existing test suites</a> and used GCC as a source of truth for validation and generating new tests.</li>
+    <li><a href="https://github.com/vercel-labs/just-bash"><strong>Vercel created a bash emulator in TypeScript</strong></a>. They created and curated an amazing set of <a href="https://github.com/vercel-labs/just-bash/tree/main/src/spec-tests">shell script spec tests</a> and <a href="https://x.com/cramforce/status/2015513111487553667?s=20">have been feeding these to Ralph</a>. (To make this even more meta, I’ve been following their commits and <a href="https://github.com/dbreunig/just-bash-py">Clauding them into Python</a>).</li>
+    <li><a href="https://github.com/pydantic/monty"><strong>Pydantic created a Python emulator…in Python</strong></a>. This sounds silly, but it’s useful in the same way Vercel’s <code>just-bash</code> is: it’s a super lightweight sandbox for AI agents. (In fact, I’ve <a href="https://github.com/dbreunig/dspy-monty-interpreter">already wrapped it in a <code>CodeInterpreter</code></a> for use with DSPy’s <a href="https://alexzhang13.github.io/blog/2025/rlm/">RLM</a> module)</li>
+  </ul>
+</blockquote>
+
+<p>The first wave of agentic development brought us <em>clones</em> and <em>ports</em>. When code is incredibly cheap, and you want the code to flow, you can either rely on <a href="https://www.dbreunig.com/2026/03/26/winchester-mystery-house.html">your own fast feedback</a> or leverage existing test suites. These early projects opted for the latter, as did many <a href="https://www.nytimes.com/2026/03/20/technology/tokenmaxxing-ai-agents.html">tokenmaxxers</a> who are <a href="https://github.com/Dicklesworthstone#the-frankensuite">rebuilding their dependencies in Rust or Go</a>.</p>
+
+<p>Two releases this week, however, suggest we’re starting to enter a second phase of open source agentic coding projects. The first brought us <em>clones</em>, this next phase brings us <em>reimaginings</em>. Consider the following two projects:</p>
+
+<ul>
+  <li><strong><a href="https://x.com/_chenglou">Cheng Lou</a> created <a href="https://github.com/chenglou/pretext">a TypeScript library for laying out text on web pages</a>:</strong> Pretext measures and lays out paragraphs, without using CSS while bypassing DOM measurements and reflow. In a nutshell, this makes tricky things involving text layout dramatically faster and much simpler to implement (Cheng provides many <a href="https://x.com/_chenglou/status/2037713766205608234">demos in his thread</a>).</li>
+  <li><strong><a href="https://blog.cloudflare.com/emdash-wordpress/">Cloudflare Launched EmDash, a modern CMS</a>:</strong> EmDash is described as, “the spiritual successor to WordPress.” It’s written in TypeScript, serverless, sandboxes plugins for security, and uses <a href="https://astro.build/">Astro</a>, a fast modern web framework.</li>
+</ul>
+
+<p>The Cloudflare post really spells out the pattern we’re seeing here: the team looked at all the jobs people hire WordPress to perform and asked, how would we solve those if we started today?</p>
+
+<blockquote>
+  <p>WordPress powers over 40% of the Internet. It is a massive success that has enabled anyone to be a publisher, and created a global community of WordPress developers. But the WordPress open source project will be 24 years old this year. Hosting a website has changed dramatically during that time. When WordPress was born, AWS EC2 didn’t exist. In the intervening years, that task has gone from renting virtual private servers, to uploading a JavaScript bundle to a globally distributed network at virtually no cost. It’s time to upgrade the most popular CMS on the Internet to take advantage of this change.</p>
+</blockquote>
+
+<p>What they ended up with is something fast, serverless, and secure. They didn’t <em>clone</em> WordPress, they <em>reimagined</em> it by focusing on the <em>job to be done</em>.</p>
+
+<p>Cheng Lou took the same route: he didn’t <em>port</em> CSS to Go or Rust to get his speed gains. Rather, he focused on one hard, important job to be done that CSS doesn’t do very well and <em>reimagined</em> it with everything we’ve learned and built, unhindered by the baggage of CSS.</p>
+
+<p>Now what does this have to do with coding agents? Isn’t this something we could have done (and did) before?</p>
+
+<p>Previously, the built up ecosystems and mature code of existing software projects made reimagining foolish. Teams <em>did</em> create modern CMS projects, but WordPress’ massive size and momentum meant newcomers could only carve out small niches of adoption, if they didn’t fail entirely. The odds weren’t good and the costs of trying were high, so most people sighed and moved on.</p>
+
+<p>Coding agents make reimagining practical because the cost to perform them is so, <em>so</em> much lower. Code is cheap. We can take more shots, more often, to counter the embedded standards.</p>
+
+<p>Further, reimagining a new standard was a <em>long</em> road. If you survived the initial build and executed a good launch, picking up a small core of users, you earned the job of writing countless bugfixes, optimizations, and security patches. Mature software like WordPress is battle tested; it’s had decades of feedback and found flaws. How can a newcomer compete?</p>
+
+<p>Well, <a href="https://x.com/_chenglou/status/2037715226838343871">Cheng Lou demonstrates an interesting approach</a>, again using agents:</p>
+
+<blockquote>
+  <p>The engine’s tiny (few kbs), aware of browser quirks, supports all the languages you’ll need, including Korean mixed with RTL Arabic and platform-specific emojis.</p>
+
+  <p>This was achieved through showing Claude Code and Codex the browsers ground truth, and have them measure &amp; iterate against those at every significant container width, running over weeks.</p>
+</blockquote>
+
+<p>With agents and LLMs, we can synthetically test our new tools, patching them as we challenge them.</p>
+
+<p>I think we’re going to see a lot more <em>reimaginings</em>, where people attack old problems with modern tactics. Coding agents lower the costs of taking on stalwarts and raise our ability to rapidly harden our software. I can think of many software tools that people rely on but <em>don’t like</em>. Those are the prime targets for reimagining.</p>
+
+<hr>
+
+
+
+  </div></div>

@@ -1,0 +1,79 @@
+<div id="readability-page-1" class="page"><div><p><span> July 22, 2025</span><span>4 minute read</span><a href="https://github.com/philschmid/code-sandbox-mcp">View Code</a></p></div><div><p>Code agents are transforming software development. But how do we safely let them execute code? Code sandboxes have evolved from basic security tools into essential development infrastructure.</p>
+<p>Today, I'm launching <strong><a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/code-sandbox-mcp">Code Sandbox MCP</a></strong>, a lightweight, STDIO-based Model Context Protocol (MCP) Server, allowing AI assistants and LLM applications to safely execute code snippets using containerized environments. It is uses the <a target="_blank" rel="noopener noreferrer" href="https://github.com/vndee/llm-sandbox">llm-sandbox</a> package for the containerization and execution of the code snippets.</p>
+<p>It exposes <code>run_python_code</code> and <code>run_javascript_code</code> tools, giving your AI agent the ability to execute code on your own infrastructure.</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li>Starts a container session (podman, docker, etc.) and ensures the session is open.</li>
+<li>Writes the code to a temporary file on the host.</li>
+<li>Copies this temporary file into the container at the configured workdir.</li>
+<li>Executes the language-specific commands to run the code, e.g. python <code>python3 -u code.py</code> or javascript <code>node -u code.js</code></li>
+<li>Captures the output and error streams from the container.</li>
+<li>Returns the output and error streams to the client.</li>
+</ol>
+<p><img src="https://www.philschmid.de/static/blog/code-sandbox-mcp/code-sandbox-mcp.png" alt="Code Sandbox MCP"></p>
+<p>This entire workflow happens on your machine, locally or on your own server, keeping your data and code private.</p>
+<h2 id="get-started-with-the-gemini-sdk">Get Started with the Gemini SDK</h2>
+<p>Integrating Code Sandbox MCP with your Python application using the Gemini SDK is incredibly straightforward. First, install the package:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">pip install git+https://github.com/philschmid/code-sandbox-mcp.git</code></pre></div></figure>
+<p>Then, you can use <code>fastmcp</code> to connect your Gemini client to the local code execution tool:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from fastmcp import Client
+from google import genai
+import asyncio
+ 
+# Configure the MCP client to use the local server
+mcp_client = Client(
+    {
+        "local_server": {
+            "transport": "stdio",
+            "command": "code-sandbox-mcp",
+        }
+    }
+)
+gemini_client = genai.Client()
+ 
+async def main():
+    async with mcp_client:
+        response = await gemini_client.aio.models.generate_content(
+            model="gemini-1.5-flash",
+            contents="Use Python to ping google.com and return the response.",
+            config=genai.types.GenerateContentConfig(
+                tools=[mcp_client.session],  # Pass the FastMCP client session
+            ),
+        )
+        # The model's response will include the output from the code execution
+        print(response.text)
+ 
+if __name__ == "__main__":
+    asyncio.run(main())
+ </code></pre></div></figure>
+<h2 id="empower-the-gemini-cli">Empower the Gemini CLI</h2>
+<p>You can also supercharge the Gemini CLI with code execution capabilities. Simply add the server configuration to your <code>~/.gemini/settings.json</code> file:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">{
+  "mcpServers": {
+    "code-sandbox": {
+      "command": "code-sandbox-mcp"
+    }
+  }
+}
+ </code></pre></div></figure>
+<p>Now, when you use the Gemini CLI, it can automatically discover and use the <code>run_python_code</code> tool to answer your questions!</p>
+<h2 id="security">Security</h2>
+<p>By leveraging <code>llm-sandbox</code>, Code Sandbox MCP benefits from multiple layers of security:</p>
+<ol>
+<li><strong>Container Isolation</strong>: All code runs inside a sandboxed container (Docker, Podman, etc.), completely isolated from the host system's filesystem and processes.</li>
+<li><strong>Resource Limits</strong>: The underlying sandbox can be configured with strict memory, CPU, and execution time limits to prevent resource exhaustion.</li>
+<li><strong>Network Controls</strong>: You can define network policies to restrict or completely block outbound network access from the container.</li>
+<li><strong>Pre-execution Analysis</strong>: The underlying <code>llm-sandbox</code> framework supports security policies that can analyze code for dangerous patterns (e.g., <code>os.system</code>, file system access) before it even runs.</li>
+</ol>
+<h2 id="why-build-this">Why Build This?</h2>
+<p>I built Code Sandbox MCP primarily for my own use. When working with the Gemini CLI or other coding agents, I constantly struggled with testing code snippets in an isolated environment. Especially when you hand over more responsbility to the agent.</p>
+<p>While managed solutions like <a target="_blank" rel="noopener noreferrer" href="https://www.daytona.io/">Daytona</a> and <a target="_blank" rel="noopener noreferrer" href="https://e2b.dev/">E2B</a> are excellent for scaling or building customer facing agents, they didn't fit my specific needs. In my use cases, I wanted to give agents a way to execute code in an environment I can control and don't have to pay for.</p>
+<p>I mean:</p>
+<ul>
+<li><strong>Having the libraries I need installed</strong>: Unlike integrated code execution tools that come with limited packages, I can customize my environment with any dependencies.</li>
+<li><strong>Access to secrets and credentials</strong>: I can safely provide API keys or other sensitive information.</li>
+<li><strong>Local code access</strong>: Agents can work with my actual codebase, files, and local resources. I export files.</li>
+<li><strong>No unnecessary costs</strong>: There's simply no need to pay for a cloud solution when executing small code snippets for personal development work.</li>
+</ul>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

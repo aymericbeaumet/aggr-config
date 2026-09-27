@@ -1,0 +1,253 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/logging-privacy-shenanigans/header.png" alt="" loading="lazy"><blockquote>
+<p><strong>TL;DR</strong> – Apple logs hide the juicy debugging bits as <code>&lt;private&gt;</code>. Drop plist files into <code>/Library/Preferences/Logging/Subsystems/</code> for a simpler solution, or install a configuration profile as an alternative.</p>
+</blockquote>
+<p>If you’ve ever tried debugging a macOS app using the unified logging system, you’ve probably encountered the dreaded <code>&lt;private&gt;</code> redaction. Your carefully crafted log messages turn into cryptic puzzles where the most important debugging information is hidden. Let me show you what’s really going on and how to work around it.</p>
+<h2 id="the-privacy-problem">The Privacy Problem</h2>
+<p>When you log something like this in Swift:</p>
+<pre><code data-language="swift">logger.info("User \(username) connected to session \(sessionId)")</code></pre>
+<p>You expect to see:</p>
+<pre><code data-language="plaintext">User john.doe connected to session ABC-123-DEF</code></pre>
+<p>But instead you get:</p>
+<pre><code data-language="plaintext">User &lt;private&gt; connected to session &lt;private&gt;</code></pre>
+<p>Not very helpful when you’re trying to debug an issue, right?</p>
+<h2 id="what-actually-gets-redacted">What Actually Gets Redacted</h2>
+<p>Here’s where it gets interesting. Through testing, I discovered that Apple’s redaction logic is <strong>not</strong> as straightforward as the documentation suggests:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>What you log</th><th>Documentation says</th><th>Reality</th></tr></thead><tbody><tr><td>Simple strings (<code>"user@example.com"</code>)</td><td>Redacted</td><td><strong>Usually redacted!</strong></td></tr><tr><td>File paths (<code>/Users/username</code>)</td><td>Redacted</td><td>✓ Redacted</td></tr><tr><td>UUIDs (<code>ABC-123-DEF</code>)</td><td>Redacted</td><td>✓ Redacted</td></tr><tr><td>Integers, booleans, floats</td><td>Public</td><td>✓ Public</td></tr></tbody></table>
+<p>The discrepancy comes from how Apple’s logging system is implemented. The os_log function requires format strings to be compile-time constants (C string literals) for performance optimization. When you use string interpolation with dynamic values, the compiler and logging library work together to mark these as runtime data that needs privacy protection.</p>
+<p>Static strings embedded directly in your code are treated as part of the format string and assumed to be non-sensitive, while any runtime values (variables, computed properties, function returns) are automatically redacted to prevent accidental leakage of personal information.</p>
+<h2 id="old-solutions-that-no-longer-work">Old Solutions That No Longer Work</h2>
+<p>Before we get to what works, let’s quickly cover what <strong>doesn’t</strong> work anymore:</p>
+<h3 id="-the-private_dataon-flag-dead-since-catalina">❌ The <code>private_data:on</code> flag (Dead since Catalina)</h3>
+<pre><code data-language="bash"># This returns "Invalid Modes 'private_data:on'" on macOS 10.15+
+sudo log config --mode "private_data:on" --subsystem your.app.subsystem</code></pre>
+<p>This was completely removed in macOS Catalina (10.15) and later.</p>
+<h3 id="-sudo-doesnt-reveal-private-data">❌ sudo doesn’t reveal private data</h3>
+<p>You might think running with sudo would show everything:</p>
+<pre><code data-language="bash">sudo log show --predicate 'subsystem == "your.app"' --info</code></pre>
+<p>Nope! The privacy redaction happens at <strong>write time</strong>, not read time. Once logged as <code>&lt;private&gt;</code>, the actual data is gone forever.</p>
+<h2 id="the-plist-solution-preferred-method">The Plist Solution (Preferred Method)</h2>
+<p>Thanks to <a href="https://micro.blog/pajp/70072065">Rasmus Sten</a> for pointing out this elegant solution! You don’t need to use <code>.mobileconfig</code> files – you can simply drop plist files directly into <code>/Library/Preferences/Logging/Subsystems/</code>. This is actually what happens when you install a configuration profile anyway.</p>
+<h3 id="step-1-create-a-plist-file">Step 1: Create a Plist File</h3>
+<p>Create a file named after your subsystem (e.g., <code>com.mycompany.myapp.plist</code>) with this content:</p>
+<pre><code data-language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;DEFAULT-OPTIONS&lt;/key&gt;
+    &lt;dict&gt;
+        &lt;key&gt;Enable-Private-Data&lt;/key&gt;
+        &lt;true/&gt;
+    &lt;/dict&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+<h3 id="step-2-install-the-plist">Step 2: Install the Plist</h3>
+<pre><code data-language="bash"># Create the directory if it doesn't exist
+sudo mkdir -p /Library/Preferences/Logging/Subsystems/
+
+# Copy your plist file
+sudo cp com.mycompany.myapp.plist /Library/Preferences/Logging/Subsystems/
+
+# Set proper permissions
+sudo chmod 644 /Library/Preferences/Logging/Subsystems/com.mycompany.myapp.plist</code></pre>
+<blockquote>
+<p><strong>Important Gotcha</strong>: When writing these plist files programmatically, you <strong>must write them atomically</strong>. Write to a temporary file first, then use <code>mv</code> to move it into place. This ensures the logging subsystem sees a complete, valid plist file.</p>
+</blockquote>
+<h3 id="step-3-generate-fresh-logs">Step 3: Generate Fresh Logs</h3>
+<p>The configuration only affects <strong>new</strong> log entries. Run your app to generate fresh logs.</p>
+<h3 id="step-4-remove-after-debugging">Step 4: Remove After Debugging</h3>
+<pre><code data-language="bash">sudo rm /Library/Preferences/Logging/Subsystems/com.mycompany.myapp.plist</code></pre>
+<h3 id="why-this-method-is-better">Why This Method is Better</h3>
+<ul>
+<li><strong>Scriptable</strong>: Can be added/removed programmatically from shell scripts</li>
+<li><strong>No UI interaction</strong>: No need to navigate System Settings</li>
+<li><strong>Granular control</strong>: Enable/disable specific subsystems instantly</li>
+<li><strong>CI/CD friendly</strong>: Perfect for automated testing environments</li>
+</ul>
+<h3 id="documentation">Documentation</h3>
+<p>This approach is documented in:</p>
+<ul>
+<li>Apple’s <a href="https://www.manpagez.com/man/5/os_log/"><code>os_log(5)</code> man page</a> (run <code>man 5 os_log</code> in Terminal)</li>
+<li><a href="https://developer.apple.com/forums/thread/114166">Apple Developer Forums</a> confirming the <code>/Library/Preferences/Logging/Subsystems/</code> directory usage</li>
+<li><a href="https://derflounder.wordpress.com/2025/05/05/accessing-subsystem-logging-configurations-used-by-the-macos-unified-logging-on-macos-sequoia/">Der Flounder’s detailed analysis</a> of macOS Sequoia’s logging configuration</li>
+</ul>
+<h2 id="the-configuration-profile-solution-alternative-method">The Configuration Profile Solution (Alternative Method)</h2>
+<p>If you prefer a GUI approach or need to deploy settings across multiple machines, you can still use configuration profiles:</p>
+<details>
+<summary><strong>View Configuration Profile Template</strong></summary>
+<pre><code data-language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;PayloadContent&lt;/key&gt;
+    &lt;array&gt;
+        &lt;dict&gt;
+            &lt;key&gt;PayloadDisplayName&lt;/key&gt;
+            &lt;string&gt;ManagedClient logging&lt;/string&gt;
+            &lt;key&gt;PayloadEnabled&lt;/key&gt;
+            &lt;true/&gt;
+            &lt;key&gt;PayloadIdentifier&lt;/key&gt;
+            &lt;string&gt;com.yourapp.logging.EnablePrivateData&lt;/string&gt;
+            &lt;key&gt;PayloadType&lt;/key&gt;
+            &lt;string&gt;com.apple.system.logging&lt;/string&gt;
+            &lt;key&gt;PayloadUUID&lt;/key&gt;
+            &lt;string&gt;GENERATE-UUID-1&lt;/string&gt;
+            &lt;key&gt;PayloadVersion&lt;/key&gt;
+            &lt;integer&gt;1&lt;/integer&gt;
+            &lt;key&gt;System&lt;/key&gt;
+            &lt;dict&gt;
+                &lt;key&gt;Enable-Private-Data&lt;/key&gt;
+                &lt;true/&gt;
+            &lt;/dict&gt;
+            &lt;key&gt;Subsystems&lt;/key&gt;
+            &lt;dict&gt;
+                &lt;key&gt;your.app.subsystem&lt;/key&gt;
+                &lt;dict&gt;
+                    &lt;key&gt;DEFAULT-OPTIONS&lt;/key&gt;
+                    &lt;dict&gt;
+                        &lt;key&gt;Enable-Private-Data&lt;/key&gt;
+                        &lt;true/&gt;
+                    &lt;/dict&gt;
+                &lt;/dict&gt;
+            &lt;/dict&gt;
+        &lt;/dict&gt;
+    &lt;/array&gt;
+    &lt;key&gt;PayloadDescription&lt;/key&gt;
+    &lt;string&gt;This profile enables logging of private data for debugging.&lt;/string&gt;
+    &lt;key&gt;PayloadDisplayName&lt;/key&gt;
+    &lt;string&gt;Your App Private Data Logging&lt;/string&gt;
+    &lt;key&gt;PayloadIdentifier&lt;/key&gt;
+    &lt;string&gt;com.yourapp.PrivateDataLogging&lt;/string&gt;
+    &lt;key&gt;PayloadOrganization&lt;/key&gt;
+    &lt;string&gt;Your Organization&lt;/string&gt;
+    &lt;key&gt;PayloadRemovalDisallowed&lt;/key&gt;
+    &lt;false/&gt;
+    &lt;key&gt;PayloadType&lt;/key&gt;
+    &lt;string&gt;Configuration&lt;/string&gt;
+    &lt;key&gt;PayloadUUID&lt;/key&gt;
+    &lt;string&gt;GENERATE-UUID-2&lt;/string&gt;
+    &lt;key&gt;PayloadVersion&lt;/key&gt;
+    &lt;integer&gt;1&lt;/integer&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+</details>
+<br>
+<details>
+<summary><strong>Customizing the Profile</strong></summary>
+<p><strong>Critical Components to Replace:</strong></p>
+<ol>
+<li>
+<p><strong>UUIDs</strong>: Two unique identifiers are required:</p>
+<ul>
+<li>Replace <code>GENERATE-UUID-1</code> and <code>GENERATE-UUID-2</code> with actual UUIDs</li>
+<li>Generate with: <code>uuidgen</code> (run twice for two different UUIDs)</li>
+</ul>
+</li>
+<li>
+<p><strong>Organization</strong>: Replace <code>Your Organization</code> with your actual organization or app name</p>
+</li>
+<li>
+<p><strong>Subsystems</strong>: The most critical part! Replace <code>your.app.subsystem</code> with your actual logging subsystem(s):</p>
+<pre><code data-language="swift">let logger = Logger(subsystem: "com.mycompany.myapp", category: "Network")</code></pre>
+<p>In this example, <code>"com.mycompany.myapp"</code> is the subsystem you need to add.</p>
+</li>
+<li>
+<p><strong>Multiple Subsystems</strong>: To enable private data for multiple subsystems, duplicate the subsystem structure:</p>
+<pre><code data-language="xml">&lt;key&gt;Subsystems&lt;/key&gt;
+&lt;dict&gt;
+    &lt;key&gt;com.mycompany.myapp&lt;/key&gt;
+    &lt;dict&gt;
+        &lt;key&gt;DEFAULT-OPTIONS&lt;/key&gt;
+        &lt;dict&gt;
+            &lt;key&gt;Enable-Private-Data&lt;/key&gt;
+            &lt;true/&gt;
+        &lt;/dict&gt;
+    &lt;/dict&gt;
+    &lt;key&gt;com.mycompany.myframework&lt;/key&gt;
+    &lt;dict&gt;
+        &lt;key&gt;DEFAULT-OPTIONS&lt;/key&gt;
+        &lt;dict&gt;
+            &lt;key&gt;Enable-Private-Data&lt;/key&gt;
+            &lt;true/&gt;
+        &lt;/dict&gt;
+    &lt;/dict&gt;
+&lt;/dict&gt;</code></pre>
+</li>
+</ol>
+<p><strong>Key Implementation Details:</strong></p>
+<ul>
+<li><strong>PayloadType values</strong>: The top-level PayloadType must be <code>Configuration</code>, while the inner PayloadType (in PayloadContent) must be <code>com.apple.system.logging</code></li>
+<li><strong>PayloadRemovalDisallowed</strong>: Keep this as <code>false</code> so you can easily remove the profile after debugging</li>
+<li><strong>System section</strong>: Enables private data for system-level logs</li>
+<li><strong>DEFAULT-OPTIONS</strong>: Required wrapper for subsystem options</li>
+</ul>
+<p>Save the customized file as <code>EnablePrivateLogging.mobileconfig</code>.</p>
+</details>
+<h3 id="installing-configuration-profiles">Installing Configuration Profiles</h3>
+<ol>
+<li>Double-click the <code>.mobileconfig</code> file</li>
+<li>Navigate to:
+<ul>
+<li><strong>macOS 15 (Sequoia) and later</strong>: System Settings → General → Device Management</li>
+<li><strong>macOS 14 (Sonoma) and earlier</strong>: System Settings → Privacy &amp; Security → Profiles</li>
+</ul>
+</li>
+<li>Click “Install…” and authenticate</li>
+<li>Wait 1-2 minutes for the system to apply changes</li>
+</ol>
+<h3 id="removing-configuration-profiles">Removing Configuration Profiles</h3>
+<p>Go back to the Profiles/Device Management section and click the minus (-) button.</p>
+<h2 id="the-code-level-solution">The Code-Level Solution</h2>
+<p>For production apps, mark specific non-sensitive values as public:</p>
+<pre><code data-language="swift">// This will always be visible
+logger.info("Session: \(sessionId, privacy: .public)")
+
+// This remains private by default
+logger.info("Token: \(apiToken)")</code></pre>
+<p>This is the safest approach as you explicitly control what’s exposed.</p>
+<h2 id="automating-with-claude-code">Automating with Claude Code</h2>
+<p>Instead of manually editing configuration files, just give Claude Code this blog post URL and ask it to create a customized plist or profile for your app. <a href="https://steipete.me/posts/2025/claude-code-is-my-computer/">Living in the future</a> means your documentation can be both human-readable and agent-executable.</p>
+<h2 id="summary">Summary</h2>
+<p>Apple’s log privacy is well-intentioned but can be frustrating during development. The plist approach is your best bet for debugging:</p>
+<ol>
+<li>Privacy redaction happens at write time</li>
+<li>sudo can’t recover what was never stored</li>
+<li>Direct plist files are simpler than configuration profiles</li>
+<li>Always remove debugging configurations when done</li>
+</ol>
+<p>For more details on this topic, check out:</p>
+<ul>
+<li><a href="https://www.manpagez.com/man/5/os_log/">Apple’s os_log(5) man page</a> – The authoritative source</li>
+<li><a href="https://eclecticlight.co/2023/03/08/removing-privacy-censorship-from-the-log/">Howard Oakley’s excellent post</a> – Deep dive into log privacy</li>
+<li><a href="https://derflounder.wordpress.com/2025/05/05/accessing-subsystem-logging-configurations-used-by-the-macos-unified-logging-on-macos-sequoia/">Der Flounder’s Sequoia analysis</a> – Latest macOS changes</li>
+</ul>
+<p>Happy debugging, and may your logs be forever unredacted (but only when you need them to be)!</p></article></div>

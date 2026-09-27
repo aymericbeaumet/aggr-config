@@ -1,0 +1,67 @@
+<div id="readability-page-1" class="page"><div><p>The debate on whats the right way to build Agents in the AI community heated up with Cognition's <a target="_blank" rel="noopener noreferrer" href="https://cognition.ai/blog/dont-build-multi-agents">"Don't Build Multi-Agents"</a> and Anthropic's <a target="_blank" rel="noopener noreferrer" href="https://www.anthropic.com/engineering/built-multi-agent-research-system">"How we built our multi-agent research system"</a>. Despite their opposing titles both are surprisingly aligned. The choice between a single agent and a multi-agent system isn't about ideology, it is about picking the right tool for the right job.</p>
+<p>Before we take a closer look, let's establish a simple definition.</p>
+<blockquote>
+<p>AI agent is a system that uses a Large Language Model (LLM) as reasoning engine to decide the control flow of an application.</p>
+</blockquote>
+<h2 id="what-are-single-agents">What Are Single Agents?</h2>
+<p>A single-agent system operates as a “single process”. Think of it as one highly-focused worker tackling a task from start to finish. It maintains a continuous thread of thought (memory) and action (tools) to ensure that every step is informed by everything that came before it.</p>
+<p><img src="https://www.philschmid.de/static/blog/single-vs-multi-agents/cognition.png" alt="cognition-single-agent"></p>
+<p>[Credits: <a target="_blank" rel="noopener noreferrer" href="https://cognition.ai/blog/dont-build-multi-agents">Cognition Don’t Build Multi-Agents</a>]</p>
+<p><strong>Key characteristics:</strong></p>
+<ul>
+<li><strong>Sequential:</strong> Actions are performed one after another. The agent completes step A before moving to step B.</li>
+<li><strong>Unified Contenxt:</strong> Maintains a single, continuous history of the entire conversation. Every new step has access to all previous steps, thoughts, and tool outputs.</li>
+<li><strong>Stateful:</strong> Decisions made early on directly and fully inform later actions without the need for message passing.</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li><strong>Context Continuity</strong>: No information is lost between steps</li>
+<li><strong>Simplicity</strong>: Easier to debug, test, and maintain</li>
+<li><strong>Transparency</strong>: Clear execution path and decision trail</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li><strong>Sequential Bottlenecks:</strong> Slow for tasks where parts could be handled in parallel.</li>
+<li><strong>Context Window Limitations</strong>: Eventually exceed the (useful) context window, leading to errors and forgotten details.</li>
+<li><strong>Inefficiency</strong>: May waste tokens on repetitive context and are limited to single model capabilities/instructions</li>
+</ul>
+<h2 id="what-are-multi-agent-systems">What Are Multi-Agent Systems?</h2>
+<p>A multi-agent system is structured like a team. It typically involves an “lead agent" that breaks down a goal into smaller subtasks, which it then delegates to multiple "worker" agents that can operate in parallel.</p>
+<p><img src="https://www.philschmid.de/static/blog/agentic-pattern/multi-agent.png" alt="multi-agent"></p>
+<p><strong>Key characteristics:</strong></p>
+<ul>
+<li><strong>Parallel Execution:</strong> Subtasks can be handled simultaneously by multiple agents.</li>
+<li><strong>Delegation:</strong> A "lead" agent typically decomposes the main goal, delegates subtasks, and synthesizes the results from the worker agents.</li>
+<li><strong>Distributed Context:</strong> Each agent operates with its own context, which is often a subset of the total information.</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li><strong>Parallelization</strong>: Can explore multiple paths simultaneously, reducing latency.</li>
+<li><strong>Specialization</strong>: Each agent can be optimized and instructed for specific tasks</li>
+<li><strong>Breadth</strong>: Can solve complex, multi-faceted problems.</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li><strong>Context</strong>: Sharing the right context between agents is hard</li>
+<li><strong>Coordination:</strong> Agents may duplicate work or make conflicting decisions</li>
+<li><strong>Cost:</strong> Can be more token-intensive. (Anthropic: 15x more tokens compared to a standard chat interaction)</li>
+</ul>
+<p><em><strong>Note:</strong></em> It's worth mentioning other multi-agent pattern, e.g. swarm are not using a "lead" agent. Instead they collaborate in a more peer-to-peer fashion to solve a problem, which has both single agent and multi agent characteristics, e.g. Unified Context, but individual instructions but comes with its on challenges.</p>
+<h2 id="comparison-single-agents-vs-multi-agent-systems">Comparison Single Agents vs Multi-Agent Systems</h2>
+<div><table><thead><tr><th>Aspect</th><th>Single Agent System</th><th>Multi-Agent System</th></tr></thead><tbody><tr><td><strong>Context Management</strong></td><td>Continuous, no loss</td><td>Complex sharing required</td></tr><tr><td><strong>Execution Speed</strong></td><td>Sequential</td><td>Parallel</td></tr><tr><td><strong>Token usage</strong></td><td>4x chat tokens</td><td>15x chat tokens</td></tr><tr><td><strong>Reliability</strong></td><td>High, predictable</td><td>Lower, emergent behaviors</td></tr><tr><td><strong>Debugging</strong></td><td>Straightforward</td><td>Complex, non-deterministic</td></tr><tr><td><strong>Best For</strong></td><td>Sequential, state-dependent tasks ("write" tasks).</td><td>Parallelizable, exploratory tasks ("read" tasks).</td></tr><tr><td><strong>Coordination</strong></td><td>None needed</td><td>Critical success factor</td></tr><tr><td><strong>Example Use Case</strong></td><td>Refactoring a codebase, writing a detailed document.</td><td>Researching a broad market trend, identifying all board members of the S&amp;P 500.</td></tr><tr><td><strong>Core Strength</strong></td><td>Context Continuity &amp; Reliability</td><td>Parallelism &amp; Scalability</td></tr><tr><td><strong>Primary Challenge</strong></td><td>Context Window Limits &amp; Sequential Speed</td><td>Context Fragmentation &amp; Coordination Complexity</td></tr></tbody></table></div>
+<h2 id="the-universal-truths-of-building-agents">The Universal Truths of Building Agents</h2>
+<p>Despite their opposing common principles apply for building serious Agentic system.</p>
+<ol>
+<li><strong>Context Engineering is everything:</strong> Architecting systems that dynamically maintain the right information at the right time for reliable decision-making is the key to success and reliability. This isn't just prompt engineering.</li>
+<li><strong>"Read" vs "Write" Agents:</strong> Are important distinction isn't single vs multi-agent. it is whether your task primarily involves <strong>reading</strong> (research, analysis, information gathering) or <strong>writing</strong> (code generation, content creation, file editing).
+<ul>
+<li><strong>Read tasks</strong> are easier to parallelize and suite multi-agent better</li>
+<li><strong>Write tasks</strong> create coordination problems when parallelized, favoring single agents</li>
+<li><strong>Mixed tasks</strong> should separate read and write phases architecturally</li>
+</ul>
+</li>
+<li><strong>Reliable Agents Need Different Tooling:</strong> Building reliable agents requires more than a good model. It requires a robust infrastructure for durable execution to survive failures, observability to debug behavior, and evaluation to measure what actually matters.</li>
+<li><strong>Economic Viability and Model Improvements:</strong> Models themselves are improving at an incredible rate. Don't over-engineer a solution for today that a much simpler can solve for you tomorrow.</li>
+</ol>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

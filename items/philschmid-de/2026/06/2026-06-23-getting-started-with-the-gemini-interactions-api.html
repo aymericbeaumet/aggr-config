@@ -1,0 +1,245 @@
+<div id="readability-page-1" class="page"><div><p>The <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">Interactions API</a> is Google's primary interface for Gemini models and agents. A single endpoint covers text generation, streaming, multi-turn chat, multimodal inputs, image generation, structured output, tool use, function calling, managed agents, and background execution.</p>
+<p>This guide uses JavaScript. For Python and REST examples, see the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/quickstart">Interactions API quickstart</a>.</p>
+<p><strong>Using a coding agent?</strong> Install the skill so your agent stays current with Interactions API patterns:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Shell</span></p><pre><code data-language="shell">npx skills add google-gemini/gemini-skills --skill gemini-interactions-api</code></pre></div></figure>
+<h2 id="setup">Setup</h2>
+<p>Create a free API key at <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/apikey">Google AI Studio</a>, then set it as an environment variable:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Shell</span></p><pre><code data-language="shell">export GEMINI_API_KEY="YOUR_API_KEY"</code></pre></div></figure>
+<p>Install the SDK:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Shell</span></p><pre><code data-language="shell">npm install @google/genai</code></pre></div></figure>
+<p>Send your first request.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const interaction = await ai.interactions.create({
+  model: "gemini-3.5-flash",
+  input: "Explain how AI works in a few words",
+});
+console.log(interaction.output_text);</code></pre></div></figure>
+<p><code>interaction.output_text</code> gives you the final text directly. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/text-generation">text generation guide</a> for system instructions and generation config.</p>
+<h2 id="streaming">Streaming</h2>
+<p>Add <code>stream: true</code> and iterate over events. Each <code>step.delta</code> with <code>type === "text"</code> is a chunk you can display immediately.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const stream = await ai.interactions.create({
+  model: "gemini-3.5-flash",
+  input: "Explain how AI works",
+  stream: true,
+});
+ 
+for await (const event of stream) {
+  if (event.event_type === "step.delta") {
+    if (event.delta.type === "text") {
+      process.stdout.write(event.delta.text);
+    }
+  }
+}</code></pre></div></figure>
+<p>See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/streaming">streaming guide</a> for event types and delta handling.</p>
+<h2 id="multi-turn-conversations">Multi-turn conversations</h2>
+<p>Chain interactions by passing <code>previous_interaction_id</code>. The server manages history for you.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const interaction1 = await ai.interactions.create({
+  model: "gemini-3.5-flash",
+  input: "I have 2 dogs in my house.",
+});
+console.log("Response 1:", interaction1.output_text);
+ 
+const interaction2 = await ai.interactions.create({
+  model: "gemini-3.5-flash",
+  input: "How many paws are in my house?",
+  previous_interaction_id: interaction1.id,
+});
+console.log("Response 2:", interaction2.output_text);</code></pre></div></figure>
+<p>For client-side history management, set <code>store: false</code>. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/text-generation#multi-turn-conversations">multi-turn guide</a>.</p>
+<h2 id="multimodal-understanding">Multimodal understanding</h2>
+<p>Gemini natively understands images, audio, video, and documents. Upload a file and pass it alongside text.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const uploadedFile = await ai.files.upload({ file: "photo.jpg" });
+ 
+const interaction = await ai.interactions.create({
+  model: "gemini-3.5-flash",
+  input: [
+    { type: "text", text: "What is in this image?" },
+    {
+      type: "image",
+      uri: uploadedFile.uri,
+      mime_type: uploadedFile.mimeType,
+    },
+  ],
+});
+console.log(interaction.output_text);</code></pre></div></figure>
+<p>Audio, video, and documents use the same structure. See the guides for <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/audio">audio</a>, <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/video-understanding">video</a>, and <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/document-processing">document processing</a>.</p>
+<h2 id="image-generation">Image generation</h2>
+<p>Generate images with Nano Banana 2 using the <code>gemini-3.1-flash-image</code> model.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+import fs from "node:fs";
+ 
+const ai = new GoogleGenAI({});
+ 
+const interaction = await ai.interactions.create({
+  model: "gemini-3.1-flash-image",
+  input: "Generate an image of a futuristic city skyline at sunset",
+});
+ 
+fs.writeFileSync(
+  "generated_image.png",
+  Buffer.from(interaction.output_image.data, "base64")
+);</code></pre></div></figure>
+<p><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/speech-generation">Speech generation</a> (multi-speaker TTS) and <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/music-generation">music generation</a> (Lyria 3) work the same way. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/image-generation">image generation guide</a> for editing, aspect ratios, and style references.</p>
+<h2 id="structured-output">Structured output</h2>
+<p>Get JSON that matches a schema you define. Works with <a target="_blank" rel="noopener noreferrer" href="https://zod.dev/">Zod</a>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+import * as z from "zod";
+ 
+const ai = new GoogleGenAI({});
+ 
+const recipeJsonSchema = {
+  type: "object",
+  properties: {
+    recipe_name: { type: "string", description: "Name of the recipe." },
+    ingredients: {
+      type: "array", items: { type: "string" }, description: "List of ingredients."
+    },
+    prep_time_minutes: { type: "integer", description: "Prep time in minutes." }
+  },
+  required: ["recipe_name", "ingredients"]
+};
+ 
+const recipeSchema = z.fromJSONSchema(recipeJsonSchema);
+ 
+const interaction = await ai.interactions.create({
+  model: "gemini-3.5-flash",
+  input: "Give me a recipe for banana bread",
+  response_format: {
+    type: "text",
+    mime_type: "application/json",
+    schema: recipeJsonSchema
+  },
+});
+ 
+const recipe = recipeSchema.parse(JSON.parse(interaction.output_text));
+console.log(recipe);</code></pre></div></figure>
+<p>See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/structured-output">structured output guide</a> for recursive schemas and enums.</p>
+<h2 id="tools-google-search">Tools (Google Search)</h2>
+<p>Ground responses in real-time data by passing <code>tools: [{ type: "google_search" }]</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const interaction = await ai.interactions.create({
+  model: "gemini-3.5-flash",
+  input: "Who won the euro 2024?",
+  tools: [{ type: "google_search" }],
+});
+console.log(interaction.output_text);</code></pre></div></figure>
+<p>Other built-in tools: <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/code-execution">Code Execution</a>, <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/url-context">URL Context</a>, <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/file-search">File Search</a>, <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/maps-grounding">Google Maps</a>, <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/computer-use">Computer Use</a>. Mix multiple tools in one request. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/tool-combination">tool combination guide</a>.</p>
+<h2 id="function-calling">Function calling</h2>
+<p>Declare functions, let the model decide when to call them, execute locally, and return results.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const weatherTool = {
+  type: "function",
+  name: "get_current_temperature",
+  description: "Gets the current temperature for a given location.",
+  parameters: {
+    type: "object",
+    properties: {
+      location: {
+        type: "string",
+        description: "The city name, e.g. San Francisco",
+      },
+    },
+    required: ["location"],
+  },
+};
+ 
+const availableFunctions = {
+  get_current_temperature: ({ location }) =&gt; ({
+    location, temperature: "22", unit: "celsius"
+  }),
+};
+ 
+let input = "What is the temperature in London?";
+let previousId = null;
+let interaction;
+ 
+while (true) {
+  interaction = await ai.interactions.create({
+    model: "gemini-3.5-flash",
+    input,
+    tools: [weatherTool],
+    previous_interaction_id: previousId,
+  });
+ 
+  const functionResults = [];
+  for (const step of interaction.steps) {
+    if (step.type === "function_call") {
+      const result = availableFunctions[step.name](step.arguments);
+      console.log(`Called ${step.name}(${JSON.stringify(step.arguments)}) →`, result);
+      functionResults.push({
+        type: "function_result",
+        name: step.name,
+        call_id: step.id,
+        result: [{ type: "text", text: JSON.stringify(result) }],
+      });
+    }
+  }
+ 
+  if (functionResults.length === 0) break;
+ 
+  input = functionResults;
+  previousId = interaction.id;
+}
+ 
+console.log(interaction.output_text);</code></pre></div></figure>
+<p>The model returns <code>status: "requires_action"</code> with <code>function_call</code> steps. You execute locally and submit <code>function_result</code> steps back. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/function-calling">function calling guide</a> for parallel calls and function choice modes.</p>
+<h2 id="managed-agents">Managed agents</h2>
+<p>Run an agent in a remote sandbox with code execution, web browsing, and file management. Pass <code>agent</code> instead of <code>model</code> and set <code>environment: "remote"</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const interaction = await ai.interactions.create({
+  agent: "antigravity-preview-05-2026",
+  input: "Write a script that generates the first 20 Fibonacci numbers and saves them to fibonacci.txt.",
+  environment: "remote",
+});
+console.log(interaction.output_text);</code></pre></div></figure>
+<p>Define <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/custom-agents">custom agents</a> with your own instructions, skills, and data sources. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/managed-agents-quickstart">Managed Agents quickstart</a>.</p>
+<h2 id="background-execution">Background execution</h2>
+<p>Set <code>background: true</code> for long-running tasks. The call returns immediately and you poll for results.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const interaction = await ai.interactions.create({
+  model: "gemini-3.5-flash",
+  input: "Write a detailed analysis of AI in healthcare.",
+  background: true,
+});
+console.log(`Task started: ${interaction.id} (status: ${interaction.status})`);
+ 
+const poll = setInterval(async () =&gt; {
+  const result = await ai.interactions.get(interaction.id);
+  if (result.status === "completed") {
+    console.log(result.output_text);
+    clearInterval(poll);
+  } else if (result.status === "failed") {
+    console.error("Failed:", result.error);
+    clearInterval(poll);
+  }
+}, 5000);</code></pre></div></figure>
+<p>See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/interactions-overview#background-execution">background execution guide</a>.</p>
+<hr>
+<p>Thanks for reading! If you have any questions, feel free to contact me on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

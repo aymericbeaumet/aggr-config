@@ -1,0 +1,79 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/vibe-meter-2-claude-code-usage-calculation/header.png" alt="" loading="lazy"><p><strong>TL;DR</strong>: Built Vibe Meter 2.0 to track Claude Code subscription usage by parsing JSON-L files and counting tokens with a SIMD-accelerated BPE tokenizer. No official API exists, so I approximated usage by counting every token. The project grew to 47K lines of Swift with 92% test coverage, all written with CC using “thinking” triggers and modern Swift idioms.</p>
+<h2 id="the-shock-how-much-am-i-actually-using">The Shock: How Much Am I Actually Using?</h2>
+<p>What started as a <a href="https://steipete.me/posts/2025/the-future-of-vibe-coding">simple idea</a> to explain vibe coding to new people is slowly growing up. With version 2 of Vibe Meter, I added full support for Anthropic’s subscription. While v1 only focused on cost display for Cursor, for version 2 I wanted to add support for CC. This turned out to be much more of an adventure than I initially thought.</p>
+<h2 id="the-problem-flying-blind-without-apis">The Problem: Flying Blind Without APIs</h2>
+<p>Anthropic has both API endpoints with straightforward pricing. They also offer subscriptions where especially in the max version you get around 900 requests in a 5-hour window. I was curious:</p>
+<ul>
+<li><strong>A)</strong> How much that would actually cost if it would be API calls</li>
+<li><strong>B)</strong> How many requests you actually have open in that 5-hour window</li>
+</ul>
+<img src="https://steipete.me/assets/img/2025/vibe-meter-2-claude-code-usage-calculation/claude-code-usage-report.png" alt="Claude Code Usage Report showing token counts and cost calculations">
+<p>Well, turns out this is not easy at all. There is no API for that, there’s no cost control, there’s not even a hidden private API or something on the website that you could look at. The only way literally is to count the individual tokens that are sent to the LLM and then approximate how much is left. We also have to approximate when a window starts. As you can see, this was the start of a little adventure.</p>
+<h2 id="the-solution-journey-from-collaboration-to-simd">The Solution Journey: From Collaboration to SIMD</h2>
+
+<p>Luckily, I wasn’t alone. There were other people that were already curious and interested in that idea, so I could learn from various open source projects like <a href="https://github.com/ryoppippi/ccusage">ccusage</a>, which pioneered the approach of parsing Claude’s JSON-L files. Counting tokens also is not as simple as you would think. Claude Code writes all interactions with their server into so-called JSON-L files which can be in the hundreds of megabytes large. So I spent a lot of time tweaking the parser, or dare I say me and Claude did.</p>
+<h3 id="simd-operations-for-performance">SIMD Operations for Performance</h3>
+<p>During the process I even started using SIMD operations, something which I only darkly remember got support in Swift but now it’s crucial to offer a speedy parsing that doesn’t bog down your CPU.</p>
+<p>The most impressive optimization is the vectorized lookup table that uses SIMD16 (16-byte vectors) for fast pattern matching:</p>
+<pre><code data-language="swift">// VibeMeter/Core/Utilities/Tiktoken/CoreBPESIMD.swift:222-281
+private struct VectorizedBytePairLookup {
+    // Pre-computed SIMD vectors for common byte pairs
+    private let pairVectors: [SIMD16&lt;UInt8&gt;: [(length: Int, rank: Int)]]
+
+    init(bytePairRanks: [Data: Int]) {
+        // Build SIMD lookup table for byte sequences
+        for (data, rank) in bytePairRanks {
+            if data.count &gt; 16 { continue } // Skip sequences longer than SIMD width
+
+            // Create a SIMD vector padded with zeros
+            var vector = SIMD16&lt;UInt8&gt;(repeating: 0)
+            data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+                for i in 0 ..&lt; min(data.count, 16) {
+                    vector[i] = bytes[i]
+                }
+            }
+            vectors[vector]?.append((length: data.count, rank: rank))
+        }
+    }
+}</code></pre>
+<p>This approach allows us to compare 16 bytes at once instead of doing byte-by-byte comparisons, dramatically speeding up the token counting process.</p>
+<h3 id="token-counting-with-bpe">Token Counting with BPE</h3>
+<p>As a basis, I used the open source <a href="https://github.com/openai/tiktoken">TikToken BPE tokenizer</a> that is actually from OpenAI. There’s no public tokenizer project from Anthropic. However, the tokens are similar enough that we can use this project and still get fairly accurate results.</p>
+<p>BPE (Byte Pair Encoding) is a compression algorithm adapted for tokenization in NLP. It breaks text into subword units (tokens), often capturing whole words or common prefixes/suffixes. Instead of just splitting on whitespace or characters, <a href="https://en.wikipedia.org/wiki/Byte-pair_encoding">BPE</a> builds a vocabulary of frequently seen pairs of characters or subwords. This allows models to handle unknown words, rare terms, and typos more gracefully.</p>
+<h2 id="key-insights-thinking-triggers-and-fresh-context">Key Insights: Thinking Triggers and Fresh Context</h2>
+<p>Agentic engineering, as I prefer to say, requires even more clear thinking. I evolved my approach where I would use Claude Code and ask it to think hard about the problem. The thinking keyword is key because it triggers how much token Claude uses to actually think about the problem. There are various levels how you can trigger thinking, with Ultra Think being the highest level.</p>
+<blockquote>
+<p>As I work more with Claude Code, I tend to slow down, ask it to plan, present options, ultrathink, and then pick the best one. And always using a fresh context. Much better results.</p>
+</blockquote>
+<p>Look at these examples:</p>
+<ul>
+<li><a href="https://github.com/steipete/VibeMeter/commit/4e447e8e19a65136c01b31e264440f119af40b9a">Debounce property wrapper</a></li>
+<li><a href="https://github.com/steipete/VibeMeter/commit/b71a484f2d1484c77c6466d38612b92a64c546af">SIMD-accelerated BPE encoder</a></li>
+</ul>
+<p>Took a few planning prompts each but then the code one-shots and works perfect.</p>
+<p><strong>Pro Tip</strong>: One trick to get better results in Claude Code is to use the various “thinking” triggers, with ultrathink being the boss. Check out the <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/extended-thinking-tips">extended thinking tips</a> in the Anthropic documentation for more details.</p>
+<div>
+<h3>🚀 Side Quest: The Birth of llm.codes</h3>
+<p>While building Vibe Meter 2.0, I ran into a weird issue where Claude would argue with me that one cannot build nice toolbars in SwiftUI. This ultimately inspired me to build llm.codes, a way to feed Claude up-to-date information so it produces better code. You can read more about this journey in my post: <a href="https://steipete.me/posts/llm-codes-transform-developer-docs">llm.codes: Transform Your Developer Docs into LLM-Optimized References</a>.</p>
+</div>
+<h2 id="modern-swift-refactoring">Modern Swift Refactoring</h2>
+<p>In the 2.0 refactor, I also put a better effort on using modern Swift idioms, and most I did that by Claude teaching modern Swift via a new Markdown file that I fed to him and asked him to refactor my codebase using modern Swift idioms. I shared this and many other knowledge files in my new <a href="https://github.com/steipete/agent-rules/tree/main/docs">agent rules repository</a>.</p>
+<h2 id="the-results-47k-lines-92-coverage">The Results: 47K Lines, 92% Coverage</h2>
+<p>VibeMeter has grown into a substantial project:</p>
+<ul>
+<li><strong>App code</strong>: 24,529 lines</li>
+<li><strong>Test code</strong>: 22,560 lines</li>
+<li><strong>Total</strong>: 47,089 lines across 218 Swift files</li>
+<li><strong>Test coverage ratio</strong>: 92% (tests are nearly as large as the app itself!)</li>
+</ul>
+<p>With this release, I also added support for macOS 14<sup><a href="#user-content-fn-1" id="user-content-fnref-1" data-footnote-ref="" aria-describedby="footnote-label">1</a></sup> which was quite simple.</p>
+<h2 id="get-vibe-meter-20">Get Vibe Meter 2.0</h2>
+<p>Note: Vibe Meter is still on the pre-release channel for now, there’s a few edge-cases I wanna get right before making it 2.0 official, but it’s close!</p>
+<p><a href="https://vibemeter.ai/">Get it here</a> and switch update channel for the preview!</p>
+<section data-footnotes=""><h2 id="footnote-label">Footnotes</h2>
+<ol>
+<li id="user-content-fn-1">
+<p>The only issue was with automatic observation tracking, which is macOS 15+ only. Learn more about this hidden gem in my post: <a href="https://steipete.me/posts/2025/automatic-observation-tracking-uikit-appkit">Automatic Observation Tracking in UIKit and AppKit</a>. <a href="#user-content-fnref-1" data-footnote-backref="" aria-label="Back to reference 1">↩</a></p>
+</li>
+</ol>
+</section></article></div>

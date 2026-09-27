@@ -1,0 +1,1320 @@
+<div id="readability-page-1" class="page"><div>
+      <p><i>Can chess, with regular expressions?
+        Yes. Can chess, with regular expressions.</i></p>
+      
+      
+      
+
+      <p>
+        Over the holidays I decided it's been too long since I did something
+        with entirely no purpose. So without further ado, I present to you ...
+        <b>Regex Chess</b>: sequence of 84,688 regular expressions that,
+        when executed in order, will play a (valid; not <i>entirely</i> terrible) move given a chess board as input.
+        Here, I'll show you.
+      </p>
+
+<div>
+    <div>
+            
+            
+            <p><label for="moveInput">Enter your move:</label>
+                
+                </p>
+            
+            
+        </div>
+
+    <div>
+            
+            <p>Current executing regular expression will show here...</p>
+        </div>
+</div>
+
+    
+
+    
+      <p>
+        Specifically, this is the entirety of the program that is playing a move against you (no really, <a href="https://github.com/carlini/regex-chess/blob/main/main.py">I'm not kidding</a>, it really is this short):
+      </p>
+
+    
+      <div><p><span>let </span><span>regex_list</span><span> = [/* a very </span><span>long</span><span> </span><span>list</span><span> of regular expressions */]</span></p>
+<p><span>let </span><span>board</span><span> = </span><span>"rnbqkbnr / pppppppp / 8 / 8 / 8 / 8 / PPPPPPPP / RNBQKBNR w KQkq - 0 1"</span><span>;</span></p>
+
+<p><span>for</span><span> (regex of regex_list) {</span></p>
+<p><span><span>&nbsp; &nbsp; </span>board = re.replace(regex.pattern, regex.target)</span></p>
+<p><span>}</span></p>
+<p><span>display(board)</span></p>
+</div>
+
+      <p>
+        By the end of this post you'll (hopefully)
+        understand why this sequence of regular
+        
+        <span id="footnote1">
+          <a href="#footnote1">
+            <label for="foot">[a]</label>
+          </a>
+          <span>
+            Now some snobby people when they see this are going to say something like
+        "yoU SaiD yoU'Re GoIng to uSe rEGUlar EXPresSIONs buT thESE ArE nOT <a href="https://en.wikipedia.org/wiki/Regular_language"><i>ReGULaR </i></a>!!" I do not care.
+          </span>
+        </span>
+
+        
+        expressions is possible,
+        and also what the specific regular expressions do.
+      </p>
+
+      <p>
+        (If you're someone who subscribed to this blog in the last six months or so,
+        and have gotten accustom to me writing about "serious" and "important" things,
+        please treat this as your fair warning that this is MY WEBSITE and I MAKE THE RULES HERE
+        and so today you're learning about RegexChess whether you like it or not.)
+      </p>
+
+      <p>
+        As always, code for this project is available on <a href="https://github.com/carlini/regex-chess">GitHub</a>.
+      </p>
+        
+        
+      <br>
+      <h2>Getting Started: A Regular Expression CPU</h2>
+
+      <p>
+        So how are we going to get regular expressions to play chess?
+        Well, by making a regular expression computer, of course!
+        More specifically, we're going to design a Branch-Free,
+        Conditional-Execution,
+        Single-Instruction Multiple-Data instruction set.
+        And then make a sequence of regular expressions that interpret these instructions.
+        (Kind of like a GPU instruction set. And a bit of ARM.
+        But a lot slower.)
+        And then from there we can program our new computer to play chess.
+        So let's get started.
+      </p>
+        
+
+      <p>
+        
+        (Some people may say I have an unhealthy obsession with building
+        weird computers, c.f. <a href="https://nicholas.carlini.com/writing/2021/unlimited-register-machine-game-of-life.html">my game of life computer</a>
+        or my <a href="https://github.com/carlini/printf-tac-toe">printf computer</a>.
+        Those people are wrong,
+        and just have an unhealthy obsession with the banal and ordinary.)
+       </p>
+        
+
+      <br>
+  <h2>Computer Design</h2>
+  
+  <p>
+    Let me get started by explaining how I'm going to organize the data
+    that the computer is going to operate over.
+    Because we're working with regular expressions,
+    the current <code>state</code> of the computer is going to be represented as
+    a single string containing both the program "stack", and all variables in the following format:
+  </p>
+
+  <p>%%
+#stack:
+top item on stack
+second item on stack
+....
+#variable1: value 1
+#variable2: value 2
+...
+#variablek: value k</p>
+
+  <p>
+    Each <code>instruction</code> will either manipulate some variables on the stack,
+    or will read or write to a given variable. Let's look at some basic instructions.
+  </p>
+
+  <h3>Basic Stack Operations</h3>
+
+<h4>The <code>Push</code> Instruction</h4>
+<p>
+  Here's the implementation of the <code>push</code> command that adds a value to the top of the stack:
+</p>
+
+<div><p><span>def</span><span> </span><span>push</span><span>(const):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(r</span><span>"(%%\n#stack:\n)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"\g&lt;1&gt;"</span><span>+const+r</span><span>"\n"</span><span>)]</span></p>
+</div>
+
+<p>
+  You should read the return type of these functions as a list of tuples.
+  Each tuple represents a regex transformation to apply,
+  where the left element is the pattern to match, and the right element is the replacement.
+</p>
+
+<p>
+  As a brief regular expression refresher.
+  Each tuple in this list has two parts: the regular expression, and the replacement.
+  A regular expression will <i>match</i> a string if it can find a substring of whatever it's being applied against (the <i>state</i>, in our case).
+  Most characters in a regular expression match themselves, but parentheses create
+  a "match group" that can be referenced later.
+</p>
+
+<p>
+  The second argument is the replacement string.
+  Again, most characters mean "Replace with this character",
+  but special sequences like \g&lt;1&gt; are back-references that refer to previously captured groups.
+  In this case, \g&lt;1&gt; references the first captured group (anything matched within the first set of parentheses)---which in this case is the "%%\n#stack:\n" header.
+</p>
+
+<p>
+  So, as a result of this operation executing on the stack, we find the occurrence of
+  "%%\n#stack:\n" in the state,
+  and insert the constant value below that (to the top of the stack).
+</p>
+
+<p>
+  Let's see this in practice. Say we start with an empty stack:
+</p>
+
+<p><span data-group="Group 1 (Matched by regex)">%%
+#stack:</span></p>
+
+<p>
+  If we execute <code>push("hello")</code>, the regular expression will:
+</p>
+
+<ul>
+  <li>Match the pattern <code>%%\n#stack:\n</code> at the start of our state</li>
+  <li>Capture this header into group 1 (the parentheses in the pattern create this capture group)</li>
+  <li>Replace it with the captured group (<code>\g&lt;1&gt;</code>) followed by our constant "hello" and a newline</li>
+</ul>
+
+<p>
+  This gives us:
+</p>
+
+<p><span data-group="Group 1 (Original header)">%%
+#stack:</span>
+hello</p>
+
+<p>
+  If we then execute <code>push("world")</code>, the same process repeats and we get:
+</p>
+
+<p><span data-group="Group 1 (Original header)">%%
+#stack:</span>
+world
+hello</p>
+
+<p>
+  The regular expression always matches at the top of the stack area, so new items get pushed on top while preserving the existing stack contents below them.
+</p>  
+
+<h4>The <code>Pop</code> Instruction</h4>
+<p>
+  The <code>pop</code> instruction removes the top element from the stack:
+</p>
+
+<div><p><span>def</span><span> </span><span>pop</span><span>():</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(r</span><span>"(%%\n#stack:\n)([^\n]*)\n"</span><span>,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"\1"</span><span>)]</span></p>
+</div>
+
+<p>
+  Here we start to see a few of the special operators that make regular expressions powerful.
+  The [^\n] block means "match any character that isn't a newline" and the * means "match zero or more of these."
+  So taken together we're looking for a line that starts with "%%\n#stack:\n",
+  and then on the next line, zero or more characters that aren't a newline (so, the entire line).
+  The replacement is just the first line, which has the effect of removing the second line,
+  popping the top of the stack.
+</p>
+
+<p>
+  Let's see how this works in practice. Say we start with this stack:
+</p>
+
+<p><span data-group="Group 1 (Stack header)">%%
+#stack:</span>
+<span data-group="Group 2 (Top element to pop)">world</span>
+hello</p>
+
+<p>
+  When we execute <code>pop()</code>, the regular expression will:
+</p>
+
+<ul>
+  <li>Match the pattern beginning with <code>%%\n#stack:\n</code> (captured in group 1)</li>
+  <li>Match any characters until the next newline (captured in group 2 - the "world")</li>
+  <li>Replace everything matched with just group 1 (the header), effectively removing the top element</li>
+</ul>
+
+<p>
+  This gives us:
+</p>
+
+<p><span data-group="Group 1 (Stack header)">%%
+#stack:</span>
+hello</p>
+
+
+<p>
+  Each pop operation removes exactly one element from the top of the stack, preserving any remaining elements below it.
+</p>
+  <h3>Variable &lt;-&gt; Stack Instructions</h3>
+
+  <h4>Variable <code>Lookup</code></h4>
+<p>
+  To load the contents of a variable onto the top of the stack:
+</p>
+
+<div><p><span>def</span><span> </span><span>lookup</span><span>(variable):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span># Find the variable's value and push it onto the stack </span><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(r</span><span>"(%%\n#stack:)([^%]*\n#"</span><span>+variable+</span><span>": )([^</span><span>\n</span><span>]*)</span><span>\n</span><span>"</span><span>,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"\1\n\3\2\3\n"</span><span>)]</span></p>
+</div>
+
+<p>
+  This regular expression is a bit more complex than our previous ones. Let's break down what it does:
+</p>
+
+<ul>
+  <li>The <code>[^%]*</code> matches basically any character (% only appears at the start of the program)
+    and so lets us find any variable anywhere in the program.
+  </li><li>The <code>[^\n]*</code> matches the variable's value by capturing everything until the end of the line</li>
+  <li>The replacement creates a copy of the value and places it on top of the stack</li>
+</ul>
+
+<p>
+  Let's see how this works in practice. Say we start with this state:
+</p>
+
+<p><span data-group="Group 1 (Stack header)">%%
+#stack:</span>
+<span data-group="Group 2 (Everything up to our variable)">#foo: hello
+#bar: </span><span data-group="Group 3 (The value we want)">world</span>
+#baz: 42</p>
+
+<p>
+  If we execute <code>lookup("bar")</code>, the regular expression will:
+</p>
+
+<ul>
+  <li>Match the stack header in group 1</li>
+  <li>Match everything up to and including "#bar: " in group 2</li>
+  <li>Match "world" in group 3</li>
+  <li>Use these groups to reconstruct the state with the value copied to the top of the stack</li>
+</ul>
+
+<p>
+  And so running the replacement will result in the following state:
+</p>
+
+<p><span data-group="Group 1 (Stack header)">%%
+#stack:</span>
+world
+<span data-group="Group 2 (Original variable definition)">#foo: hello
+#bar: </span><span data-group="Group 3 (Original value)">world</span>
+#baz: 42</p>
+
+<p>
+  The lookup operation preserved the original variable and its value while also placing a copy of the value on top of the stack. This allows us to read variable values without modifying them.
+</p>
+
+  <h4>Variable <code>Assignment</code></h4>
+  <p>
+    Assigning to a variable presents an interesting challenge: we don't know if the variable
+    already exists. We need to handle both cases: updating an existing variable or creating
+    a new one.
+  </p>
+
+
+      <p>
+        Let me show you the implementation and then I'll walk you through it case by case.
+      </p>
+
+      <div><p><span>def</span><span> </span><span>assign_pop</span><span>(varname):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"(%%)\n#stack:\n([^\n]*)\n"</span><span> +</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>"([^%]*#"</span><span> + varname + r</span><span>": )[^\n]*"</span><span>,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"\1`\n#stack:\n\3\2"</span><span>),</span></p>
+
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"(%%)([^`]\n?#stack:\n)([^\n%]*)\n([^%]*)"</span><span>,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"\1`\2\4#"</span><span> + varname + r</span><span>": \3\n"</span><span>),</span></p>
+
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"%%`"</span><span>,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"%%"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; </span>]</span></p>
+</div>
+
+      <p>
+        To begin let's assume the variable already exists. That is, the stack starts
+        off looking like this, and assume we're calling assign_pop("bar"):
+      </p>
+
+      <p>%%
+#stack:
+world
+#foo: hello
+#bar: something
+#othervar: othervalue</p>
+
+      <p>
+        When we run this regular expression list, we create the following capture groups:
+      </p>
+        
+
+      <p><span data-group="Group 1 (%%)">%%</span>
+#stack:
+<span data-group="Group 2 (world)">world</span>
+#foo: hello
+<span data-group="Group 3 (#bar: )">#bar: </span>something
+#othervar: othervalue</p>
+  
+
+  
+
+  <p>
+    After the replacement operation, we get this output:
+  </p>
+
+  <p><span data-group="Header">%%`</span>
+#stack:
+<span data-group="Stack declaration">#foo: hello
+#bar: </span><span data-group="Variables">world</span>
+#othervar: othervalue
+  </p>
+
+  <p>
+    Now we proceed on to the next instruction, and <i>we don't match it</i> because the second regex fails if there's a back-tick after the program start %%. So nothing happens. And then finally, the third regex cleans things up for us.
+  </p>
+  
+  
+<p>
+  <b>Handling Non-Existent Variables:</b>
+    Let's consider what happens if the variable doesn't already exist. Again, assume we're calling <code>assign_pop("bar")</code>:
+  </p>
+
+  <p>
+%%
+#stack:
+world
+#foo: hello
+#othervar: othervalue
+  </p>
+
+  <p>
+    The first regex tries to match but fails because there is no "#bar" anywhere. So it doesn't do anything. But now the second regex tries to match and succeeds. It creates the following capture groups:
+  </p>
+
+  <p><span data-group="Group 1">%%</span>
+<span data-group="Group 2">#stack:
+world</span>
+<span data-group="Group 3">#foo: hello
+#othervar: othervalue</span></p>
+
+  <p>
+    From here, we perform the rewrite and get the following output:
+  </p>
+
+  <p>
+%%
+#stack:
+#foo: hello
+#othervar: othervalue
+#bar: world
+  </p>
+
+<p>
+  And then the third regex is applied and does nothing.
+</p>
+
+<p>
+  There are lots of instructions that use this trick to make sure we don't
+  apply things in the order we don't want. For example, as an exercise for
+  yourself, try to understand how the "is equal" instruction works:
+</p>
+
+<div><p><span>def</span><span> </span><span>eq</span><span>():</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"(%%\n#stack:\n)([^\n]*)\n\2\n"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"\1`True\n"</span><span>),</span></p>
+
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"(%%\n#stack:\n)([^`][^\n]*)\n([^\n]*)\n"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"\1False\n"</span><span>),</span></p>
+
+</div>
+
+<br>
+<h2>(Branch-Free) Conditionals</h2>
+
+<p>
+  Programming languages, in order to be interesting, usually need to have some kind of
+  control flow. It's very hard to write some program without ever having an if statement.
+  So let's now show how we're going to do this.
+  (And I hope you did your homework, because we're going to use the
+  same conditional execution trick again!)
+  Here's the implementation of a conditional instruction:
+</p>
+
+<div><p><span>def</span><span> </span><span>cond</span><span>(tag):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(r</span><span>"%(%\n#stack:\nTrue)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"%\1`"</span><span>),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"%(\n#stack:\nFalse)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>tag+r</span><span>"\1`"</span><span>),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"\n(True|False)`\n"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>"</span><span>\n</span><span>"</span><span>)]</span></p>
+</div>
+
+<p>
+  Let's walk through how this is going to work, starting with the case where the
+  top of the stack is False.
+</p>
+
+<p>%%
+#stack:
+False
+#variable: value</p>
+
+<p>
+  Initially, the first regex will fail to match, because the top element on the stack
+  isn't True. So we go to the next regex, and see if it applies. This one does match,
+  and makes the corresponding match groups.
+</p>
+
+<p><span data-group="Group 1 (Initial state)">%%
+#stack:
+False</span>
+#variable: value</p>
+
+
+<p>
+  After we apply the replacement, we get the following stack.
+</p>
+
+<p>%tag
+#stack:
+False`
+#variable: value</p>
+
+<p>
+  (And finally, using the same cleanup trick, we'll remove the used marker.)
+</p>
+
+<p>
+  Now see what happened here? The program <i>no longer begins with <code>%%</code></i>.
+  This means that EVERY instruction will fail to match, because they always make sure
+  that the program begins with %%. So nothing else will happen.... until we <i>reactivate</i>
+  it later with the following simple instruction:
+</p>
+
+
+
+<div><p><span>def</span><span> </span><span>reactivate</span><span>(tag):</span></p>
+<p><span><span>&nbsp;&nbsp;&nbsp;&nbsp;</span></span><span>return</span><span> [(r</span><span>"%"</span><span>+tag+r</span><span>"\n([^%]*)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>r</span><span>"%%\n\1"</span><span>)]</span></p></div>
+
+<p>
+  Let's now return to the True case for the conditional. This is the easy case: we
+  basically don't do anything at all. We replace the stack with True` on the second
+  regex, and then delete this line on the third. Easy.
+</p>
+
+<p>
+        Notice that this means our code is actually branch-free,
+        because every instruction is a conditional instruction. (Kind of like ARM's predicated execution, where most instructions can be conditionally executed based on status flags rather than using explicit branch instructions.)</p>
+        
+        
+      <br>
+      <h3>Loops (are impossible)</h3>
+
+      <p>
+        Because our program just consists of a sequence of regular expressions,
+        you can't loop at all! That, technically, means we can't actually perform
+        <a href="https://en.wikipedia.org/wiki/Turing_completeness">Turing Complete</a>
+        But we can do any bounded computation by just <i>unrolling</i> any loops we may have.
+        And fortunately computing the next move in a chess position is a bounded computation, so we can do just that. 
+      </p>
+        
+        
+      <h2>Single-Instruction Multiple-Data</h2>
+
+<p>
+  And now for my absolute favorite part of the language we've developed.
+  By the magic of regular expressions (and the fact that they perform
+  substitution globally over the entire string), we can run multiple <i>threads</i>
+  simultaneously!
+</p>
+
+<p>
+  That is, if we just write our state string as:
+</p>
+
+<p><span data-group="Group 1 (First thread header)">%%
+#stack:</span>
+<span data-group="Group 2 (First operand)">int0000101010</span>
+<span data-group="Group 3 (Second operand)">int0001011100</span>
+<span data-group="Group 1 (Second thread header)">%%
+#stack:</span>
+<span data-group="Group 2 (First operand)">int0000001101</span>
+<span data-group="Group 3 (Second operand)">int0110000000</span></p>
+
+<p>
+  When we call <code>binary_add()</code>, both additions happen simultaneously! After execution:
+</p>
+
+<p>%%
+#stack:
+int0010001110
+%%
+#stack:
+int0110001101</p>
+
+<p>
+  The reason this happens is because the regular expression matches work globally. When we match the "begin thread"
+  operator (<code>%%</code>) twice, we get to perform operations on both threads simultaneously.
+</p>
+
+<p>
+  So how do we actually make use of this feature? Let's look at some instructions that help us create and manage threads.
+</p>
+
+<br>
+<h3>The Fork Instructions</h3>
+
+<p>
+  Here's a simple fork instruction that splits every currently running thread into two, 
+  with the second one starting off inactive with a given tag:
+</p>
+
+<div><p><span>def</span><span> </span><span>fork_inactive</span><span>(tag):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(r</span><span>"%%\n([^%]*)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"%%\n\1"</span><span> + </span><span>"%"</span><span>+tag+r</span><span>"\n\1"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>]</span></p>
+</div>
+
+<p>
+  We can also, for example, <code>fork()</code> on a boolean, giving one thread
+  the True case and another the False case. (This is something like McCarthy's
+  Amb operator <a href="https://linkinghub.elsevier.com/retrieve/pii/S0049237X08720184">reference</a>)
+</p>
+
+<div><p><span>def</span><span> </span><span>fork_bool</span><span>(variable):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(r</span><span>"%%\n([^%]*)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"%%\n\1#"</span><span>+variable+r</span><span>": True\n%%\n\1#"</span><span>+variable+r</span><span>": False\n"</span><span>)</span></p></div>
+
+<p>
+  Let's see what happens when we apply multiple forks. Starting with a simple state:
+</p>
+
+<p><span data-group="Group 1 (Thread content)">%%
+#stack:
+somevalue
+#x: 10</span></p>
+
+<p>
+  After calling <code>fork_bool("condition")</code>, we get:
+</p>
+
+<p>%%
+#stack:
+somevalue
+#x: 10
+#condition: True
+%%
+#stack:
+somevalue
+#x: 10
+#condition: False</p>
+
+<p>
+  If we then call <code>fork_bool("c2")</code>, each existing thread splits into two:
+</p>
+
+<p>%%
+#stack:
+somevalue
+#x: 10
+#condition: True
+#c2: True
+%%
+#stack:
+somevalue
+#x: 10
+#condition: True
+#c2: False
+%%
+#stack:
+somevalue
+#x: 10
+#condition: False
+#c2: True
+%%
+#stack:
+somevalue
+#x: 10
+#condition: False
+#c2: False</p>
+
+<p>
+  Now we have four simultaneous execution paths, exploring every possible combination of our boolean conditions at the same time.
+  This is exceptionally useful for chess, when we might frequently want to consider multiple
+  possible board states at the same time, and (for example) score them to see which is best.
+  Instead of having to loop over every possible board state, we can just pretend we were doing it
+  once but have them all happen at the same time.
+</p>
+
+        
+        
+<br>
+<h2>Compiling to our little language</h2>
+
+<p>
+  Now that we have our CPU emulator, we can build a compiler to target our new assembly
+  language.
+</p>
+
+<p>
+  <i>"But wait I'm not reading this post for a lesson in compilers!"</i> you say??
+  Fair point.
+  Also I didn't go into this project trying to build a compiler,
+  so instead what I have is more of a macro-assembler.
+  It turns python-ish programs like this:
+</p>
+
+<div><p><span>def</span><span> </span><span>fib</span><span>():</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>a</span><span> = 1</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>b</span><span> = 2</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(10):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>next</span><span> = a + b</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>a</span><span> = b</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>b</span><span> = </span><span>next</span></p>
+</div>
+
+<p>
+  Into a sequence of instructions like this:
+</p>
+
+<p>push(1)
+assign_pop('a')
+push(2) 
+assign_pop('b')
+lookup('a')
+lookup('b')
+binary_add()
+assign_pop('next')
+lookup('b')
+assign_pop('a')
+lookup('next')
+assign_pop('b')
+[... repeated 8 more times ...]
+</p>
+
+<br>
+<h3>Compiling Through Symbolic Execution</h3>
+
+<p>
+  Rather than writing a traditional compiler with parsing and code generation
+  phases, I took an unusual approach: symbolic execution. The key insight is
+  that we can "execute" the Python code in a special way that records what
+  operations would happen rather than actually performing them.
+</p>
+
+<p>
+  Here's how it works: the <code>variables</code> argument isn't actually a
+  dictionary---it's a special object that records every operation performed on
+  it. It creates what we call a "trace" of the execution. When you write:
+</p>
+
+<p>a = b + 1</p>
+
+<p>
+  The tracer object records four operations:
+</p>
+
+<ol>
+  <li>A <code>lookup</code> of variable 'b'</li>
+  <li>A <code>push</code> of the constant 1</li>
+  <li>A <code>binary_add</code> operation</li>
+  <li>An <code>assign_pop</code> to variable 'a'</li>
+</ol>
+
+<br>
+<h3>Handling Control Flow</h3>
+
+<p>
+  The trickiest part of this approach is handling branching control flow---<code>if</code> statements, specifically.
+  (What about loops? We don't have those, so I never use them. Loops can only have constants.)
+  We need to make sure we capture all possible execution paths. Here's how we do it:
+</p>
+
+<p>
+  When we hit a conditional, we create two separate paths in our trace---one for when the condition is true, and one for when it's false. Each path records its own sequence of operations. Later, we merge these paths back together.
+</p>
+
+<p>
+  For example, this Python code:
+</p>
+
+<div><p><span>if</span><span> x &gt; 0:</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>y</span><span> = 1</span></p>
+<p><span>else</span><span>:</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>y</span><span> = 2</span></p>
+</div>
+
+<p>
+  Generates something like this trace structure:
+</p>
+
+<p>lookup('x')      # Get x's value
+push(0)          # Push 0
+greater_than()   # Compare
+cond('tag1')     # Branch on result
+  # True path:
+  push(1)
+  assign_pop('y')
+pause('tag2')
+reactivate('tag1')
+  # False path:
+  push(2)
+  assign_pop('y')
+reactivate('tag2')</p>
+
+<p>
+  The magic of the compiler lies in how it handles control flow through branching.
+  Let me explain this in a little bit more detail.
+</p>
+
+<p>
+  When our compiler first starts processing code, it maintains a single linear
+  path of instructions in the CallTree. Each instruction gets appended one after
+  another as we go. This list of instructions looks entirely linear.
+  When we   reach a conditional statement, though, things get interesting.
+</p>
+
+<p>
+  Consider what happens when we hit a conditional statement like the <code>x &gt; 0</code>
+  conditional above.
+  When this happens, I detect it, and create a branch in the call tree representing the two
+  paths simultaneously.
+  Then, I just pretend this conditional was true, and fill out the true case of the tree.
+  When we reach the end of the program we've done <i>some</i> of our compilation, but not all of it.
+</p>
+
+
+<p>
+  Now comes the clever part.
+  When compiling, we don't just trace the program once.
+  We trace many times.
+  And each time we trace, we arrange for the conditionals to go through whichever branch has been
+  taken least often.
+  In this way, the second time around, we record the instructions for the false branch.
+</p>
+
+      <p>
+        Finally, once the conditional is over, we detect this and merge the two branches back together.
+  This branching and merging mechanism is more than just a clever trick---it's essential to how our regex-based CPU actually works. When we convert this tree into instructions, each branch gets translated into a conditional regex operation (using our cond instruction) that can selectively activate and deactivate different parts of our program state. The merge points become reactivate instructions that ensure we continue execution on the correct path.
+</p>
+
+<br>
+      <h2>Writing a Chess Engine</h2>
+
+      <p>
+        Okay, so we're finally to the part of this post where we can actually start writing
+        a chess engine. (And at the part where some of the emulator design decisions will
+        make sense.)
+      </p>
+
+      <p>
+        For the most part, this is entirely straightforward and mirrors how you would write a chess
+        engine in any other programming language.
+        But this branching thing with SIMD is what gives us the power to make things go fast.
+      </p>
+
+      <p>
+        Let's consider the following (simplified) program that calculates
+        all the valid pawn moves.
+      </p>
+
+
+<div><p><span>def</span><span> </span><span>pawn_moves</span><span>(initial_board):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span># Step 1: Find all pawns and create a list of their positions<span>&nbsp;</span></span><span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>pawnpos_list</span><span> = find_all_pawns(initial_board)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span># Step 2: Create parallel states for each pawn (up to 8) </span><span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>MAX_PAWNS</span><span> = 8</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> iteration </span><span>in</span><span> </span><span>range</span><span>(MAX_PAWNS):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>if</span><span> </span><span>not</span><span> pawn_list.is_empty():</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>pawn_pos</span><span> = pawnpos_lst.remove_first()</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>fork_inactive(</span><span>"waiting"</span><span>)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span># Step 3: Switch to processing the parallel states </span><span></span></p>
+<p><span><span>&nbsp; &nbsp; </span>pause(</span><span>"main"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; </span>reactivate(</span><span>"inactive"</span><span>)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span># Step 4: Generate moves for all pawns simultaneously<span>&nbsp;</span></span><span> </span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>candidate_moves</span><span> = []</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> initial_board[pawn_pos + (0, 1)].is_empty():</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>candidate_moves.append(pawn_pos + (0, 1))</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>if</span><span> pawn_pos.y == 2:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>if</span><span> initial_board[pawn_pos + (0, 2)].is_empty():</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>candidate_moves.append(pawn_pos + (0, 2))</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> initial_board[pawn_pos + (1, 1)].has_opponent():</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>candidate_moves.append(pawn_pos + (1, 1))</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> initial_board[pawn_pos + (-1, 1)].has_opponent():</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>candidate_moves.append(pawn_pos + (-1, 1))</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span># Step 5: Switch back and merge results<span>&nbsp;</span></span><span> </span></p>
+<p><span><span>&nbsp; &nbsp; </span>pause(</span><span>"inactive"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; </span>reactivate(</span><span>"main"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>candidate_moves</span><span> = merge_variables_from_threads(</span><span>"inactive"</span><span>)</span></p>
+</div>
+
+<h3>Step 1: Finding the Pawns</h3>
+<p>
+  The <code>find_all_pawns()</code> function scans through our board representation,
+  looking for white pawns (represented as 'P' in the FEN string).
+  It returns a list of the position of each of these pawns.
+  As an example, if we run our program on the following
+  position with three pawns on d2, e2, and f2, this creates a semicolon-separated list in the pawnpos_lst variable as follows
+</p>
+
+<p>%%
+#stack:
+#board: 4k3/8/8/8/8/8/3PPP2/4K3
+#pawnpos_lst: d2;e2;f2;</p>
+
+<h3>Step 2: State Creation</h3>
+<p>
+  Now comes the clever part. The <code>fork_inactive</code> instruction, as described above, duplicates our entire program state. Each time it runs, it creates an exact copy of the currently running thread, but marks the new copy with %waiting instead of %%. (Recall this means instructions won't apply to this thread.) At the same time, it takes one position from our pawnpos_lst and assigns it to a new variable pawnpos in the copied state.
+</p>
+
+<p>
+  When our loop runs three times, each <code>fork_inactive</code> operation splits off a new parallel universe where we'll process a different pawn. The regex operation that does this copying preserves all existing variables but adds the new pawnpos variable with the specific position for that copy to process.
+</p>
+
+<p>%%
+#stack:
+#board: 4k3/8/8/8/8/8/3PPP2/4K3
+#pawnpos_lst: 
+
+%waiting
+#stack:
+#board: 4k3/8/8/8/8/8/3PPP2/4K3
+#pawnpos: d2
+
+%waiting
+#stack:
+#board: 4k3/8/8/8/8/3PPP2/4K3
+#pawnpos: e2
+
+%waiting
+#stack:
+#board: 4k3/8/8/8/8/3PPP2/4K3
+#pawnpos: f2</p>
+
+<h3>Step 3: Activation Switch</h3>
+<p>
+  Recall that the pause and reactivate operations work by manipulating the %% markers that indicate which states are active. The pause("main") operation changes our original %% to %main, effectively deactivating it. Then reactivate("inactive") finds all states marked with %waiting and changes them to %%, making them the new active states.
+</p>
+
+<h3>Step 4: Parallel Move Generation</h3>
+<p>
+  Here's where the SIMD magic happens. Each check for a possible move---forward one square, forward two squares, or diagonal captures---executes across all active states simultaneously. When we check if the square ahead is empty, we're actually checking d3, e3, and f3 all in one operation. For each valid move, we add this to the candidate_moves list. 
+</p>
+
+<p>
+  (I've significantly simplified the program for visual purposes here. In
+  reality I don't work directly over the FEN strings but expand them to 64
+  independent variables for each of the 64 squares and read and write to these
+  squares directly. This makes processing the board state much easier. But for
+  the purpose of this blog post it's easier to show visually as if it worked on FEN strings alone.)
+</p>
+
+<p>%main
+#stack:
+#board: 4k3/8/8/8/8/8/3PPP2/4K3
+#pawnpos_lst: 
+
+%%
+#stack:
+#board: 4k3/8/8/8/8/8/3PPP2/4K3
+#pawnpos: d2
+#candidate_moves: d3;d4
+
+%%
+#stack:
+#board: 4k3/8/8/8/8/8/3PPP2/4K3
+#pawnpos: e2
+#candidate_moves: e3;e4
+
+%%
+#stack:
+#board: 4k3/8/8/8/8/8/3PPP2/4K3
+#pawnpos: f2
+#candidate_moves: f3;f4</p>
+
+<h3>Step 5: Merging Results</h3>
+<p>
+  The final merge operation combines all the candidate_moves lists from our parallel states. It first switches activation back to the main state using pause and reactivate. Then merge_variables_from_threads (again, a pseudo-op I've made up for visual clarity, in practice this requires like 10 different instructions on my real machine) match all the candidate_moves lists across our inactive states and concatenates them together.
+</p>
+
+<p>
+  What this means is that while the code we wrote code <i>looks</i> like it processes one pawn at a time, our regex engine's ability to process multiple states means we're actually handling all pawns simultaneously. Every operation, from checking empty squares to building move lists, happens in parallel across all our active states.
+</p>
+
+      <p>
+        And this is how every piece operation works.
+        Because this post is already getting quite long, I won't walk through each piece one by one, but if you're interested definitely go look at the <a href="https://github.com/carlini/regex-chess/blob/main/chess_engine.py">chess-engine.py</a> for the details.
+      </p>
+
+      <br>
+<h2>Playing a Turn</h2>
+
+<p>
+  Now let's walk through the overall game loop that handles everything.
+</p>
+
+
+<div><p><span>def</span><span> </span><span>play_turn</span><span>():</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span># Step 1: Read the human entered move from the input </span><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>board_before_move</span><span>, </span><span>src</span><span>, </span><span>dst</span><span> = from_pretty_utf8_to_fen()</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span># Step 2: Check if their move is valid </span><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>after_move</span><span> = board_before_move.make_move(src, dst)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>next_boards</span><span> = compute_legal_boards(board_before_move)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>next_board</span><span> = fork_on_list(next_boards)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> after_move != next_board:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>destroy_active_thread()</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span># Step 3: Generate the computer's reply<span>&nbsp;</span></span><span> <span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></p>
+  <p><span><span>&nbsp; &nbsp; </span></span><span>candidate_boards</span><span> = compute_and_score_legal_boards(after_move)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>candidate_board</span><span> = fork_on_list(candidate_boards)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>keep_best_scoring_board(score)</span></p>
+<p><span><span>&nbsp; &nbsp; </span>from_fen_to_pretty_utf8(candidate_board)</span></p>
+
+</div>
+
+<p>
+  Say we're at the start of a game, and the human enters "e2e4" (the king's pawn opening).
+  Here's how our code processes this:
+</p>
+
+<h3>Step 1: Reading the Move</h3>
+
+<p>
+  Initially, the function <code>from_pretty_utf8_to_fen()</code> converts our pretty-printed
+  board with Unicode chess pieces back into FEN notation.
+  It also extracts the source and destination squares from the input:
+</p>
+
+<p>%%
+#stack:
+#board: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+#src: e2
+#dst: e4</p>
+
+<h3>Step 2: Move Validation</h3>
+
+<p>
+  Now we need to check if this is a valid move.
+  Rather than writing entirely new code that explicitly checks if a move is legal,
+  we use our parallel processing power again.
+  The process works in three stages:
+</p>
+
+<p>
+  First, <code>make_move</code> applies the human's move to create a new board state:
+</p>
+
+<p>%%
+#stack:
+#board: rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR
+#after_move: rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR</p>
+
+<p>
+  Then <code>compute_legal_boards</code> generates <i>all</i> possible legal moves from the starting position, creating a list like:
+</p>
+
+<p>%%
+#stack:
+#next_boards: rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR;
+              rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR;
+              rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR;
+              ...</p>
+
+<p>
+  Finally, fork_on_list creates parallel states for each legal board position:
+</p>
+
+<p>%%
+#stack:
+#board: rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR
+
+%%
+#stack:
+#board: rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR
+
+%%
+#stack:
+#board: rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR</p>
+
+<p>
+  The <code>destroy_active_thread()</code> call removes any thread where the board doesn't match after_move.
+  In our case, only the e2-e4 position survives, confirming it's a legal move.
+  (If no legal move is made, I have a special regex that will replace the entire output with just the hard-coded text "Illegal Move.")
+</p>
+
+<h3>Step 3: Computer's Reply</h3>
+
+<p>
+  Now we repeat a similar process to find the best reply.
+  First, <code>compute_and_score_legal_boards</code> generates all possible black responses.
+  This function does a little bit of magic,
+  and when it returns the next possible boards, it returns with each board
+  <i>the score of that board after whites next best move</i>
+  I'll explain how this works below. But suffice to know that what this function returns for
+  now the possible positions as <code>compute_legal_boards</code> does, but also the score of the position.
+        (This is where the MiniMax happens.
+        The score here is how good each position is from the player's perspective, after they have
+        made their best reply move.)
+      </p>
+
+<o>
+  So running this function gives us something like this as output
+
+
+<p>%%
+#stack:
+#board: rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR
+#score: 100
+
+%%
+#stack:
+#board: rnbqkbnr/ppppp1pp/8/5p2/4P3/8/PPPP1PPP/RNBQKBNR
+#score: 102
+
+%%
+#stack:
+#board: rnbqkb1r/pppppppp/5n2/8/4P3/8/PPPP1PPP/RNBQKBNR
+  #score: 98</p>
+
+
+<p>
+  <code>keep_best_scoring_board(score)</code> collapses these parallel states,
+  but this time keeping only the position with the highest score according to black (in this example, the f7-f5 response).
+  This is the second half of the minimax search---the one where we look at all of the options where our
+  opponent had a pick the first time around, and now we pick among these the best for us.
+  Finally, from_fen_to_pretty_utf8 converts this position back to the pretty Unicode display format.
+  As a result, I never have to build any explicit search algorithms or lists to store lists of positions,
+  that's all handled by the parallel processing.
+</p>
+
+<br>
+<h2>MiniMax Search (for free)</h2>
+  
+      <p>
+        The final missing piece of this process is how to implement the <code>compute_and_score_legal_boards</code>
+      function in a way that gets us the depth-2 minimax search.
+      And here I cheat (a lot).
+      </p>
+
+<p>
+  It is relatively easy to generate <i>pseudo-</i>legal moves---that is, moves that are basically legal, but might leave the king in check.
+  In chess this isn't allowed (you can't end your turn in check) and so the second thing that has to happen
+  is I have to delete all of the moves that would leave the king in check.
+</p>
+
+<p>
+  The way to do this is to again generate all possible opponent replies and see if any of them would possible "capture" the king. If they would, then the position is illegal because that's the definition of check.
+  But what this means is we're already doing a depth-2 search.
+  We have our initial board state.
+  Depth 1, we generate all possible moves the computer wants to make.
+  Then depth 2, we generate all possible moves the opponent could make to ensure we're not in check.
+</p>
+
+<p>
+  All I have to do now then is score each of these opponent-generated moves and return the score of the candidate
+  position as the best scoring among all of these (from the perspective of the opponent).
+  And then I can just take the best scoring of these (from the persepctive of the computer) as its best move
+</p>
+
+<p>
+  Now there's one slight problem here, which is why real chess engines don't do this.
+  And that is this isn't technically a full depth-2 minimax search because it would allow the opponent
+  moves generated in reply to be illegal because they could put their king in check.
+  So doing this fully correctly would require a depth-3 search, which would significantly increase
+  the cost of the search.
+  So I just don't do that.
+</p>
+
+<p>
+  Importantly, the computer will never generate an illegal reply.
+  This just means that, in some cases, the reply it generates won't be quite as strong as if it had
+  done a full depth-2 minimax search because it might assume the opponent could make an illegal move.
+</p>
+
+
+<br>
+<h2>Everything Else</h2>
+      <p>
+        There's a lot more that goes into the program than this. If you're curious I'd encourage you to read through the source
+        code on <a href="https://github.com/carlini/regex-chess">GitHub</a>.
+        Among the things I think are particularly interesting that I didn't talk about here:
+      </p>
+
+      <ul>
+        <li>How to parallelize move generation for sliding pieces like bishops, rooks, and queens all at exactly the same time</li>
+        <li>How castling is implemented with a specialized "is this square under attack" procedures</li>
+        <li>Conversion to and from the FEN chess board to one has a single variable per square</li>
+        <li>Detection of castling rights by tracking the king and rook positions</li>
+        <li>The implementation of en passant capture detection and tracking</li>
+        <li>An extensive 2000 lines of tests, validating the correctness of the engine over several thousand games</li>
+      </ul>
+        
+        
+      <br>
+      <h2>Some Performance Tricks</h2>
+
+      <p>
+        Before I leave you, I thought I'd describe a few fun performance optimizations I made.
+        My initial code would take roughly 30 minutes to generate a single human reply---perfect for chess by mail, less perfect for chess by browser.
+        The final code, on my machine, takes somewhere between one and ten seconds depending on the position.
+        So I managed about a factor of 100 speedup by making sure I got all the details right.
+      </p>
+
+      <p>
+        (I've already shown you my favorite performance trick: parallel processing.
+        Now I'll tell you a few more.)
+      </p>
+
+      <br>
+      <h3>Delete Intermediate Variables</h3>
+
+      <p>
+        One of the biggest performance killers in the initial implementation was keeping
+        too many intermediate variables around. Every variable lookup requires scanning
+        through the entire state string to find the variable's value - an O(n) operation.
+        Additionally, when we fork execution states, we need to copy all these variables,
+        which bloats our memory usage significantly.
+      </p>
+
+      <p>
+        By aggressively deleting variables as soon as they're no longer needed,
+        and reusing variable names where possible, I was able to dramatically reduce
+        both the computation time and memory usage. Evaluating a single move now
+        takes about 300MB of internal state, down from 10GB in the unoptimized version.
+      </p>
+      
+      <br>
+      <h3>Fast Regex Matching</h3>
+      <p>
+        Recall earlier that I defined the conditional operator like this
+      </p>
+
+      <div><p><span>def</span><span> </span><span>cond</span><span>(tag):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(r</span><span>"%(%\n#stack:\nTrue)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"%\1`"</span><span>),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"%(\n#stack:\nFalse)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>tag+r</span><span>"\1`"</span><span>),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"\n(True|False)`\n"</span><span>,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>"</span><span>\n</span><span>"</span><span>)]</span></p>
+</div>
+
+      <p>
+        Why do you think the third regex is written this way? Wouldn't it just be shorter
+        if it was like this instead:
+      </p>
+        
+      <div><p><span>def</span><span> </span><span>cond</span><span>(tag):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(r</span><span>"%(%\n#stack:\nTrue)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>r</span><span>"%\1`"</span><span>),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"%(\n#stack:\nFalse)"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>tag+r</span><span>"\1`"</span><span>),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>(r</span><span>"(True|False)`\n"</span><span>,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>""</span><span>)]</span></p></div>
+
+      <p>
+        Notice the missing newline <code>\n</code>.
+      </p>
+
+      <p>
+        As it turns out, the first version actually improves the efficiency of this
+        instruction by a factor of two! By changing just one character!
+        The reason for this is due to the details about how regular expressions work
+        and how they're matched.
+      </p>
+
+      <p>
+        There are going to be lots of True/False strings all throughout the code.
+        But most of them will be part of variables, and not the top element on the stack.
+        By requiring the preceding newline and "#stack:\n" prefix in our pattern,
+        we ensure the regex engine can quickly skip over all the True/False strings
+        that appear in variable names or values. This dramatically reduces the number
+        of attempted matches the regex engine needs to make.
+      </p>
+        
+      <br>
+      <h3>Writing Special-Purpose Instructions</h3>
+
+      <p>
+        Sometimes it's worth writing specialized instructions rather than composing existing ones.
+        For example, one of the slowest parts of the initial implementation was in a loop that scanned
+        each of the squares to find all pieces of a given type. This required a bunch of conditionals,
+        and within each conditional, a bunch of stack operations.
+        But you can just smash the entire loop body into a single regex instruction:
+      </p>
+
+      <div><p><span>def</span><span> </span><span>do_piece_assign</span><span>(piece_chr, piece, x, y, pos):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> [(f</span><span>"%%([^%]*#</span><span>{pos}</span><span>: </span><span>{piece_chr}</span><span>[^%]*)"</span><span> +</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>f</span><span>"#</span><span>{piece}</span><span>x_lst: ([^</span><span>\n</span><span>]*)</span><span>\n</span><span>"</span><span> +</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>f</span><span>"#</span><span>{piece}</span><span>y_lst: ([^</span><span>\n</span><span>]*)</span><span>\n</span><span>"</span><span> +</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>f</span><span>"#</span><span>{piece}</span><span>pos_lst: ([^</span><span>\n</span><span>]*)</span><span>\n</span><span>"</span><span>,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>fr</span><span>"%%\1#</span><span>{piece}</span><span>x_lst: </span><span>{x}</span><span>;\2\n"</span><span> +</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>fr</span><span>"#</span><span>{piece}</span><span>y_lst: </span><span>{y}</span><span>;\3\n"</span><span> +</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>fr</span><span>"#</span><span>{piece}</span><span>pos_lst: </span><span>{pos}</span><span>;\4\n"</span><span>)]</span></p></div>
+
+      <p>
+        The final major optimization comes from maximizing how much we can do in parallel.
+        Remember that our regex engine can process multiple states simultaneously---this means
+        that instead of generating moves one at a time, we can generate them all at once.
+      </p>
+
+      <p>
+        For example, when generating rook moves, instead of checking each direction
+        sequentially, we can fork eight parallel states---one for each possible direction.
+        (Notice that "up" and "down" are different directions.)
+        Each state then moves its rook as far as it can go in that direction. This turns
+        what would be a loop into a single parallel operation.
+      </p>
+
+      <p>
+        Similarly, when evaluating positions, instead of scoring one position at a time,
+        we create parallel states for each candidate position and evaluate them all simultaneously.
+        This parallel evaluation is particularly effective because most of our operations
+        (like counting piece values) work identically across all states.
+      </p>
+
+      <br>
+      <h2>Conclusion</h2>
+
+      <p>
+        What do you want out of a conclusion to a blog post like this?
+        I don't really have much to conclude.
+        I guess I'll just say that
+        I think more people should do entirely pointless things like this.
+        It's a lot of fun,
+        no one cares how long it takes you to finish,
+        no one cares if it works or not,
+        and incidentally, it teaches you more than you wanted to know about
+        dozens of areas of computer science outside your field.
+      </p>
+
+      <p>
+        I hope to have a few more entirely pointless things like this coming later this year.
+        If you liked this sort of thing, you might find it fun to read this other article I wrote
+        about <a href="https://github.com/carlini/printf-tac-toe">how to play tic-tac-toe</a>
+        using C's <code>printf</code> statement,
+        or how I wrote <a href="https://nicholas.carlini.com/writing/2019/javascript-doom-clone-13k.html">a Doom clone in 13kB of JavaScript</a>.
+      </p>
+
+    </o></div></div>

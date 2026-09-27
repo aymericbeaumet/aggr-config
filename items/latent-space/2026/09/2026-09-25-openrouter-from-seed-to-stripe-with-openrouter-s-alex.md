@@ -1,0 +1,1174 @@
+---
+title: 'OpenRouter: from Seed to Stripe — with OpenRouter’s Alex Atallah & AMP’s Anjney Midha'
+link: https://www.latent.space/p/openrouter
+source: latent-space
+published: 2026-09-25T23:14:41Z
+updated: 2026-09-25T23:14:41Z
+first_seen: 2026-09-27T19:29:15.293681927Z
+summary: In 2023 most people doubted that there could be more than 1 or 2 frontier model labs. Now there are dozens.... and Stripe just bought the best known one for $7B.
+content: extracted
+html: 2026-09-25-openrouter-from-seed-to-stripe-with-openrouter-s-alex.html
+preview:
+  file: 2026-09-25-openrouter-from-seed-to-stripe-with-openrouter-s-alex.preview-e588fbb429a6.webp
+  width: 256
+  height: 128
+  color: '#64676a'
+images:
+- source: https://substackcdn.com/image/fetch/$s_!aJ4B!,w_1200,h_600,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-video.s3.amazonaws.com%2Fvideo_upload%2Fpost%2F217456046%2Fcfdbb355-dae4-4659-9766-9c8031b653bf%2Ftranscoded-1790372655.png
+  original:
+    file: 2026-09-25-openrouter-from-seed-to-stripe-with-openrouter-s-alex.image-b82a8d35086a.jpg
+    width: 1200
+    height: 600
+  color: '#031737'
+extra:
+  audio_type: audio/mpeg
+  audio_url: https://api.substack.com/feed/podcast/217456046/69e6d188059a812b68e47c97b6495374.mp3
+---
+
+From the earliest days of open-weight models to becoming the neutral routing layer for more than **10 million developers**, OpenRouter is one of the clearest bets that the future of AI will be multi-model. In this episode, **OpenRouter co-founder & CEO Alex Atallah, with AMP’s Anjney Midha [returning](https://www.youtube.com/watch?v=h5dlIPM0X18&t=2s&pp=0gcJCS8MAYcqIYzv)** with swyx to unpack how OpenRouter emerged from [the first wave of Llama](https://ai.engineer/speakers/alex-atallah), Alpaca, Mistral, and Midjourney, why model diversity mattered before it was consensus, and how **a company dismissed as “just a wrapper” became critical infrastructure for the AI ecosystem.**
+
+[www.youtube.com](https://www.youtube.com/watch?v=dCX4PE2HxMs)
+
+We go deep on the product and distribution **lessons behind OpenRoute** r: why model labs can spend billions training a checkpoint and still struggle to get it into developers’ hands, how Mistral helped prove the value of a competitive inference marketplace, why OpenRouter chose focus over expanding into fine-tuning, memory, and other adjacent products, and how its rankings became a real-time map of how AI usage was changing. Alex also explains **OpenRouter’s early experiments with model fusion**, why they deleted the first version and brought it back years later, and how the platform grew to more than 10 trillion tokens per day.
+
+Finally, Anjney explains **why Stripe and OpenRouter fit together**, why **token fraud may become one of the defining security problems of the AI economy**, and why the next wave of fraud won’t just come from humans but from **autonomous agents attacking increasingly valuable token flows**.
+
+- Why OpenRouter bet early that **no single AI model would win everything**
+
+- **Alpaca, Llama, and open models** becoming impossible to ignore
+
+- Why Discord’s early AI deployments exposed the limitations of **closed models**
+
+- Why model labs can spend **billions on training** and still fail at distribution
+
+- How OpenRouter became a **neutral distribution layer** for model developers
+
+- Why VCs dismissed OpenRouter as **“just a marketplace” or “just a wrapper”**
+
+- The **Mistral price war** and the first real proof of an inference marketplace
+
+- How **Midjourney scaled through Discord** and what it taught the AI ecosystem
+
+- Why crypto infrastructure became a **dress rehearsal for generative AI**
+
+- **OpenRouter vs. LM Arena** and why their missions are fundamentally different
+
+- Why **focus** became one of OpenRouter’s biggest strategic advantages
+
+- Anthropic’s early focus on **AI pair programming and coding**
+
+- The OpenRouter products that were **prototyped but never launched**
+
+- MOM, OpenRouter’s early **Mixture of Models** experiment
+
+- Why **model fusion** failed in 2024 — and why it works much better now
+
+- How OpenRouter’s leaderboard became a **live map of the AI industry**
+
+- **OpenClaw, auto-routing, and agents** reshaping AI usage
+
+- How OpenRouter reached **10+ trillion tokens per day**
+
+- Why inference gateways are increasingly becoming **targets for fraud**
+
+- Why Stripe’s fraud infrastructure is strategically important to OpenRouter
+
+- The coming rise of **agentic fraud** and attacks on the token economy
+
+- What changes and what stays the same as **OpenRouter joins Stripe**
+
+- **LinkedIn:** [https://www.linkedin.com/in/alexatallah/](https://www.linkedin.com/in/alexatallah/)
+
+- **X:** [https://x.com/alexatallah](https://x.com/alexatallah)
+
+- **Website:** [https://alexatallah.com](https://alexatallah.com/)
+
+  ## Anjney Midha
+
+- **LinkedIn:** [https://www.linkedin.com/in/anjney/](https://www.linkedin.com/in/anjney/)
+
+- **X:** [https://x.com/AnjneyMidha](https://x.com/AnjneyMidha)
+
+- **AMP:** [https://www.amppublic.com/](https://www.amppublic.com/)
+
+**00:00:00** Introduction
+
+**00:02:12** Alpaca, Llama, and the Multi-Model Bet
+
+**00:06:04** Discord, Open Models, and OpenRouter’s Origins
+
+**00:14:28** Why “One Model Wins” Was the Wrong Bet
+
+**00:17:27** Why Model Labs Struggle With Distribution
+
+**00:23:04** “Just a Wrapper”: Why VCs Misunderstood OpenRouter
+
+**00:27:58** Bootstrapping OpenRouter Through Community
+
+**00:36:16** Crypto, Midjourney, and the Early Generative AI Ecosystem
+
+**00:43:38** Mistral and the Birth of the Inference Marketplace
+
+**00:47:10** OpenRouter vs. LM Arena
+
+**00:52:08** Focus, Anthropic, and Roads Not Taken
+
+**00:59:34** Mixture of Models and Model Fusion
+
+**01:02:44** Sonnet, OpenClaw, and OpenRouter’s Explosive Growth
+
+**01:09:03** Why Stripe Acquired OpenRouter
+
+**01:12:45** Fraud and the Emerging Token Economy
+
+**01:17:47** The Coming Wave of Agentic Fraud
+
+**01:19:07** What’s Next for OpenRouter at Stripe
+
+**Swyx \[00:00:00\]:** Okay, we are here in Anja’s house, which is where all big startups in San Francisco start.
+
+**Anjney Midha \[00:00:08\]:** Howdy.
+
+**Swyx \[00:00:08\]:** And, congrats on Cursor, Mistral. I don’- God knows what else. You got so much stuff going on.
+
+**Anjney Midha \[00:00:17\]:** There’s, there’s a lot going on. Well, OpenRouter is probably the - has been the most, I would say, like, one I’m excited about recently.
+
+**Swyx \[00:00:24\]:** Yeah. And we have Alex, first time on the pod, but,
+
+**Anjney Midha \[00:00:27\]:** Thanks for having me.
+
+**Swyx \[00:00:27\]:** You’ve been in the IE a few times. I appreciate every time you’ve shown up, for the community. Congrats. I just, like, what a journey. When I was looking back at your past posts, one of the earliest principles that I saw you write as a product person is sub as a product principle. And I wanted - you to maybe explain how you think about what should exist in the world.
+
+**Anjney Midha \[00:00:49\]:** Yeah. The sub piece, which was early 2023, I didn’t think about it until we talked like 10 minutes ago, is about how there is like a way of thinking about products as an intersection between subscribing to data and publishing data. And marketplaces are an easy example of this. You have suppliers that are publishing some product to a SKU. And the SKU is like a sub topic that a consumer is subscribing to and just going to, like, consume whenever they want. And humans consume in a very, like, discreet, ad hoc way. It’s not very scalable. all their attention is on the topic when they’re buying the thing, and their attention is nowhere else when that happens. agents and consumers of inference don’t act like that. They’re consuming continuously, and they’re changing the SKUs that they consume from all the time. So OpenRouter is like a blend between a normal API experience and a marketplace where we create model slug. We have the auto router. We have all kinds of, like, product SKUs that you can subscribe to. And then you can, like, continuously add, like, derive value and make decisions based on those consumers.
+
+**Swyx \[00:02:11\]:** Yeah. This is something that was more consensus now, but not consensus when you guys started, which was that there is such a demand for swapping models and changing things out and, that people would not use the native SDKs. I guess, for each of you, what was your realization moment that this would be it? I, - You’ve, you’ve given a talk at EIE about Alpaca as,
+
+**Anjney Midha \[00:02:33\]:** Yeah.
+
+**Swyx \[00:02:33\]:** One of your inspiring moments.
+
+**Anjney Midha \[00:02:35\]:** Alpaca, I can, like, rehash the Alpaca moment for a sec. Like, the very beginning, at the end of 2022, OpenAI was the only game in town. There was, like, OpenAI, Cohere,
+
+**Swyx \[00:02:47\]:** Yes.
+
+**Anjney Midha \[00:02:48\]:** And then a smattering of, like, early attempts at open weight models.
+
+**Swyx \[00:02:54\]:** Yeah.
+
+**Anjney Midha \[00:02:54\]:** When Llama came out in January of 2023, it was like, “Wow, really exciting. This is really big.” It outperforms 3 on, one or two benchmarks. but you can’t chat with it. It wasn’t like - It wasn’t an engaging model, but it seemed like someone just needed to fix a couple things and do some RLHF on it to get it all the way there. And Alpaca was the first model that I saw that did that. It only took $600 to do. A team at Stanford generated a bunch of synthetic data, tuned Llama, and made Alpaca, billion parameter model. Or was - Maybe it was thirteen billion parameters. And it was so good. Like, I was just, like, on an airplane using it. I, - in many cases, I, like, you could not discern a ChatGPT versus an Alpaca result. And I figured if it was this easy to make a model, one, we have a whole new way of monetizing data for the first time. you can just, like, take really valuable data and turn it into a service in $600. and that cost will probably go down over time.
+
+**Swyx \[00:04:03\]:** When you - So sorry. when you say monetizing your data as, what eventually will become an MCP endpoint or as a training data for a model?
+
+**Anjney Midha \[00:04:12\]:** Yeah, training data for a model.
+
+**Swyx \[00:04:13\]:** Awesome.
+
+**Anjney Midha \[00:04:13\]:** Like, an abstract way of saying like, “Hey, I have this data.”
+
+**Swyx \[00:04:15\]:** Compress it into a model.
+
+**Anjney Midha \[00:04:16\]:** Like, it makes sense for me in my product, but, like, I could repackage it in the form of a model and sell it. And so it’s just a whole new business model for the economy. It also, of course, provides, like, a way of following what Frontier Labs are doing, but in a way that, like, a single developer or a small team of developers can roll on their own. And so - Whenever you have an example of that, like a breakout app that’s doing really well, and then some framework for imitating it with - in your own flavor, you have an immediate ecosystem of, like an immediate ecosystem, like, should arise because there’s just a huge gap between the, like, decisions that the single company is making and all of the variations in those decisions that, like, a wider ecosystem can create themselves. And so then, you need a marketplace to, like, discover all of those, services and all of those products. There wasn’t any place on the internet that, like, was like a home base for LLMs in terms of seeing how much they were being used and seeing who was using them and why.
+
+**Swyx \[00:05:29\]:** The closest would be Hugging Face.
+
+**Anjney Midha \[00:05:30\]:** Hugging Face was the closest at the time, yeah.
+
+**Swyx \[00:05:31\]:** They just started Hugging, like, a few years ago before that.
+
+**Anjney Midha \[00:05:34\]:** Yeah, and Hugging Face also didn’t have the closed-source models.
+
+**Swyx \[00:05:37\]:** Yeah.
+
+**Anjney Midha \[00:05:38\]:** And they didn’- you couldn’t use the models at the time. and there wasn’t data about who was using them. There were, like, a bunch of differences between OpenRouter and Hugging Face, and those differences felt really critical to me, especially when I was just trying to learn about LLMs and, like, why people are choosing, like, Different little ones that are emerging over time.
+
+**Swyx \[00:06:03\]:** Got it. And then, Ansh, no stranger to wanting more model diversity, at the time, you’re a couple of years into your Anthropic journey, which we covered in the previous podcast as well. What was your introduction to Alex?
+
+**Alex Atallah \[00:06:16\]:** Well, the introduction was, I think, thirteen years before that.
+
+**Swyx \[00:06:20\]:** Oh.
+
+**Alex Atallah \[00:06:20\]:** But the OpenRouter handshake happened right over there, if you remember.
+
+**Anjney Midha \[00:06:23\]:** Yeah.
+
+**Alex Atallah \[00:06:24\]:** Which - So Alex and I, met, I believe as sophomores now, if I remember at the Stanford Review,
+
+**Anjney Midha \[00:06:32\]:** That’s right
+
+**Alex Atallah \[00:06:32\]:** Meeting for the first time.
+
+**Anjney Midha \[00:06:33\]:** I think so, yeah.
+
+**Alex Atallah \[00:06:35\]:** Yeah.
+
+**Anjney Midha \[00:06:35\]:** Yeah.
+
+**Alex Atallah \[00:06:35\]:** So Stanford Review was the libertarian newspaper on campus at Stanford that Peter Thiel started back in the day. And, whatever-- for whatever reason, I, Alex and I both showed up to one of the meetings, and I remember, the editor-chief was a mutual friend of ours. Lisa was really a really great editor-chief, where, part of an editor-chief’s job is to assign responsibilities to people and make sure the work gets done. and I, I may be misremembering the details, but I remember wanting to. It was surprising to me that at the time there was no dedicated technology section in the newspaper.
+
+**Alex Atallah \[00:07:11\]:** You
+
+**Swyx \[00:07:13\]:** Because it’s political, right?
+
+**Alex Atallah \[00:07:14\]:** It is primarily
+
+**Swyx \[00:07:14\]:** Like, it’s talking
+
+**Alex Atallah \[00:07:15\]:** It originally started as like a
+
+**Anjney Midha \[00:07:16\]:** Yes.
+
+**Swyx \[00:07:17\]:** Yeah, states and all those things.
+
+**Alex Atallah \[00:07:17\]:** Correct.
+
+**Swyx \[00:07:18\]:** Yeah.
+
+**Alex Atallah \[00:07:18\]:** But it, - To take us back in time, you may remember this, but, there was this technology, legislation that was being debated called, the Net Neutrality Act. And net neutrality is, like, inherently this political concept, right? It’s, it’s about the regulation of - internet broadband access. And so there was a community of us who were technologists, but also debating the politics of the technology. And I thought the Review would be a great place - to, like, write about that. And I was working on, I think, a net neutrality article, and I remember proposing, “Well, maybe we should start a technology section.” And Alex was one of the only people who said, “Yes, that would be cool.” And said. I forget whether we ended up writing stuff together, but - that’s when we first met,
+
+**Alex Atallah \[00:08:03\]:** Was 2011 or twelve. I forget which year it was. It was one of those.
+
+**Anjney Midha \[00:08:09\]:** Yeah.
+
+**Alex Atallah \[00:08:09\]:** It was at Old Union, if I remember correctly.
+
+**Alex Atallah \[00:08:11\]:** That’s where we used to meet. But, along the way, Alex and I have had a chance to, To hang out often. And probably the time when we had the most professional overlap was when I was running the platform at Discord, and it had become this explosive platform for crypto
+
+**Swyx \[00:08:32\]:** Yeah
+
+**Alex Atallah \[00:08:32\]:** And NFTs in the middle of the pandemic.
+
+**Swyx \[00:08:35\]:** Which also, by the way, you were in charge of safety and security as well, right?
+
+**Alex Atallah \[00:08:38\]:** I was the head of platform, which meant all of the crypto - the DAO and NFT launch security debugging fell on
+
+**Swyx \[00:08:45\]:** And their phishing and.
+
+**Alex Atallah \[00:08:47\]:** The phishing, the social engineering attacks, the katana DDoS that we were getting hit by. but it’s around the time I first started teaching security at scale at Stanford, CS 153. And Alex was on the, - at OpenSea at the time, and I was trying to figure out how we could defend against all these attacks that we were. Like, and at peak, I forget, if you remember how much NFT volume was running through
+
+**Swyx \[00:09:10\]:** Discord
+
+**Alex Atallah \[00:09:10\]:** Discord, but it was, like, a meaningful amount of, like, it was, like, several billion dollars in NFT volume of GMV, so to speak, were running through the platform, and it was all coming from OpenSea. It was these, like, buy, sell,
+
+**Swyx \[00:09:20\]:** The
+
+**Alex Atallah \[00:09:21\]:** Servers
+
+**Swyx \[00:09:21\]:** The D in DAO is Discord.
+
+**Alex Atallah \[00:09:25\]:** Yes. And so that’s when I think we had hung out professionally. But a year after that, OpenAI gave Discord early access to GPT. Sorry, three. No, it was five. Yeah, five, which is the RL version of three. And that’s around the time we made a Discord bot with, OpenAI for internal deployment, and that’s when I realized we would need. Like, since I was part of the deployment team.
+
+**Anjney Midha \[00:09:50\]:** What was the use case?
+
+**Alex Atallah \[00:09:51\]:** There were two that were. And there’s, there’s a post now called “Discord is Your Place for AI with Friends” that somebody sent me recently that I wrote, and published in twenty-three. But There were two use cases. One was Clyde, which was the - like, a party friend inside of Discord that could help you set up your Discord server and talk to you about onboarding and get your friends to hang out more. and then there was content moderation. And one of the realizations we had with content moderation was - it would refuse to moderate. Like, it would just refuse our prompts because the The training was. We were very early in the training era, and it would just. Our prompts would trigger it, its, like, guardrails. And we told OpenAI, “Hey, guys, we need access to the weights because if we’re gonna be doing content moderation at scale, we had 250 million monthly active users, we need more reliability that the model will do what we need it to.” And they said, “Well, sorry, guys, that’s not how this works. We’re a closed-source company.” And so that was my first realization that we needed open models, and the enterprises would need more control over capabilities, and then ultimately would need some control plane or management system to orchestrate these open models. But there weren’t no good - there were no good open alternatives until maybe
+
+**Alex Atallah \[00:11:10\]:** Six months later when Llama came out. And six months after that, I led the series A into Mistral, which was started by Guillaume and the Llama team. And - That, - Around that time is when I remember hearing about Alex launching OpenRouter and going, “These worlds are gonna collide, and I don’t know when it’ll make sense to team up.” But Alex was so early and could see. I think he was totally right about this ecosystem starting with Llama that then needed, like, a, an easy layer to manage for, especially for. I was approaching it from the enterprise perspective because I had been that, like, the. As the VP of platform at Discord, it was my job to ensure that when we deployed models to, like, 250 million users, they did what we wanted them to. And that was very hard, because if you outsourced it to the labs and they controlled the guardrails and their guardrails are their safety policies. Forbid the model from responding to your prompts. That was quite catastrophic.
+
+**Swyx \[00:12:05\]:** Yeah. But what, a moderation is the thing that they want to support. And obviously, beyond that, they would - OpenAI would work with you, presumably to give you a moderation endpoint, which they offer for free.
+
+**Alex Atallah \[00:12:16\]:** It was an interesting use case, that - So they did give us a moderation endpoint. However, as you guys know, every Discord server is like a mini deployment of itself. And so the use case was instead of having human moderators that have to interpret the norms of the community, you just give the, - Often, like every, subreddit, Discord servers, public ones have their own rules that the user, the users create.
+
+**Swyx \[00:12:41\]:** Oh, yeah. We run the LinkedIn Discord in. Yeah.
+
+**Alex Atallah \[00:12:43\]:** And then humans used to read those norms and then enforce it every day manually, like observing each message in these communities. And these communities have like millions of users. So we had a 5,000+ person team globally in the, on the Discord content moderation team. These are outsourced contractors who had a really tough job. And so the idea was instead, if you could give the norms of that server To the LLM, then the LLM would do custom moderation for that server. It’s almost like a, like context moderation for that server. And many of those servers’ norms just violated OpenAI’s rules. And so - It was like we had our own custom eval. So each server had its own custom eval. But Discord-- at the time, OpenAI’s evals, we were all so
+
+**Alex Atallah \[00:13:28\]:** Primitive in our thinking about how to deploy these LLMs that often the training prompts were super handed. It said, “Oh, anything about Harry Potter, anything that has trademarked content, don’- refuse.” And if it was a fan - Harry Potter fan community, this is a real use case, that had content moderation, the LLM would just refuse.
+
+**Swyx \[00:13:48\]:** Yeah.
+
+**Alex Atallah \[00:13:49\]:** And that was just not precise enough.
+
+**Anjney Midha \[00:13:52\]:** Another one that we heard was like if someone was trying to write like a detective story, and there’s one chapter with a lot of violence, like maybe someone
+
+**Alex Atallah \[00:14:01\]:** Right
+
+**Anjney Midha \[00:14:01\]:** Like kills someone, the LLMs would just refuse to, like, help with that part of the story.
+
+**Alex Atallah \[00:14:07\]:** Yeah.
+
+**Anjney Midha \[00:14:07\]:** And then - like, we used to be like, okay, this is not like structurally inherent to LLMs. There must be, like, some choice out there so that I can, like, switch to another model, when I’m getting, like, a refusal or a bad result from the main one that I have. And that, like, tension also drove me for a marketplace.
+
+**Swyx \[00:14:28\]:** Yeah. I think that is well accepted now. What was it like back then when you were raising or, starting this? did people get it? what was the, some of the struggles? I like getting stories out of him about how other VCs don’t get it. So like anything you wanna, talk about, now - Let’s, let’s call it, that the early journey of OpenRouter is done, right? You can obviously talk about some of the early days stuff.
+
+**Anjney Midha \[00:14:54\]:** Well, I was gonna say that, like, the biggest objection we got is big model win, which is - all of the
+
+**Swyx \[00:15:03\]:** Scaling laws.
+
+**Anjney Midha \[00:15:04\]:** Huh?
+
+**Swyx \[00:15:04\]:** Scaling laws.
+
+**Anjney Midha \[00:15:05\]:** Yeah, scaling laws, and natural network effects are just gonna accrue to one company, which will be - It’ll be a Google-style monopoly, just like how Google won the search market, by a large margin, and you’ll just be fighting for scraps at the end. That was probably the biggest objection we got. it is interesting that Google won the search engine race with such a huge margin. I think, like, had there been more interesting benchmarks or had, like, search engines been, - had people, like, seen them a little bit more like LLMs where they’re services that you can build companies on top of, that might not have been the case. but LLMs don’t merely have a user interface. They’re also, like, ways of building entirely new businesses. And, a Google-level monopoly would be like the Dutch East India Company times, quadrillion in magnitude because the whole economy ends up, like, depending on the one monopoly as well. So it didn’t seem like would be a really crazy outcome if that happened. And it’s also less likely because the economics of, like, creating good competitors are much, like, much more decentralizable.
+
+**Alex Atallah \[00:16:25\]:** Everything Alex said is true, And I came at it from a completely different perspective, which
+
+**Swyx \[00:16:31\]:** Yes, this is why we’re here.
+
+**Alex Atallah \[00:16:32\]:** The scaling laws were never - In my mind, were always a feature, not a bug for why OpenRouter would be very valuable. Because, I was one of the first investors in Anthropic, and it was obvious to me that other researchers in our friends - I went to grad school for machine learning, and I just had a lot of friends in the ML community who it was very obvious to us that the bitter lesson holds. And so I was like, “Oh, fantastic. Now we have at least two proof points that compute scaling works.” It was OpenAI and Anthropic. and by the time I think we decided to team up on OpenRouter, I had already invested in Mistral and Black Forest Labs and Luma. So there was multiple model companies and teams that I was, working with.
+
+**Swyx \[00:17:14\]:** But you did other modalities, whereas this is literally
+
+**Alex Atallah \[00:17:16\]:** Across different modalities, yes
+
+**Swyx \[00:17:17\]:** Text.
+
+**Alex Atallah \[00:17:18\]:** Exactly. And it was so obvious to me that an ecosystem of different kinds of models were being created, and that this whole narrative of, like, Only one company will dominate like Google was, well, like maybe true, but one, I don’t believe that. But two, there was so much extraordinary innovation happening across several different research teams. But the shared problem I was noticing across all of them was often, the research teams were fantastic at figuring out how to reason about new capabilities. They think in terms of capabilities, but never - like, are not developer mindset-oriented. Like, what happens after the training is done and the checkpoint comes out? Like, you’d be shocked how, like, similar the early training teams at OpenAI, sorry, Anthropic, BFL, Mistral, were in their, like, default approach to. Taking their research out of the, lab and scaling their impact, which is often, oh, the checkpoint is done, put it out as an API, done, and then there’d be crickets. in the case of Claude, the first Claude checkpoint was done a year before they released it internally. And then ChatGPT came out, and we decided, okay, yes, it’s a good idea to release a Claude version externally.
+
+**Alex Atallah \[00:18:34\]:** And they had no plan, like no plan for how to get developers to try it out. And so if you go to the Claude one blog post, you’ll notice there are, like, three developer examples for users of the API, and one is a Discord bot, and the second is Vivian, my wife’s startup called Juny Learning, ‘- And then there was, like, Notion, because these were all friends of, like, the Anthropic Because that’s how - like, last minute the planning was around, hey, once the model’s done training, how do you get it out to the world? There was no distribution platform that understood what developers needed, all the key management, provisioning, like, simple, like, endpoint management, versioning control. Like, all these things that the scientists and researchers go, “ that’s plumbing. I don’t really think about it.”
+
+**Swyx \[00:19:15\]:** Implementation detail.
+
+**Alex Atallah \[00:19:16\]:** Right. And instead, Alex came at it from that perspective. And so, it was so obvious to me that, like, every single lab I was funding would spend - like, literally sometimes billions of dollars into training, and then a checkpoint would be done, and there’d be crickets, like, during early access because they’re like, “Oh, that’s right.”
+
+**Alex Atallah \[00:19:35\]:** It’s hard to use a checkpoint to make anything. You need a whole bunch of plumbing around it to make it usable by a developer. And so by the - I think - it was so obvious to me that a distribution platform like OpenRouter was critical to have in the ecosystem if we wanted there to be competition to Google. Like, unless-- ‘cause with Google, DeepMind is done training a new checkpoint, and then they push a button, and it gets blasted out across all their surfaces from Google Docs to,
+
+**Swyx \[00:20:01\]:** Everywhere, even if I don’t want it.
+
+**Alex Atallah \[00:20:02\]:** Everywhere. You wanna know about, like, on Android, like, overnight, they can deploy a new checkpoint to, like, a billion devices, right? And that invisible infra advantage, distribution advantage, most people don’t realize, but until OpenRouter showed up, - you had to think about all of that yourself as a model lab. And it was very daunting. at Anthropic, I think it took, well, more than twelve months to get to our first 10 million in revenue. And in contrast with Black Forest Labs, I remember the early days, you guys had a conversation with the BFL team, and, it was so simple for OpenRouter to say, “Oh, no problem. Like, the day you launch, we can send 1 million developers to you.” that was crazy. That was like a step function change in, like, an hour.
+
+**Swyx \[00:20:46\]:** Is that a real number, a million?
+
+**Alex Atallah \[00:20:47\]:** I,
+
+**Swyx \[00:20:48\]:** Okay. All right.
+
+**Alex Atallah \[00:20:48\]:** I think today it’s, like, 4 million. How many developers are on OpenRouter today?
+
+**Anjney Midha \[00:20:52\]:** Over ten,
+
+**Alex Atallah \[00:20:54\]:** Yeah.
+
+**Anjney Midha \[00:20:54\]:** Over 10 million, but, like, it’s, it’s hard to, you
+
+**Alex Atallah \[00:20:59\]:** I, yeah, I don’t know how to. Yeah.
+
+**Anjney Midha \[00:21:00\]:** We do a lot of, like, account duping work, but, no
+
+**Alex Atallah \[00:21:04\]:** If you could get 1,000 developers, just to put in context If you get 1,000 developers who try the model on day one after you release it and just, like, do inference and give you feedback, that’s a thousand
+
+**Anjney Midha \[00:21:15\]:** That’s huge
+
+**Alex Atallah \[00:21:16\]:** More developers than they knew how to get to on their own.
+
+**Swyx \[00:21:19\]:** Well, BFL had a reputation, but yes.
+
+**Alex Atallah \[00:21:21\]:** They had one in Stable Diffusion.
+
+**Swyx \[00:21:22\]:** Yeah.
+
+**Alex Atallah \[00:21:23\]:** And with Mistral, I don’t know if you guys remember, but the first checkpoint they released was, like, torrents. It was, like, torrent weights.
+
+**Swyx \[00:21:31\]:** Yeah, they just put up a magnet link.
+
+**Alex Atallah \[00:21:33\]:** Yeah, there was no API.
+
+**Anjney Midha \[00:21:34\]:** Yeah.
+
+**Alex Atallah \[00:21:34\]:** Because they didn’- they weren’t infra people.
+
+**Alex Atallah \[00:21:37\]:** ? Like, it’s like, okay, download these weights, and you guys go figure out how to host it.
+
+**Swyx \[00:21:39\]:** Well, he has a story on his side, yeah.
+
+**Anjney Midha \[00:21:41\]:** Yeah, in addition to the, like, building a really good developer experience around it, the marketing that we do on, like, for different models is totally different and perceived totally differently
+
+**Alex Atallah \[00:21:54\]:** Right
+
+**Anjney Midha \[00:21:54\]:** From the marketing that a model lab does for itself.
+
+**Alex Atallah \[00:21:56\]:** Yes, 1,000%.
+
+**Anjney Midha \[00:21:57\]:** Right? We are like a, neutral layer looking at this market like it’s a big dark room with all the corners completely obscure to users, and users are walking into the room and, like, feeling around
+
+**Alex Atallah \[00:22:09\]:** Yeah
+
+**Anjney Midha \[00:22:09\]:** And trying to figure out what objects to grab off the tables and, like, build into, their companies. And it’s just an insane way of working. Like, models are not products where you can just enumerate all their features onto a web page. They’re all black boxes, including the open weight ones. So you need to, like, shine lights on all corners of this room, so that people can see what makes this model good, and you need the company shining that light to be a neutral third party, which is what we specialize in. So the, like. It’- In addition to developer experience, there’s also, like, a very important, like, marketing and product packaging component
+
+**Alex Atallah \[00:22:50\]:** Yeah
+
+**Anjney Midha \[00:22:50\]:** And a way of, like, routing and discovering models becomes, like, critical to your market as a provider or a model lab or a server tool and more in the future.
+
+**Alex Atallah \[00:23:03\]:** And this value, to your earlier point about how many VCs, like, just don’t. One of my biggest frustrations is that venture capitalists, many of them, like, just don’t have any operating experience in the field. so unlike a traditional investor who’s just maybe come up through the ranks as, like, a associate working on financial modeling or maybe hasn’t been a real operator in the field for, like, more than ten years, which is a big part of the industry now, I had just arrived at a16z, like, a year after running the platform. And so I knew what the challenges were of, like, building a real - great developer experience and like, being able to create a working piece of software with a model. And there were a few, I won’t name names, but there were investors who were looking at OpenRouter, and, felt at the time, like, when I would compare notes with people, that it was just, I quote unquote, “just a marketplace.”
+
+**Swyx \[00:23:59\]:** Yeah, just a thin layer, just a
+
+**Alex Atallah \[00:24:00\]:** Correct
+
+**Swyx \[00:24:00\]:** Just
+
+**Alex Atallah \[00:24:01\]:** A wrapper or whatever on other people’s APIs. And I was like, “You have no idea how strategic the value that OpenRouter has created by being able to orchestrate even three.” APIs in production. The amount of both engineering work and community design that goes into getting that live and running in production at the scale the OpenRouter team had started just doesn’t happen by default. And that was one of the things that stood out to me about Alex from the earliest days. Like, he just understood, like, - from a systems perspective, like, how do you get these flywheels going? Like, that stood out to me with OpenSea when we were working together on the NFT integration at Discord. Like, Alex had a level of community-- like, systems thinking on how you get these flywheels going that most scientists and machine learning people just don’t
+
+**Alex Atallah \[00:24:48\]:** Think of. Like, we often think in terms of training.
+
+**Swyx \[00:24:52\]:** It’s a linear stage.
+
+**Alex Atallah \[00:24:53\]:** It’s this linear pipeline.
+
+**Swyx \[00:24:53\]:** There’s no loop yet.
+
+**Alex Atallah \[00:24:54\]:** Yeah. It wasn’t until much later that the modern context feedback loop cycle really got standardized in the industry. But at the time, if you remember, machine learning was like. Like, mostly we did a lot of ML, like, when I was in grad school on a laptop. So you just, like, download a dataset, ran some ablations, and you looked at the loss curves, and you’re like, “Great, I made AI.” And the idea that you have to, like, deploy those capabilities, collect feedback trajectories, then, like, put those into a continuous loop, like, came much later. And it was very counterintuitive to the - like, the traditional AI mindset. I do remember doing the investment phase for, OpenRouter, I just didn’t try and educate a bunch of other VCs on why it was not just a marketplace. I was like, “ what? I’m just gonna invest.”
+
+**Anjney Midha \[00:25:41\]:** Yeah.
+
+**Alex Atallah \[00:25:41\]:** And I’m going to, like, take the opportunity to partner with Alex, and if - no other VCs get it, that’s totally fine. ‘Cause at the time, - it was not obvious, I think, to several of the investors that, like, OpenRouter was not more than just a wrapper around APIs. And - that infuriated me. And I was like, “ what? I don’t have time to debate you. I’m - we’re gonna, we’re gonna invest.” And then I think, like, a month later, Matt Murphy marked it up by 10x. Like, - I think. I forget what the exact money was and so on, but, to his credit, Menlo Ventures realized, “Okay, there’s much more strategic value here as well.” Maybe you didn’t hear all these conversations behind the scenes But that frustrated me a lot. there’s a lot of this, like, opining about wrappers. and if you’re like, “Oh, an app is just a wrapper on a model,” then, like. And, OpenRouter is, like, this wrapper on top of other APIs, and this is the most stupid, reductive framework.
+
+**Alex Atallah \[00:26:31\]:** And so it’s clearly somebody who has no experience deploying product at scale.
+
+**Swyx \[00:26:34\]:** It’s the thing you dismiss other things with. Like, you’re a - everyone’s a wrapper on everything, right? Like, and there’s, there’s some Some wrappers have value.
+
+**Alex Atallah \[00:26:40\]:** Investors are wrappers and LPs, right?
+
+**Alex Atallah \[00:26:42\]:** Like venture capitalists. So, yeah, it’s all wrappers down, all down to bare metal, I guess, and like energy.
+
+**Swyx \[00:26:46\]:** Yeah, there - When I started the whole AI engineer, I guess, the coining, in 2023, like, that was, like, the number one pushback is that this is no value. You should just train models.
+
+**Anjney Midha \[00:26:56\]:** Right.
+
+**Swyx \[00:26:57\]:** And, yeah, obviously this is, like. you guys are one of the testaments to the fact that you can build very valuable wrappers, but also very valuable model companies.
+
+**Alex Atallah \[00:27:06\]:** It’s so, hard to be. Like, the day a model launches, the fact that you have an OpenRouter, endpoint for that model frequently at the top of Hacker News on day one, people don’t realize the amount of work that goes into accomplishing that. And OpenRouter used. Like, that would happen over and over again, and I remember going, “People have no idea how hard that is.”
+
+**Alex Atallah \[00:27:30\]:** That’s not.
+
+**Swyx \[00:27:31\]:** Yeah, we’ve covered some of the inference engineering that goes behind,
+
+**Alex Atallah \[00:27:34\]:** Yes
+
+**Swyx \[00:27:34\]:** Some of - with Base Ten and all those. Well, today you have, all those, like, cool code name things that people guess what Oxy Alpha is and all those things. But, like, I guess one of the things that you’re teasing is, how do you get that initial flywheel going, right? Because today you have your scale and your reputation, all these things, so obviously you - you’re driving immense distribution. But when you were early on, when it’s mostly
+
+**Alex Atallah \[00:27:55\]:** The bootstrap, yeah.
+
+**Swyx \[00:27:56\]:** Yeah.
+
+**Alex Atallah \[00:27:56\]:** What was the bootstrap like?
+
+**Anjney Midha \[00:27:58\]:** To bring it back to early Discord days, I think we, like, initially connected with. This is an OpenSea story, technically. But, and we initially connected when you were at Discord, and we talked about, like, - the Axie Infinity server.
+
+**Alex Atallah \[00:28:13\]:** Oh, yes. Yes.
+
+**Anjney Midha \[00:28:14\]:** This server was, like, the biggest server at the
+
+**Alex Atallah \[00:28:17\]:** Yeah
+
+**Anjney Midha \[00:28:17\]:** At Discord.
+
+**Alex Atallah \[00:28:18\]:** That’s right.
+
+**Anjney Midha \[00:28:19\]:** And you were like, constantly bumping up the
+
+**Alex Atallah \[00:28:22\]:** The limits on the server. Oh, my God
+
+**Anjney Midha \[00:28:24\]:** Of how many people could be in the server.
+
+**Swyx \[00:28:24\]:** For those who don’t know, like, 10% of Philippines was Axie.
+
+**Alex Atallah \[00:28:29\]:** Was on that server. That’s a big hit.
+
+**Swyx \[00:28:31\]:** It was, like, a meaningful contributor to the GDP of the country.
+
+**Alex Atallah \[00:28:33\]:** It was an NFT, like, crypto game, but it
+
+**Swyx \[00:28:35\]:** It was like a Pokémon breeding thing.
+
+**Anjney Midha \[00:28:36\]:** Yeah.
+
+**Alex Atallah \[00:28:36\]:** Yeah. Similar. Yeah. There was battling, there was breeding, and then there was, like, a marketplace for trading.
+
+**Swyx \[00:28:43\]:** Earn as well.
+
+**Alex Atallah \[00:28:45\]:** Yeah, earn. And, like, the graphics were really cute and fun, and you like, you get emotional about your Axie that you make. So to, like, start a community like that, which we had to do many times at OpenSea with every early project, for us to create a marketplace for it, we need to make sure that the, like, the community wants it.
+
+**Anjney Midha \[00:29:09\]:** Right.
+
+**Alex Atallah \[00:29:09\]:** And it’s like building something that people want and going and telling them about it. Like, you can do that on a one basis, but there’s way higher leverage to do that in a community where everyone can talk to you at the same time. So we spent a lot of time, like, building things that the community really wanted. We did the same thing for OpenRouter. And, like, the Axie community was one of, like, a zillion communities we did that with. And Anj, like, saw us doing it and. ‘Cause you could just see people sharing OpenSea links constantly in that Discord. Like, users sharing links is a really clear indicator that, like, something important is going on. So we spent, a lot of time, like, first figuring out what the gap is in the technology that people care about. Like, what was the actual problem that needs to be solved? in early LLM days, it was, OpenAI refusing to finish the prompt or,
+
+**Anjney Midha \[00:30:09\]:** Yeah
+
+**Alex Atallah \[00:30:10\]:** To, like, complete the task. It was also.
+
+**Anjney Midha \[00:30:13\]:** Inability to customize models. and so there are communities that, like are just completely blocked on that issue, and those are the communities that are most useful to learn about and dive into and explore.
+
+**Alex Atallah \[00:30:28\]:** Something that really struck me at that time, - as I was just hearing your talk, I remember noting - you may not remember this, but we - we had these, like working, Zoom calls that we were doing a sprint around for, like this OpenSea integration with Discord. and, we’d, we’d - it was myself, my engineering team. I think you were there. And I remember, Alex, in the middle of one of those calls, just like there was like silence. we were all like, “Oh, yeah, this totally makes sense. Let’s do this.” And then there’s - every, like everybody aligned. And Alex was like, “No, this makes no sense to me.” And everyone’s - I remember going, “What? Like, it works. Like, you click on a link and this, then it bounces you out to, like, OpenSea.” And he was like, “It’s not a good user experience. Yeah, we should not do this.” And I remember going, he was the only one person out of all of us to raise his hand and go, yes, it made sense from a technical implementation perspective. Like, we were bouncing the user out into the, into OpenSea. And so it kinda checked the box of the product manager’s requirements on both sides. But Alex went one step further and was like, “ what would be better, guys? If we just embedded the experience right here inside of Discord so the link opened up as an embedded iframe, and you can just check out right there.”
+
+**Alex Atallah \[00:31:47\]:** And not one person on the call, and there’s like seven of us who had met, like, week after week.
+
+**Swyx \[00:31:52\]:** And it’s the guy who doesn’t work for Discord.
+
+**Alex Atallah \[00:31:53\]:** And it’s the guy who doesn’t work for Discord.
+
+**Swyx \[00:31:55\]:** Like, technically, you benefit if they bounce.
+
+**Alex Atallah \[00:31:57\]:** Exactly. And that was, like, adversarial. To keep the user inside of Discord would be adversarial to OpenSea. And yet Alex put that user experience first. And I was like, “That’s special.”
+
+**Swyx \[00:32:08\]:** Wow.
+
+**Alex Atallah \[00:32:08\]:** Because it’s very hard to have somebody who’s technical like Alex and understands the developer flow, but also understands the best user experience and wants to prioritize that. And that’s two sides of the flywheel that if you can get spinning, like is often hard to stop. And you just reminded me, like that one was one of those moments where I go, I - I realized I gotta be better at user experience because I should have been the one who came up with that, and I didn’t. And I learned from you. And, I think that went into one of our case studies for the PM training program at Discord.
+
+**Swyx \[00:32:34\]:** Whoa.
+
+**Alex Atallah \[00:32:36\]:** I don’t know if it there is Because of
+
+**Swyx \[00:32:38\]:** You need an Alex is the conclusion.
+
+**Alex Atallah \[00:32:40\]:** Yeah. You need an Alex. And this is why I’m not, nobody should be surprised why Stripe decided like they had to buy OpenRouter because it’s a really rare combination of people who understand the machine learning community, the developer experience, and the user experience. And putting all that together has resulted in this extraordinary scale that very few other marketplaces have been able to achieve
+
+**Swyx \[00:33:02\]:** Yeah.
+
+**Alex Atallah \[00:33:02\]:** Over the last, five years.
+
+**Swyx \[00:33:04\]:** Yeah. Well, we should talk about the other reasons for acquisitions, which
+
+**Alex Atallah \[00:33:07\]:** Yes, we should.
+
+**Swyx \[00:33:07\]:** You’ve written about. I wanna proceed somewhat chronologically as well. So - there is a point that, one of the questions that, Dave from H of Zero sent in was, when did it - really started to work? And you brought up Mixtral. I don’t know if you wanna bring up that story.
+
+**Alex Atallah \[00:33:22\]:** Oh, yeah.
+
+**Swyx \[00:33:23\]:** Which obviously you overlap with, so.
+
+**Anjney Midha \[00:33:26\]:** Yeah, the MoE was. I don’t know when. there’s no like one moment where I was like, “Oh, this is, officially starting to work.” It was
+
+**Swyx \[00:33:36\]:** The moment where you had a Chrome extension, like, really super early on.
+
+**Anjney Midha \[00:33:39\]:** Oh, yeah. But, well, - yeah. So before OpenRouter, I wanted to, like, explore a bring-your-own-model experiment. And,
+
+**Swyx \[00:33:47\]:** Which anyone familiar with crypto is like, yeah, Phantom and all these things.
+
+**Anjney Midha \[00:33:50\]:** Yeah. So it felt like doing a MetaMask analogy for AI would be a fun way of exploring that. And at the time, there were no AI apps. There were probably as many AI apps that were, like, hitting AI - like, hitting an LLM via an API call as there were, like, games just doing it in JavaScript. like there was a, there was a moment in time where it could have been the case that web apps call LLMs through the browser, like through some desktop
+
+**Alex Atallah \[00:34:27\]:** Yes.
+
+**Anjney Midha \[00:34:27\]:** Managed app that is controlled by the user. and of course, there are like, I think, many reasons that did not happen. But back when the days were that primordial, I built a Chrome extension called Window AI
+
+**Swyx \[00:34:43\]:** With Plasmo.
+
+**Anjney Midha \[00:34:44\]:** With Plasmo.
+
+**Swyx \[00:34:45\]:** I had come across early on, and I was like, “Who’s gonna use this?” You did.
+
+**Anjney Midha \[00:34:49\]:** Plasmo had a couple, like, I think Phantom was using it. there were some other, like real companies using it.
+
+**Alex Atallah \[00:34:56\]:** It was like a shim.
+
+**Swyx \[00:34:57\]:** React for Chrome extension. It compiles to all
+
+**Anjney Midha \[00:35:00\]:** Yeah.
+
+**Alex Atallah \[00:35:00\]:** I see.
+
+**Anjney Midha \[00:35:00\]:** Like Next.js for Chrome extensions.
+
+**Swyx \[00:35:01\]:** Next.js, Next.js.
+
+**Alex Atallah \[00:35:02\]:** Okay.
+
+**Anjney Midha \[00:35:03\]:** And yeah, built Window AI on top of it. The creator of Plasmo, like started contributing code to Window AI, in GitHub, and that turned out to be Louis Vicchi
+
+**Alex Atallah \[00:35:15\]:** Oh, you’
+
+**Anjney Midha \[00:35:15\]:** Who is the founder of OpenRouter.
+
+**Alex Atallah \[00:35:17\]:** That’s right. You have told me this is how you met Louis. Yes.
+
+**Anjney Midha \[00:35:19\]:** Yeah.
+
+**Alex Atallah \[00:35:19\]:** Okay.
+
+**Anjney Midha \[00:35:20\]:** So, that allowed users to like configure which model they wanted to use for a web page in their browser, and then, like the app would just call out to that model when it needed to do things. not the right form factor for LLMs, but, it’s like fun experiment. You learn a lot, and like I open sourced it. And the main learning is like, okay, this has to be an API, and it has to look a little bit - like, there has to be more of a developer experience here and more of a discovery experience as well. Like, I don’t know where to use these models, and a little Chrome extension is not gonna help me discover. It’s not enough real estate. I need more space. I need visuals. I need graphs. I need, examples. I need images. I need to, like, I need to be able to, like explore both as a human and as an agent.
+
+**Alex Atallah \[00:36:10\]:** Yeah.
+
+**Anjney Midha \[00:36:10\]:** So that’s how OpenRouter came to be.
+
+**Alex Atallah \[00:36:13\]:** A meta point that.
+
+**Alex Atallah \[00:36:16\]:** I think is underappreciated, but Alex is reminding me, is that we were quite lucky that we were so. we were, like, adjacent to the crypto community in those days. Because in hindsight, crypto ended up being like a dress rehearsal for generative models, right? If you think about the Axie experience, Alex is totally right, there were not that many AI apps at the time. And while I was dealing-- my job was to be the head of platform at Discord, which meant to be a general purpose place for communities and friends to create-- for developers to create apps and bots and, other services that could be deployed across Discord. And while 80% of the attention at the time was being spent on crypto, because that’s where all the NFT volume was, there was, like, twenty percent of my time I was spending with a friend, who would get hotbot with me and ask me for. We would play Magic: The Gathering on weekends, and he was working on a little Discord bot that could take a text input and turn it into an image, and it was called Midjourney. You
+
+**Swyx \[00:37:15\]:** Is that David?
+
+**Alex Atallah \[00:37:15\]:** It was David Holz.
+
+**Alex Atallah \[00:37:16\]:** He was a good friend. And David and I have both been failed ARVR founders, in the before that. And, I remember this. Midjourney was one of the fastest-growing communities we had after Axie Infinity started to peter off. And many of the, like, the abstractions and the infrastructure decisions we made to scale Axie happened just in time because they. Axie did this and then fell off a cliff. And then as Midjourney was taking off, we, like, explicitly decided to help David make the server, the Midjourney server, as the primary place for interaction with the model, because it was very hard for people to understand how to use the model if they couldn’t see other people using it and copy them. And so the single-player Midjourney web app on its own, like midjourney.com, had, like, terrible retention because people would show up, they’d see this empty field. It’s like E 2, and they would type in, like, cat or dog. And it was, like, paralyzing for them to have this blank canvas that they had to fill because they’d never used an AI model before. But instead, in a Discord server, you could see other people using it and riff off of their prompt, and the engagement was off the charts. And so scaling, Midjourney from zero to, like, 10 million monthly actives was a much smoother approach Axie Infinity. And so,
+
+**Swyx \[00:38:29\]:** Don’t forget the best of four pictures, and you choose one.
+
+**Alex Atallah \[00:38:31\]:** The best, yeah, and then the other, we
+
+**Swyx \[00:38:32\]:** Which is the feedback loop.
+
+**Alex Atallah \[00:38:33\]:** The RLHF feedback loop, which, by the way, separately, like, Tom Brown, David and I used to play Magic: The Gathering on weekends. And so, like, it was one group of friends would hang out, and we’d. Like, these concepts were all being discussed all the time. But, there was.
+
+**Alex Atallah \[00:38:47\]:** I think there were few of us who bridged both the crypto worlds and the AI worlds. And compared to crypto, where it was - the question was always, what’s the use case, for this technology? There was never any need to ask that for AI because it’s, like, the use case was so visceral. It was like, I can create now anything at - I can imagine. I can write novels, I can code. And the infrastructure that those of us who believed in the distributed systems, like, value of crypto, like the censorship resistance part, found this use case that was explosive. And I think between Midjourney, the, Claude was a Discord bot launch, that we were using internally as an LLM. ElevenLabs had a TTS model that we had on Discord as well. Like, Discord became this petri dish for, like, early apps to innovate. And I don’t think it’s a coincidence that they found a home there before OpenRouter gave the world, like, a public home store or, like, a, storefront. Discord was this, like, almost petri dish storefront that - had, like, piggybacked on the infra we’d built for crypto communities. And then I think Alex was one of the first people to realize, wait a minute, like, these apps need their own home, on the internet. And then OpenRouter, to me, was a continuation of that community’s needs. And of course, there was the crazy distribution that you enabled for a lot of these developers.
+
+**Swyx \[00:40:07\]:** So then my question is, how come you were. My perception is OpenRouter is not that Discord-centric, right? You have a Discord.
+
+**Anjney Midha \[00:40:14\]:** Yeah.
+
+**Swyx \[00:40:14\]:** And you use it to engage your community, but it’s not like Midjourney where, like, no, that is like the primary way people experience OpenRouter.
+
+**Anjney Midha \[00:40:21\]:** Yeah, Midjourney, like, it really helps to see visually really quickly how people are using the model and how to prompt it.
+
+**Swyx \[00:40:29\]:** Yeah.
+
+**Anjney Midha \[00:40:29\]:** And I think that is partly why the server was so critical. It’s like it is the user experience. It adds a ton.
+
+**Swyx \[00:40:36\]:** Yes.
+
+**Anjney Midha \[00:40:37\]:** And you can go the whole mile with just, like, prompting via Midjourney, like, the, via the Midjourney Discord server, getting your images and then sharing them and having fun. For OpenRouter, for LLMs, like, you need a lot of user experience around LLMs to make them, like, really usable.
+
+**Swyx \[00:40:54\]:** Charge point.
+
+**Anjney Midha \[00:40:55\]:** And yeah.
+
+**Anjney Midha \[00:40:57\]:** The, like, seeing the examples of other people is also not as useful because it’s a lot of stuff to read. It takes a long time.
+
+**Swyx \[00:41:03\]:** Yeah.
+
+**Anjney Midha \[00:41:04\]:** You need, like, based integration. Not possible to do in a Discord server. You need, Or technic- it’s possible. I shouldn’t say that. It’s just not a great developer experience. you need, like, - you need governance for. At the point where you got based integration, now you need governance for managing the LLMs that have access to it, the data policies, which teams. All that stuff needs a lot more than a Discord server can provide. So it’s just
+
+**Swyx \[00:41:30\]:** Yeah
+
+**Anjney Midha \[00:41:30\]:** It’s not the right.
+
+**Alex Atallah \[00:41:32\]:** Well, in addition, you’re not wrong, but also there’s the very important distinction that, Midjourney was an end user application.
+
+**Swyx \[00:41:40\]:** Right.
+
+**Alex Atallah \[00:41:40\]:** And, that’s why Discord, which has 250 million monthly end consumers, made, it made sense for Discord to be a host for that application experience. What I knew was gonna happen soon after Midjourney found explosive product-market fit, because we. I think when Midjourney launched, from launch to $100 million revenue run rate, it was less than eight months. And shortly thereafter, Stable Diffusion launched. And, all of us used to hang out in the Discord server. There, I think it was the,
+
+**Swyx \[00:42:13\]:** The Stability Discord?
+
+**Alex Atallah \[00:42:14\]:** It was the
+
+**Swyx \[00:42:16\]:** Yeah, LAION.
+
+**Alex Atallah \[00:42:16\]:** Yeah, the LAION Discord server.
+
+**Swyx \[00:42:17\]:** The image community that spawned Stable Diffusion.
+
+**Alex Atallah \[00:42:19\]:** The image community. Yeah. And so when Stable Diffusion came out, I realized- Oh, now other people can build their own Midjourney.
+
+**Alex Atallah \[00:42:27\]:** Because until then, Midjourney did not have an API, so they were a stack company, right? They were training their own models, and they were deploying them as an application. But if you wanted to build your own Midjourney, there was no API of that quality. and I think E two was still quite primitive. Like, Midjourney had great quality. And then when Stable Diffusion came out, suddenly there was this new person who - there was - this new capability in the world, which is a developer could create their own Midjourney. And that, I think, created the need for something like OpenRouter, because then you need an API to. If you - if you had the creativity of David Holz and you had Stable Diffusion as the model and you wanted to put these things together, how could you do that without having to figure out how to host the weights? And what OpenRouter, - the shape of OpenRouter enabled is that. Right? When you have open model alternatives to closed applications, OpenRouter’s value in the world becomes extraordinary because now any developer can just show up and use the
+
+**Swyx \[00:43:20\]:** You just love model diversity.
+
+**Anjney Midha \[00:43:21\]:** Did you just say the shape of OpenRouter?
+
+**Alex Atallah \[00:43:23\]:** Oh, no.
+
+**Anjney Midha \[00:43:25\]:** Were you in cloud? What is this the real Han?
+
+**Alex Atallah \[00:43:26\]:** I’ve been, I’ve been - I’m, I’m misaligned now. I’ve been overtrained. I’ve been using Cloud way too much, haven’t I?
+
+**Swyx \[00:43:34\]:** Claude-ish is what people would say.
+
+**Alex Atallah \[00:43:35\]:** Claude-ish. Oh, God, I gotta untrain myself.
+
+**Swyx \[00:43:38\]:** Okay. - And I just wanna cap off the Mistral side. my TLDR is there was a Mistral price war, is what they called it, right? Like, round about NeurIPS is twenty-three or twenty-four.
+
+**Anjney Midha \[00:43:47\]:** Yes. December
+
+**Swyx \[00:43:48\]:** They launched, the Mistral 8x7B, and like the price went down like 80%.
+
+**Anjney Midha \[00:43:54\]:** Yeah.
+
+**Swyx \[00:43:54\]:** To me, that’s very positive because it’s like the first, like, real competition to host Mistral. Is there more?
+
+**Anjney Midha \[00:44:01\]:** Yeah, that was. I’m, like, trying to remember it, all the things that happened. It. Like, we saw that model come out and immediately saw people say that it was the best model in the world.
+
+**Alex Atallah \[00:44:15\]:** Yes.
+
+**Anjney Midha \[00:44:15\]:** Like, this was, to my knowledge, the first time an open weights model was called that in real seriousness.
+
+**Swyx \[00:44:22\]:** It’s hype, right? Is it?
+
+**Anjney Midha \[00:44:25\]:** It was hype. It was hype. It was also, like, hype from AI influencers at the time. And there were many examples where it was, like, outperforming four. So people really wanted to try it out and see, is this gonna be true for me too? And if so, at what price? And, the, like, inference landscape was really messy.
+
+**Alex Atallah \[00:44:49\]:** Yes.
+
+**Anjney Midha \[00:44:50\]:** We cleaned it up. - it allowed, like, providers to compete on price, so we could give you just the best price in one spot. And so it was, I think, the first clear example of, like, a provider marketplace working in a way that adds value to end developers.
+
+**Alex Atallah \[00:45:08\]:** Sean, you may not remember this, but I think we met for the first time a few days after Mistral came out at NeurIPS
+
+**Anjney Midha \[00:45:15\]:** Yeah.
+
+**Alex Atallah \[00:45:15\]:** At a luncheon.
+
+**Swyx \[00:45:16\]:** Yeah. That’s where I also met BFL as well. Yeah.
+
+**Alex Atallah \[00:45:18\]:** And Guillaume was there.
+
+**Swyx \[00:45:19\]:** Yeah.
+
+**Anjney Midha \[00:45:19\]:** I was at NeurIPS at that time.
+
+**Alex Atallah \[00:45:20\]:** You were there too. And, we had just announced the Mistral investment, and I remember Guillaume was over there, and I remember turning to Guillaume and asking him, Like, “Is it is all the. Like, how are you feeling after the launch of Mistral and seven B?” And, him in his typical French fashion was like, “ it’s a, it’s an okay model. It’s not that good.” And I was like. It was so, in contrast. But I remember him also saying that part of the reason he felt a lot of people Thought that it was better than four was because of the speed. - it was an MoE model that they had, like, absolutely figured out how to make super efficient. It was on the Pareto frontier. And this is an important thing about LLMs, right? Sometimes when they’re faster, you think they’re smarter, even though, like, if you did, N of, these common, like, evals that are - you do seven tries, and I don’t remember. I think we should go back and figure out what the data says, but I wouldn’t be surprised if it turns out, oh, on an N of seven attempts, four was smarter on evals, but the perception of on, like, or correctness would be smarter or more accurate. But, people, like, from a human preference perspective felt that it was faster because it - or smarter because it’s so fast.
+
+**Swyx \[00:46:36\]:** Yeah. And most queries do not take that level
+
+**Alex Atallah \[00:46:39\]:** Don’t take that. That’s true.
+
+**Swyx \[00:46:40\]:** Right? So this is the start of humans as router
+
+**Alex Atallah \[00:46:42\]:** Yes.
+
+**Swyx \[00:46:42\]:** Which then eventually becomes OpenRouter as router of like the
+
+**Alex Atallah \[00:46:45\]:** Oh, that’s interesting way to think about it. Yeah.
+
+**Swyx \[00:46:47\]:** Like, because humans are the routing mechanism. Like, I will ask the fast model first, and then if, like, oh, not good enough, I’m gonna upgrade manually.
+
+**Alex Atallah \[00:46:52\]:** Yes.
+
+**Swyx \[00:46:53\]:** But then he’s gonna auto it.
+
+**Alex Atallah \[00:46:54\]:** I didn’t, I hadn’t thought of it that way, but that makes sense.
+
+**Swyx \[00:46:57\]:** Which then there’s, there’s a lot more techniques, like fusion. Fusion is the thing that we should talk about. Before I move on to those things, I just want to close off the early years. one thing that I observe, which you are also an investor in Arena.
+
+**Alex Atallah \[00:47:10\]:** Right.
+
+**Swyx \[00:47:10\]:** And we talked about Midjourney having that feedback loop of, A, B, C, D, and choosing that very. being very important. And you understand the flywheel. So how come you didn’t build Arena, and how come Arena didn’t build OpenRouter?
+
+**Anjney Midha \[00:47:23\]:** Well, Arena started before OpenRouter, right?
+
+**Swyx \[00:47:27\]:** They had the school project
+
+**Anjney Midha \[00:47:29\]:** Yeah, LM
+
+**Swyx \[00:47:29\]:** And then it became a company.
+
+**Anjney Midha \[00:47:31\]:** LM Arena, yeah.
+
+**Swyx \[00:47:32\]:** So, but, and I know you had some Arena experiences, like the up comparison type things.
+
+**Anjney Midha \[00:47:37\]:** Yeah.
+
+**Swyx \[00:47:37\]:** But you never really went as hard as Arena did.
+
+**Swyx \[00:47:40\]:** And,
+
+**Anjney Midha \[00:47:40\]:** In doing up experiences?
+
+**Swyx \[00:47:42\]:** Yes. And LM Arena did have a router project based on LM Arena ELOs, which they never commercialized.
+
+**Anjney Midha \[00:47:48\]:** It’s hard to do a company that does both because one company is taking data and selling it, and the other company really can’t by default. So, I think there is, like, a branding reason that there are two companies here. like, when you set up OpenRouter, there’s no training, there are no prompts, right, aside from what your provider policy set. Like, OpenRou- like, OpenRouter can’t see your prompts or completions. If you want to see that as an org, you have to opt into it and enable it. And so we’re, like, pretty conservative and careful about data policy and security. And privacy. And LM Arena is like, their business model is like oriented around the labs and,
+
+**Swyx \[00:48:34\]:** Because they give it for free, right? You don’t give it for free to give it for free.
+
+**Anjney Midha \[00:48:37\]:** Yeah.
+
+**Anjney Midha \[00:48:38\]:** But we do give some. We like have free endpoints too, but like those free endpoints, we, I think we’re not collecting any prompts. We’re not like monetizing the data unless you, opt into it for some reason.
+
+**Alex Atallah \[00:48:48\]:** This comparison. you’re not the first person to ask me this, and Alex knows this, but I was the interim, like the founder, like first CEO of Arena for the first five months when, and we were helping Anastasios and Waylin spin out of Berkeley. And, I did invest in that before, OpenRouter, but it was very strange to me the comparisons that outside, folks would make between the two projects because the missions were completely different. The founding entity for Arena, we called it the AI Reliability Institute because it was there as an eval service. Like the data, so to speak, that they were originally, offering the labs was how do you make the evaluation of models more reliable than like the state of the art at the time, which was like really just finger in the wind.
+
+**Alex Atallah \[00:49:38\]:** That’s what Anastasios and Waylin’s PhD work was as scientists at Berkeley, was on statistical methodologies for correcting, eval estimates, based on like intrinsic biases and how you collected the data.
+
+**Swyx \[00:49:54\]:** Yes.
+
+**Alex Atallah \[00:49:54\]:** And
+
+**Swyx \[00:49:54\]:** Style control.
+
+**Alex Atallah \[00:49:55\]:** Style control and stuff like that. And which is very much like a, hey, how. If you’re a scientist and you’re trying to. the highest expectation customer for Arena was always like a training and, like a researcher at a lab. Whereas the highest expectation customer from my perspective that Alex like really understood and was the mission was to serve was like a developer, right? Who then takes the result of the research and then produces an application that’s deployed to the world. It was a completely different problem and person that these two teams were focused on. And so from the outside in. I don’t know if you remember this, but I have a distinct memory of a few weeks before we did the term sheet, together for OpenRouter, I’d given you a call because we were trying to get a pooled data set together from OpenRouter and from Arena to, create like an open source repository of prompts. these projects were so different in their goals that it was totally normal to me to be like, “Oh, yeah, let’s call Alex and see if he’d want to team up on pooling data,” because they’re so different. We need. We don’t have that data at all. We. Like, we didn’t have API prompts. We didn’t, we didn’t have like what developers want to do with the models, which is very different from what researchers inside a model lab want to do before releasing the model.
+
+**Swyx \[00:51:15\]:** Yeah.
+
+**Alex Atallah \[00:51:15\]:** Does that make sense? And so to this day, I think you see that this difference, even though at a 30,000-foot level you could. I guess you could conclude that Arena and OpenRouter are adjacent, but, the roadmaps, the missions and so on at the time at least were like in very different directions.
+
+**Swyx \[00:51:36\]:** That ideal customer, I get. I totally get that.
+
+**Alex Atallah \[00:51:39\]:** Yes.
+
+**Swyx \[00:51:39\]:** As a founder, I want to own everything, right?
+
+**Alex Atallah \[00:51:41\]:** That’s possible.
+
+**Swyx \[00:51:42\]:** Like this is clearly an adjacency that I’m like gonna explore that.
+
+**Anjney Midha \[00:51:45\]:** Own everything meaning like you don’t know what to do yet, so you wanna like make sure you catch PM
+
+**Alex Atallah \[00:51:51\]:** No, I think what he
+
+**Anjney Midha \[00:51:52\]:** As quickly as possible.
+
+**Alex Atallah \[00:51:53\]:** You want to own the entire infrastructure space, and so you expand to whatever demand you can capture.
+
+**Swyx \[00:51:58\]:** You want to have a play in each end.
+
+**Alex Atallah \[00:51:59\]:** Yeah, I think that’s, that’s hard, in reality, because serving multiple customers is difficult.
+
+**Swyx \[00:52:05\]:** Clearly, this is the one focus, right?
+
+**Alex Atallah \[00:52:08\]:** Yeah.
+
+**Anjney Midha \[00:52:08\]:** Yeah. I still think even in the age of AI, like focus is,
+
+**Alex Atallah \[00:52:12\]:** Is critical
+
+**Anjney Midha \[00:52:13\]:** Underrated and critical, not just because you end up with a better product by focusing your humans on it, but also because the world knows what your focus is.
+
+**Alex Atallah \[00:52:22\]:** One thousand percent.
+
+**Anjney Midha \[00:52:23\]:** The world can map like, “Oh, I have this issue. Which brand out there is going to help me with that issue? This is the brand that’s known for that focus.”
+
+**Alex Atallah \[00:52:31\]:** Yes.
+
+**Anjney Midha \[00:52:32\]:** So like if I want real attention on this issue, like this really matters to me, I should go with the brand that cares the most about it.
+
+**Alex Atallah \[00:52:39\]:** To underscore Alex’s point about how important focus is, in the early days of Anthropic, it was not easy to. Like people think that the early days of Anthropic were like super easy because they were on their 3 guys who left, but it was very competitive. The company was starting 10 billion dollars behind OpenAI, right? And so to get to the frontier, like the big question was, what do we want to be known for? What’s the mission? And the mission was AGI pair programming. And so to the, exclusion of all kinds of other things that were really shiny at the time, like image models and video models that were getting lots of, momentum, the Anthropic team was like, “We just got to focus on coding.” Like that is the core capability that we’re focused. And today you can see the results, right? It’s a trillion-dollar company within five years. And that focus, I think, like the high. The focus on who your highest expectation customer is and how you exceed their expectations, because exceeding anyone’s expectations is hard, and doing it for multiple like customers is so even more difficult, is part of the reason why OpenRouter succeeded and Anthropic as well.
+
+**Anjney Midha \[00:53:39\]:** Was the focus on coding that early, though, or did it come later?
+
+**Alex Atallah \[00:53:42\]:** Literally from day one it was AI pair programming is. Responsibly commercialize an AI pair programmer was the seed memo. That was when I invested, right? We like refined that memo a lot. Well, you got to ask Dario and Tom for permission on that.
+
+**Alex Atallah \[00:53:57\]:** But it’s an extraordinary piece of writing that they had put together. And AI, commercializing it. Responsibly commercializing an AI pair program was the mission, from day one. And I would say there were maybe like a couple moments in the company’s history where like they did experiments to see if like little detours made sense, like a general chatbot, like Claude.ai when ChatGPT was really taking off. But, at the end of the day, but especially once, they got their like significant training compute online, I think like the. All the main evals at the company, for example, have always Coding evals, long horizon agentic programming. from day one, that was always the plan.
+
+**Anjney Midha \[00:54:34\]:** Because when, like, Claude Instant came out and Claude 2 came
+
+**Alex Atallah \[00:54:38\]:** Yes
+
+**Anjney Midha \[00:54:39\]:** I remember the marketing mostly being focused on pros. Like, this
+
+**Alex Atallah \[00:54:43\]:** Yeah
+
+**Anjney Midha \[00:54:43\]:** Could write better
+
+**Swyx \[00:54:44\]:** Yeah Long context. It was the first of its kind.
+
+**Anjney Midha \[00:54:47\]:** Long context,
+
+**Swyx \[00:54:49\]:** This directly affected me ‘cause I built something on that. Yeah.
+
+**Alex Atallah \[00:54:51\]:** What did you make?
+
+**Swyx \[00:54:52\]:** A small developer, which was my Devin before Devin.
+
+**Alex Atallah \[00:54:54\]:** Oh, yeah. Yes.
+
+**Anjney Midha \[00:54:55\]:** Yes.
+
+**Alex Atallah \[00:54:55\]:** Small.
+
+**Swyx \[00:54:56\]:** Yes. and, so I think, like, there’s, there’s all that really, like, good, like, focus is another thing - That is a question that people do wanna ask. you could have built any other things. Like, and obviously OpenRouter was working. were there other ideas that you wanted to pursue that you turned down? just the paths, roads not taken.
+
+**Anjney Midha \[00:55:16\]:** We made a couple prototypes for things that we didn’t launch. One was a tuning model as a service.
+
+**Swyx \[00:55:23\]:** Yeah. Lots of that with OpenPipe and, all those things.
+
+**Anjney Midha \[00:55:25\]:** But it - It was in a very consumery form factor, where you would give us a YouTube video or two or three. We would then extract all the transcripts from it and try to tune a model to talk like the person in the YouTube
+
+**Alex Atallah \[00:55:40\]:** Yeah
+
+**Anjney Midha \[00:55:40\]:** Or the people in the videos that you sent. So, like, a really easy way of creating a tuned model based on, like, some videos that you like.
+
+**Alex Atallah \[00:55:48\]:** That would be so useful.
+
+**Anjney Midha \[00:55:50\]:** We,
+
+**Alex Atallah \[00:55:51\]:** No
+
+**Anjney Midha \[00:55:51\]:** We made it too. It was
+
+**Alex Atallah \[00:55:53\]:** You don’t think so?
+
+**Anjney Midha \[00:55:54\]:** It was, it
+
+**Alex Atallah \[00:55:55\]:** And nobody used it?
+
+**Anjney Midha \[00:55:55\]:** It - We didn’t like, test it with that many people because the model marketplace was our main focus, and it was, like, growing, and we were building more conviction in it over time.
+
+**Swyx \[00:56:09\]:** Just, you
+
+**Alex Atallah \[00:56:10\]:** Yeah. Why,
+
+**Swyx \[00:56:10\]:** As a creator
+
+**Alex Atallah \[00:56:11\]:** Yes. I’m a creator.
+
+**Swyx \[00:56:11\]:** Have you been pitched many, like, - I have five hundred hours of recorded voice of myself.
+
+**Alex Atallah \[00:56:17\]:** Right.
+
+**Swyx \[00:56:17\]:** Make a thing of you, charge access to it. it works for OnlyFans, doesn’t work for
+
+**Alex Atallah \[00:56:23\]:** I see
+
+**Swyx \[00:56:23\]:** As regular people. I think - this is mostly, - It’s just a glorified RAG bot.
+
+**Alex Atallah \[00:56:28\]:** Right.
+
+**Swyx \[00:56:29\]:** Whether it’s in the weights or it’s outside the weights, doesn’t really matter. You’re just doing RAG on the videos, and people ultimately always just wanna find the source video, that directly answers it.
+
+**Alex Atallah \[00:56:36\]:** Oh. my use case was mostly to practice - - with myself ‘cause I often like to see what. Like, the way I practice for a job interview or if I’m hiring a candidate or public speaking or whatever is I wish there was, like, a good
+
+**Swyx \[00:56:48\]:** Yeah
+
+**Alex Atallah \[00:56:48\]:** That I could, like, critique ‘cause it’s kinda hard to pull yourself out. I would never get. I would never offer it to other people as a service.
+
+**Swyx \[00:56:54\]:** I wish there were, like, pick your top five mentors that, then talk to them instead of talking to yourself.
+
+**Alex Atallah \[00:56:57\]:** That’d be cool too, yeah.
+
+**Anjney Midha \[00:56:58\]:** That was, that’
+
+**Swyx \[00:56:59\]:** That’s the creator AI. That’s a replica.
+
+**Anjney Midha \[00:57:01\]:** And that was the use case we were aiming at.
+
+**Alex Atallah \[00:57:02\]:** I see.
+
+**Anjney Midha \[00:57:03\]:** Is like, you wanna create an experience
+
+**Swyx \[00:57:06\]:** Like AI Steve Jobs and.
+
+**Anjney Midha \[00:57:07\]:** And AI Steve Jobs was the initial use case.
+
+**Alex Atallah \[00:57:11\]:** That’s a,
+
+**Anjney Midha \[00:57:12\]:** Even though it’s not allowed.
+
+**Alex Atallah \[00:57:14\]:** That’s a, that’s a common prototype, yeah.
+
+**Swyx \[00:57:15\]:** Talking about adjacencies, tuning as a service, as part of the router service is something that I would typically think about as well, right? Like, why don’t you do that? ‘Cause if people are running already their inference through you, store everything, log everything, tune to a smaller model that is cheaper, faster, all these things that’s within your control, right? you didn’t do that, but, like, other people would have pitched that in the general state of a infra startup.
+
+**Anjney Midha \[00:57:37\]:** Yeah. Yeah.
+
+**Alex Atallah \[00:57:37\]:** I think you were just maybe a little bit early ‘cause today that’s an extraordinarily growing segment. Like, from Mistral, where they do a lot of enterprise deployments
+
+**Anjney Midha \[00:57:44\]:** Right
+
+**Alex Atallah \[00:57:44\]:** And stuff and tuning as, custom models for ASML or whatever. And often
+
+**Swyx \[00:57:48\]:** But not as a router. They’re, they’re just like, “I come to you because I like your Mistral models. I want custom Mistral model,” right? It is not, “I want, to run all my OpenAI prompts, - store all my results, and then just move off of OpenAI.” Right? They’re not doing that.
+
+**Alex Atallah \[00:58:01\]:** As a, as like a way to export off of dependency on a Frontier lab, I have not seen that yet. Yeah.
+
+**Swyx \[00:58:08\]:** Right.
+
+**Alex Atallah \[00:58:08\]:** Which was your vision.
+
+**Swyx \[00:58:09\]:** Is efficient to do.
+
+**Anjney Midha \[00:58:10\]:** We decided. Really, we, like, leaned into our focus and figured that, like, there aren’t. Like, we just saw the ecosystem develop over time. All these inference providers that do wanna help companies do that, - Like, it makes sense for us to partner with them and to, like, give users lots of choice and to, like, figure out what makes them, what gives them competitive advantages. It’s, it’s a whole new business and there’s, there’s value in being a neutral marketplace that just like, works with those companies.
+
+**Alex Atallah \[00:58:45\]:** Could you share a little bit, to Sean’s point, like, how you prioritized. What are some ways you prioritize features? ‘Cause you’ve always done it so elegantly that I never. it just happens, and you make all the right decisions that always have product-market fit from the outside looking in. But consistently, you seem to have prioritized, a lot of hit features that worked. And maybe I have a sample set bias or whatever, but Sean’s question
+
+**Swyx \[00:59:06\]:** Can you list what you think hit features worked?
+
+**Alex Atallah \[00:59:09\]:** Oh, the leaderboards.
+
+**Swyx \[00:59:10\]:** Leaderboard, okay.
+
+**Alex Atallah \[00:59:10\]:** Yeah. like, from day
+
+**Swyx \[00:59:13\]:** That’s charting, right? That’s the feedback loop.
+
+**Alex Atallah \[00:59:14\]:** Charting, BYOK.
+
+**Swyx \[00:59:15\]:** But, like, he had, like, ins. he had, like, And I think there was a whole thing I wanna get into about, like, completions versus
+
+**Alex Atallah \[00:59:22\]:** Yes.
+
+**Swyx \[00:59:23\]:** Check completions versus completions. And then also, let’s call it, like, the rise of the reasoning models and how you deal with those, multimodality, all those things, right?
+
+**Alex Atallah \[00:59:31\]:** Yeah. BYOK.
+
+**Swyx \[00:59:32\]:** BYOK, yeah.
+
+**Alex Atallah \[00:59:32\]:** That was a huge one.
+
+**Anjney Midha \[00:59:34\]:** There’s one I. Like, I think it was in early 2024, very early 2024, we thought it might be interesting to fuse the results of multiple models together, and we launched a prototype called MOM, Mixture of Models, that let you, like, pick a couple models, or we’d pick them for you, and then it would fuse the results together at the end, and it would show you all the intermediate results in this, like, big Kanban looking product.
+
+**Swyx \[01:00:05\]:** What does the fusion at the end, another model?
+
+**Anjney Midha \[01:00:07\]:** Another model. The,
+
+**Swyx \[01:00:08\]:** The smartest of
+
+**Anjney Midha \[01:00:09\]:** The smartest
+
+**Swyx \[01:00:10\]:** Of the set
+
+**Anjney Midha \[01:00:10\]:** Of the three, of the set.
+
+**Swyx \[01:00:12\]:** Okay. So this is like a council idea?
+
+**Anjney Midha \[01:00:13\]:** Yeah. It was a model. It was like a very early LLM council.
+
+**Alex Atallah \[01:00:16\]:** This is a agent swarm as, like, they would call it at one of the Frontier Labs, in the early days?
+
+**Anjney Midha \[01:00:23\]:** Yeah, like some of those ideas are, like, going the right direction, but the devil’s in the details.
+
+**Swyx \[01:00:27\]:** Yeah.
+
+**Anjney Midha \[01:00:27\]:** There’s a lot of, like, product refinement needed to make them really work. they take your focus away
+
+**Swyx \[01:00:34\]:** Right
+
+**Anjney Midha \[01:00:34\]:** Whatever else you have going on. And there’s a lot of, like, community building and learning that you need to do. And the technology might be too early. So there are - like, all kinds of reasons they might go wrong. And in our case, the technology was a little too early. In other words, the fused result was a little bit
+
+**Swyx \[01:00:53\]:** Right. Like a Frankenstein
+
+**Anjney Midha \[01:00:54\]:** Sometimes the same as the best model that was being used to fuse because the best model was so far ahead of options two and three at the time. over time, the top three or four LLMs have gotten closer together, still neurodivergent, but, like, all capable of inserting, like, pretty interesting ideas. Like, RL has like, expanded the surface area of creativity for machine learning researchers within each lab, and so they can, diversify the reasoning power of different models more effectively. At least that’s my theory for
+
+**Swyx \[01:01:29\]:** Yeah
+
+**Anjney Midha \[01:01:30\]:** Fusion - it, like, works better than it used to, but early twenty-twenty-four. And, so the technology was a little bit too primitive. The form factor was not right, and so we would have had to go through a couple more iterations. And so we decided to just delete all the code. And, then years later, middle of twenty-twenty-six, or early twenty-twenty-six, we’re like, “Let’s bring it back.” Like, the research is looking kinda promising for fusion. The models now have, like, two, three, four top frontier models that are all really good and, like, I’m, I’m frequently trying to, like, consult multiple models to get the best results. Like, and then I ran a little personal experiment where I was like, “I’m gonna, like, do a, an architecture plan for a code change. I’m gonna give it to all the models. I’m gonna fuse the result, and then I’m gonna ask all the models if the fused result is better than the individual result each model came up with.” And they all said yes, that the fused result was better. And this happened a couple times, and I was like, “Okay, spot check, pretty good. We should, like, benchmark this.” And that’s how we built fusion.
+
+**Swyx \[01:02:40\]:** Yeah. And it came on your Fable, so you were like, “This is Fable level.”
+
+**Anjney Midha \[01:02:43\]:** Yeah.
+
+**Swyx \[01:02:44\]:** Let’s start leading up to this year, which we haven’t gone to this year. can you mark out the main milestones in the journey? I think, it seems like your promise, was, routing. You decided the business model very early.
+
+**Swyx \[01:02:59\]:** You take a cut. And, like, what are the major milestones that, inflect the growth, right? Like, you’re, you’re growing, like, 9% week on week now? Is this the official number?
+
+**Anjney Midha \[01:03:10\]:** In terms of token volume, I think that sounds about right, yeah.
+
+**Swyx \[01:03:13\]:** Yeah. So just, like, can you mark out, like, the brief history of OpenRouter up to, the acquisition? Let’s, let’s call we’re, we’re just, we’re just, talking about, people are, - you have a your birth moment with, the Mistral stuff where people are really competing. You have your state of AI thing where,
+
+**Anjney Midha \[01:03:32\]:** Yeah.
+
+**Swyx \[01:03:32\]:** It’s very cute. You have a hundred trillion tokens, ha, ‘cause now you’re doing ten a week, .
+
+**Anjney Midha \[01:03:39\]:** Yeah. We’re doing ten a day.
+
+**Swyx \[01:03:41\]:** Ten a day now?
+
+**Anjney Midha \[01:03:42\]:** Yeah. More.
+
+**Swyx \[01:03:43\]:** So yeah, you do this in ten days.
+
+**Swyx \[01:03:45\]:** Like, what are the major end points there? I just wanna. Like, there’s a smooth curve, but, like, you feel the inflections.
+
+**Anjney Midha \[01:03:51\]:** A lot of this is oriented around model launches. we had, a huge focus on pros all the way up through May of twenty-twenty-four, because coding was just not there, and no apps were able to build much on top of it. So, a diversity in models, but not a wide diversity and not a wide diversity in use cases. Dream Tavern was one of our top apps at the time. The creator of Dream Tavern now runs product at Cognition, Devon. - Then - In the middle of twenty-twenty-four, we saw Claude 3.5 Sonnet. That came out, incredible leap forward in coding, and we saw the dynamics of, like, apps building on top of us change. we saw a huge surge in volume in, like, users, using OpenRouter. And this is when I think people started to look at the, like, money that they were spending and get a little bit like, “Whoa, what’s going on? I might need to, like, think about, like, more efficient but equivalent models.” And shortly after that, I think it was after Sonnet three five, Mixtral 8x7B came out, and everyone was like, “What? This is the model.” Like, the OpenWeights community delivered. And so it was really good timing from Mistral.
+
+**Swyx \[01:05:17\]:** All of Anja’s portcos are just helping you out.
+
+**Alex Atallah \[01:05:21\]:** It takes an ecosystem to grow an OpenRouter?
+
+**Anjney Midha \[01:05:24\]:** Yeah, that was the. Yeah, it was. It like, it was the, like, this early ecosystem, it was like a swing action where, like, model labs would come up with some frontier innovation. Like, usage would surge. Then users, look at their invoices 30 days later and like, “Whoa, what’s going on here?” And then OpenWeight models would deliver, like, a, like, effective options two, three months later. We saw that happen several times.
+
+**Swyx \[01:05:54\]:** By the way, one
+
+**Anjney Midha \[01:05:55\]:** Yeah
+
+**Swyx \[01:05:55\]:** One thing you also did with the coding agents was that you broke out which are the top coding agents, and they love that. They love that leaderboard. The Klein versus the Rue code versus the what have you.
+
+**Anjney Midha \[01:06:04\]:** Yeah. Like, Klein was, like, the top of our leaderboard at the time. We, We then, at the end of. And I’ll skip forward a little bit. The end of twenty-twenty-five, there were quite a few coding apps on the leaderboard, but they were all IDs or, terminal-Agents. And at the end of twenty-five, we saw OpenClaw appear. And OpenClaw was, like, particularly interesting because, one, it was like a new form factor that, like, brought in a new type of user, not just a developer, but like a productivity or a, like an internet creator came to AI for the first time. And it also had an interesting architecture where it was, like, calling your chosen model for these heartbeats to see if it was still alive in addition to using the model for real tasks. And the heartbeats are like, they’re kind
+
+**Swyx \[01:07:02\]:** Fréquence.
+
+**Anjney Midha \[01:07:02\]:** You don’t wanna pay a lot of
+
+**Swyx \[01:07:03\]:** Every thirty minutes
+
+**Anjney Midha \[01:07:04\]:** To do a heartbeat.
+
+**Swyx \[01:07:05\]:** Yeah.
+
+**Anjney Midha \[01:07:05\]:** So, the auto router that we provided was really useful to this, like, wide range of users all of a sudden. And so we just saw it rocket exponentially, and then we saw, like OpenClaw just blow up and a couple other, apps lean into that new paradigm and do something similar. Hermes came out and really leaned into things like the auto router and built, like, a really good community and leaned into, like, skill management and making it really easy and effective for people to, like, set their memory in the agent
+
+**Swyx \[01:07:44\]:** Yeah.
+
+**Anjney Midha \[01:07:44\]:** And build really good skills.
+
+**Swyx \[01:07:45\]:** Which another thing you never did, memory skills, sandboxes, all these, like, adjacent things you could have done.
+
+**Anjney Midha \[01:07:52\]:** Could have, but It’- I think,
+
+**Swyx \[01:07:54\]:** It’s hard to bet.
+
+**Anjney Midha \[01:07:55\]:** They’re also - There are things that developer-- that really matter for, like, the developer use cases that were coming out at the time. Like, developers wanted to architect those things.
+
+**Swyx \[01:08:05\]:** Right.
+
+**Anjney Midha \[01:08:05\]:** Those were kinda critical to building a good user experience. It’s really-- It was, like, - It’s been hard for companies to find abstractions that work for all developers on the memory layer. It is, it - Yeah, there are some, like Mastra has done a pretty good job, for example. But, like, developers have, like, lots of varied preferences for them. And then we - - the way our leaderboard has changed over time is like a movie of how the AI space has changed over time. If you just like, go to the Wayback Machine and look at the rankings leaderboard and the apps leaderboard over time, it shows you, like, what’s happened in AI over the last couple of years.
+
+**Swyx \[01:08:48\]:** To me, the coming of age moment was, Andrej Karpathy was like, “I no longer read Local Llama ‘cause, like, I just go to OpenClaw-- OpenRouter’s leaderboard.”
+
+**Swyx \[01:08:57\]:** Which I remember that. Yeah. I think he probably, like, said, like, “Sorry, guys, I’m gonna send a bunch of traffic to you.”
+
+**Swyx \[01:09:03\]:** So I also wanna bring it into the Stripe, thing.
+
+**Swyx \[01:09:07\]:** How does that conversation start?
+
+**Anjney Midha \[01:09:09\]:** We had this longstanding relationship with Stripe, though, from, like, many different projects that we had worked on with them. We invest, a lot of effort in countering abuse,
+
+**Swyx \[01:09:24\]:** Token fraud.
+
+**Anjney Midha \[01:09:24\]:** And token fraud.
+
+**Swyx \[01:09:26\]:** Can you give some numbers just - so people understand?
+
+**Anjney Midha \[01:09:29\]:** I think I, like, I posted about this. We blocked 10x as much dollar volume last month as the month before. And the types of token fraud are diversifying quite a bit. there are, like, fraudsters going after typical stolen credit cards, but there are also, people trying to resell traffic against the terms of service. There’s, like, hacked accounts. There’s people who just lose - like, their whole company is compromised, and they don’t even realize it, and we help them, like, regain control and detect it. There’- There are accounts that are, like, reselling inference on the side. There’- There are accounts that are dealing with, a, like, an accidental runaway agent, and they don’t realize it. Not a hack, but it’s something that blows up and the company doesn’t want it. And so our trust and safety team, like, works a lot on all of these, like, categories of problems and helps block it and detect it. And so we’ve built these. we have models around them. We - We worked closely with Stripe for a while on this, and I think it’s gonna become a huge problem in the ecosystem. Like, we’re already seeing a lot of companies start to see these fraudsters, like, spread and look for other ways other than OpenRouter to other fraud vectors. And if you’re making a gateway or selling, like, generalized inference, you are a target for fraud. If you’re selling very discreet, like, intelligence products that are, like, doing something pretty specific, but not, like, just reselling inference with some added capability, then you’re way less likely to get these fraudsters. So - I think we’ll see companies also move away from just reselling inference with some like, added capability and move towards like, discreet tasks and charging for those tasks and charging for those enhancements and letting people bring their own inference, like, in a party way.
+
+**Swyx \[01:11:39\]:** Whoa. Okay. and yeah, obviously you would power that.
+
+**Anjney Midha \[01:11:44\]:** Right.
+
+**Swyx \[01:11:44\]:** But you - People pay, for outcomes Or per task?
+
+**Anjney Midha \[01:11:48\]:** I think people will pay. I think, like, the Datadog pricing page is a good look at, like, the future to come. It’s like companies, like infrastructure companies will, like, charge for different types of events that they’re providing, and there’ll be lots of, like, continuous pricing models that look like that. And of course, there will be, like, if you go down, towards consumer apps, simpler pricing, more subscriptions, fewer events to worry about, and ones that, like, are not. Focus on just adding a markup on top of inference.
+
+**Swyx \[01:12:28\]:** Yeah.
+
+**Anjney Midha \[01:12:28\]:** Not just because fraud is hard, but also because the pressure from the labs and from - like, good inference providers to, like, do a commit and then bring your inference elsewhere is gonna be very high.
+
+**Swyx \[01:12:44\]:** Any comments?
+
+**Alex Atallah \[01:12:45\]:** Two. One, I think Alex has done a very eloquent job of describing something, counterintuitively I knew would be a thing at scale, like four years ago because of Discord. And the particular experience that taught me this was, as we started scaling Midjourney, - one of the primary ways that we used to give away or, like, get people to try Midjourney early on to get to their first ten generations. Because, ten generations - ten images generated was roughly the magic moment activation point we found. Like, once you’d done ten, you were like, “This is extraordinary.” but for that week, so we had a free trial with Midjourney. And one day I woke up, because I was the head of platform and had to monitor, I had all these dashboards, and I had, like, three missed calls from David. And it turns out, like, there had been this flood of new users overnight. And we were like, “This is great.” And he was like, “No, we shut down the free trial.” And I was like, “Why is that?” and he said, “I want you to look at the geolocation IP addresses.” And somebody in China had started to resell Midjourney free, subscriptions with the free trial as a way to, like, you - It was fraud abuse, right?
+
+**Swyx \[01:13:54\]:** Even for a specialized model like Midjourney.
+
+**Alex Atallah \[01:13:56\]:** Yeah. And that was an application. So this idea - I think the big picture realization I had back then was, hey, there’s a new type of unit of value that’s being streamed across the internet called a token.
+
+**Alex Atallah \[01:14:11\]:** And over the next ten years, the entire internet value chain was going to have to deal with the fact that, like, the more valuable tokens got, The more bad actors are gonna go to try to get their hands on those tokens. And anytime you scale something and the payload gets more and more valuable, More bad things, people try to get access to that value. And so it was very obvious to me back then. And so, look, to this day, I don’t think there’s a free turn. Like, I don’t think Midjourney’s ever turned on the free trial since then, because it was really not an easy problem to solve in terms of trust and safety. that’s why I - started teaching the class Security at Scale at Stanford. Like, it was like one of - that and the Anthropic learnings, to me, it was clear that the need for security at scale is gonna be enormous a few years from then. Because if you just do the math, right, think about, like, if we’re. online payments, has started roughly in the eighties and nineties, right, and grew to over a trillion dollars over the next ten years, and we needed to build entirely new payment solutions to deal with online fraud. where we are today is roughly there on tokens, but over the next even five years, we’re expecting the token economy to get to, like, roughly 5 trillion dollars. And over the next ten years, I’d be shocked if we weren’t at 10 trillion dollars of token flow. And so if we were starting to see such aggressive abuse and fraud at subscale, Midjourney, remember Midjourney at this point was, like, less than three $100 million revenue run rate a year.
+
+**Alex Atallah \[01:15:44\]:** I just realized we were gonna need, like, entirely new, Like, systems to deal with the fraud that was gonna happen for trying to get into the token flow. And so, - I, - I forget the board meeting it was when you brought up that, Stripe wanted to partner up, and it made so much sense to me because Stripe Radar. When I was at Kleiner ten years ago, we invested in Stripe, and the whole pitch that, Patrick and John communicate so eloquently was like, “Hey, unlike traditional payment tools like Braintree that do a day verification, like KYC and AML to get the fraud out of the way, we just bite the fraud cost upfront as customer acquisition cost and - tell a developer, like, just use five lines of code, and we start accepting your payments in five minutes. And what’ll happen is over time, we collect all this data on the developers.”
+
+**Swyx \[01:16:31\]:** Cloudflare model.
+
+**Alex Atallah \[01:16:32\]:** Is the Cloudflare model, right? And they did. Five years later, they launched Stripe Radar, and Stripe really today is a security company. That’s the real. People think it’s a payments company. No, the reason. There’s lots of other payments providers today that give you, like, cheaper payments transmission. But the reason Stripe keeps, being the dominant one here and Adyen and Europe is because they have extraordinary fraud detection that they’ve built, - over the years.
+
+**Swyx \[01:16:52\]:** It’s the same story with Elon and Max Levchin
+
+**Alex Atallah \[01:16:55\]:** And affirm, yeah.
+
+**Swyx \[01:16:56\]:** Yeah.
+
+**Alex Atallah \[01:16:57\]:** So, I think the story shows up over and over again, where every time you have value streamed across the world in large amounts, you need new protection and security infrastructure to fight, to keep the bad guys out and allow the good people to, like, have their transactions happen really fast. And so I think, - this is why - from my perspective, like, the Stripe and OpenRouter story is a security story for the internet ecosystem, for the frontier AI ecosystem. Without a partnership like that, it becomes very hard to defend the quality of experience and the speed and all the good stuff without letting the bad guys get in the way. the second is that, there’s this underappreciated thing about, like, the fact that you need to. Like, - all the bad things that Alex described as being perpetuated by humans right now is going to be perpetuated by AI agents over the next ten years.
+
+**Swyx \[01:17:46\]:** Oof.
+
+**Alex Atallah \[01:17:47\]:** Right? So think about the, like, recursive scale we’re about to see of bad actors. It’s not just bad human beings, it’s, it’s all the bad agents that are gonna be attacking the token flow. And there’s. It’s very hard if you’re a researcher and at an AI lab to reason about that problem because the only data you have is how agents you’re training are going rogue. But that’s just a fraction of all the bad behavior on the internet that we’re gonna see. And so what you need is defenders, new sheriffs in town, which cowboy hats, that can see all the bad behavior from AI agents across the ecosystem, from different model labs and different trained deployments and different developers, and take all of that data and say, “We’re gonna build a shield for the entire token economy.” Because without that, the amount of fraud we’re gonna see of this 10 trillion dollars in GMV and global GDP growth is, like, a huge percentage of that, I think, is going to be fraud, abuse. And we might never get there if people just don’t trust. Tokens, right? and I don’t think this infrastructure exists. So you have your work cut out for you with, at Stripe, but I don’t think people have realized the scale at which agents, agent, agentic fraud, like bad behavior perpetuated by AI agents is about to hit us like a tsunami.
+
+**Swyx \[01:18:58\]:** Yeah. there’s a lot to dig into there. I wanna give you the last word. We do have to wrap. what can people expect from OpenRouter and Stripe?
+
+**Anjney Midha \[01:19:07\]:** I think this is a really good way for us to accelerate market and, to go upmarket more quickly. It’s also, as Ansh eloquently described, this is, there’s a really clear better together story here when it comes to improving trust and safety and making it really easy to, like, accept tokens and let people bring their own inference to your app and to help developers just, like, build on top of inference, going forward. We have a really strong brand with OpenRouter, and we’re keeping the brand. So, like, OpenRouter, like, as a product and the roadmap and the name and the brand, like, is staying the same. And so what, like, you should expect, in the next six months is that most things will be like what we would have done had we been independent, except everything will be moving faster. And that’s like our, term goal. Longer term, hopefully I can comment on it soon, but I can’
+
+**Anjney Midha \[01:20:11\]:** Now.
+
+**Swyx \[01:20:11\]:** Okay. Well, we’ll hopefully do a follow-up at some point, but thank you for being so generous with your time, and, congrats on the partnership. this is one of the most beautiful bromances I’ve seen in AI.
+
+**Alex Atallah \[01:20:22\]:** Just starting out.
+
+**Swyx \[01:20:23\]:** Starting from Stanford
+
+**Alex Atallah \[01:20:24\]:** Just starting.
+
+**Swyx \[01:20:24\]:** To here.
+
+**Alex Atallah \[01:20:24\]:** Yeah. Lots more to do.
+
+**Anjney Midha \[01:20:26\]:** Yeah.
+
+**Alex Atallah \[01:20:26\]:** Lots of sheriff, policing to do of the, of
+
+**Swyx \[01:20:29\]:** Yes. The cowboys in town.
+
+**Alex Atallah \[01:20:30\]:** Of the token economy. We need We need new sheriffs for sure.
+
+**Swyx \[01:20:33\]:** Yeah. Awesome. Thank you.
+
+**Anjney Midha \[01:20:35\]:** Thank you.

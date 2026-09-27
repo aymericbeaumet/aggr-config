@@ -1,0 +1,6 @@
+identity = "05fd7c0ed74b4df973b30e9a0e92cc9ad4369783"
+resolved_url = "https://slack-status.com/feed/atom"
+title = "Slack System Status"
+site_url = "https://slack-status.com/"
+language = "en-US"
+body_hash = "5ce42ec223519500d7a5ae0a34adf72414f0b91f"

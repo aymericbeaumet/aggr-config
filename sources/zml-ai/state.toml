@@ -1,7 +1,7 @@
-identity = "6057fbdf24e8550c80c2fa028cf19b340b693a39"
-resolved_url = "https://zml.ai/posts/index.xml"
-title = "Posts on ZML - Model to Metal"
-site_url = "https://zml.ai/posts/"
+identity = "6984fc397dc89b54b9267f910338ee8e0d9e1971"
+resolved_url = "https://zml.ai/index.xml"
+title = "ZML - Model to Metal"
+site_url = "https://zml.ai/"
 language = "en-US"
-etag = 'W/"0e99d8c9d1d6cb9ffef2090acba98e01"'
-body_hash = "c3d3384714ded26c7345615829042dcaab068d31"
+etag = 'W/"e88a38f1199dd35bb4ef42c00f39015d"'
+body_hash = "3f8b8fecc5d1383fbc3c4f5379d52793dd9219c6"

@@ -1,0 +1,185 @@
+<div id="readability-page-1" class="page"><div>
+            <blockquote>
+  <p>Also translated to <a href="https://ziminpark.github.io/posts/system-design-for-discovery/">Korean</a> thanks to Zimin Park.</p>
+</blockquote>
+
+<p>How do the system designs for industrial recommendations and search look like? It’s uncommon to see system design discussed in machine learning papers or blogs; most focus on model design, training data, and/or loss functions. Nonetheless, the handful of papers that discuss implementation details elucidate design patterns and best practices that are hard to gain outside of hands-on experience.</p>
+
+<p>Specific to discovery systems (i.e., recommendations and search), most implementations I’ve come across follow a similar paradigm—components and processes are split into offline vs. online environments, and candidate retrieval vs. ranking steps. The 2 x 2 below tries to simplify this.</p>
+
+<p><img src="https://eugeneyan.com/assets/discovery-2x2.webp" loading="lazy" title="2x2 of online vs. offline environments, and candidate retrieval vs. ranking." alt="2x2 of online vs. offline environments, and candidate retrieval vs. ranking."></p>
+<p>2 x 2 of online vs. offline environments, and candidate retrieval vs. ranking.</p>
+
+<p><strong>The offline environment</strong> largely hosts batch processes such as model training (e.g., representation learning, ranking), creating embeddings for catalog items, and building an approximate nearest neighbors (ANN) index or knowledge graph to find similar items. It may also include loading item and user data into a feature store that is used to augment input data during ranking.</p>
+
+<p><strong>The online environment</strong> then uses the artifacts generated (e.g., ANN indices, knowledge graphs, models, feature stores) to serve individual requests. A typical approach is converting the input item or search query into an embedding, followed by candidate retrieval and ranking. There are also other preprocessing steps (e.g., standardizing queries, tokenization, spell check) and post-processing steps (e.g., filtering undesirable items, business logic) though we won’t discuss them in this writeup.</p>
+
+<p><strong>Candidate retrieval</strong> is a fast—but coarse—step to narrow down millions of items into hundreds of candidates. We trade off precision for efficiency to quickly narrow the search space (e.g., from millions to hundreds, a 99.99% reduction) for the downstream ranking task. Most contemporary retrieval methods convert the input (i.e., item, search query) into an embedding before using ANN to find similar items. Nonetheless, in the examples below, we’ll also see systems using graphs (DoorDash) and decision trees (LinkedIn).</p>
+
+<p><strong>Ranking</strong> is a slower—but more precise—step to score and rank top candidates. As we’re processing fewer items (i.e., hundreds instead of millions), we have room to add features that would have been infeasible in the retrieval step (due to compute and latency constraints). Such features include item and user data, and contextual information. We can also use more sophisticated models with more layers and parameters.</p>
+
+<p>Ranking can be modeled as a learning-to-rank or classification task, with the latter being more commonly seen. If deep learning is applied, the final output layer is either a softmax over a catalog of items, or a sigmoid predicting the likelihood of user interaction (e.g., click, purchase) for each user-item pair.</p>
+
+<p>Next, let’s see how the processes above come together in a recommender or search system.</p>
+
+<p><img src="https://eugeneyan.com/assets/discovery-system-design.webp" loading="lazy" title="Basic system design of a recommender or search system." alt="Basic system design of a recommender or search system."></p>
+<p>Basic system design for recommendations and search, based on the 2 x 2 above.</p>
+
+<p><strong>In the offline environment, data flows bottom-up,</strong> where we use training data and item/user data to create artifacts such as models, ANN indices, and feature stores. These artifacts are then loaded into the online environment (via the dashed arrows). <strong>In the online environment, each request flows left to right,</strong> through the retrieval and ranking steps before returning a set of results (e.g., recommendations, search results).</p>
+
+<p>Additional details on some arrows in the diagram:</p>
+<ol>
+  <li>With the trained representation learning model, embed items in the catalog.</li>
+  <li>With the item embeddings, build the ANN index that allows retrieval of similar embeddings and their respective items.</li>
+  <li>Get (historical) features to augment training data for the ranking model. Use the same feature store in offline training and online serving to minimize train-serve skew. Might require <a href="https://eugeneyan.com/writing/feature-stores/.#integrity-creating-correct-offline-and-online-features" target="_blank">time travel</a>.</li>
+  <li>Use the input query/item(s) embedding to retrieve <code>k</code> similar items via ANN.</li>
+  <li>Add item and user features to the candidates for downstream ranking.</li>
+  <li>Rank the candidates based on objectives such as click, conversion, etc.</li>
+</ol>
+
+<blockquote>
+  <p>Update: This 2x2 has since been referenced in other resources, including:</p>
+  <ul>
+    <li>NVIDIA’s “<a href="https://medium.com/nvidia-merlin/recommender-systems-not-just-recommender-models-485c161c755e">Recommender Systems, Not Just Recommender Models</a>”</li>
+    <li>Xavier Amatriain’s “<a href="https://amatriain.net/blog/RecsysArchitectures">Blueprints for RecSys Architectures</a>”</li>
+  </ul>
+</blockquote>
+
+<h2 id="examples-from-alibaba-facebook-jd-doordash-etc">Examples from Alibaba, Facebook, JD, Doordash, etc.</h2>
+
+<p>Next, we’ll briefly discuss the high-level system design of some discovery systems, based on their respective papers and tech blogs. I’ll highlight how these systems are split into offline and online environments, and their retrieval and ranking steps. For full details on the methodology, model, etc., I recommend you read the full paper/blog.</p>
+
+<p><strong>We start with Alibaba’s sharing about <a href="https://arxiv.org/abs/1803.02349" target="_blank">building item embeddings for candidate retrieval</a>.</strong> In the <em>offline</em> environment, session-level user-item interactions are mined to construct a weighted, bidirectional item graph. The graph is then used to generate item sequences via random walks. Item embeddings are then learned via representation learning (i.e., word2vec skip-gram), doing away with the need for labels. Finally, with the item embeddings, they get the nearest neighbor for each item and store it in their item-to-item (i2) similarity map (i.e., a key-value store).</p>
+
+<p><img src="https://eugeneyan.com/assets/alibaba-retrieval-design.webp" loading="lazy" title="Alibaba's design for candidate retrieval in Taobao." alt="Alibaba's design for candidate retrieval in Taobao."></p>
+<p>Alibaba's design for candidate retrieval in Taobao via item embeddings and ANN.</p>
+
+<p>In the <em>online</em> environment, when the user launches the app, the <a href="https://taobao.com" target="_blank">Taobao</a> Personalization Platform (TPP) starts by fetching the latest items that the user interacted with (e.g., click, like, purchase). These items are then used to <em>retrieve</em> candidates from the i2i similarity map. The candidates are then passed to the Ranking Service Platform (RSP) for <em>ranking</em> via a deep neural network, before being displayed to the user.</p>
+
+<p><strong>Alibaba also shared a similar example where they apply a <a href="https://arxiv.org/abs/2005.12002" target="_blank">graph network for ranking</a>.</strong> In the <em>offline</em> environment, they combine an existing knowledge graph (<code>G</code>), user behavior (e.g., impressed but not clicked, clicked), and item data to create an adaptive knowledge graph (<code>G_ui</code>). This is then merged with user data (e.g., demographics, user-item preferences) to train the ranking model (Adaptive Target-Behavior Relational Graph Network, ATBRN).</p>
+
+<p><img src="https://eugeneyan.com/assets/alibaba-ranking-design.webp" loading="lazy" title="Alibaba's design for ranking in Taobao." alt="Alibaba's design for ranking in Taobao."></p>
+<p>Alibaba's design for ranking in Taobao via a graph network (ATBRN).</p>
+
+<p>In the <em>online</em> environment, given a user request, the candidate generator <em>retrieves</em> a set of candidates and the user ID, before passing them to the Real-Time Prediction (RTP) platform. RTP then queries the knowledge graph and feature stores for item and user attributes. The graph representations, item data, and user data is then fed into the <em>ranking</em> model (i.e., ATBRN) to predict the probability of click on each candidate item. The candidates are then reordered based on probability and displayed to the user.</p>
+
+<p><strong>Next, we look at Facebook’s <a href="https://arxiv.org/abs/2006.11632" target="_blank">embedding-based retrieval for search</a>.</strong> In the <em>offline</em> environment (right half of image), they first train a two-tower network—with a query encoder and document encoder—that outputs cosine similarity for each query-document pair (not shown in image). This ensures that search queries and documents (e.g., user profiles, groups) are in the same embedding space.</p>
+
+<p><img src="https://eugeneyan.com/assets/facebook-retrieval-design.webp" loading="lazy" title="Facebook's design for embedding-based retrieval." alt="Facebook's design for embedding-based retrieval."></p>
+<p>Facebook's design for embedding-based retrieval via query and document encoders.</p>
+
+<p>Then, with the document encoder, they embed each document via Spark batch jobs. The embeddings are then quantized and published into their ANN index (“inverted index”). This ANN index is based on <a href="https://engineering.fb.com/2017/03/29/data-infrastructure/faiss-a-library-for-efficient-similarity-search/" target="_blank">Faiss</a> and fine-tuned (see Section 4.1 of paper). The embeddings are also published in a forward index, without quantization, for ranking. The forward index can also include other data such as profile and group attributes to augment candidates during ranking.</p>
+
+<p>In the <em>online</em> environment, each search request goes through query understanding and is embedded via the query encoder. The search request and associated embedding then go through the <em>retrieval</em> step to get nearest neighbor candidates via the ANN index and boolean filtering (e.g., match on name, location, etc.). The candidates are then augmented with full embeddings and additional data from the forward index before being <em>ranked</em>.</p>
+
+<p><strong>JD shared a similar approach for <a href="https://arxiv.org/abs/2006.02282" target="_blank">semantic retrieval for search</a>.</strong> In the <em>offline</em> environment, a two-tower model with a query encoder and an item encoder is trained to output a similarity score for each query-item pair. The item encoder then embeds catalog items before loading them into an embedding index (i.e., key-value store).</p>
+
+<p><img src="https://eugeneyan.com/assets/jd-retrieval-design.webp" loading="lazy" title="Major stages of an e-commerce search systems (left), JD's design for candidate retrieval (right)." alt="Major stages of an e-commerce search systems (left), JD's design for candidate retrieval (right)."></p>
+<p>Major stages of an e-commerce search systems (left), JD's design for candidate retrieval (right).</p>
+
+<p>Then, in the <em>online</em> environment, each query goes through preprocessing (e.g., spelling correction, tokenization, expansion, and rewriting) before being embedding via the query encoder. The query embedding is then used to <em>retrieve</em> candidates from the embedding index via nearest neighbors lookup. The candidates are then <em>ranked</em> on factors such as relevance, predicted conversion, etc.</p>
+
+<p>The paper also shares practical tips to optimize model training and serving. For model training, they raised that the de facto input of user-item interaction, item data, and user data is duplicative—item and user data appear once per row, consuming significant disk space. To address this, they built a custom TensorFlow dataset where user and item data are first loaded into memory as lookup dictionaries. Then, during training, these dictionaries are queried to append user and item attributes to the training set. This simple practice reduced training data size by 90%.</p>
+
+<p>They also called out the importance of ensuring offline training and online serving consistency. For their system, the most critical step was text tokenization which happens thrice (data preprocessing, training, serving). To minimize train-serve skew, they built a C++ tokenizer with a thin Python wrapper that was used for all tokenization tasks.</p>
+
+<p>For model serving, they shared how they reduced latency by combining services. Their model had two key steps: query embedding and ANN lookup. The simple approach would be to have each as a separate service, but this would require two network calls and thus double network latency. Thus, they unified the query embedding model and ANN lookup in a single instance, where the query embedding is passed to the ANN via memory instead of network.</p>
+
+<p>They also shared how they run hundreds of models simultaneously, for different retrieval tasks and various A/B tests. Each “servable” consists of a query embedding model and an ANN lookup, requiring 10s of GB. Thus, each servable had their own instance, with a proxy module (or load balancer) to direct incoming requests to the right servable.</p>
+
+<p><img src="https://eugeneyan.com/assets/jd-model-server.webp" loading="lazy" title="How JD organizes the embedding model and ANN indices across multiple versions." alt="How JD organizes the embedding model and ANN indices across multiple versions."></p>
+<p>How JD organizes the embedding model and ANN indices across multiple versions.</p>
+
+<p>(Aside: My candidate retrieval systems have a similar design pattern. Embedding stores and ANN indices are hosted on the same docker container—you’ll be surprised how far this goes with efficiently-sized embeddings. Furthermore, Docker makes it easy to version, deploy, and roll back each model, as well as scale horizontally. Fronting the model instances with a load balancer takes care of directing incoming requests, <a href="https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens/bluegreen-deployments.html" target="_blank">blue-green deployments</a>, and <a href="https://docs.aws.amazon.com/sagemaker/latest/dg/model-ab-testing.html" target="_blank">A/B testing</a>. SageMaker makes this easy.)</p>
+
+<p><strong>Next, we move from the embedding + ANN paradigm and look at DoorDash’s use of a <a href="https://doordash.engineering/2020/12/15/understanding-search-intent-with-better-recall/" target="_blank">knowledge graph for query expansion and retrieval</a>.</strong> In the <em>offline</em> environment, they train models for query understanding, query expansion, and ranking. They also load documents (i.e., restaurants and food items) into ElasticSearch for use in retrieval, and attribute data (e.g., ratings, price points, tags) into a feature store.</p>
+
+<p><img src="https://eugeneyan.com/assets/doordash-search-design.webp" loading="lazy" title="How DoorDash splits their search into offline and online, and retrieval (recall) and ranking (precision)" alt="How DoorDash splits their search into offline and online, and retrieval (recall) and ranking (precision)"></p>
+<p>DoorDash splits search into offline and online, and retrieval (recall) and ranking (precision).</p>
+
+<p>In the <em>online</em> environment, each incoming query is first standardized (e.g., spell check) and synonymized (via a manually curated dictionary). Then, the knowledge graph (Neo4J) <a href="https://eugeneyan.com/writing/search-query-matching/#graph-based-adding-concepts-and-relationships" target="_blank">expands the query</a> by finding related tags. For example, a query for “KFC” will return tags such as “fried chicken” and “wings”. These tags are then used to <em>retrieve</em> similar restaurants such as “Popeyes” and “Bonchon”.</p>
+
+<p>These candidates are then <em>ranked</em> based on lexical similarity between the query and documents (aka restaurants, food items), store popularity, and possibly the search context (e.g., time of day, location). Finally, the ranked results are augmented with attributes such as ratings, price point, and delivery time and cost before displayed to the customer.</p>
+
+<p><strong>Finally, we look at how LinkedIn <a href="https://arxiv.org/abs/1902.09041" target="_blank">personalizes talent search results</a>.</strong> Their system relies heavily on XGBoost, first as a model to retrieve the top 1,000 candidates for ranking, and second, as a generator of features (i.e., model scores, tree interactions) for their downstream ranking model (a generalized linear mixed model aka GLMix).</p>
+
+<p><img src="https://eugeneyan.com/assets/linkedin-offline-design.webp" loading="lazy" title="LinkedIn's offline design for generating GLMix ranking models." alt="LinkedIn's offline design for generating GLMix ranking models."></p>
+<p>LinkedIn's offline design for generating tree-based features, and training GLMix ranking models.</p>
+
+<p>In the <em>offline</em> environment,  they first combine impression and label data to generate training data (step 1 in image above). Labels consist of instances where the recruiter sent a message to potential hires and the user responded positively. The training data is then fed into a pre-trained XGBoost model to generate model scores and tree interaction features (step 3 in image above) to augment the training data. This augmented data is then used to train the ranking model (GLMix).</p>
+
+<p><img src="https://eugeneyan.com/assets/linkedin-online-design.webp" loading="lazy" title="LinkedIn's online design for candidate retrieval, feature augmentation, and ranking via GLMix." alt="LinkedIn's online design for candidate retrieval, feature augmentation, and ranking via GLMix."></p>
+<p>LinkedIn's online design for candidate retrieval, feature augmentation, and ranking via GLMix.</p>
+
+<p>In the <em>online</em> environment, with each search request, the search engine (maybe Elastic or Solr?) first <em>retrieves</em> candidates which are then scored via a first-level XGBoost model. The top 1,000 candidates are then augmented with (i) additional features (step 2 in image above) and (ii) tree interaction features via a second-level XGBoost model (step 3 in image above). Finally, these augmented candidates are ranked before the top 125 results are shown to the user.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>That was a brief overview of the offline-online, retrieval-ranking pattern for search and recommendations. While this isn’t the only approach for discovery systems, from what I’ve seen, it’s the most common design pattern. I’ve found it helpful to distinguish the latency-constrained online systems from the less-demanding offline systems, and split the online process into retrieval and ranking steps.</p>
+
+<p>If you’re starting to build your discovery system, start with <a href="https://eugeneyan.com/writing/real-time-recommendations/#how-to-design-and-implement-an-mvp" target="_blank">candidate retrieval via simple embeddings and approximate nearest neighbors</a>, before adding a ranker on top of it. Alternatively, consider using a knowledge graph <a href="https://eugeneyan.com/writing/search-query-matching/#graph-based-adding-concepts-and-relationships" target="_blank">like Uber and DoorDash did</a>. But before you get too excited, think hard about whether you need real-time retrieval and ranking, or <a href="https://eugeneyan.com/writing/real-time-recommendations/#when-not-to-use-real-time-recommendations" target="_blank">if batch recommendations will suffice</a>.</p>
+
+<p>Did I miss out anything? Please reach out and let me know!</p>
+
+<div>
+
+<blockquote><div lang="en" dir="ltr"><p>Let's explore how recsys &amp; search are often split into:</p><p>• Latency-constrained online vs. less-demanding offline environments <br>• Fast but coarse candidate retrieval vs. slower and more precise ranking</p><p>Examples from Alibaba, Facebook, JD, DoorDash, etc.<a href="https://t.co/zTsfElLw1z">https://t.co/zTsfElLw1z</a></p></div>— Eugene Yan (@eugeneyan) <a href="https://twitter.com/eugeneyan/status/1410029817496576009?ref_src=twsrc%5Etfw">June 30, 2021</a></blockquote> 
+
+</div>
+
+<p>Update (2022-04-14): Even Oldridge and Karl Byleen-Higley from NVIDIA updated the <a href="https://medium.com/nvidia-merlin/recommender-systems-not-just-recommender-models-485c161c755e" target="_blank">2-stage design to 4-stages</a> by adding a filtering step and splitting ranking into scoring and ordering. They also presented it at <a href="https://www.youtube.com/watch?v=5qjiY-kLwFY&amp;list=PL65MqKWg6XcrdN4TJV0K1PdLhF_Uq-b43&amp;index=4">KDD’s Industrial Recommender Systems workshop</a>.</p>
+
+<p><img src="https://eugeneyan.com/assets/4-stage-recsys.webp" loading="lazy" title="NVIDIA augmented the 2-stage design with 2 more stages." alt="NVIDIA augmented the 2-stage design with 2 more stages."></p>
+<p>Even Oldridge &amp; Karl Byleen-Higley (NVIDIA) augmented my 2-stage design with 2 more stages.</p>
+
+<h2 id="references">References</h2>
+<ul>
+  <li><a href="https://arxiv.org/abs/1803.02349">Billion-scale Commodity Embedding for E-commerce Recommendation</a> <code>Alibaba</code></li>
+  <li><a href="https://arxiv.org/abs/2005.12002">Adaptive Target-Behavior Relational Graph Network for Recommendation</a> <code>Alibaba</code></li>
+  <li><a href="https://arxiv.org/abs/2006.11632">Embedding-based Retrieval in Facebook Search</a> <code>Facebook</code></li>
+  <li><a href="https://arxiv.org/abs/2006.02282">An End-to-End Solution for E-commerce Search via Embedding Learning</a> <code>JD</code></li>
+  <li><a href="https://doordash.engineering/2020/12/15/understanding-search-intent-with-better-recall/">Things Not Strings: Understanding Search Intent with Better Recall</a> <code>DoorDash</code></li>
+  <li><a href="https://arxiv.org/abs/1902.09041">Entity Personalized Talent Search Models with Tree Interaction Features</a> <code>LinkedIn</code></li>
+  <li><a href="https://engineering.fb.com/2017/03/29/data-infrastructure/faiss-a-library-for-efficient-similarity-search/">Faiss: A Library for Efficient Similarity Search</a> <code>Facebook</code></li>
+</ul>
+
+<p><br>
+<strong>Thanks</strong> to Yang Xinyi for reading drafts of this.</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Jun 2021). System Design for Recommendations and Search. eugeneyan.com.
+        https://eugeneyan.com/writing/system-design-for-discovery/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2021system,
+  title   = {System Design for Recommendations and Search},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2021},
+  month   = {Jun},
+  url     = {https://eugeneyan.com/writing/system-design-for-discovery/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

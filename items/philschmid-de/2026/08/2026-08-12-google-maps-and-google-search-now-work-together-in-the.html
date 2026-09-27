@@ -1,0 +1,94 @@
+<div id="readability-page-1" class="page"><div><p>We just shipped something I've wanted for a while. You can now use the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/maps-grounding">Google Maps</a> and <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/google-search">Google Search</a> tools in the exact same call with Gemini 3.5 Flash and 3.6 Flash. You can also add custom functions or MCP servers into the same request via <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/tool-combination">Tool Combination</a>.</p>
+<h2 id="how-the-tools-fit-together">How the tools fit together</h2>
+<p>Building location apps usually means juggling web context and physical data yourself. You'd write separate LLM calls, parse messy JSON, and glue external APIs together.</p>
+<p>Now Gemini handles the whole loop in one interaction:</p>
+<ul>
+<li><strong><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/google-search">Google Search</a></strong>: finds live web info (tonight's concerts, recent food blogs, pop-up events).</li>
+<li><strong><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/maps-grounding">Google Maps</a></strong>: pulls physical details (exact coordinates, current opening hours, ratings, place IDs).</li>
+<li><strong>Custom tools &amp; MCP</strong>: runs your app logic (reserving a table, adding to calendar, saving to a database).</li>
+</ul>
+<p><img src="https://www.philschmid.de/static/blog/gemini-search-maps/agent_loop_tools_diagram.jpg" alt="Agent Loop with Built-in and Client Tools"></p>
+<p>When Gemini finds a venue on the web, it queries Maps for the exact place details, then hands structured parameters to your <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/function-calling">function call</a>. Zero roundtrips on your side.</p>
+<h2 id="the-javascript-snippet">The JavaScript snippet</h2>
+<p>Here is how you set it up with the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">Interactions API</a> using <code>@google/genai</code>:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">import { GoogleGenAI } from "@google/genai";
+ 
+const ai = new GoogleGenAI({});
+ 
+const bookTableTool = {
+  type: "function",
+  name: "book_table",
+  description: "Reserves a table at a chosen venue.",
+  parameters: {
+    type: "object",
+    properties: {
+      placeName: { type: "string" },
+      time: { type: "string" },
+      partySize: { type: "number" },
+      seatingPreference: { type: "string" }
+    },
+    required: ["placeName", "time"]
+  }
+};
+ 
+const interaction = await ai.interactions.create({
+  model: "gemini-3.6-flash",
+  input: "Find a quiet coffee spot in SoHo with a garden patio open this morning, and book a table for 2 at 10am.",
+  tools: [
+    { type: "google_search" },
+    { type: "google_maps" },
+    bookTableTool
+  ]
+});</code></pre></div></figure>
+<h2 id="running-it-in-an-app">Running it in an app</h2>
+<p>I put together a quick app to test the flow end-to-end.</p>
+<p>You start with a prompt:</p>
+<p><img src="https://www.philschmid.de/static/blog/gemini-search-maps/screen_1_empty_input.jpg" alt="Prompt Input State"></p>
+<p>In one turn, Gemini searches the web for patio spots in SoHo, verifies the venues on Google Maps, drops pins on the map, and prepares the reservation action:</p>
+<p><img src="https://www.philschmid.de/static/blog/gemini-search-maps/screen_2_results_and_map.jpg" alt="Results with Map Pins and Proposed Action"></p>
+<p>When the user clicks confirm, your app calls your real reservation service, gets a reference ID, and hands that result back to Gemini in turn 2 using <code>previous_interaction_id</code>:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">// 1. Execute the actual booking in your backend
+const bookingResult = await reservationService.book({
+  venue: functionCall.arguments.placeName,
+  time: functionCall.arguments.time,
+  party: functionCall.arguments.partySize
+});
+ 
+// 2. Send the result back to Gemini to finish the interaction
+const finalInteraction = await ai.interactions.create({
+  model: "gemini-3.6-flash",
+  previous_interaction_id: interaction.id,
+  input: [{
+    type: "function_result",
+    call_id: functionCall.id,
+    name: "book_table",
+    result: [{
+      type: "text",
+      text: JSON.stringify({
+        status: "confirmed",
+        reference: bookingResult.id
+      })
+    }]
+  }]
+});</code></pre></div></figure>
+<p>The server keeps the whole grounding context and conversation state alive without you having to re-send token histories:</p>
+<p><img src="https://www.philschmid.de/static/blog/gemini-search-maps/screen_4_confirmed.jpg" alt="Reservation Confirmed"></p>
+<h2 id="using-opentable-via-mcp">Using OpenTable via MCP</h2>
+<p>Instead of writing custom booking functions by hand, you can plug in an existing OpenTable MCP server directly:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="javascript">const interaction = await ai.interactions.create({
+  model: "gemini-3.6-flash",
+  input: "Find a romantic pasta bar in the West Village with an open table at 7:30pm and book it for 2.",
+  tools: [
+    { type: "google_search" },
+    { type: "google_maps" },
+    {
+      type: "mcp_server",
+      name: "opentable",
+      url: "https://mcp.opentable.com/sse"
+    }
+  ]
+});</code></pre></div></figure>
+<p>Gemini finds the restaurant through Search, checks reviews and coordinates on Maps, and handles the live reservation through OpenTable's MCP server in the background.</p>
+<h2 id="why-this-is-fun">Why this is fun</h2>
+<p>Having Search, Maps, and MCP together cuts out a lot of boilerplate. You don't have to extract keywords, call Places APIs, and re-prompt to figure out the next step.</p>
+<p>Check out the docs for <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/tool-combination">Tool Combination</a>, <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/maps-grounding">Maps Grounding</a>, and the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/quickstart">Interactions API Quickstart</a> to try it out.</p></div></div>

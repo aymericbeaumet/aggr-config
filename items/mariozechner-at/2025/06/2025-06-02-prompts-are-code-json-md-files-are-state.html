@@ -1,0 +1,1271 @@
+<div id="readability-page-1" class="page"><article>
+
+
+
+<p>2025-06-02</p>
+
+<figure>
+<img src="https://mariozechner.at/posts/2025-06-02-prompts-are-code/media/hello-computer.jpg">
+<figcaption>Hello, Computer, do my work</figcaption>
+</figure>
+
+
+<div>
+<ul><li><a href="#toc_0">Feeling the pain</a></li><li><a href="#toc_1">Thinking of LLMs as Shitty General Purpose Computers</a></li><li><a href="#toc_2">A Real World Example: Porting the Spine Runtimes</a></li><li><a href="#toc_3">The "Port Java to X" Program</a><ul><li><a href="#toc_4">Initial Input and State</a></li><li><a href="#toc_5">The Function Library</a></li><li><a href="#toc_6">The Main Workflow</a></li></ul></li><li><a href="#toc_7">Program Execution</a></li><li><a href="#toc_8">Future Work</a></li><li><a href="#toc_9">Conclusion</a></li></ul>
+</div>
+
+<p>Like most of you, I've been dabbling in what people call "agentic engineering." Truth is, there's not much engineering happening. We're basically throwing shit at the wall and hoping something sticks.</p>
+<p>Using LLM coding tools like Claude Code to spin up throwaway greenfield projects or bang out ad hoc scripts? Pretty great experience. But try using them on a big, established codebase, or the-production-app-formerly-known-as-greenfield-project without breaking everything? That's where things get painful.</p>
+<h2 id="toc_0">Feeling the pain</h2>
+<p>For bigger codebases, the main issue is context, or rather, the lack of it. These tools don't have the full picture of your project. Maybe you haven't given them that overview, or maybe their context window is too small to hold all your interconnected components. But there's more to it.</p>
+<p>Even with recent improvements like 'reasoning', which is really just the old 'think step by step' trick, with more scratch space to attend to, LLMs still can't follow execution flow all that well. They're especially lost with anything beyond sequential scripts: multiple processes, IPC, client-server architectures, concurrent execution within the same process. Even when you manage to cram all the context they need, they'll still generate code that doesn't fit your system's actual architecture.</p>
+<p>LLMs also lack taste. Trained on all code on the web (and likely some private code), they generate, to oversimplify, the statistical mean of what they've seen. While senior engineers strive for elegant, minimal solutions that reduce bugs and complexity, LLMs reach for 'best practices' and spit out over-engineered garbage. Let them run wild and you'll get code that's hard to maintain, hard to understand, and full of places for bugs to hide.</p>
+<p>Then there's context degradation. As your session progresses and pulls in more files, tool outputs, and other data, things start falling apart around 100k tokens. Benchmarks be damned. Whatever tricks LLM providers use to achieve those massive context windows don't work in practice. The model loses track of important details buried in the middle of all that context.</p>
+<p>Worse still, many tools don't let you control what goes into your context. Companies like Cursor that aren't LLM providers themselves need to make a margin between what you pay them and what they pay for tokens. Their incentive? Cut down your context to save money, which means the LLM might miss crucial information or get it in a suboptimal format.</p>
+<p>Claude Code is different. It comes straight from Anthropic with no middleman trying to squeeze margins. With the Max plan, you get essentially unlimited tokens (though folks like <a href="https://twitter.com/steipete">Peter</a> manage to get rate limited even with three or four accounts). You still don't have full control: there's a system prompt you can't change, additional instructions get sneakily injected into your first message, the VS Code integration adds unwanted crap, and all the tool definitions eat up context and give the model plenty of rope to confuse itself with. But this is the best deal we're getting, so we work with what we have. (Anthropic, please OSS Claude Code. Your models are your moat, not Claude Code.)</p>
+<h2>How do we tame this agentic mess?</h2>
+<p>What we need when using coding agents on bigger codebases is a structured way to engineer context. By that I mean: keep only the information needed for the task of modifying or generating code, minimize the number of turns the model needs to take calling tools or reporting back to us, and ensure nothing important is missing. We want reproducible workflows. We want determinism, as much as possible within the limits of these inherently non-deterministic models.</p>
+<p>I'm a programmer. You're probably a programmer. We think in systems, deterministic workflows, and abstractions. What's more natural for us than viewing LLMs as an extremely slow kind of unreliable computer that we program with natural language?</p>
+<p>This is a weird form of metaprogramming: we write "code" in the form of prompts that execute on the LLM to produce the actual code that runs on real CPUs.</p>
+<p>Yes, I know LLMs aren't actually computers (though there are some papers on arXiv...). The metaphor is a bit stretched. But here's the thing: as developers, we're used to encoding specifications in precise programming languages. When we interact with LLMs, the fuzziness of natural language makes us forget we can apply the same structured thinking. This framework bridges that gap: think "inputs, state, outputs" instead of "chat with the AI" and suddenly you're closer to engineering solutions instead of just hoping for the best.</p>
+<h2 id="toc_1">Thinking of LLMs as Shitty General Purpose Computers</h2>
+<p>In traditional software, we create programs by writing code and importing libraries. A program takes inputs, manipulates state, and produces outputs. We can map these concepts to our LLM-as-shitty-computer metaphor like this:</p>
+<p><strong>Program</strong> is your prompt, written in natural language. It specifies initial inputs, "imports" external functions via tool descriptions, and implements business logic through control flow: sequential steps, loops, conditionals, and yes, even goto. Tool calls and user input are I/O.</p>
+<p><strong>Inputs</strong> come from three sources: prepared information (codebase docs, style guides, architecture overviews) either baked into the prompt or loaded from disk, user input during execution (clarifications, corrections, new requirements), and tool outputs (file contents, command results, API responses).</p>
+<p><strong>State</strong> evolves as the program runs. Some lives in the context, but we treat that as ephemeral: compaction will eventually wipe it (trololo). Plus, you'll quickly hit context limits with any substantial state. So we serialize to disk using formats LLMs handle well: JSON for structured data, where the LLM can surgically read and update specific fields via <code>jq</code>. Markdown for smaller unstructured data we can load fully into context if needed. The payoff? You can resume from any point with a fresh context, sidestepping the dreaded compaction issue entirely.</p>
+<p><strong>Outputs</strong> aren't limited to generated code. Just like traditional programs produce console output, write files, or display GUIs, our LLM program uses tool calls to create various outputs: the actual code, diffs, open files in an editor for us, codebase statistics, summaries of changes, or any other artifact that documents what the program did. These outputs serve multiple purposes: helping you review the work, providing input for the next steps in the workflow, or simply showing the program's progress.</p>
+<p>Let's see how this plays out in practice.</p>
+<h2 id="toc_2">A Real World Example: Porting the Spine Runtimes</h2>
+<p>After experimenting with toy projects, I felt ready to apply this approach to a real codebase: the <a href="https://github.com/EsotericSoftware/spine-runtimes">Spine runtimes</a>.</p>
+<p><a href="https://esotericsoftware.com">Spine</a> is 2D skeletal animation software. You create animations in the editor, export them to a runtime format, then use one of many runtimes to display them in your app or game. We maintain runtimes for C, C++, C#, Haxe, Java, Dart, Swift, and TypeScript. On top of these, we've built integrations for Unity, Unreal, Godot, Phaser, Pixi, ThreeJS, iOS, Android, web, and more.</p>
+<p>Here's the painful part: between releases, the runtime code changes. We implement new features in our reference implementation (spine-libgdx in Java, which powers the editor), then manually port those changes to every other language runtime. It's tedious, error-prone work. Math-heavy code needs exact translation, and after hours of porting, your brain turns to mush. Bugs creep in that are hell to track down.</p>
+<img src="https://mariozechner.at/posts/2025-06-02-prompts-are-code/media/changeset.png" alt="Git diff showing thousands of lines of code changes" loading="lazy">
+
+<p>And no, transpilers won't work for this (trust me, bro, I made money doing compilers). We need idiomatic ports that preserve the same API surface in a way that feels natural for each language.</p>
+<p>Between releases 4.2 and 4.3-beta, the Java reference implementation  saw significant changes:</p>
+<pre><code data-language="bash">$ git diff --stat 4.2..4.3-beta -- '*.java' | tail -1
+  79 files changed, 4820 insertions(+), 4679 deletions(-)
+</code></pre><p>Here's how I'd approach this with my manual workflow:</p>
+<ol>
+<li>Open the changeset in Fork (my git client) and scan through all changed files</li>
+<li>Plan the porting order based on the dependency graph: interfaces and enums first (they're usually independent), then try to port dependencies before the classes that use them, hoping to maintain some compilability</li>
+<li>Pick a type to port in Java, open a side-by-side diff, check if the type already exists in the target runtime or needs creation from scratch</li>
+<li>Port changes line-by-line, method-by-method to the target language</li>
+<li>Watch the illusion of order crumble: the dependency graph is cyclic, so there's no perfect porting order that keeps everything compiling (note to self: it would be nice if we had an acyclic type dependency graph)</li>
+<li>Can't test individual pieces because a skeletal animation system needs all its parts working in concert</li>
+<li>Port everything blind, then face a wall of compilation errors and bugs introduced because my brain was fried after hours of human transpilation</li>
+</ol>
+<p>This is especially fun when porting from Java to C, the language pair with the biggest type system and memory management mismatch.</p>
+<p>What makes this tractable is that we maintain the same API surface across all runtime implementations. If there's a class <code>Animation</code> in Java, there's also a class <code>Animation</code> in C#, C++, and every other runtime, in a corresponding file. This one-to-one mapping exists for 99% of types. Sure, there are quirks like Java files containing dozens of inner classes, but the structural consistency is there.</p>
+<p>Here's an example of one of the more math-heavy types, <code>PhysicsConstraint</code>:</p>
+
+
+<p><strong>Java (PhysicsConstraint.java)</strong></p>
+<div>
+
+<pre><code data-language="java">package com.esotericsoftware.spine;
+
+import static com.esotericsoftware.spine.utils.SpineUtils.*;
+
+/** Stores the current pose for a physics constraint. A physics constraint applies physics to bones.
+ * &lt;p&gt;
+ * See &lt;a href="https://esotericsoftware.com/spine-physics-constraints"&gt;Physics constraints&lt;/a&gt; in the Spine User Guide. */
+public class PhysicsConstraint extends Constraint&lt;PhysicsConstraint, PhysicsConstraintData, PhysicsConstraintPose&gt; {
+	BonePose bone;
+
+	boolean reset = true;
+	float ux, uy, cx, cy, tx, ty;
+	float xOffset, xLag, xVelocity;
+	float yOffset, yLag, yVelocity;
+	float rotateOffset, rotateLag, rotateVelocity;
+	float scaleOffset, scaleLag, scaleVelocity;
+	float remaining, lastTime;
+
+	public PhysicsConstraint (PhysicsConstraintData data, Skeleton skeleton) {
+		super(data, new PhysicsConstraintPose(), new PhysicsConstraintPose());
+		if (skeleton == null) throw new IllegalArgumentException("skeleton cannot be null.");
+
+		bone = skeleton.bones.items[data.bone.index].constrained;
+	}
+
+	public PhysicsConstraint copy (Skeleton skeleton) {
+		var copy = new PhysicsConstraint(data, skeleton);
+		copy.pose.set(pose);
+		return copy;
+	}
+
+	public void reset (Skeleton skeleton) {
+		remaining = 0;
+		lastTime = skeleton.time;
+		reset = true;
+		xOffset = 0;
+		xLag = 0;
+		xVelocity = 0;
+		yOffset = 0;
+		yLag = 0;
+		yVelocity = 0;
+		rotateOffset = 0;
+		rotateLag = 0;
+		rotateVelocity = 0;
+		scaleOffset = 0;
+		scaleLag = 0;
+		scaleVelocity = 0;
+	}
+
+	/** Translates the physics constraint so next {@link #update(Skeleton, Physics)} forces are applied as if the bone moved an
+	 * additional amount in world space. */
+	public void translate (float x, float y) {
+		ux -= x;
+		uy -= y;
+		cx -= x;
+		cy -= y;
+	}
+
+	/** Rotates the physics constraint so next {@link #update(Skeleton, Physics)} forces are applied as if the bone rotated around
+	 * the specified point in world space. */
+	public void rotate (float x, float y, float degrees) {
+		float r = degrees * degRad, cos = cos(r), sin = sin(r);
+		float dx = cx - x, dy = cy - y;
+		translate(dx * cos - dy * sin - dx, dx * sin + dy * cos - dy);
+	}
+
+	/** Applies the constraint to the constrained bones. */
+	public void update (Skeleton skeleton, Physics physics) {
+		PhysicsConstraintPose p = applied;
+		float mix = p.mix;
+		if (mix == 0) return;
+
+		boolean x = data.x &gt; 0, y = data.y &gt; 0, rotateOrShearX = data.rotate &gt; 0 || data.shearX &gt; 0, scaleX = data.scaleX &gt; 0;
+		BonePose bone = this.bone;
+		float l = bone.bone.data.length, t = data.step, z = 0;
+
+		switch (physics) {
+		case none:
+			return;
+		case reset:
+			reset(skeleton);
+			// Fall through.
+		case update:
+			float delta = Math.max(skeleton.time - lastTime, 0), aa = remaining;
+			remaining += delta;
+			lastTime = skeleton.time;
+
+			float bx = bone.worldX, by = bone.worldY;
+			if (reset) {
+				reset = false;
+				ux = bx;
+				uy = by;
+			} else {
+				float a = remaining, i = p.inertia, f = skeleton.data.referenceScale, d = -1, m = 0, e = 0, ax = 0, ay = 0,
+					qx = data.limit * delta, qy = qx * Math.abs(skeleton.scaleY);
+				qx *= Math.abs(skeleton.scaleX);
+				if (x || y) {
+					if (x) {
+						float u = (ux - bx) * i;
+						xOffset += u &gt; qx ? qx : u &lt; -qx ? -qx : u;
+						ux = bx;
+					}
+					if (y) {
+						float u = (uy - by) * i;
+						yOffset += u &gt; qy ? qy : u &lt; -qy ? -qy : u;
+						uy = by;
+					}
+					if (a &gt;= t) {
+						float xs = xOffset, ys = yOffset;
+						d = (float)Math.pow(p.damping, 60 * t);
+						m = t * p.massInverse;
+						e = p.strength;
+						float w = f * p.wind, g = f * p.gravity;
+						ax = (w * skeleton.windX + g * skeleton.gravityX) * skeleton.scaleX;
+						ay = (w * skeleton.windY + g * skeleton.gravityY) * skeleton.scaleY;
+						do {
+							if (x) {
+								xVelocity += (ax - xOffset * e) * m;
+								xOffset += xVelocity * t;
+								xVelocity *= d;
+							}
+							if (y) {
+								yVelocity -= (ay + yOffset * e) * m;
+								yOffset += yVelocity * t;
+								yVelocity *= d;
+							}
+							a -= t;
+						} while (a &gt;= t);
+						xLag = xOffset - xs;
+						yLag = yOffset - ys;
+					}
+					z = Math.max(0, 1 - a / t);
+					if (x) bone.worldX += (xOffset - xLag * z) * mix * data.x;
+					if (y) bone.worldY += (yOffset - yLag * z) * mix * data.y;
+				}
+				if (rotateOrShearX || scaleX) {
+					float ca = atan2(bone.c, bone.a), c, s, mr = 0, dx = cx - bone.worldX, dy = cy - bone.worldY;
+					if (dx &gt; qx)
+						dx = qx;
+					else if (dx &lt; -qx) //
+						dx = -qx;
+					if (dy &gt; qy)
+						dy = qy;
+					else if (dy &lt; -qy) //
+						dy = -qy;
+					if (rotateOrShearX) {
+						mr = (data.rotate + data.shearX) * mix;
+						z = rotateLag * Math.max(0, 1 - aa / t);
+						float r = atan2(dy + ty, dx + tx) - ca - (rotateOffset - z) * mr;
+						rotateOffset += (r - (float)Math.ceil(r * invPI2 - 0.5f) * PI2) * i;
+						r = (rotateOffset - z) * mr + ca;
+						c = cos(r);
+						s = sin(r);
+						if (scaleX) {
+							r = l * bone.getWorldScaleX();
+							if (r &gt; 0) scaleOffset += (dx * c + dy * s) * i / r;
+						}
+					} else {
+						c = cos(ca);
+						s = sin(ca);
+						float r = l * bone.getWorldScaleX() - scaleLag * Math.max(0, 1 - aa / t);
+						if (r &gt; 0) scaleOffset += (dx * c + dy * s) * i / r;
+					}
+					a = remaining;
+					if (a &gt;= t) {
+						if (d == -1) {
+							d = (float)Math.pow(p.damping, 60 * t);
+							m = t * p.massInverse;
+							e = p.strength;
+							float w = f * p.wind, g = f * p.gravity;
+							ax = (w * skeleton.windX + g * skeleton.gravityX) * skeleton.scaleX;
+							ay = (w * skeleton.windY + g * skeleton.gravityY) * skeleton.scaleY;
+						}
+						float rs = rotateOffset, ss = scaleOffset, h = l / f;
+						while (true) {
+							a -= t;
+							if (scaleX) {
+								scaleVelocity += (ax * c - ay * s - scaleOffset * e) * m;
+								scaleOffset += scaleVelocity * t;
+								scaleVelocity *= d;
+							}
+							if (rotateOrShearX) {
+								rotateVelocity -= ((ax * s + ay * c) * h + rotateOffset * e) * m;
+								rotateOffset += rotateVelocity * t;
+								rotateVelocity *= d;
+								if (a &lt; t) break;
+								float r = rotateOffset * mr + ca;
+								c = cos(r);
+								s = sin(r);
+							} else if (a &lt; t) //
+								break;
+						}
+						rotateLag = rotateOffset - rs;
+						scaleLag = scaleOffset - ss;
+					}
+					z = Math.max(0, 1 - a / t);
+				}
+				remaining = a;
+			}
+			cx = bone.worldX;
+			cy = bone.worldY;
+			break;
+		case pose:
+			z = Math.max(0, 1 - remaining / t);
+			if (x) bone.worldX += (xOffset - xLag * z) * mix * data.x;
+			if (y) bone.worldY += (yOffset - yLag * z) * mix * data.y;
+		}
+
+		if (rotateOrShearX) {
+			float o = (rotateOffset - rotateLag * z) * mix, s, c, a;
+			if (data.shearX &gt; 0) {
+				float r = 0;
+				if (data.rotate &gt; 0) {
+					r = o * data.rotate;
+					s = sin(r);
+					c = cos(r);
+					a = bone.b;
+					bone.b = c * a - s * bone.d;
+					bone.d = s * a + c * bone.d;
+				}
+				r += o * data.shearX;
+				s = sin(r);
+				c = cos(r);
+				a = bone.a;
+				bone.a = c * a - s * bone.c;
+				bone.c = s * a + c * bone.c;
+			} else {
+				o *= data.rotate;
+				s = sin(o);
+				c = cos(o);
+				a = bone.a;
+				bone.a = c * a - s * bone.c;
+				bone.c = s * a + c * bone.c;
+				a = bone.b;
+				bone.b = c * a - s * bone.d;
+				bone.d = s * a + c * bone.d;
+			}
+		}
+		if (scaleX) {
+			float s = 1 + (scaleOffset - scaleLag * z) * mix * data.scaleX;
+			bone.a *= s;
+			bone.c *= s;
+		}
+		if (physics != Physics.pose) {
+			tx = l * bone.a;
+			ty = l * bone.c;
+		}
+		bone.modifyWorld(skeleton.update);
+	}
+
+	void sort (Skeleton skeleton) {
+		Bone bone = this.bone.bone;
+		skeleton.sortBone(bone);
+		skeleton.updateCache.add(this);
+		skeleton.sortReset(bone.children);
+		skeleton.constrained(bone);
+	}
+
+	boolean isSourceActive () {
+		return bone.bone.active;
+	}
+
+	/** The bone constrained by this physics constraint. */
+	public BonePose getBone () {
+		return bone;
+	}
+
+	public void setBone (BonePose bone) {
+		this.bone = bone;
+	}
+}
+</code></pre></div>
+
+<p><strong>C++ Header (PhysicsConstraint.h)</strong></p>
+<div>
+
+<pre><code data-language="cpp">#ifndef Spine_PhysicsConstraint_h
+#define Spine_PhysicsConstraint_h
+
+#include &lt;spine/Constraint.h&gt;
+#include &lt;spine/PhysicsConstraintData.h&gt;
+#include &lt;spine/PhysicsConstraintPose.h&gt;
+#include &lt;spine/BonePose.h&gt;
+#include &lt;spine/Vector.h&gt;
+
+namespace spine {
+	class Skeleton;
+	class BonePose;
+	class PhysicsConstraintPose;
+
+	/// Stores the current pose for a physics constraint. A physics constraint applies physics to bones.
+	///
+	/// See https://esotericsoftware.com/spine-physics-constraints Physics constraints in the Spine User Guide.
+	class SP_API PhysicsConstraint : public ConstraintGeneric&lt;PhysicsConstraint, PhysicsConstraintData, PhysicsConstraintPose&gt; {
+		friend class Skeleton;
+		friend class PhysicsConstraintTimeline;
+		friend class PhysicsConstraintInertiaTimeline;
+		friend class PhysicsConstraintStrengthTimeline;
+		friend class PhysicsConstraintDampingTimeline;
+		friend class PhysicsConstraintMassTimeline;
+		friend class PhysicsConstraintWindTimeline;
+		friend class PhysicsConstraintGravityTimeline;
+		friend class PhysicsConstraintMixTimeline;
+		friend class PhysicsConstraintResetTimeline;
+
+	public:
+		RTTI_DECL
+
+		PhysicsConstraint(PhysicsConstraintData&amp; data, Skeleton&amp; skeleton);
+
+		void update(Skeleton&amp; skeleton, Physics physics) override;
+		void sort(Skeleton&amp; skeleton) override;
+		bool isSourceActive() override;
+		PhysicsConstraint* copy(Skeleton&amp; skeleton);
+
+		void reset(Skeleton&amp; skeleton);
+
+		/// Translates the physics constraint so next update() forces are applied as if the bone moved an additional amount in world space.
+		void translate(float x, float y);
+
+		/// Rotates the physics constraint so next update() forces are applied as if the bone rotated around the specified point in world space.
+		void rotate(float x, float y, float degrees);
+
+		/// The bone constrained by this physics constraint.
+		BonePose&amp; getBone();
+		void setBone(BonePose&amp; bone);
+
+	private:
+		BonePose* _bone;
+
+		bool _reset;
+		float _ux, _uy, _cx, _cy, _tx, _ty;
+		float _xOffset, _xLag, _xVelocity;
+		float _yOffset, _yLag, _yVelocity;
+		float _rotateOffset, _rotateLag, _rotateVelocity;
+		float _scaleOffset, _scaleLag, _scaleVelocity;
+		float _remaining, _lastTime;
+	};
+}
+
+#endif /* Spine_PhysicsConstraint_h */
+</code></pre></div>
+
+<p><strong>C++ Implementation (PhysicsConstraint.cpp)</strong></p>
+<div>
+
+<pre><code data-language="cpp">#include &lt;spine/PhysicsConstraint.h&gt;
+#include &lt;spine/PhysicsConstraintData.h&gt;
+#include &lt;spine/PhysicsConstraintPose.h&gt;
+#include &lt;spine/BonePose.h&gt;
+#include &lt;spine/Skeleton.h&gt;
+#include &lt;spine/SkeletonData.h&gt;
+#include &lt;spine/BoneData.h&gt;
+#include &lt;spine/Bone.h&gt;
+#include &lt;spine/MathUtil.h&gt;
+
+using namespace spine;
+
+RTTI_IMPL(PhysicsConstraint, Constraint)
+
+PhysicsConstraint::PhysicsConstraint(PhysicsConstraintData &amp;data, Skeleton &amp;skeleton) : ConstraintGeneric&lt;PhysicsConstraint, PhysicsConstraintData, PhysicsConstraintPose&gt;(data),
+																						_reset(true), _ux(0), _uy(0), _cx(0), _cy(0), _tx(0), _ty(0),
+																						_xOffset(0), _xLag(0), _xVelocity(0), _yOffset(0), _yLag(0), _yVelocity(0),
+																						_rotateOffset(0), _rotateLag(0), _rotateVelocity(0), _scaleOffset(0), _scaleLag(0), _scaleVelocity(0),
+																						_remaining(0), _lastTime(0) {
+
+	_bone = &amp;skeleton._bones[(size_t) data._bone-&gt;getIndex()]-&gt;_constrained;
+}
+
+PhysicsConstraint *PhysicsConstraint::copy(Skeleton &amp;skeleton) {
+	PhysicsConstraint *copy = new (__FILE__, __LINE__) PhysicsConstraint(_data, skeleton);
+	copy-&gt;_pose.set(_pose);
+	return copy;
+}
+
+void PhysicsConstraint::reset(Skeleton &amp;skeleton) {
+	_remaining = 0;
+	_lastTime = skeleton.getTime();
+	_reset = true;
+	_xOffset = 0;
+	_xLag = 0;
+	_xVelocity = 0;
+	_yOffset = 0;
+	_yLag = 0;
+	_yVelocity = 0;
+	_rotateOffset = 0;
+	_rotateLag = 0;
+	_rotateVelocity = 0;
+	_scaleOffset = 0;
+	_scaleLag = 0;
+	_scaleVelocity = 0;
+}
+
+void PhysicsConstraint::translate(float x, float y) {
+	_ux -= x;
+	_uy -= y;
+	_cx -= x;
+	_cy -= y;
+}
+
+void PhysicsConstraint::rotate(float x, float y, float degrees) {
+	float r = degrees * MathUtil::Deg_Rad, cosVal = MathUtil::cos(r), sinVal = MathUtil::sin(r);
+	float dx = _cx - x, dy = _cy - y;
+	translate(dx * cosVal - dy * sinVal - dx, dx * sinVal + dy * cosVal - dy);
+}
+
+void PhysicsConstraint::update(Skeleton &amp;skeleton, Physics physics) {
+	PhysicsConstraintPose &amp;p = *_applied;
+	float mix = p._mix;
+	if (mix == 0) return;
+
+	bool x = _data._x &gt; 0, y = _data._y &gt; 0, rotateOrShearX = _data._rotate &gt; 0 || _data._shearX &gt; 0, scaleX = _data._scaleX &gt; 0;
+	BonePose *bone = _bone;
+	float l = bone-&gt;_bone-&gt;_data.getLength(), t = _data._step, z = 0;
+
+	switch (physics) {
+		case Physics_None:
+			return;
+		case Physics_Reset:
+			reset(skeleton);
+			// Fall through.
+		case Physics_Update: {
+			float delta = MathUtil::max(skeleton._time - _lastTime, 0.0f), aa = _remaining;
+			_remaining += delta;
+			_lastTime = skeleton._time;
+
+			float bx = bone-&gt;_worldX, by = bone-&gt;_worldY;
+			if (_reset) {
+				_reset = false;
+				_ux = bx;
+				_uy = by;
+			} else {
+				float a = _remaining, i = p._inertia, f = skeleton._data.getReferenceScale(), d = -1, m = 0, e = 0, ax = 0, ay = 0,
+					  qx = _data._limit * delta, qy = qx * MathUtil::abs(skeleton.getScaleY());
+				qx *= MathUtil::abs(skeleton._scaleX);
+				if (x || y) {
+					if (x) {
+						float u = (_ux - bx) * i;
+						_xOffset += u &gt; qx ? qx : u &lt; -qx ? -qx
+														  : u;
+						_ux = bx;
+					}
+					if (y) {
+						float u = (_uy - by) * i;
+						_yOffset += u &gt; qy ? qy : u &lt; -qy ? -qy
+														  : u;
+						_uy = by;
+					}
+					if (a &gt;= t) {
+						float xs = _xOffset, ys = _yOffset;
+						d = MathUtil::pow(p._damping, 60 * t);
+						m = t * p._massInverse;
+						e = p._strength;
+						float w = f * p._wind, g = f * p._gravity;
+						ax = (w * skeleton._windX + g * skeleton._gravityX) * skeleton._scaleX;
+						ay = (w * skeleton._windY + g * skeleton._gravityY) * skeleton.getScaleY();
+						do {
+							if (x) {
+								_xVelocity += (ax - _xOffset * e) * m;
+								_xOffset += _xVelocity * t;
+								_xVelocity *= d;
+							}
+							if (y) {
+								_yVelocity -= (ay + _yOffset * e) * m;
+								_yOffset += _yVelocity * t;
+								_yVelocity *= d;
+							}
+							a -= t;
+						} while (a &gt;= t);
+						_xLag = _xOffset - xs;
+						_yLag = _yOffset - ys;
+					}
+					z = MathUtil::max(0.0f, 1 - a / t);
+					if (x) bone-&gt;_worldX += (_xOffset - _xLag * z) * mix * _data._x;
+					if (y) bone-&gt;_worldY += (_yOffset - _yLag * z) * mix * _data._y;
+				}
+				if (rotateOrShearX || scaleX) {
+					float ca = MathUtil::atan2(bone-&gt;_c, bone-&gt;_a), c, s, mr = 0, dx = _cx - bone-&gt;_worldX, dy = _cy - bone-&gt;_worldY;
+					if (dx &gt; qx)
+						dx = qx;
+					else if (dx &lt; -qx)
+						dx = -qx;
+					if (dy &gt; qy)
+						dy = qy;
+					else if (dy &lt; -qy)
+						dy = -qy;
+					if (rotateOrShearX) {
+						mr = (_data._rotate + _data._shearX) * mix;
+						z = _rotateLag * MathUtil::max(0.0f, 1 - aa / t);
+						float r = MathUtil::atan2(dy + _ty, dx + _tx) - ca - (_rotateOffset - z) * mr;
+						_rotateOffset += (r - MathUtil::ceil(r * MathUtil::InvPi_2 - 0.5f) * MathUtil::Pi_2) * i;
+						r = (_rotateOffset - z) * mr + ca;
+						c = MathUtil::cos(r);
+						s = MathUtil::sin(r);
+						if (scaleX) {
+							r = l * bone-&gt;getWorldScaleX();
+							if (r &gt; 0) _scaleOffset += (dx * c + dy * s) * i / r;
+						}
+					} else {
+						c = MathUtil::cos(ca);
+						s = MathUtil::sin(ca);
+						float r = l * bone-&gt;getWorldScaleX() - _scaleLag * MathUtil::max(0.0f, 1 - aa / t);
+						if (r &gt; 0) _scaleOffset += (dx * c + dy * s) * i / r;
+					}
+					a = _remaining;
+					if (a &gt;= t) {
+						if (d == -1) {
+							d = MathUtil::pow(p._damping, 60 * t);
+							m = t * p._massInverse;
+							e = p._strength;
+							float w = f * p._wind, g = f * p._gravity;
+							ax = (w * skeleton._windX + g * skeleton._gravityX) * skeleton._scaleX;
+							ay = (w * skeleton._windY + g * skeleton._gravityY) * skeleton.getScaleY();
+						}
+						float rs = _rotateOffset, ss = _scaleOffset, h = l / f;
+						while (true) {
+							a -= t;
+							if (scaleX) {
+								_scaleVelocity += (ax * c - ay * s - _scaleOffset * e) * m;
+								_scaleOffset += _scaleVelocity * t;
+								_scaleVelocity *= d;
+							}
+							if (rotateOrShearX) {
+								_rotateVelocity -= ((ax * s + ay * c) * h + _rotateOffset * e) * m;
+								_rotateOffset += _rotateVelocity * t;
+								_rotateVelocity *= d;
+								if (a &lt; t) break;
+								float r = _rotateOffset * mr + ca;
+								c = MathUtil::cos(r);
+								s = MathUtil::sin(r);
+							} else if (a &lt; t)
+								break;
+						}
+						_rotateLag = _rotateOffset - rs;
+						_scaleLag = _scaleOffset - ss;
+					}
+					z = MathUtil::max(0.0f, 1 - a / t);
+				}
+				_remaining = a;
+			}
+			_cx = bone-&gt;_worldX;
+			_cy = bone-&gt;_worldY;
+			break;
+		}
+		case Physics_Pose: {
+			z = MathUtil::max(0.0f, 1 - _remaining / t);
+			if (x) bone-&gt;_worldX += (_xOffset - _xLag * z) * mix * _data._x;
+			if (y) bone-&gt;_worldY += (_yOffset - _yLag * z) * mix * _data._y;
+			break;
+		}
+	}
+
+	if (rotateOrShearX) {
+		float o = (_rotateOffset - _rotateLag * z) * mix, s, c, a;
+		if (_data._shearX &gt; 0) {
+			float r = 0;
+			if (_data._rotate &gt; 0) {
+				r = o * _data._rotate;
+				s = MathUtil::sin(r);
+				c = MathUtil::cos(r);
+				a = bone-&gt;_b;
+				bone-&gt;_b = c * a - s * bone-&gt;_d;
+				bone-&gt;_d = s * a + c * bone-&gt;_d;
+			}
+			r += o * _data._shearX;
+			s = MathUtil::sin(r);
+			c = MathUtil::cos(r);
+			a = bone-&gt;_a;
+			bone-&gt;_a = c * a - s * bone-&gt;_c;
+			bone-&gt;_c = s * a + c * bone-&gt;_c;
+		} else {
+			o *= _data._rotate;
+			s = MathUtil::sin(o);
+			c = MathUtil::cos(o);
+			a = bone-&gt;_a;
+			bone-&gt;_a = c * a - s * bone-&gt;_c;
+			bone-&gt;_c = s * a + c * bone-&gt;_c;
+			a = bone-&gt;_b;
+			bone-&gt;_b = c * a - s * bone-&gt;_d;
+			bone-&gt;_d = s * a + c * bone-&gt;_d;
+		}
+	}
+	if (scaleX) {
+		float s = 1 + (_scaleOffset - _scaleLag * z) * mix * _data._scaleX;
+		bone-&gt;_a *= s;
+		bone-&gt;_c *= s;
+	}
+	if (physics != Physics_Pose) {
+		_tx = l * bone-&gt;_a;
+		_ty = l * bone-&gt;_c;
+	}
+	bone-&gt;modifyWorld(skeleton._update);
+}
+
+void PhysicsConstraint::sort(Skeleton &amp;skeleton) {
+	Bone *bone = _bone-&gt;_bone;
+	skeleton.sortBone(bone);
+	skeleton._updateCache.add(this);
+	skeleton.sortReset(bone-&gt;_children);
+	skeleton.constrained(*bone);
+}
+
+bool PhysicsConstraint::isSourceActive() {
+	return _bone-&gt;_bone-&gt;isActive();
+}
+
+BonePose &amp;PhysicsConstraint::getBone() {
+	return *_bone;
+}
+
+void PhysicsConstraint::setBone(BonePose &amp;bone) {
+	_bone = &amp;bone;
+}
+</code></pre></div>
+
+<p>Much of this porting work is mechanical and can be automated, like getters and setters, transferring documentation from Javadoc to docstrings, or ensuring the math matches. Some of the porting work requires a human brain, like translating Java generics to C++ templates, a task LLMs aren't very good at. What LLMs are good at is helping me double-check that I ported every line faithfully. This presented the perfect opportunity to apply my little workflow experiment to a real-world task on a real-world, largish codebase.</p>
+<h2 id="toc_3">The "Port Java to X" Program</h2>
+<p>Time to write our program. We're essentially encoding my manual workflow into a structured LLM program. The goal: go through each Java type that changed between two commits and port it to a target runtime (like C++) collaboratively with the user.</p>
+<p>Instead of me manually opening diffs, tracking dependencies, and porting line-by-line while my brain melts, we'll have the LLM handle the mechanical parts while I stay in control of the decisions that matter.</p>
+<p>The final result of this program design can be found in the <a href="https://github.com/badlogic/spine-port">spine-port repository</a>. The program itself is stored in a file called <a href="https://github.com/badlogic/spine-port/blob/main/port.md"><code>port.md</code></a>. When I want to start or continue porting, I start Claude Code in the spine-port directory and tell it to read the <code>port.md</code> file in full and execute the workflow. That starts the "program".</p>
+<p>Writing the <code>port.md</code> file was an iterative, collaborative process between me and Claude. In the following sections, we'll walk through each section of this program.</p>
+<h3 id="toc_4">Initial Input and State</h3>
+<p>Every program needs input data and initial state to work with. The <code>port.md</code> file starts by defining the data structure that serves as both:</p>
+<pre><code data-language="markdown"># Spine Runtimes Porting Program
+
+Collaborative porting of changes between two commits in the Spine runtime
+reference implementation (Java) to a target runtime. Work tracked in
+`porting-plan.json` which has the following format:
+
+​```json
+{
+  "metadata": {
+    "prevBranch": "4.2",
+    "currentBranch": "4.3-beta",
+    "generated": "2024-06-30T...",
+    "spineRuntimesDir": "/absolute/path/to/spine-runtimes",
+    "targetRuntime": "spine-cpp",
+    "targetRuntimePath": "/absolute/path/to/spine-runtimes/spine-cpp/spine-cpp",
+    "targetRuntimeLanguage": "cpp"
+  },
+  "deletedFiles": [
+    {
+      "filePath": "/path/to/deleted/File.java",
+      "status": "pending"
+    }
+  ],
+  "portingOrder": [
+    {
+      "javaSourcePath": "/path/to/EnumFile.java",
+      "types": [
+        {
+          "name": "Animation",
+          "kind": "enum",
+          "startLine": 45,
+          "endLine": 52,
+          "isInner": false,
+          "portingState": "pending",
+          "candidateFiles": ["/path/to/spine-cpp/include/spine/Animation.h", "/path/to/spine-cpp/include/spine/Animation.cpp"]
+        }
+      ]
+    }
+  ]
+}
+​```
+</code></pre><p>This data structure is the central state that tracks our porting progress. The <code>porting-plan.json</code> file serves as both the initial input and the persistent state for our LLM program. Let's break down what each part means:</p>
+<p><strong>metadata</strong>: Configuration for the porting session:</p>
+<ul>
+<li><code>prevBranch</code> and <code>currentBranch</code>: The git commits we're porting between</li>
+<li><code>spineRuntimesDir</code>: Where all the runtime implementations live</li>
+<li><code>targetRuntime</code>, <code>targetRuntimePath</code>, <code>targetRuntimeLanguage</code>: Which runtime we're porting to and where to find it</li>
+</ul>
+<p><strong>deletedFiles</strong>: Java files that were removed and need corresponding deletions in the target runtime</p>
+<p><strong>portingOrder</strong>: The heart of the plan. Each entry represents a Java file that changed and contains:</p>
+<ul>
+<li><code>javaSourcePath</code>: The full path to the Java source file</li>
+<li><code>types</code>: An array of all classes, interfaces, and enums in that file, each with:<ul>
+<li><code>name</code>: The type name (e.g., "Animation")</li>
+<li><code>kind</code>: Whether it's a class, interface, or enum</li>
+<li><code>startLine</code> and <code>endLine</code>: Where to find it in the Java file</li>
+<li><code>isInner</code>: Whether it's an inner type</li>
+<li><code>portingState</code>: Tracks progress: "pending" or "done"</li>
+<li><code>candidateFiles</code>: Where this type likely exists in the target runtime</li>
+</ul>
+</li>
+</ul>
+<p>The <code>portingState</code> field is crucial: it's how the LLM tracks what's been done across sessions. When I stop and restart later, the program knows exactly where to pick up.</p>
+<p>But how do we generate all this structured data? Before the LLM can start porting, we need to analyze what changed between the two versions and prepare the data in a format the LLM can efficiently query. I wrote <a href="https://github.com/badlogic/spine-port/blob/main/generate-porting-plan.js"><code>generate-porting-plan.js</code></a> to automate this preparation:</p>
+<pre><code data-language="bash">./generate-porting-plan.js 4.2 4.3-beta /path/to/spine-runtimes spine-cpp
+</code></pre><p>This script does several things:</p>
+<ol>
+<li><strong>Runs git diff</strong> to find all Java files that changed between the two commits</li>
+<li><strong>Uses <a href="https://github.com/badlogic/lsp-cli"><code>lsp-cli</code></a></strong> to extract complete type information from both the Java reference implementation and the target runtime</li>
+<li><strong>Analyzes dependencies</strong> to create a porting order (enums before interfaces before classes)</li>
+<li><strong>Finds candidate files</strong> in the target runtime where each type likely exists</li>
+<li><strong>Outputs a structured JSON file</strong> that the LLM can read from and write to efficiently via <code>jq</code>.</li>
+</ol>
+<p>Why pre-generate all this data instead of having the LLM explore the codebase as it goes?</p>
+<p><strong>Determinism</strong>: The same inputs always produce the same plan. LLM exploration might miss files, use wrong search patterns, or get lost in the directory structure. Pre-generation ensures complete, accurate, and reproducible results.</p>
+<p><strong>Context efficiency</strong>: The pre-generation saves tokens and turns by not needing the LLM to perform all the steps that <code>generate-porting-plan.js</code> does: running git diff, analyzing dependencies, extracting type information, finding candidate files. That's a lot of tool calls and context that would otherwise be wasted.</p>
+<p><strong>Speed</strong>: Generating the plan takes seconds. Having the LLM explore the codebase would take orders of magnitude longer.</p>
+<p>This transforms an open-ended exploration problem into structured data processing. Instead of "figure out what changed and how to port it," the LLM gets "here's exactly what changed, where it lives, and where it should go."</p>
+<p>No tokens and turns wasted. The context contains only the information we need.</p>
+<h3 id="toc_5">The Function Library</h3>
+<p>The next section of <code>port.md</code> defines the tools available to our LLM program. Just like traditional programs import libraries, our LLM program needs tools to interact with the world.</p>
+<pre><code data-language="markdown">## Tools
+
+### VS Claude
+Use the vs-claude MCP server tools for opening files and diffs for the user
+during porting.
+
+​```javascript
+// Open multiple files at once (batch operations)
+mcp__vs-claude__open([
+  {"type": "file", "path": "/abs/path/Animation.java"},    // Java source
+  {"type": "file", "path": "/abs/path/Animation.h"},       // C++ header
+  {"type": "file", "path": "/abs/path/Animation.cpp"}      // C++ source
+]);
+
+// Open single file with line range
+mcp__vs-claude__open({"type": "file", "path": "/abs/path/Animation.java", "startLine": 100, "endLine": 120});
+
+// View git diff for a file
+mcp__vs-claude__open({"type": "gitDiff", "path": "/abs/path/Animation.cpp", "from": "HEAD", "to": "working"});
+​```
+</code></pre><p><strong>VS Code Integration</strong> keeps the human in the loop. The LLM doesn't just modify files in the background; it opens them in my editor so I can see what's happening. This uses <a href="https://marketplace.visualstudio.com/items?itemName=MarioZechner.vs-claude">vs-claude</a>, an extension I wrote that implements the Model Context Protocol (MCP), turning VS Code into the LLM's display device.</p>
+<pre><code data-language="markdown">### Progress Tracking
+
+Monitor porting progress using these jq commands:
+
+​```bash
+# Get overall progress percentage
+jq -r '.portingOrder | map(.types[]) | "\(([.[] | select(.portingState == "done")] | length)) types ported out of \(length) total (\(([.[] | select(.portingState == "done")] | length) * 100 / length | floor)% complete)"' porting-plan.json
+
+# Count types by state
+jq -r '.portingOrder | map(.types[]) | group_by(.portingState) | map({state: .[0].portingState, count: length}) | sort_by(.state)' porting-plan.json
+
+# List all completed types
+jq -r '.portingOrder | map(.types[] | select(.portingState == "done") | .name) | sort | join(", ")' porting-plan.json
+
+# Find remaining types to port
+jq -r '.portingOrder | map(.types[] | select(.portingState == "pending") | .name) | length' porting-plan.json
+​```
+</code></pre><p><strong>Progress Tracking</strong> functions that I can ask the LLM to run at any time. When I want to know how far we've gotten, I tell the LLM to execute one of these queries. They're pre-written and tested, ensuring the LLM uses efficient patterns instead of crafting its own potentially buggy versions.</p>
+<pre><code data-language="markdown">### Compile Testing
+
+For C++, test compile individual files during porting:
+
+​```bash
+./compile-cpp.js /path/to/spine-cpp/spine-cpp/src/spine/Animation.cpp
+​```
+
+For other languages, we can not compile individual files and should not try to.
+</code></pre><p><strong>Compile Testing</strong> includes language-specific build commands. Notice the explicit warning about other languages. This prevents the LLM from wasting time trying to compile individual TypeScript or Haxe files, which would fail. It's defensive programming: explicitly state what not to do. Though with our non-deterministic computer, there's always a chance it'll try anyway.</p>
+<h3 id="toc_6">The Main Workflow</h3>
+<p>Now we get to the heart of our program: the actual porting logic with its loops, conditionals, and human checkpoints.</p>
+<pre><code data-language="markdown">## Workflow
+
+Port one type at a time. Ensure the target runtime implementation is functionally
+equivalent to the reference implementation. The APIs must match, bar idiomatic
+differences, including type names, field names, method names, enum names,
+parameter names and so on. Implementations of methods must match EXACTLY, bar
+idiomatic differences, such as differences in collection types.
+
+Follow these steps to port each type:
+
+### 1. Setup (One-time)
+
+DO NOT use the TodoWrite and TodoRead tools for this phase!
+
+1. Read metadata from porting-plan.json:
+   ​```bash
+   jq '.metadata' porting-plan.json
+   ​```
+   - If this fails, abort and tell user to run generate-porting-plan.js
+   - Store these values for later use:
+      - targetRuntime (e.g., "spine-cpp")
+      - targetRuntimePath (e.g., "/path/to/spine-cpp/spine-cpp")
+      - targetRuntimeLanguage (e.g., "cpp")
+</code></pre><p>Like any traditional program, this starts with initialization. The <code>jq '.metadata'</code> command is essentially a function call - the program tells the LLM exactly which function to invoke rather than having it figure out the extraction logic itself, saving tokens and turns. Notice the conditional: "If this fails, abort" - defensive programming ensuring the required input exists. The "Store these values" instruction doesn't actually store anything; it tells the LLM what variable names to use when referencing these values extracted from the porting plan metadata later, similar to how variable assignments work. Storage happens implicitly in the LLM's context.</p>
+<pre><code data-language="markdown">2. In parallel
+   a. Check for conventions file:
+      - Read `${targetRuntime}-conventions.md` (from step 1) in full.
+      - If missing:
+         - Use Task agents in parallel to analyze targetRuntimePath (from step 1)
+         - Document all coding patterns and conventions:
+            * Class/interface/enum definition syntax
+            * Member variable naming (prefixes like m_, _, etc.)
+            * Method naming conventions (camelCase vs snake_case)
+            * Inheritance syntax
+            * File organization (single file vs header/implementation)
+            * Namespace/module/package structure
+            * Memory management (GC, manual, smart pointers)
+            * Error handling (exceptions, error codes, Result types)
+            * Documentation format (Doxygen, JSDoc, etc.)
+            * Type system specifics (generics, templates)
+            * Property/getter/setter patterns
+      - Agents MUST use ripgrep instead of grep!
+      - Save as ${TARGET}-conventions.md
+      - STOP and ask the user to review the generated conventions file
+
+   b. Read `porting-notes.md` in full
+      - If missing create with content:
+      ​```markdown
+      # Porting Notes
+      ​```
+</code></pre><p>The "in parallel" instruction tells the LLM to use multiple tools simultaneously rather than sequentially, speeding up execution.</p>
+<p>Step 2a first tries to read the conventions file using <strong><code>${targetRuntime}-conventions.md</code></strong> - this is like string interpolation, where the LLM inserts the value for the target runtime name that it read from the porting plan. That conventions file captures the coding style and architecture patterns of the target runtime. This documents everything from naming conventions to memory management approaches, ensuring the LLM ports code that fits seamlessly into the existing codebase.</p>
+<p>Step 2b sets up the <strong>porting notes file</strong> as a scratch pad for the porting job. This contains observations and edge cases discovered while porting - things like "Java uses <code>pose</code> but C++ uses <code>_applied</code> in this context" or "don't port toString() methods." It's a running log so we don't forget important discoveries that affect later porting decisions.</p>
+<p>If either file doesn't exist, we create it.</p>
+<p>Why generate the conventions file as part of the workflow instead of pre-generating it like the porting plan? Pre-generating conventions would require either manual work (time-consuming) or using an LLM with manual review anyway. Generating it inside the program ensures I don't have too many moving parts to juggle, and all instructions aimed at an LLM are contained in a single location: the program.</p>
+<p>Here are the actual conventions and porting notes files:</p>
+<p><strong>Conventions (spine-cpp-conventions.md)</strong></p>
+<div>
+
+<pre><code data-language="markdown"># Spine-CPP Coding Conventions
+
+## File Organization
+
+### Directory Structure
+- Headers: `include/spine/` - Public API headers
+- Implementation: `src/spine/` - Implementation files (.cpp)
+- One class per file pattern (Animation.h/Animation.cpp)
+
+### Header Guards
+​```cpp
+#ifndef Spine_Animation_h
+#define Spine_Animation_h
+// content
+#endif
+​```
+
+## Naming Conventions
+
+### Classes and Types
+- **Classes**: PascalCase (e.g., `Animation`, `BoneTimeline`, `SkeletonData`)
+- **Enums**: PascalCase with prefixed values
+  ​```cpp
+  enum MixBlend {
+      MixBlend_Setup,
+      MixBlend_First,
+      MixBlend_Replace,
+      MixBlend_Add
+  };
+  ​```
+
+### Variables
+- **Member variables**: Underscore prefix + camelCase
+  ​```cpp
+  private:
+      float _duration;
+      Vector&lt;Timeline*&gt; _timelines;
+      bool _hasDrawOrder;
+  ​```
+- **Parameters**: camelCase, often with "inValue" suffix for setters
+  ​```cpp
+  void setDuration(float inValue) { _duration = inValue; }
+  ​```
+- **Local variables**: camelCase (e.g., `timelineCount`, `lastTime`)
+
+### Methods
+- **Public methods**: camelCase
+  ​```cpp
+  float getDuration() { return _duration; }
+  void apply(Skeleton&amp; skeleton, float lastTime, float time, ...);
+  ​```
+- **Getters/Setters**: get/set prefix pattern
+  ​```cpp
+  const String&amp; getName() { return _name; }
+  void setName(const String&amp; inValue) { _name = inValue; }
+  ​```
+
+## Class Structure
+
+### Base Class Pattern
+All classes inherit from `SpineObject`:
+​```cpp
+class SP_API Animation : public SpineObject {
+    // ...
+};
+​```
+
+### Access Modifiers Order
+1. Friend declarations
+2. Public members
+3. Protected members
+4. Private members
+
+### Friend Classes
+Extensive use for internal access:
+​```cpp
+friend class AnimationState;
+friend class AnimationStateData;
+​```
+
+## Memory Management
+
+### Manual Memory Management
+- No smart pointers
+- Explicit new/delete with custom allocators
+- SpineObject base class provides memory tracking
+
+### Object Pools
+​```cpp
+class SP_API Pool&lt;T&gt; : public SpineObject {
+    // Efficient object recycling
+};
+​```
+
+### Vector Usage
+Custom Vector class instead of std::vector:
+​```cpp
+Vector&lt;Timeline*&gt; _timelines;
+​```
+
+## Type System
+
+### Custom String Class
+​```cpp
+class SP_API String : public SpineObject {
+    // UTF-8 aware string implementation
+};
+​```
+
+### Container Types
+- `Vector&lt;T&gt;` - Dynamic array
+- `HashMap&lt;K,V&gt;` - Hash map implementation
+- `Pool&lt;T&gt;` - Object pool
+
+### RTTI Usage
+Runtime type information with RTTI macros:
+​```cpp
+RTTI_DECL
+RTTI_IMPL(Animation, SpineObject)
+​```
+
+## Error Handling
+
+### No Exceptions
+- Uses assertions for debug builds
+- Return values indicate success/failure
+- assert() for internal invariants
+
+### Assertions
+​```cpp
+assert(timelineCount == _timelines.size());
+​```
+
+## Documentation
+
+### Triple-Slash Comments
+​```cpp
+/// @brief Sets the duration of the animation.
+/// @param inValue The duration in seconds.
+void setDuration(float inValue);
+​```
+
+### File Headers
+​```cpp
+/******************************************************************************
+ * Spine Runtimes License Agreement
+ * ...
+ *****************************************************************************/
+​```
+
+## Platform Handling
+
+### DLL Export/Import
+​```cpp
+#ifdef SPINE_CPP_DLL
+    #ifdef _MSC_VER
+        #define SP_API __declspec(dllexport)
+    #else
+        #define SP_API __attribute__((visibility("default")))
+    #endif
+#else
+    #define SP_API
+#endif
+​```
+
+### Platform-Specific Code
+Minimal, mostly in Extension.cpp
+
+## Include Style
+
+### System Headers
+​```cpp
+#include &lt;spine/SpineObject.h&gt;
+#include &lt;spine/Vector.h&gt;
+​```
+
+### Forward Declarations
+Used extensively to minimize dependencies:
+​```cpp
+namespace spine {
+    class Skeleton;
+    class Event;
+}
+​```
+
+## Special Patterns
+
+### Inline Getters/Setters
+Simple accessors defined in headers:
+​```cpp
+float getDuration() { return _duration; }
+​```
+
+### Const Correctness
+- Const methods where appropriate
+- Const references for parameters
+​```cpp
+void apply(Skeleton&amp; skeleton, float lastTime, float time,
+          Vector&lt;Event*&gt;* pEvents, float alpha,
+          MixBlend blend, MixDirection direction);
+​```
+
+### No STL Usage
+Custom implementations for all containers, minimal stdlib dependency
+
+## Build System
+
+### CMake Integration
+- include directories specified in CMakeLists.txt
+- Separate static/shared library targets
+
+### Compiler Flags
+- C++11 standard
+- RTTI enabled
+- No exceptions (-fno-exceptions on some platforms)
+</code></pre></div>
+
+<p><strong>Porting Notes (porting-notes.md)</strong></p>
+<div>
+
+<pre><code data-language="markdown"># Porting Notes
+
+## Java to C++ Porting Conventions
+
+### Direct Field Access vs Getters/Setters
+- C++ uses direct field access (e.g., `p._mixRotate`) where Java uses direct field access (e.g., `p.mixRotate`)
+- C++ uses underscore prefix for private fields but accesses them directly via friend classes
+- This is intentional - C++ classes are friends of each other to allow direct field access
+- Do NOT change direct field access to getter/setter calls in C++
+- Java `slot.pose.attachment` → C++ `_slot-&gt;_pose._attachment` (NOT `_slot-&gt;getPose()._attachment`)
+
+### Override Keywords
+- When fixing override warnings, add `virtual` and `override` keywords to methods in derived classes
+- Example: `PathConstraintData &amp;getData();` → `virtual PathConstraintData &amp;getData() override;`
+
+### Pose vs Applied Usage (CRITICAL)
+- C++ MUST use the same pose reference as Java
+- If Java uses `applied`, C++ must use `_applied`
+- If Java uses `pose`, C++ must use `_pose`
+- Never mix these up - they represent different states in the constraint system
+- Example:
+  - Java: `IkConstraintPose p = applied;` → C++: `IkConstraintPose &amp;p = *_applied;`
+  - Java: `copy.pose.set(pose);` → C++: `copy-&gt;_pose.set(_pose);`
+
+### Constraint Pose Initialization
+- In Java, constraint constructors pass new pose instances to the parent constructor
+- In C++, `ConstraintGeneric` allocates poses as member fields (_pose and _constrained), not through constructor
+- Example: Java `super(data, new PhysicsConstraintPose(), new PhysicsConstraintPose())`
+- C++ just calls `ConstraintGeneric&lt;PhysicsConstraint, PhysicsConstraintData, PhysicsConstraintPose&gt;(data)`
+
+### Method Name Differences
+- Java `Posed.reset()` → C++ `PosedGeneric::resetConstrained()`
+- This naming difference must exist to avoid conflicts with other reset methods in C++
+- The Java code has a comment `// Port: resetConstrained` indicating this is intentional
+
+### Methods NOT Ported
+- `toString()` methods are not ported to C++
+- Methods that use `Matrix3` type in Java are not ported to C++
+
+### Parameter Conversions
+- Methods that take `Vector2` in Java are "unrolled" in C++ to use separate float parameters:
+  - Java: `worldToLocal(Vector2 world)`
+  - C++: `worldToLocal(float worldX, float worldY, float&amp; outLocalX, float&amp; outLocalY)`
+
+## Dark Color Handling Pattern
+- Java uses `@Null Color darkColor` (nullable reference)
+- C++ uses `Color _darkColor` with `bool _hasDarkColor` flag
+- This avoids manual memory management while maintaining the same functionality
+- The _hasDarkColor boolean indicates whether a dark color has been set
+- Example: SlotPose class uses this pattern
+
+## Event Class (Ported - 4.3-beta update)
+- Method names updated to match Java API:
+  - `getIntValue()` → `getInt()`
+  - `setIntValue()` → `setInt()`
+  - `getFloatValue()` → `getFloat()`
+  - `setFloatValue()` → `setFloat()`
+  - `getStringValue()` → `getString()`
+  - `setStringValue()` → `setString()`
+- Constructor now initializes values from EventData defaults to match Java behavior
+</code></pre></div>
+
+<p>At this point, we have exactly what we need in the context and nothing else: <code>port.md</code> in full (the program), the metadata from the porting plan JSON, the target runtime conventions in full, and the porting notes in full.</p>
+<p>And now here's the main loop that does the actual porting:</p>
+<pre><code data-language="markdown">### 2. Port Types (Repeat for each)
+
+1. **Find next pending type:**
+   ​```bash
+   # Get next pending type info with candidate files
+   jq -r '.portingOrder[] | {file: .javaSourcePath, types: .types[] | select(.portingState == "pending")} | "\(.file)|\(.types.name)|\(.types.kind)|\(.types.startLine)|\(.types.endLine)|\(.types.candidateFiles | join(","))"' porting-plan.json | head -1
+   ​```
+
+2. **Open files in VS Code via vs-claude (for user review):**
+   - Open Java file and Java file git diff (from prevBranch to currentBranch)
+   - If candidateFiles exists: open all candidate files
+
+3. **Confirm with user:**
+   - Ask: "Port this type? (y/n)"
+   - STOP and wait for confirmation.
+
+4. **Read source files:**
+   - Note: Read the files in parallel if possible
+   - Java: Read the ENTIRE file so it is fully in your context!
+   - Target: If exists, read the ENTIRE file(s) so they are fully in your context!
+   - For large files (&gt;2000 lines): Read in chunks of 1000 lines
+   - Read parent types if needed (check extends/implements)
+   - Goal: Have complete files in context for accurate porting
+
+5. **Port the type:**
+   - Follow conventions from ${targetRuntime}-conventions.md
+   - If target file(s) don't exist, create them and open them for the user via vs-claude
+   - Port incrementally and always ultrathink:
+     * Base on the full content of the files in your context, identify differences and changes that need to be made.
+      * differences can be due to idiomatic differences, or real differences due to new or changed functionality in the reference
+        implementation. Ultrathink to discern which is which.
+     * If changes need to be made:
+       * Structure first (fields, method signatures)
+       * Then method implementations
+       * For C++: Run `./compile-cpp.js` after each method
+   - Use MultiEdit for all changes to one file
+   - Ensure 100% functional parity
+   - Add or update jsdoc, doxygen, etc. based on Javadocs.
+
+6. **Get user confirmation:**
+   - Open a diff of the files you modified, comparing HEAD to working.
+   - Give the user a summary of what you ported
+   - Ask: "Mark as done? (y/n)"
+   - If yes, update status:
+   ​```bash
+   jq --arg file "path/to/file.java" --arg type "TypeName" \
+      '(.portingOrder[] | select(.javaSourcePath == $file) | .types[] | select(.name == $type) | .portingState) = "done"' \
+      porting-plan.json &gt; tmp.json &amp;&amp; mv tmp.json porting-plan.json
+   ​```
+
+7. **Update porting-notes.md:**
+   - Add any new patterns or special cases discovered.
+
+8. **STOP and confirm:**
+   - Show what was ported. Ask: "Continue to next type? (y/n)"
+   - Only proceed after confirmation.
+</code></pre><p><strong>Step 1</strong> queries our state to find the next pending type using another precise <code>jq</code> function call. Here's what gets extracted from the porting plan and is now in the context:</p>
+<pre><code data-language="json">{
+  "javaSourcePath": "/Users/badlogic/workspaces/spine-runtimes/spine-libgdx/spine-libgdx/src/com/esotericsoftware/spine/attachments/AtlasAttachmentLoader.java",
+  "types": [
+    {
+      "name": "AtlasAttachmentLoader",
+      "kind": "class",
+      "startLine": 43,
+      "endLine": 101,
+      "isInner": false,
+      "portingState": "pending",
+      "candidateFiles": [
+        "/Users/badlogic/workspaces/spine-runtimes/spine-cpp/spine-cpp/include/spine/AtlasAttachmentLoader.h",
+        "/Users/badlogic/workspaces/spine-runtimes/spine-cpp/spine-cpp/src/spine/AtlasAttachmentLoader.cpp"
+      ]
+    }
+  ]
+}
+</code></pre><p><strong>Steps 2-3</strong> implement a human checkpoint: the LLM opens relevant files in VS Code and waits for confirmation before proceeding. This isn't just politeness; it's a safety mechanism ensuring I can abort if something looks wrong, or if I want to port a different type, or if I can immediately see that this type is complete and we should update the porting state and move on to the next type.</p>
+<p><strong>Step 4</strong> is critical: "Read the ENTIRE file so it is fully in your context!" The emphasis prevents the LLM from being lazy and reading only parts of files, which would lead to incomplete ports. After this step, the context contains the complete source files needed for accurate porting.</p>
+<p><strong>Step 5</strong> does the actual porting work. The "ultrathink to discern" instruction acknowledges that porting isn't just mechanical translation; it requires judgment about idiomatic differences versus actual functionality changes.</p>
+<p><strong>Steps 6-8</strong> implement more human checkpoints and program state management. The LLM shows its work (via diffs), then updates the program's persistent state: step 6 writes to <code>porting-plan.json</code> to mark the type as done, and step 7 optionally updates <code>porting-notes.md</code> with new observations. This is where our program writes its state to disk - crucial for resumability. The state update in step 6 uses <code>jq</code> to surgically modify just the <code>portingState</code> field, ensuring we can resume exactly where we left off. Step 8 asks permission before the next loop iteration.</p>
+<p>This is our complete LLM program: structured initialization, precise function calls, state management, human checkpoints, and deterministic loops. What started as an ad hoc conversation with an AI has become a reproducible, resumable workflow that tackles real-world porting at scale.</p>
+<h2 id="toc_7">Program Execution</h2>
+<p>Let's see this program in action:</p>
+<video controls="" loading="lazy">
+    <source src="https://mariozechner.at/posts/2025-06-02-prompts-are-code/media/program-execution.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+<p>This recording demonstrates the key insights of treating LLMs as computers:</p>
+<ul>
+<li><strong>Follows the program</strong>: Reads port.md and executes each step methodically</li>
+<li><strong>Manages state</strong>: Uses precise jq queries to read and update porting-plan.json</li>
+<li><strong>Loads context strategically</strong>: Reads only necessary files when needed</li>
+<li><strong>Maintains resumability</strong>: Updates persistent state after each completed type</li>
+<li><strong>Implements human checkpoints</strong>: Asks for confirmation before proceeding</li>
+</ul>
+<p>Unlike ad hoc prompting where the conversation meanders, this programmatic approach follows a deterministic workflow. The LLM becomes a reliable executor of structured instructions rather than an unpredictable chat partner.</p>
+<p>While the LLM cannot handle the full porting process autonomously due to challenges with complex type hierarchies and execution flows, this deterministic workflow dramatically simplifies my work compared to manual porting. The tedious mechanical tasks are now automated, freeing me to focus on the genuinely difficult problems that require human insight.</p>
+<p>What previously took me 2-3 weeks, now takes 2-3 days.</p>
+<h2 id="toc_8">Future Work</h2>
+<p>As with everything, there's always plenty of room for improvements.</p>
+<p><strong>Testing and debugging</strong>: The deterministic nature of these workflows opens possibilities for traditional software engineering practices. We could test that given specific inputs and state, our programs produce expected outputs. For debugging, we could instrument prompts to write state information at key points, creating execution traces that help identify where workflows diverge from expectations.</p>
+<p><strong>Sub-agent orchestration</strong>: Current tools like Claude Code spawn sub-agents without observability or communication channels. To scale this programming model, we need structured ways to program sub-agents and monitor their execution. The main agent should define explicit workflows for sub-agents rather than generating them ad hoc, ensuring reliability through the same structured approach we use for the primary workflow.</p>
+<h2 id="toc_9">Conclusion</h2>
+<p>This mental model has transformed how I work with established codebases using agentic coding tools. By treating LLMs as programmable computers rather than conversational partners, I've found a more reliable approach to complex software tasks. It's not a panacea and won't work for all problems, but it represents a step toward turning AI-assisted coding into an engineering discipline rather than a "throwing shit at the wall" approach.</p>
+<p>
+    This page respects your privacy by not using cookies or similar technologies and by not collecting any personally identifiable information.
+</p>
+
+</article></div>

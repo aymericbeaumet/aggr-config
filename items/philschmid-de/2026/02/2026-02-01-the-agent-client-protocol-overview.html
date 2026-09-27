@@ -1,0 +1,24 @@
+<div id="readability-page-1" class="page"><div><p>With the explosion of AI coding agents—Claude Code, Gemini CLI, OpenCode, Goose, Codex CLI, we've entered an era where every major AI lab ships their own terminal-based coding assistant. But there is one problem. Each agent has its own events or outputs.</p>
+<p>The <a target="_blank" rel="noopener noreferrer" href="https://agentclientprotocol.com/get-started/introduction">Agent Client Protocol (ACP)</a> is an an open standard abstracts the events and outputs of AI agents and provides a common interface for editors to interact with them. Similar to MCP but for agent to client (UI) communication.</p>
+<p>ACP is a JSON-RPC 2.0 protocol with a simple premise:</p>
+<ol>
+<li><strong>Clients</strong> (editors like Zed, JetBrains or Obsidian) manage the user environment</li>
+<li><strong>Agents</strong> (Claude Code, Gemini CLI, OpenClaw (prev. Clawdbot)) Thinking and tool execution</li>
+<li>They communicate over <strong>stdio</strong> (agent runs as subprocess) or <strong>HTTP</strong> (remote agents)</li>
+</ol>
+<p><img src="https://www.philschmid.de/static/blog/acp-overview/acp.png" alt="acp"></p>
+<h2 id="protocol-events">Protocol Events</h2>
+<div><table><thead><tr><th>Method</th><th>Direction</th><th>Purpose</th></tr></thead><tbody><tr><td><code>initialize</code></td><td>Client → Agent</td><td>Negotiate protocol version &amp; capabilities</td></tr><tr><td><code>session/new</code></td><td>Client → Agent</td><td>Create new conversation session</td></tr><tr><td><code>session/load</code></td><td>Client → Agent</td><td>Resume existing session</td></tr><tr><td><code>session/prompt</code></td><td>Client → Agent</td><td>Send user message</td></tr><tr><td><code>session/set_mode</code></td><td>Client → Agent</td><td>Switch agent operating mode</td></tr><tr><td><code>fs/read_text_file</code></td><td>Agent → Client</td><td>Read file (includes unsaved edits)</td></tr><tr><td><code>fs/write_text_file</code></td><td>Agent → Client</td><td>Write/create file</td></tr><tr><td><code>terminal/create</code></td><td>Agent → Client</td><td>Start shell command</td></tr><tr><td><code>terminal/output</code></td><td>Agent → Client</td><td>Get command output</td></tr><tr><td><code>terminal/wait_for_exit</code></td><td>Agent → Client</td><td>Wait for command completion</td></tr><tr><td><code>terminal/kill</code></td><td>Agent → Client</td><td>Terminate running command</td></tr><tr><td><code>terminal/release</code></td><td>Agent → Client</td><td>Clean up terminal</td></tr><tr><td><code>session/request_permission</code></td><td>Agent → Client</td><td>Request user approval for action</td></tr></tbody></table></div>
+<h3 id="notifications-one-way">Notifications (One-Way)</h3>
+<div><table><thead><tr><th>Notification</th><th>Direction</th><th>Purpose</th></tr></thead><tbody><tr><td><code>session/update</code></td><td>Agent → Client</td><td>Stream progress, messages, tool calls</td></tr><tr><td><code>session/cancel</code></td><td>Client → Agent</td><td>Abort current operation</td></tr></tbody></table></div>
+<h3 id="session-update-types">Session Update Types</h3>
+<div><table><thead><tr><th>Update Type</th><th>Description</th><th>Content</th></tr></thead><tbody><tr><td><code>plan</code></td><td>Agent's execution plan</td><td>List of steps with status</td></tr><tr><td><code>agent_message_chunk</code></td><td>Streamed text response</td><td>Text content block</td></tr><tr><td><code>user_message_chunk</code></td><td>Echo of user input</td><td>Text content block</td></tr><tr><td><code>thought_message_chunk</code></td><td>Agent's reasoning</td><td>Text content block</td></tr><tr><td><code>tool_call</code></td><td>New tool invocation</td><td>ID, title, kind, status</td></tr><tr><td><code>tool_call_update</code></td><td>Tool progress/result</td><td>Status change, content</td></tr><tr><td><code>available_commands</code></td><td>Slash commands</td><td>List of available commands</td></tr><tr><td><code>mode_change</code></td><td>Mode switch</td><td>New mode info</td></tr></tbody></table></div>
+<h3 id="tool-call-status-flow">Tool Call Status Flow</h3>
+<p><img src="https://www.philschmid.de/static/blog/acp-overview/tool.png" alt="tool"></p>
+<h2 id="protocol-flow">Protocol Flow</h2>
+<h3 id="complete-lifecycle">Complete Lifecycle</h3>
+<p><img src="https://www.philschmid.de/static/blog/acp-overview/full.png" alt="protocol"></p>
+<h3 id="terminal-execution-flow">Terminal Execution Flow</h3>
+<p><img src="https://www.philschmid.de/static/blog/acp-overview/terminal.png" alt="terminal"></p>
+<h3 id="permission-request-flow">Permission Request Flow</h3>
+<p><img src="https://www.philschmid.de/static/blog/acp-overview/permission.png" alt="permission"></p></div></div>

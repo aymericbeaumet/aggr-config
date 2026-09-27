@@ -1,0 +1,61 @@
+<div id="readability-page-1" class="page"><div><p>For the past few decades, Engineering meant one thing: removing ambiguity. It meant defining strict interfaces, enforcing type safety, and ensuring that <code>Input A \+ Code B \= Output C</code>.</p>
+<p>Traditional software engineering is <strong>Deterministic</strong>. We play the role of Traffic Controllers; we own the roads, the lights, and the laws. We decide exactly where data goes and when. Agent Engineering is <strong>Probabilistic</strong>. We are Dispatchers. We give instructions to a driver (an LLM) who might take a shortcut, get lost, or decide to drive on the sidewalk because it "seemed faster."</p>
+<p>It is a paradox that junior engineers often ship functional agents faster than seniors. Why? The more senior the engineer, the less they tend to trust the reasoning and instruction-following capabilities of the Agent. We fight the model and try to "code away" the probabilistic nature.</p>
+<p>Here are 5 examples where traditional engineering habits clash with the new reality of Agent Engineering.</p>
+<h2 id="1-text-is-the-new-state">1. Text is the New State</h2>
+<p>In traditional engineering, we model the world with data structures. We define schemas, interfaces, and strict types. It feels safe because it is predictable. We instinctively try to force Agents into this box.</p>
+<p><strong>The Trap:</strong> Real-world intents, preferences, or configurations are rarely binary/structured. User inputs are continuous (natural language) rather than discrete (structured fields).</p>
+<p><strong>Text is the new State.</strong> We must abandon the comfort of booleans in favor of semantic meaning.</p>
+<p>Imagine a Deep Research plan approval use case where the user says, <em>"This plan looks good, but please focus on the US market."</em> A deterministic system forces this into <code>is_approved: true/false</code> and we lobotomize the context.</p>
+<p><strong>Software Engineering:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">{
+  "plan_id": "123",
+  "status": "APPROVED" // Nuance is lost here
+}</code></pre></div></figure>
+<p><strong>Agent Engineering:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">{
+  "plan_id": "123",
+  "text": "This plan looks good, but please focus on the US market."
+}</code></pre></div></figure>
+<p>By preserving the text, the downstream agent can read the feedback ("Approved, but focus on US market") and adjust its behavior dynamically.</p>
+<p>Another example is user preferences. A deterministic system might store <code>is_celsius: true</code>. An agentic system stores <em>"I prefer Celsius for weather, but use Fahrenheit for cooking".</em> The agent can dynamically switch contexts based on the task.</p>
+<h2 id="2-hand-over-control">2. Hand over Control</h2>
+<p>In microservices, a user's intent matches a route (<code>POST /subscription/cancel</code>). In Agents, we have a single natural language entrypoint with a Brain (LLM) that decides the control flow based on the available tools, input, and instructions.</p>
+<p><strong>The Trap:</strong> We try to hard-code the flow into the agent, but interactions don't follow straight lines. They loop, they backtrack, and they pivot. A user might want to cancel, and end up agreeing to renew.</p>
+<ul>
+<li>User: "I want to cancel my subscription." (Intent: Churn)</li>
+<li>Agent: "I can offer you a 50% discount to stay."</li>
+<li>User: "Actually, yeah, that works." (Intent: Retention)</li>
+</ul>
+<p><strong>Trust the agent to navigate the flow.</strong> If we try to hard-code every edge case, we aren't building an AI agent. We must trust the agent to understand the current intent based on the entire context.</p>
+<h2 id="3-errors-are-just-inputs">3. Errors are just inputs</h2>
+<p>In traditional software, if an API call fails or a variable is missing, we throw an exception. We want the program to crash immediately so we can fix the bug.</p>
+<p><strong>The Trap:</strong> An agent might take 5 minutes and cost $0.50. If step 4 of 5 fails because of a missing or wrong input, crashing the whole execution is unacceptable.</p>
+<p><strong>An error is just another input.</strong> Instead of crashing, we catch the error, feed it back to the agent, and try to recover.</p>
+<p><img src="https://www.philschmid.de/static/blog/why-engineers-struggle-building-agents/agent-error-handling.png" alt="Agent Error Handling"></p>
+<h2 id="4-from-unit-tests-to-evals">4. From Unit Tests to Evals</h2>
+<p>Test Driven Development (TDD) helps us write more robust code, but we cannot unit test an Agent. Engineers can waste weeks looking for binary correctness in a probabilistic system. We must evaluate behavior.</p>
+<p><strong>The Trap:</strong> We cannot write binary assertions for creative or reasoning tasks. "Write a summary of this email" has infinite valid outputs. If we try to Mock the LLM, we aren't testing the agent, we are testing our string concatenation.</p>
+<p><strong>Evals over Tests.</strong> We cannot unit test reasoning. We must validate Reliability and Quality, and trace intermediate checks:</p>
+<ul>
+<li><strong>Reliability (Pass^k):</strong> We don't ask "Did it work?" We ask "How often does it work?"</li>
+<li><strong>Quality (LLM as a Judge):</strong> "Is the answer helpful? Is the tone correct? Is the summary accurate?"</li>
+<li><strong>Tracing:</strong> Don't just check the final answer. Check the intermediate steps. Did the agent search the knowledge base before answering?</li>
+</ul>
+<p>If our agent succeeds 45/50 times with a quality score of 4.5/5, it can be production-ready. We are managing risk, not eliminating variance.</p>
+<h2 id="5-agents-evolve-apis-dont">5. Agents Evolve, APIs Don't</h2>
+<p>In the past, we designed APIs for human developers, relying on implicit context and "clean" interfaces. Humans infer context. Agents do not. Agents are Literalists. If an ID format is ambiguous, the agent will hallucinate one.</p>
+<p><strong>The Trap:</strong> We often build "Human-Grade" APIs—endpoints that rely on implicit context. For example, a variable named <code>id</code> is obviously the <code>user_unique_identifier</code> (UUID) to us, and can be used in <code>get_user(id)</code>. An Agent might not have this context and might try to use the email or name in <code>get_user(id)</code>.</p>
+<p>Agents require verbose, <strong>"Idiot-Proof" semantic typing</strong> (e.g., <code>"user_email_address"</code> instead of <code>"email"</code>) and highly descriptive docstrings that act as "context".</p>
+<ul>
+<li><strong>Bad:</strong> <code>delete_item(id)</code> (Is ID an integer? A UUID? What happens if it's not found?)</li>
+<li><strong>Good:</strong> <code>delete_item_by_uuid(uuid: str)</code> with a docstring/description: <em>"Deletes an item. If the item is not found, return a descriptive error string."</em></li>
+</ul>
+<p>Furthermore, Agents allow for Just-in-Time adaptation. Normal APIs are promises to developers; we commit code that relies on those APIs, and then walk away. If we change an API from <code>get_user_by_id(id)</code> to <code>get_user_by_email(email)</code>, we break that promise and everything breaks immediately. An agent, however, reads the new tool definition and can adjust to it.</p>
+<h2 id="conclusion-trust-but-verify">Conclusion: Trust, but Verify</h2>
+<p>The transition from deterministic systems to probabilistic agents is uncomfortable. It requires us to trade certainty for semantic flexibility. We no longer know and own the exact execution path. We effectively hand over the control flow to a non-deterministic model and store our application state in natural language.</p>
+<p>This feels wrong to a mind trained on strict interfaces. But trying to force an Agent into a deterministic box defeats the purpose of using one. You cannot code away the probability. You must manage it through evals and self-correction.</p>
+<p>However, "trusting" an agent does not mean letting it run wild. We must find the middle ground. Agents will fail in many unexpected ways but the trajectory is clear. We must stop trying to code away the ambiguity and start engineering systems that are resilient enough to handle it.</p>
+<p>This also means knowing when to use workflows over agents. I go into detail on how to architect these differences in my post on <a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/agentic-pattern">Agentic Patterns</a>.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

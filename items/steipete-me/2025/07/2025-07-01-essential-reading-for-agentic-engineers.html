@@ -1,0 +1,120 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/essential-reading/hero.png" alt="" loading="lazy"><p><strong>Kickstart your transition from vibe coding to agentic engineering.</strong></p>
+<p>These resources will help you master the new paradigm of AI-assisted development, where agents become true collaborators that can handle entire codebases and ship production features. Each piece was chosen for its practical, real-world insights. I’ll keep this list updated as the field evolves.</p>
+<h2 id="how-to-use-claude-code-effectively">How to Use Claude Code Effectively</h2>
+<p><a href="https://spiess.dev/blog/how-i-use-claude-code">Read the article</a> by Philipp Spiess (<a href="https://x.com/philippspiess">@philippspiess</a>) • June 2025 • 14 min</p>
+<p>Philipp shares practical workflow tips for maximizing Claude Code’s effectiveness:</p>
+<ul>
+<li><strong>Start fresh often</strong>: Use <code>/clear</code> frequently to prevent context drift and maintain focus</li>
+<li><strong>Precise prompts win</strong>: Provide extensive context, edge cases, and specific examples</li>
+<li><strong>Iterate, don’t overwhelm</strong>: Break complex tasks into small steps rather than attempting large changes at once</li>
+<li><strong>Advanced techniques</strong>: Use “ultrathink” for complex problems, interrupt early when things go wrong, and leverage Git worktrees for parallel work</li>
+<li><strong>Safety first</strong>: Stage Git changes frequently and use them as checkpoints</li>
+</ul>
+<blockquote>
+<p>Claude Code has fundamentally changed how I approach many programming tasks… The key is finding the right balance between automation and human oversight.</p>
+</blockquote>
+<h2 id="agentic-coding-the-future-of-software-development-with-agents">Agentic Coding: The Future of Software Development with Agents</h2>
+<p><a href="https://www.youtube.com/watch?v=nfOVgz_omlU">Watch the video</a> by Armin Ronacher (<a href="https://x.com/mitsuhiko">@mitsuhiko</a>) • June 2025 • 37 min</p>
+<p>Armin explores agentic coding as a transformative paradigm where AI agents become true collaborators rather than mere autocomplete tools, describing it as “catnip for programmers” that draws developers into addictive, energizing sessions. Claude Code emerges as the leading tool, with its terminal-based interface enabling powerful agent chaining and remote workflows that editor integrations can’t match.</p>
+<ul>
+<li><strong>Context is king</strong>: Success requires rich context, descriptive function names, and simple codebases. Go, PHP, and basic Python work best</li>
+<li><strong>Dev environment matters</strong>: Agents need centralized logging, clear error messages, and tools that fail loudly to recover from mistakes</li>
+<li><strong>Terminal &gt; Editor</strong>: Terminal interfaces enable agent nesting and composability that’s difficult in traditional IDEs</li>
+<li><strong>Beyond coding</strong>: Agents excel at debugging CI pipelines, browser automation, file management, and even online sales automation</li>
+<li><strong>Avoid context rot</strong>: Long-running tasks suffer from accumulated failures. Often better to restart than compress context</li>
+</ul>
+<blockquote>
+<p>The early adopter programmers are just the beginning of a broader wave of agentic AI use.</p>
+</blockquote>
+<h2 id="i-cant-sleep-gud-anymore---a-practical-guide-to-agentic-computering">I can’t sleep gud anymore - A Practical Guide to Agentic Computering</h2>
+<p><a href="https://vimeo.com/1098025052">Watch the video</a> by Mario Zechner (<a href="https://x.com/badlogicgames">@badlogicgames</a>) • June 2025 • 85 min</p>
+<p>Mario shares his hard-won patterns for using Claude Code effectively on real projects, demonstrating workflows from ad-hoc scripting to complex cross-language porting live, revealing how to maintain control while leveraging AI’s speed. Also see his blog post “<a href="https://mariozechner.at/posts/2025-01-02-prompts-are-code/">Prompts are code</a>” for deeper insights into this paradigm.</p>
+<ul>
+<li><strong>Claude changes everything but demands discipline</strong>: It writes terrible code but enables rapid iteration - the key is maintaining tight control and understanding what it generates</li>
+<li><strong>Context is everything</strong>: Use CLAUDE.md files, structured documentation, and tools like <code>jq</code> to query JSON databases instead of letting Claude waste tokens exploring your codebase</li>
+<li><strong>Survival tactics</strong>: Run with <code>--dangerously-skip-permissions</code>, write task summaries before context compaction hits, and hack Claude Code via <a href="https://github.com/badlogic/lemmy/tree/main/apps/claude-trace">claude-trace</a> to become better at context management</li>
+<li><strong>LLMs as a flexible ISA</strong>: Your prompts are code, your .md/.json files are state on disk - build deterministic workflows with human checkpoints for quality control</li>
+<li><strong>Live demo on production code</strong>: Watch the prompts-as-code principle in action - porting changes across a large polyglot codebase (Java/C++/C#) using LSP databases and .json state files, turning 2-week tasks into 1-day sprints</li>
+</ul>
+<blockquote>
+<p>It’s not about the AI being smart - it’s about being smart about the AI.</p>
+</blockquote>
+<h2 id="claude-code-best-practices-from-anthropic">Claude Code Best Practices from Anthropic</h2>
+<p><a href="https://www.anthropic.com/engineering/claude-code-best-practices">Read the article</a> by Anthropic Engineering • April 2025 • 15 min</p>
+<p>Anthropic’s engineering team shares comprehensive best practices for maximizing Claude Code’s effectiveness:</p>
+<ul>
+<li><strong>Customize your environment</strong>: Use <code>CLAUDE.md</code> files for context, curate allowed tools carefully, and install GitHub CLI for enhanced interactions</li>
+<li><strong>Adopt proven workflows</strong>: Follow the Explore→Plan→Code→Commit approach, leverage TDD, iterate visually with screenshots, and use “Safe YOLO mode” for autonomous tasks</li>
+<li><strong>Optimize interactions</strong>: Be specific in instructions, reference exact files, course-correct early, and use <code>/clear</code> to maintain focused context</li>
+<li><strong>Advanced techniques</strong>: Utilize multi-Claude workflows, git worktrees for parallel tasks, headless mode for automation, and subagents for complex problems</li>
+</ul>
+<blockquote>
+<p>Claude performs best when it has a clear target to iterate against: a visual mock, a test case, or another kind of output.</p>
+</blockquote>
+<h2 id="mcp-vs-cli-a-data-driven-tool-comparison">MCP vs CLI: A Data-Driven Tool Comparison</h2>
+<p><a href="https://mariozechner.at/posts/2025-08-15-mcp-vs-cli/">Read the article</a> by Mario Zechner (<a href="https://x.com/badlogicgames">@badlogicgames</a>) • August 2025 • 12 min</p>
+<p>Mario runs a rigorous evaluation comparing Model Context Protocol (MCP) servers against CLI tools for agentic workflows, with surprising results:</p>
+<ul>
+<li><strong>Many MCPs are redundant</strong>: They often reimplement functionality already available in better CLI tools</li>
+<li><strong>Context window pollution</strong>: Some MCPs flood the context with unnecessary information, degrading agent performance</li>
+<li><strong>When MCPs make sense</strong>: No good CLI alternative exists, CLI output is too verbose, LLM lacks shell access, or stateful tools benefit from persistent connections</li>
+<li><strong>Empirical testing matters</strong>: Through 120 evaluation runs across debugging tasks, tmux outperformed custom tools with “lowest cost and consistent clean execution”</li>
+<li><strong>Choose tools pragmatically</strong>: Tool effectiveness varies by task - prefer simpler interfaces and existing CLI tools when available</li>
+</ul>
+<blockquote>
+<p>All tools achieved 100% success rate… The main differentiators were efficiency and ease of use.</p>
+</blockquote>
+<h2 id="building-a-macos-app-entirely-with-claude-code">Building a macOS App Entirely with Claude Code</h2>
+<p><a href="https://www.indragie.com/blog/i-shipped-a-macos-app-built-entirely-by-claude-code">Read the article</a> by Indragie Karunaratne (<a href="https://x.com/indragie">@indragie</a>) • July 2025 • 19 min</p>
+<p>Indragie built and shipped Context, a macOS app for debugging MCP servers, with Claude Code writing ~19,000 of the 20,000 lines of code. Key insights:</p>
+<ul>
+<li><strong>Context engineering matters</strong>: Detailed specifications and “priming” Claude with examples produces much higher quality code</li>
+<li><strong>Modern Swift can be tricky</strong>: Claude is competent but sometimes struggles with recent language features</li>
+<li><strong>Productivity transformation</strong>: Rapid prototyping, mock data generation, and automated release scripts made shipping a polished side project actually achievable</li>
+<li><strong>The future is here</strong>: Massive productivity gains make the investment worthwhile</li>
+</ul>
+<p>This represents a fundamental shift in how developers can work: AI agents aren’t just assistants but capable collaborators that can handle entire codebases.</p>
+<blockquote>
+<p>It’s like I found an extra 5 hours every day, and all it cost me was $200 a month.</p>
+</blockquote>
+<h2 id="a-cautionary-perspective-on-ai-coding">A Cautionary Perspective on AI Coding</h2>
+<p><a href="https://albertofortin.com/writing/coding-with-ai">Read the article</a> by Alberto Fortin (<a href="https://x.com/a7fort">@a7fort</a>) • May 2025 • 8 min</p>
+<p>Alberto offers a sobering counterpoint to AI coding enthusiasm after discovering fundamental structural issues in his AI-generated codebase. His key insights:</p>
+<ul>
+<li><strong>AI limitations are real</strong>: LLMs generate inconsistent, poorly structured code and struggle to maintain coherence across multiple files</li>
+<li><strong>Use AI as an assistant, not a lead developer</strong>: Best for specific tasks like renaming parameters, translating pseudo-code, or learning new languages</li>
+<li><strong>“Vibe coding” is dangerous</strong>: Relying on AI without technical knowledge is “a recipe for disaster”</li>
+<li><strong>Protect your skills</strong>: Over-reliance on AI risks degrading critical thinking and coding abilities</li>
+<li><strong>Return to fundamentals</strong>: Sometimes pen and paper planning beats AI-generated solutions</li>
+</ul>
+<blockquote>
+<p>I’m not asking it to write new things from scratch… I’m the senior dev. The LLM is the assistant.</p>
+</blockquote>
+<h2 id="ai-is-a-money-trap-the-economics-of-generative-ai">AI is a Money Trap: The Economics of Generative AI</h2>
+<p><a href="https://www.wheresyoured.at/ai-is-a-money-trap/">Read the article</a> by Ed Zitron (<a href="https://x.com/edzitron">@edzitron</a>) • January 2025 • 25 min</p>
+<p>Ed delivers a scathing economic analysis of the generative AI industry, arguing that it’s fundamentally unsustainable and heading for collapse:</p>
+<ul>
+<li><strong>No viable business model</strong>: After three years and billions in investment, no AI startup has achieved profitability or demonstrated a path to it</li>
+<li><strong>Massive capital destruction</strong>: Companies like OpenAI and Anthropic are burning billions while generating minimal revenue relative to their costs</li>
+<li><strong>Infrastructure bubble</strong>: Big Tech’s AI data center investments are consuming a significant portion of US economic growth with little return</li>
+<li><strong>Systemic economic risks</strong>: The AI bubble is artificially sustained by venture capital and big tech spending, threatening broader economic stability when it bursts</li>
+<li><strong>No exit strategies</strong>: Inflated valuations make acquisitions impossible and public offerings unviable</li>
+</ul>
+<blockquote>
+<p>The generative AI industry is, at its core, unnatural. It does not make significant revenue compared to its unbelievable costs.</p>
+</blockquote>
+<h2 id="the-evolution-of-software-from-10-to-30">The Evolution of Software: From 1.0 to 3.0</h2>
+<p><a href="https://www.youtube.com/watch?v=LCEmiRjPEtQ">Watch the video</a> by Andrej Karpathy (<a href="https://x.com/karpathy">@karpathy</a>) • June 2025 • 40 min</p>
+<p>Andrej presents a framework for understanding software evolution through three paradigms: Software 1.0 (traditional code), Software 2.0 (neural networks), and Software 3.0 (LLMs programmable via natural language). LLMs are becoming the new operating systems where English is the programming language, fundamentally changing how we interact with computers.</p>
+<ul>
+<li><strong>LLMs as infrastructure</strong>: Like utilities and semiconductor fabs, they’re centralized, capital-intensive services with high reliability requirements</li>
+<li><strong>The “people spirits” paradox</strong>: LLMs have encyclopedic knowledge but jagged intelligence, hallucinations, and no persistent memory</li>
+<li><strong>Partial autonomy is key</strong>: Apps like Cursor and Perplexity provide “autonomy sliders” letting users balance AI generation with human verification</li>
+<li><strong>Natural language democratizes coding</strong>: “Vibe coding” makes software development accessible to anyone, but deployment complexity remains a barrier</li>
+<li><strong>Agents need new interfaces</strong>: Documentation must evolve from human-centric (“click this”) to machine-actionable commands</li>
+</ul>
+<blockquote>
+<p>We are at a historic moment where software is fundamentally changing… Being fluent in all three paradigms will be valuable for future engineers.</p>
+</blockquote>
+<hr>
+<p><strong>Continue Reading</strong>: Check out <a href="https://steipete.me/posts/2025/essential-reading-july-2025">Essential Reading for Agentic Engineers - July 2025</a> for fresh perspectives from the field, including real-world productivity reports and technical deep-dives into the evolving landscape of AI-assisted development.</p></article></div>

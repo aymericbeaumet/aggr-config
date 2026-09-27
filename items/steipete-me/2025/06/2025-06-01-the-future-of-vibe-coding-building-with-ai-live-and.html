@@ -1,0 +1,158 @@
+<div id="readability-page-1" class="page"><article id="article"><p></p>
+<p>A friend asked me to show off my current workflow, so I did an impromptu workshop for him and his developers. This is a snapshot of how I approach vibe coding these days. Don’t expect a professional workshop - I did this as a favor and for the fun of it. I let Gemini extract the key points into a blog post, if you don’t want to watch all of the 3-hour video.</p>
+<p>All the code generated during this workshop is available on <a href="https://github.com/steipete/VibeMeter">GitHub</a>.</p>
+<h2 id="transcript">Transcript</h2>
+<p>Alright, let’s talk about how software development is changing, right now. For nearly 15 years, I was deep in the PDF world with PSPDFKit (now they rebranded as Nutrient). After selling the company, I took a much-needed breather. I was properly burned out. But a couple of months ago, that itch, that <a href="https://steipete.me/posts/2025/finding-my-spark-again/">spark</a>, came back. And what pulled me in? AI.</p>
+<p>It’s a completely different landscape now. Everything I’m about to share is what I’ve crammed into my brain over the last two, very intense, months. I’m still discovering new things daily, but what’s already possible is, frankly, incredibly cool. So, I decided to do a live workshop: go from a raw idea to a (hopefully) working product in a few hours, unscripted, just pure “vibe coding.”</p>
+<h3 id="the-idea-vibe-meter--keeping-an-eye-on-ai-costs">The Idea: “Vibe Meter” – Keeping an Eye on AI Costs</h3>
+<p>If you’re like me, you’re probably diving deep into AI tools. I’m using Cursor (the AI-first IDE) and Anthropic’s Claude Code (their command-line AI) pretty heavily. These things aren’t free. My Cursor bill was already nudging $900 for the month, and there’s that $1000 cap before you need to talk enterprise. It got me thinking: wouldn’t it be great to have a little something in the menu bar to see that spend in real-time?</p>
+<p>And thus, “Vibe Meter” was born. I even briefly considered calling it “Aufpasser” (German for a kind of minder or little policeman – seemed fitting!). The plan was ambitious for a short workshop:</p>
+<ul>
+<li>A macOS menu bar app (because native is nice).</li>
+<li>An Electron app (for that cross-platform reach, because why not?).</li>
+<li>Display current monthly Cursor spend.</li>
+<li>Show more details on click, like who’s logged in.</li>
+<li>Configurable warning limits – say, a “vibe code limit” at $200, and another at the $1000 mark, with actual user notifications.</li>
+<li>A proper settings dialog for these limits.</li>
+<li>Since Cursor doesn’t have a public API for this, we’d need to figure out a login mechanism, likely by capturing cookies like their own web app does.</li>
+<li>Currency conversion (dollars, Euros, maybe even Philippine Pesos for the team!).</li>
+<li>The usuals: launch at startup, quit option, logout.</li>
+</ul>
+<p>Yeah, a bit much for a live demo, but go big or go home, right?</p>
+<h3 id="phase-1-the-blueprint--forging-specs-with-googles-ai-studio--gemini">Phase 1: The Blueprint – Forging Specs with Google’s AI Studio &amp; Gemini</h3>
+<p>Even in this new AI-driven world, a solid specification is still your bedrock. The difference? The process of creating it can be far more dynamic and, dare I say, fun. For this, I turned to Google’s AI Studio, powered by their Gemini model.</p>
+<p><strong>Why AI Studio for Specification? It’s About the Output and the Process.</strong>
+Gemini is seriously impressive. I find it’s incredibly good at generating lengthy, structured text without the aggressive summarization or “shortcut-taking” I’ve seen from other models when you ask for, say, full technical documentation. The playground for Gemini seems to have almost unlimited processing power for this kind of task – it doesn’t feel like it’s constantly trying to save on tokens when you need detail. Plus, the cost is quite reasonable – something like <strong>four cents per million tokens</strong> for the input, which is great for feeding it lots of context.</p>
+<p><strong>My Spec Refinement Loop – AI Critiquing AI:</strong>
+This is a pattern I’ve found incredibly powerful:</p>
+<ol>
+<li><strong>Voice-First Brain Dump:</strong> I’m lazy with typing. I use an app called “Flow” (or Whisper Flow – just hit the <code>Fn</code> key on my Mac, and it transcribes) to dictate my initial thoughts, feature ideas, and user stories directly into a new Gemini chat in AI Studio. It’s fast and captures ideas fluidly.</li>
+<li><strong>Gemini’s First Draft:</strong> Gemini takes this verbal stream-of-consciousness and churns out a pretty decent first-pass structured specification document.</li>
+<li><strong>The “Peer Review” by Another AI:</strong> This is the fun part. I copy that entire generated spec and paste it into a <em>brand new, separate</em> Gemini chat. My prompt to this second instance is something like: <em>“You are an AI tasked with implementing this spec in one go. Before you start, what questions do you have? What’s unclear? What’s missing for you to build this successfully?”</em></li>
+<li><strong>Addressing the AI’s Questions:</strong> The second AI <em>always</em> comes back with brilliant questions. It points out ambiguities, edge cases I hadn’t considered, and missing information. It’s like having an infinitely patient, detail-oriented peer reviewer.</li>
+<li><strong>Refining the Master Spec:</strong> I take these questions, think through the answers, and then feed those answers and clarifications back into the <em>original</em> AI Studio chat – the one that holds the “master” context of our evolving spec.</li>
+<li><strong>Iteration is Key:</strong> We went back and forth. For Vibe Meter, this helped us realize we needed to be very specific about how we’d get the Cursor <code>teamId</code> and the exact cookie name (which turned out to be <code>workos_cursor_session</code>). This led to a bit of live “API archeology” using browser dev tools – inspecting Cursor’s own web app’s network requests during login, when viewing usage, etc. We found the <code>/me</code> endpoint for user details and the <code>getMonthlyInvoice</code> call (a POST request, interestingly) which contained the team ID and costs (in cents).</li>
+<li><strong>Nailing Down Technicals:</strong> We also layered in technical constraints: Swift 6 for the Mac app (because why not use the latest?), latest macOS only, Swift Test for unit tests, a strict “menu bar only, no Dock icon” policy, and for the Electron version, a clear directive to use TypeScript and React.</li>
+</ol>
+<p>This process of letting an AI help refine the input for <em>another</em> AI (or even itself in a later stage) is a cornerstone of “vibe coding.” The better your spec, the less friction you’ll have when it’s time to generate actual code. Gemini’s massive 1 million token context window is a godsend here; you can really build up a rich, detailed understanding within the chat.</p>
+<h3 id="phase-2-unleashing-the-coders--cursor-ide-parallel-builds-and-my-bag-of-ai-tricks">Phase 2: Unleashing the Coders – Cursor IDE, Parallel Builds, and My Bag of AI Tricks</h3>
+<p>With a spec that felt reasonably robust (for a live demo!), it was time to fire up Cursor, my AI-first IDE of choice, and actually generate some code.</p>
+<p><strong>Going Parallel – Mac &amp; Electron Simultaneously:</strong>
+I’d already set up a GitHub repo for “Vibe Meter” and, within it, two distinct folders: <code>VibeMeter-Mac</code> and <code>VibeMeter-Electron</code>. The plan was to build both in parallel, so I opened two separate Cursor IDE windows, one pointed at each sub-project.</p>
+<ol>
+<li><strong>For the Mac App (SwiftUI):</strong>
+<ul>
+<li>In the Cursor window for <code>VibeMeter-Mac</code>, I started a new chat.</li>
+<li>Pasted our full, refined specification.</li>
+<li>Selected the Gemini model within Cursor (it’s one of several you can choose).</li>
+<li>The prompt was straightforward: <em>“You are an AI tasked with building a Mac app based on this software specification. Generate the project and all necessary files.”</em></li>
+</ul>
+</li>
+<li><strong>For the Electron App (TypeScript/React):</strong>
+<ul>
+<li>In the <code>VibeMeter-Electron</code> Cursor window, I did the same but with a crucial addition to the prompt: <em>“We also want to build a version of this using Electron. Any technical choices in the spec that were Swift-only should be replaced with good cross-platform alternatives. Use TypeScript and React for the implementation.”</em></li>
+</ul>
+</li>
+</ol>
+<p>And then, the magic (and sometimes the madness) begins. You hit “go,” and the AIs start chugging away, planning steps, creating files, and writing code.</p>
+<p><strong>Dealing with the “Continue Monkey” – And My Solution, <a href="https://codelooper.app">CodeLooper</a>:</strong>
+One of the current papercuts in these AI-driven IDEs is the generation loop. They’ll work for a bit, then pause, often requiring a manual click on a “Continue” button. This can be due to internal limits (Cursor sometimes has a 25-turn limit before pausing), connection hiccups, or the AI just needing a moment to plan its next multi-step move.</p>
+<p>This constant need to babysit the “Continue” button is why I’m building a side-project called “<a href="https://codelooper.app">CodeLooper</a>.” It’s a Mac menu bar app that uses a combination of screen capture, accessibility APIs, and even JavaScript injection (since Cursor itself is an Electron app) to detect when a generation loop has paused and, if it deems it safe, automatically click “Continue” for me. It’s still a work in progress, but the goal is to achieve longer, truly unattended generation sessions. For this workshop, though, I was the designated “Continue Monkey.”</p>
+<p><strong>MCPs – My Custom Toolkit for Supercharging Cursor:</strong>
+Cursor allows you to define “MCPs” (which I think of as “More Capable Prompts” or “More Capable Tools”). These are essentially custom functions or external tools the AI agent within Cursor can choose to call. I’ve been building out a suite of these to give the AI more leverage:</p>
+<ul>
+<li>🧠 <strong><a href="https://github.com/steipete/claude-code-mcp">Claude Code</a></strong>: This is a big one. It allows the Gemini agent in Cursor to delegate specific tasks to Anthropic’s Claude Code running in my terminal (often in “YOLO mode,” where I pre-authorize it to bypass permission prompts for shell commands – live dangerously, right?). This is fantastic for playing to each AI’s strengths. If Cursor gets stuck or I want Claude’s deeper reasoning on a complex refactor, I can have Gemini call out. It’s also cost-effective if you’re on Claude’s flat-rate subscription. A buddy for your IDE that your agent can ask if he’s stuck. Can do coding tasks and offer “a pair of fresh eyes” that often un-stucks the loop.</li>
+<li>👻 <strong><a href="https://github.com/steipete/Peekaboo">Peekaboo</a></strong>: Enables your IDE to make screenshots and ask questions about images. For example: <em>“Is this settings screen blank? Does the button look enabled?”</em> This is a step towards visual self-correction.</li>
+<li>🐱 <strong><a href="https://github.com/steipete/conduit-mcp">Conduit</a></strong>: Advanced file manipulation for faster refactoring. Provides more robust and reliable file system operations (creating directories, moving files, bulk reading/writing) than what the AI might try with basic terminal commands.</li>
+<li>🤖 <strong><a href="https://github.com/steipete/Terminator">Terminator</a></strong>: Manages a Terminal outside of the loop, so processes that might get stuck don’t break the loop. Crucial for web development. If the AI needs to run a dev server (<code>npm run dev</code>), this MCP runs it in a properly detached, non-blocking external shell. This prevents the main AI generation loop from getting stuck waiting for a server process that never exits on its own.</li>
+<li>🎯 <strong><a href="https://github.com/steipete/macos-automator-mcp">Automator</a></strong>: AppleScript for your IDE.</li>
+</ul>
+<p>These MCPs are about extending the AI’s reach and making it more autonomous in a practical development workflow.</p>
+<p><strong>Choosing Your Fighter – AI Models in Cursor:</strong>
+Cursor offers a selection of underlying LLMs, and I switch between them based on the task:</p>
+<ul>
+<li><strong>Gemini 2.5 Pro (May 6 Update):</strong> This is my workhorse for most code generation within Cursor. It strikes a great balance of intelligence, speed, and cost.</li>
+<li><strong>o3:</strong> This is what I call my “Dark Knight.” It’s incredibly smart, uncannily good at reasoning through complex problems, but it’s <em>significantly</em> more expensive. I reserve o3 for when I’m truly stumped on a gnarly bug. You feed it the problem, and it often goes silent for a bit, “planning its next moves,” reading more of your codebase, and then, like that brilliant but slightly arrogant senior dev, it’ll often just present the solution with minimal fuss. It almost <em>always</em> cracks the problem.</li>
+<li><strong>Claude Opus:</strong> Also very capable. I find it sometimes a bit more prone to “vision quests” – deviating from the original task if it hits a snag, or getting stuck in its own reasoning loops (like repeatedly trying to downgrade a library if it encounters an issue with a newer version). But for certain types of refactoring or generation, it’s excellent.</li>
+</ul>
+<p>During the initial generation, the Mac app (SwiftUI) ran into some turbulence. Swift 6 has tightened up its concurrency rules considerably (Sendability, <code>@MainActor</code> isolation), and there’s simply less Swift 6 example code out in the wild for the models to have trained on. This meant more iteration was needed. The Electron app, on the other hand, initially started life as JavaScript because, in my haste, I forgot to explicitly re-state TypeScript in the main project generation prompt (the spec mentioned it, but the top-level instruction to the AI didn’t). A good lesson: be explicit, even if it feels redundant. I later instructed it to convert the whole thing to TypeScript.</p>
+<h3 id="phase-3-the-intricate-dance-of-debugging-refinement-and-iteration">Phase 3: The Intricate Dance of Debugging, Refinement, and Iteration</h3>
+<p>This is where “vibe coding” truly comes alive. The AI isn’t a magic wand that spits out perfect, production-ready code on the first try. Far from it. The initial output will have bugs, missing pieces, UI that needs a loving touch (or a complete overhaul), and architectural decisions you might want to revisit. The beauty is how <em>fast</em> you can iterate with AI as your partner.</p>
+<p><strong>Navigating the Unscripted Path – Workshop Highlights:</strong></p>
+<ul>
+<li><strong>Taming Xcode’s Beast (The <code>.pbxproj</code> file):</strong> Xcode project files are notoriously complex. Rather than having the AI in Cursor wrestle with directly manipulating that XML monstrosity, I took a different route for the Swift app. I opened a separate terminal window and used my <code>claude-code-mcp</code> to have Claude Code set up the project using <strong>Tuist</strong>. Tuist is a fantastic open-source tool that generates Xcode projects from a much simpler Swift-based manifest file and a conventional folder structure. I even pointed Claude to another project of mine that already uses Tuist, essentially saying, “Use this as a template.” This is a great example of using the right tool (and AI) for the right job.</li>
+<li><strong>Icons, Because Aesthetics Matter (Eventually):</strong> While the AI was churning, I popped over to an image generation model (like DALL-E, accessible through ChatGPT or other interfaces) and prompted it for app icon ideas: <em>“Vibe Meter, cost control app, macOS, cool, modern.”</em> Then, more specifically for the menu bar: <em>“Monochrome, tintable, simple lines, Mac OS menu bar icon for a cost tracking app.”</em> Got some decent starting points.</li>
+<li><strong>Live Debugging – The Swift App’s Journey:</strong>
+<ul>
+<li><strong>The Main Actor Crash:</strong> Sure enough, the app crashed on first launch. The culprit? A <code>UNUserNotificationCenter</code> delegate callback was firing on a background thread, but trying to update UI or state that was (correctly) marked as <code>@MainActor</code> isolated. Classic Swift concurrency. I switched the active model in that Cursor chat to o3 (the Dark Knight!), fed it the crash log and a brief explanation, and o3, true to form, pinpointed the issue and applied the fix: judicious use of <code>nonisolated</code> on the delegate conformance and wrapping the UI-touching callback code in a <code>Task { @MainActor in ... }</code> block. Problem solved in minutes.</li>
+<li><strong>Menu Bar Shenanigans:</strong> Initially, the menu bar displayed the text “Login Required” when not logged in, instead of our nice (placeholder) icon. A quick clarification to the AI sorted that.</li>
+<li><strong>The Off-By-One API Bug:</strong> The API call to fetch the cost data was consistently returning an empty dataset or an error. This was a head-scratcher. By adding some logging and then carefully inspecting the JSON payload from Cursor’s <em>actual</em> web interface (using browser dev tools), we spotted it: our app was correctly getting the current month (e.g., May as <code>5</code>), but the Cursor API expected months to be <em>zero-indexed</em> (so May should be <code>4</code>). A classic off-by-one! I took screenshots of my logging output and the browser’s network inspector, pasted them into the chat, and explained the discrepancy. The AI got it immediately and adjusted the date calculation.</li>
+<li><strong>UI Polish:</strong> The initial settings screen was… functional. A prompt like, <em>“Make this settings screen look more like a native, clean macOS settings panel, using standard SwiftUI controls,”</em> led to a much-improved version.</li>
+</ul>
+</li>
+<li><strong>Live Debugging – The Electron App’s Adventure:</strong>
+<ul>
+<li><strong>Test Setup:</strong> Playwright tests were part of the spec, and the AI set them up, but they needed some initial nudging to run correctly.</li>
+<li><strong>Styling Woes:</strong> The Electron settings screen was unstyled for a bit. <em>“It looks like the CSS for the settings dialog isn’t loading correctly. Please investigate and fix.”</em></li>
+<li><strong>Login Logic:</strong> Getting the web view in Electron to correctly capture the session cookie after a successful login and then trigger the necessary API calls required a few rounds of refinement.</li>
+</ul>
+</li>
+<li><strong>My General AI Debugging &amp; Refinement Workflow:</strong>
+<ul>
+<li><strong>Screenshots are Your Best Friend:</strong> Seriously, a picture (or a screenshot of a crash log/weird UI) is worth a thousand words to these multimodal AIs. They can often “see” the problem.</li>
+<li><strong>Focused, Iterative Prompts:</strong> Instead of massive, multi-point requests, I tend to give short, focused instructions: <em>“Fix this crash.”</em> <em>“Change the button color to blue.”</em> <em>“Refactor this function to be more readable.”</em></li>
+<li><strong>Delegate Complex Refactors to Claude Code (CLI):</strong> For bigger tasks like adding linters (we integrated SwiftLint for Swift and ESLint/Prettier for the Electron app) or that big “JavaScript to TypeScript” conversion for the Electron app, I often switch to a terminal and let Claude Code handle it. It excels at these broader, codebase-wide transformations and tends to run for longer stretches without needing intervention.</li>
+<li><strong>Embrace AI Self-Correction:</strong> Often, the AI will generate code <em>and</em> tests for that code. If the tests fail, and the AI understands the failure in relation to the spec it was given, it can often figure out the bug in its own generated code and fix it. This self-correction loop is powerful.</li>
+</ul>
+</li>
+</ul>
+<p>Throughout this three-hour whirlwind, I was an orchestrator, a prompter, a quality checker, and a debugger-by-proxy. I wrote <strong>zero</strong> lines of functional code myself. All the Swift, TypeScript, HTML, CSS, JSON configs – everything came from the AI, guided by my prompts and the initial spec.</p>
+<h3 id="the-outcome-two-mostly-functional-apps-and-a-whole-lot-of-vibe">The Outcome: Two (Mostly) Functional Apps and a Whole Lot of Vibe</h3>
+<p>So, after about three hours of intense, unscripted, AI-driven development, where did we land?</p>
+<ul>
+<li><strong>Vibe Meter (Mac - SwiftUI):</strong>
+<ul>
+<li>It launched! The menu bar icon appeared (though we wrestled a bit to get the custom PNG to show consistently; sometimes it defaulted to text).</li>
+<li>Clicking it revealed my current (mocked, then actual) Cursor spending (e.g., “$895.72”) and my company name (“Amatøs Måchinå” – a little inside joke).</li>
+<li>The login flow worked: it presented a web view for Cursor’s login page, successfully captured the session cookie upon successful login, and securely stored it in the macOS keychain.</li>
+<li>It then correctly used that cookie to hit Cursor’s internal <code>/me</code> endpoint (to get my user details) and the <code>getMonthlyInvoice</code> endpoint.</li>
+<li>On refresh? A delightful “VIBE SYNCED ✨” message in the menu. That was pure AI flair, and I loved it.</li>
+<li>The settings screen was functional and looked decent after a few rounds of UI prompting: currency selection (PHP, EUR, USD all present!), spending limits, and a refresh interval.</li>
+<li>And yes, it correctly registered itself to launch at login.</li>
+</ul>
+</li>
+<li><strong>Vibe Meter (Electron - TypeScript/React):</strong>
+<ul>
+<li>This one was a bit further behind but definitely taking shape. It launched, and the basic React structure was there.</li>
+<li>Login was partially implemented, and the cookie capture was on its way.</li>
+<li>The settings screen existed but needed more UI love (some CSS wasn’t loading correctly when I last left it).</li>
+<li>It would need a bit more focused prompting to reach feature parity with the Mac app, but the foundation was solidly laid.</li>
+</ul>
+</li>
+</ul>
+<p>In total, the AIs probably generated something in the ballpark of 5,000 lines of Swift and around 2,000 lines of TypeScript, JavaScript (before conversion), HTML, and CSS, not to mention all the configuration files, test setups, and package manifests.</p>
+<h3 id="key-takeaways--my-developing-vibe-coding-philosophy">Key Takeaways &amp; My Developing “Vibe Coding” Philosophy</h3>
+<p>This workshop wasn’t just about the Vibe Meter app itself; it was about demonstrating a <em>way</em> of working, a new “vibe” for software development. Here are my big takeaways, which are constantly evolving:</p>
+<ol>
+<li><strong>AI as a Force Multiplier, Not a Replacement:</strong> Let’s be clear: this isn’t about AI taking our jobs. It’s about giving us superpowers. The ability to explore ideas, build prototypes, and even flesh out significant features at 10x, 20x, or even greater speed is transformative. You become an architect, a guide, a refiner.</li>
+<li><strong>Code Becomes Cheaper, Iteration Becomes Faster:</strong> This is a profound mental shift. In the past, if I spent days crafting a feature, I’d be heavily invested in that code. Ripping it out or taking a completely different approach felt costly. Now? If an AI generates a component in 20 minutes and it’s not quite right, or I have a better idea, I can tell it to refactor it, or just scrap it and try again with a new prompt. The cost of experimentation plummets. This frees you to explore more avenues.</li>
+<li><strong>Focus Your Energy on the Hard Problems:</strong> You can delegate a huge amount of boilerplate, initial scaffolding, CRUD operations, or even well-defined, common features to the AI. This frees up your precious cognitive cycles to focus on the truly novel, complex, and differentiating aspects of your product – the parts that require deep human insight and creativity.</li>
+<li><strong>Accelerated Learning in Unfamiliar Territory:</strong> This is huge for me personally. I’m primarily a native developer. But with AI, I’ve been able to dive into web technologies like TypeScript, React, and Tailwind CSS much faster than I ever could have traditionally. The AI can explain concepts, generate example code, show best practices, and help debug my newbie mistakes. It’s like having an infinitely patient tutor.</li>
+<li><strong>The AI is Your “Brilliant but Quirky” Teammate:</strong> Think of the current generation of AI tools as incredibly knowledgeable, super-fast junior-to-mid-level developers who sometimes act like autistic savants. They can produce amazing work, have access to a vast corpus of knowledge, but they can also misunderstand requirements, hallucinate APIs that don’t exist, get stuck on seemingly simple things, or rigidly adhere to an incorrect assumption. Your job is to learn their strengths, weaknesses, and how to “manage” them effectively through clear prompting and iterative feedback.</li>
+<li><strong>Prompt Engineering is the New Core Skill:</strong> The quality of your interaction with the AI directly dictates the quality of the output. This isn’t just about typing a question; it’s about crafting clear, unambiguous specifications, providing good examples, giving constructive feedback, knowing when to break down a problem into smaller steps for the AI, and understanding how to guide its reasoning process.</li>
+<li><strong>Horses for Courses – Choosing Your AI Tools Wisely:</strong>
+<ul>
+<li><strong>Google AI Studio (with Gemini):</strong> My go-to for initial, comprehensive spec generation and refinement. That massive context window and less restrictive output format are invaluable for laying a strong foundation.</li>
+<li><strong>Cursor IDE:</strong> Fantastic for the main development loop – iterative code generation, interactive debugging, and the ability to quickly switch between different AI models (like Gemini for speed/cost, and o3 for those really tough nuts to crack) within the context of your actual project files.</li>
+<li><strong>Claude Code (Anthropic’s CLI tool):</strong> A powerhouse for large-scale, codebase-wide refactoring (like adding linters, converting languages, or enforcing style guides). It tends to be very thorough and can run for extended periods on a single, complex task.</li>
+</ul>
+</li>
+<li><strong>The Power of Context Cannot Be Overstated:</strong> LLMs are all about their context window. The more relevant information you can feed them – detailed specs, existing code snippets, error messages, screenshots, links to relevant documentation or GitHub repositories – the better their output will be. This is why Gemini 1.5 Pro’s 1 million token window (and even larger ones on the horizon) are such game-changers.</li>
+<li><strong>Don’t Be Afraid to Explore the Obscure:</strong> Even if you’re working with a less common language or a niche problem, don’t assume AI can’t help. I showed a quick example of using a <code>Repo-to-Text</code> converter tool to dump an entire Zig language GitHub repository into a flat text file, which I then uploaded to AI Studio. Gemini was then able to explain the project’s purpose, its architecture, and even answer specific questions about the Zig code, all in pirate speak for a bit of fun!</li>
+<li><strong>Rethinking Cost vs. Value:</strong> Yes, these AI tools have a cost. As I mentioned, I’m spending around $1100 a month right now between Cursor, direct API access, and Claude subscriptions. But you <em>have</em> to weigh that against the value of your time and the sheer increase in output. If these tools allow me to build 10x or 20x more, or explore ideas that would have been too time-consuming before, the ROI is a no-brainer. Your time is valuable; AI helps you leverage it far more effectively.</li>
+</ol>
+<h3 id="the-future-is-now--go-vibe-with-it">The Future is Now – Go Vibe with It!</h3>
+<p>This is not some far-off future; this is what’s possible <em>today</em>. The tools are evolving at a dizzying pace. The way we conceive, design, and build software is undergoing a fundamental shift.</p>
+<p>My advice? Don’t wait. Dive in. Pick a small side project, something fun. Start experimenting with these tools. Learn how to prompt, how to iterate, how to “vibe” with your AI coding partner. See for yourself how it can transform your workflow, your learning, and your creative output.</p>
+<p>As for Vibe Meter? I’m definitely going to take the Mac app, polish it up (with more AI help, of course!), and integrate its core cost-tracking logic into my “<a href="https://codelooper.app">CodeLooper</a>” project. The cycle of AI-assisted creation continues.</p>
+<p>Thanks for joining me on this live-coding adventure. Now, go build something cool!</p></article></div>

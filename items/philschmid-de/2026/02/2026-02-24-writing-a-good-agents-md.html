@@ -1,0 +1,32 @@
+<div id="readability-page-1" class="page"><div><p>An <code>AGENTS.md</code> (or <code>GEMINI.md</code>) file is the single highest-leverage configuration point for coding agents. It's injected into <strong>every</strong> conversation, acting as the agent's onboarding document to your codebase. But research shows that doing it wrong actively hurts performance. Here's how to do it right, backed by data from <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2602.11988">"Evaluating AGENTS.md" (ETH Zurich, 2025)</a> and <a target="_blank" rel="noopener noreferrer" href="https://www.humanlayer.dev/blog/writing-a-good-claude-md">practical experience from HumanLayer</a>.</p>
+<h2 id="the-data-says-less-is-more">The Data Says: Less Is More</h2>
+<ul>
+<li><strong>Auto-generated AGENTS.md files reduce task success rates by ~3%</strong> on average across multiple agents and models, while increasing inference cost by over 20% (<a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/html/2602.11988v1#S4">§4.2</a>).</li>
+<li><strong>Human-written AGENTS.md files only marginally improve performance (~4%)</strong>, and still increase cost by up to 19% due to extra steps the agent takes.</li>
+<li><strong>Stronger models don't generate better context files.</strong> GPT-5.2-generated files improved performance on one benchmark by 2% but degraded it on another by 3% (<a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/html/2602.11988v1#S4">§4.4</a>).</li>
+<li><strong>Codebase overviews in AGENTS.md don't help agents navigate faster.</strong> Agents found relevant files in roughly the same number of steps with or without an overview section (<a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/html/2602.11988v1#S4">§4.2</a>).</li>
+<li><strong>LLM-generated files are redundant with existing docs.</strong> When all other documentation was removed, LLM-generated files actually improved performance by 2.7%—they only hurt when they duplicate what's already discoverable (<a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/html/2602.11988v1#S4">§4.2</a>).</li>
+<li><strong>Instructions ARE followed—that's the problem.</strong> Agents respect AGENTS.md instructions, but unnecessary requirements make tasks harder, increasing reasoning tokens by 14–22% (<a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/html/2602.11988v1#S4">§4.3</a>).</li>
+</ul>
+<h2 id="what-to-include">What to Include</h2>
+<ul>
+<li><strong>The WHAT:</strong> Your tech stack, project structure, and what each part does. Critical for monorepos—tell the agent what the apps, shared packages, and services are.</li>
+<li><strong>The WHY:</strong> The purpose of the project and its key components. Help the agent understand intent, not just structure.</li>
+<li><strong>The HOW:</strong> How to build, test, and verify changes. Include non-obvious tooling (e.g., <code>uv</code> instead of <code>pip</code>, <code>bun</code> instead of <code>npm</code>). Tools mentioned in AGENTS.md get used 160x more often than unmentioned ones (<a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/html/2602.11988v1#S4">§4.3</a>).</li>
+</ul>
+<h2 id="what-not-to-include">What NOT to Include</h2>
+<ul>
+<li><strong>Detailed codebase overviews or directory listings.</strong> The paper found these don't help agents navigate faster, and agents can discover structure themselves.</li>
+<li><strong>Code style guidelines.</strong> Use linters and formatters instead—they're faster, cheaper, and deterministic. LLMs are in-context learners and will follow existing patterns in your code.</li>
+<li><strong>Task-specific instructions</strong> that only apply sometimes. Since AGENTS.md goes into every session, non-universal instructions dilute focus. Frontier models can reliably follow ~150–200 instructions; the agent harness already uses ~50 of those.</li>
+<li><strong>Auto-generated content.</strong> Don't use <code>/init</code> or let the agent write its own AGENTS.md. The data shows this hurts more than it helps.</li>
+</ul>
+<h2 id="how-to-structure-it">How to Structure It</h2>
+<ul>
+<li><strong>Keep it short.</strong> General consensus is &lt;300 lines; HumanLayer keeps theirs under 60 lines. Every line goes into every session—make each one count.</li>
+<li><strong>Use progressive disclosure.</strong> Don't put everything in AGENTS.md. Instead, keep task-specific docs in separate files (e.g., <code>agent_docs/running_tests.md</code>, <code>agent_docs/database_schema.md</code>) and list them in AGENTS.md with brief descriptions so the agent reads them only when relevant.</li>
+<li><strong>Prefer pointers over copies.</strong> Reference <code>file:line</code> locations rather than embedding code snippets that will go stale.</li>
+<li><strong>Write it yourself, deliberately.</strong> A bad line in AGENTS.md cascades into bad plans, bad code, and bad results across every session. Treat it like infrastructure, not a scratchpad.</li>
+</ul>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

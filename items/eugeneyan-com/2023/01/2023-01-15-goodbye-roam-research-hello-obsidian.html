@@ -1,0 +1,61 @@
+<div id="readability-page-1" class="page"><div>
+            <p>I was bored over the weekend and migrated my notes from Roam Research to Obsidian. It was easier than expected and took under an hour. Here are the steps I took.</p>
+
+<p>First, I selectively followed this <a href="https://notes.nicolevanderhoeven.com/Migrating+from+Roam+to+Obsidian" target="_blank">guide</a> to download my notes as a zip file (steps 1) and create an Obsidian vault. Then, I <a href="https://github.com/nicolevanderhoeven/deroamify/blob/main/downloadfirebase.py" target="_blank">downloaded the images</a> in my notes into <code>/assets</code> (step 11). A few notes were in folders because they had <code>/</code> in the title; I cleaned these up by hand.</p>
+
+<p>As part of format conversion (step 4), I incorrectly enabled “Roam Research tag fixer”. As a result, my <code>#tag</code> and <code>#[[tag]]</code> were converted to <code>[[tag]]</code>. Fortunately, my tags always came after <code>tags:</code> and were on the first line of each file. Thus, I wrote some <a href="https://gist.github.com/eugeneyan/95d09eaeff0c99d468d8c459cfed5218" target="_blank">basic regex</a> to fix it.</p>
+
+<p>Next, I set up <a href="https://github.com/denolehov/obsidian-git" target="_blank">obsidian-git</a> for syncing across devices. Installation on <a href="https://github.com/denolehov/obsidian-git/wiki/Installation#plugin-installation" target="_blank">Mac</a> and <a href="https://github.com/denolehov/obsidian-git/wiki/Installation#mobile" target="_blank">mobile</a> was straightforward. The first sync took seconds and subsequent syncs were under a second.</p>
+
+<p>Syncing images was trickier as git doesn’t do well with large commits. For my 1k+ existing images (mostly screenshots of talks and papers), I <a href="https://gist.github.com/eugeneyan/c4da21af315b62fc3b88163541c816e3" target="_blank">iteratively committed</a> those that were less than 1,024kb in size. Images greater than 1,024kb were shrunk—by converting image format from <code>png</code> to <code>jpg</code>—before committed. Syncing the images to GitHub took about 15 minutes. New images will be synced via obsidian-git.</p>
+
+<p>A few community plug-ins I use:</p>
+<ul>
+  <li><a href="https://github.com/denolehov/obsidian-git" target="_blank">obsidian-git</a>: To sync notes across devices via git</li>
+  <li><a href="https://github.com/vslinko/obsidian-outliner" target="_blank">obsidian-outliner</a>: Easier working with bullets</li>
+  <li><a href="https://github.com/kepano/obsidian-minimal" target="_blank">obsidian-minimal</a> and <a href="https://github.com/kepano/obsidian-minimal-settings" target="_blank">obsidian-minimal-settings</a>: Minimal display theme</li>
+</ul>
+
+<p>Others have also recommended their favorite plug-ins on this <a href="https://twitter.com/eugeneyan/status/1614847315914936321" target="_blank">tweet</a>.</p>
+
+<p>I’m loving Obsidian so far. It feels snappier than web-based Roam during startup and while using it. It’s also more customizable. I don’t foresee it hindering my <a href="https://eugeneyan.com/writing/note-taking-zettelkasten/">Zettelkasten workflow</a>. While I have a forever-free Roam graph (I was an early adopter) and there’s no push factor, I’m going to stick with Obsidian for a bit and see how it goes.</p>
+
+<p>Are you an Obsidian user as well? What features or plug-ins do you recommend?</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Jan 2023). Goodbye Roam Research, Hello Obsidian. eugeneyan.com.
+        https://eugeneyan.com/writing/roam-to-obsidian/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2023obsidian,
+  title   = {Goodbye Roam Research, Hello Obsidian},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2023},
+  month   = {Jan},
+  url     = {https://eugeneyan.com/writing/roam-to-obsidian/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

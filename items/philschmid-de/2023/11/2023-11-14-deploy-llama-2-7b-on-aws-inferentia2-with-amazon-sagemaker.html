@@ -1,0 +1,258 @@
+<div id="readability-page-1" class="page"><div><p>In this end-to-end tutorial, you will learn how to deploy and speed up Llama 2 inference using AWS Inferentia2 and <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/optimum-neuron/index">optimum-neuron</a> on Amazon SageMaker. <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/optimum-neuron/index">Optimum Neuron</a> is the interface between the Hugging Face Transformers &amp; Diffusers library and AWS Accelerators including AWS Trainium and AWS Inferentia2.</p>
+<p>You will learn how to:</p>
+<ol>
+<li><a href="#1-convert-llama-2-to-aws-neuron-inferentia2-with-optimum-neuron">Convert Llama 2 to AWS Neuron (Inferentia2) with <code>optimum-neuron</code></a></li>
+<li><a href="#2-create-a-custom-inferencepy-script-for-llama-2-7b">Create a custom <code>inference.py</code> script for Llama 2</a></li>
+<li><a href="#3-upload-the-neuron-model-and-inference-script-to-amazon-s3">Upload the neuron model and inference script to Amazon S3</a></li>
+<li><a href="#4-deploy-a-real-time-inference-endpoint-on-amazon-sagemaker">Deploy a Real-time Inference Endpoint on Amazon SageMaker</a></li>
+<li><a href="#5-run-inference-and-chat-with-llama-2">Run inference and chat with Llama 2</a></li>
+</ol>
+<h2 id="quick-intro-aws-inferentia-2">Quick intro: AWS Inferentia 2</h2>
+<p><a target="_blank" rel="noopener noreferrer" href="https://aws.amazon.com/de/ec2/instance-types/inf2/">AWS inferentia (Inf2)</a> are purpose-built EC2 for deep learning (DL) inference workloads. Inferentia 2 is the successor of <a target="_blank" rel="noopener noreferrer" href="https://aws.amazon.com/ec2/instance-types/inf1/?nc1=h_ls">AWS Inferentia</a>, which promises to deliver up to 4x higher throughput and up to 10x lower latency.</p>
+<div><table><thead><tr><th>instance size</th><th>accelerators</th><th>Neuron Cores</th><th>accelerator memory</th><th>vCPU</th><th>CPU Memory</th><th>on-demand price ($/h)</th></tr></thead><tbody><tr><td>inf2.xlarge</td><td>1</td><td>2</td><td>32</td><td>4</td><td>16</td><td>0.76</td></tr><tr><td>inf2.8xlarge</td><td>1</td><td>2</td><td>32</td><td>32</td><td>128</td><td>1.97</td></tr><tr><td>inf2.24xlarge</td><td>6</td><td>12</td><td>192</td><td>96</td><td>384</td><td>6.49</td></tr><tr><td>inf2.48xlarge</td><td>12</td><td>24</td><td>384</td><td>192</td><td>768</td><td>12.98</td></tr></tbody></table></div>
+<p>Additionally, inferentia 2 will support the writing of custom operators in c++ and new datatypes, including <code>FP8</code> (cFP8).</p>
+<p>Let's get started! 🚀</p>
+<p><em>If you are going to use Sagemaker in a local environment (not SageMaker Studio or Notebook Instances). You need access to an IAM Role with the required permissions for Sagemaker. You can find&nbsp;<a target="_blank" rel="noopener noreferrer" href="https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html">here</a>&nbsp;more about it.</em></p>
+<h2 id="1-convert-llama-2-to-aws-neuron-inferentia2-with-optimum-neuron">1. Convert Llama 2 to AWS Neuron (Inferentia2) with <code>optimum-neuron</code></h2>
+<p>We are going to use the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/optimum-neuron/index">optimum-neuron</a> to compile/convert our model to neuronx. Optimum Neuron provides a set of tools enabling easy model loading, training and inference on single- and multi-Accelerator settings for different downstream tasks.</p>
+<p>As a first step, we need to install the <code>optimum-neuron</code> and other required packages.</p>
+<p><em>Tip: If you are using Amazon SageMaker Notebook Instances or Studio you can go with the <code>conda_python3</code> conda kernel.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Install the required packages
+%pip install "optimum-neuron==0.0.13" --upgrade
+%pip install "sagemaker&gt;=2.197.0"  --upgrade</code></pre></div></figure>
+<p>After we have installed the <code>optimum-neuron</code> we can convert load and convert our model.</p>
+<p>We are going to use the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-2-7b-chat-hf">meta-llama/Llama-2-7b-chat-hf</a> model. Llama 2 is a collection of pretrained and fine-tuned generative text models ranging in scale from 7 billion to 70 billion parameters. This is the repository for the 7B fine-tuned model, optimized for dialogue use cases.</p>
+<p>At the time of writing, the <a target="_blank" rel="noopener noreferrer" href="https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-features/dynamic-shapes.html?highlight=dynamic%20shapes#">AWS Inferentia2 does not support dynamic shapes for inference</a>, which means that the we need to specify our image size in advanced for compiling and inference.</p>
+<p>In simpler terms, this means we need to define the input shapes for our prompt (sequence length), batch size, height and width of the image.</p>
+<p>We precompiled the model with the following parameters and pushed it to the Hugging Face Hub:</p>
+<ul>
+<li><code>sequence_length</code>: 2048</li>
+<li><code>batch_size</code>: 2</li>
+<li><code>neuron</code>: 2.15.0</li>
+</ul>
+<p><em>Note: If you want to compile your own model or a different Llama 2 checkpoint you need to use ~120GB of memory and the compilation can take ~60 minutes. We used an <code>inf2.24xlarge</code> ec2 instance with the <a target="_blank" rel="noopener noreferrer" href="https://aws.amazon.com/marketplace/pp/prodview-gr3e6yiscria2">Hugging Face Neuron Deep Learning AMI</a> to compile the model.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from huggingface_hub import snapshot_download
+ 
+# compiled model id
+compiled_model_id = "aws-neuron/Llama-2-7b-chat-hf-seqlen-2048-bs-2"
+ 
+# save compiled model to local directory
+save_directory = "llama_neuron"
+# Downloads our compiled model from the HuggingFace Hub
+# using the revision as neuron version reference
+# and makes sure we exlcude the symlink files and "hidden" files, like .DS_Store, .gitignore, etc.
+snapshot_download(compiled_model_id, revision="2.15.0", local_dir=save_directory, local_dir_use_symlinks=False, allow_patterns=["[!.]*.*"])
+ 
+ 
+###############################################
+# COMMENT IN BELOW TO COMPILE DIFFERENT MODEL #
+###############################################
+#
+# from optimum.neuron import NeuronModelForCausalLM
+# from transformers import AutoTokenizer
+#
+# # model id you want to compile
+# vanilla_model_id = "meta-llama/Llama-2-7b-chat-hf"
+#
+# # configs for compiling model
+# compiler_args = {"num_cores": 2, "auto_cast_type": "fp16"}
+# input_shapes = {
+#   "sequence_length": 2048, # max length to generate
+#   "batch_size": 1 # batch size for the model
+#   }
+#
+# llm = NeuronModelForCausalLM.from_pretrained(vanilla_model_id, export=True, **input_shapes, **compiler_args)
+# tokenizer = AutoTokenizer.from_pretrained(model_id)
+#
+# # Save locally or upload to the HuggingFace Hub
+# save_directory = "llama_neuron"
+# llm.save_pretrained(save_directory)
+# tokenizer.save_pretrained(save_directory)</code></pre></div></figure>
+<h2 id="2-create-a-custom-inferencepy-script-for-llama-2-7b">2. Create a custom <code>inference.py</code> script for Llama 2 7B</h2>
+<p>The <a target="_blank" rel="noopener noreferrer" href="https://github.com/aws/sagemaker-huggingface-inference-toolkit">Hugging Face Inference Toolkit</a> supports zero-code deployments on top of the&nbsp;<a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/transformers/main_classes/pipelines.html">pipeline&nbsp;feature</a>&nbsp;from 🤗 Transformers. This allows users to deploy Hugging Face transformers without an inference script [<a target="_blank" rel="noopener noreferrer" href="https://github.com/huggingface/notebooks/blob/master/sagemaker/11_deploy_model_from_hf_hub/deploy_transformer_model_from_hf_hub.ipynb">Example</a>].</p>
+<p>Currently is this feature not supported with AWS Inferentia2, which means we need to provide an <code>inference.py</code> for running inference. But <code>optimum-neuron</code> has integrated support for the 🤗 Diffusers pipeline feature. That way we can use the <code>optimum-neuron</code> to create a pipeline for our model.</p>
+<p>If you want to know more about the <code>inference.py</code>&nbsp;script check out this <a target="_blank" rel="noopener noreferrer" href="https://github.com/huggingface/notebooks/blob/master/sagemaker/17_custom_inference_script/sagemaker-notebook.ipynb">example</a>. It explains amongst other things what the <code>model_fn</code> and <code>predict_fn</code> are.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># create code directory in our model directory
+!mkdir {save_directory}/code</code></pre></div></figure>
+<p>We are using the <code>NEURON_RT_NUM_CORES=2</code> to make sure that each HTTP worker uses 2 Neuron core for inference. In additon we are going to use <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/transformers/main/en/chat_templating">"templates for chat models"</a> and new feature of transformers, which allows us to provide OpenAI messages, which are then converted to the correct input format for the model.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">messages = [
+    {"role": "user", "content": "Hi there!"},
+    {"role": "assistant", "content": "Nice to meet you!"},
+    {"role": "user", "content": "Can I ask a question?"}
+]</code></pre></div></figure>
+<p>For this to work we need <code>jinja2</code> installed. Lets create a <code>requirements.txt</code> file and install the required packages.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">%%writefile {save_directory}/code/requirements.txt
+ 
+jinja2&gt;="3.0.0"</code></pre></div></figure>
+<p>Now, we create our <code>inference.py</code> file using the <code>apply_chat_template</code> method.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">%%writefile {save_directory}/code/inference.py
+import os
+# To use two neuron core per worker
+os.environ["NEURON_RT_NUM_CORES"] = "2"
+import torch
+import torch_neuronx
+import base64
+from io import BytesIO
+from optimum.neuron import pipeline
+ 
+def model_fn(model_dir):
+    # load local converted model and tokenizer
+    print("loading pipeline...")
+    pipe = pipeline("text-generation", model_dir)
+    print("loading complete")
+    return pipe
+ 
+ 
+def predict_fn(data, pipe):
+    # extract prompt from data
+    messages = data.pop("inputs", data)
+    parameters = data.pop("parameters", None)
+ 
+    # convert messages to input ids
+    inputs = pipe.tokenizer.apply_chat_template(messages, add_generation_prompt=True,tokenize=False)
+    # run generation
+    if parameters is not None:
+        outputs = pipe(inputs, **parameters)[0]
+    else:
+        outputs = pipe(inputs)[0]
+ 
+    # decode generation
+    return {"generation": outputs["generated_text"][len(inputs):].strip()}</code></pre></div></figure>
+<h2 id="3-upload-the-neuron-model-and-inference-script-to-amazon-s3">3. Upload the neuron model and inference script to Amazon S3</h2>
+<p>Before we can deploy our neuron model to Amazon SageMaker we need to upload it all our model artifacts to Amazon S3.</p>
+<p><em>Note: Currently <code>inf2</code> instances are only available in the <code>us-east-2</code> &amp; <code>us-east-1</code> region [<a target="_blank" rel="noopener noreferrer" href="https://aws.amazon.com/de/about-aws/whats-new/2023/05/sagemaker-ml-inf2-ml-trn1-instances-model-deployment/">REF</a>]. Therefore we need to force the region to us-east-2.</em></p>
+<p>Lets create our SageMaker session and upload our model to Amazon S3.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import sagemaker
+import boto3
+sess = sagemaker.Session()
+# sagemaker session bucket -&gt; used for uploading data, models and logs
+# sagemaker will automatically create this bucket if it not exists
+sagemaker_session_bucket=None
+if sagemaker_session_bucket is None and sess is not None:
+    # set to default bucket if a bucket name is not given
+    sagemaker_session_bucket = sess.default_bucket()
+ 
+try:
+    role = sagemaker.get_execution_role()
+except ValueError:
+    iam = boto3.client('iam')
+    role = iam.get_role(RoleName='sagemaker_execution_role')['Role']['Arn']
+ 
+sess = sagemaker.Session(default_bucket=sagemaker_session_bucket)
+ 
+print(f"sagemaker role arn: {role}")
+print(f"sagemaker bucket: {sess.default_bucket()}")
+print(f"sagemaker session region: {sess.boto_region_name}")
+assert sess.boto_region_name in ["us-east-2", "us-east-1"] , "region must be us-east-2 or us-west-2, due to instance availability"</code></pre></div></figure>
+<p>We create our <code>model.tar.gz</code> with our <code>inference.py</code> script.</p>
+<p><em>Note: We will use <code>pigz</code> for multi-core compression to speed up the process. Make sure <code>pigz</code> is installed on your system, you can install it on ubuntu with <code>sudo apt install pigz</code>. With <code>pigz</code> and 32 cores compression takes ~2.4min</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># create a model.tar.gz archive with all the model artifacts and the inference.py script.
+%cd {save_directory}
+!tar -cf model.tar.gz --use-compress-program=pigz *
+%cd ..</code></pre></div></figure>
+<p>Next, we upload our <code>model.tar.gz</code> to Amazon S3 using our session bucket and <code>sagemaker</code> sdk.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from sagemaker.s3 import S3Uploader
+ 
+# create s3 uri
+s3_model_path = f"s3://{sess.default_bucket()}/neuronx/llama"
+ 
+# upload model.tar.gz
+s3_model_uri = S3Uploader.upload(local_path=f"{save_directory}/model.tar.gz", desired_s3_uri=s3_model_path)
+print(f"model artifcats uploaded to {s3_model_uri}")</code></pre></div></figure>
+<h2 id="4-deploy-a-real-time-inference-endpoint-on-amazon-sagemaker">4. Deploy a Real-time Inference Endpoint on Amazon SageMaker</h2>
+<p>After we have uploaded our&nbsp;model artifacts&nbsp;to Amazon S3 can we create a custom&nbsp;<code>HuggingfaceModel</code>. This class will be used to create and deploy our real-time inference endpoint on Amazon SageMaker.</p>
+<p>The <code>inf2.xlarge</code> instance type is the smallest instance type with AWS Inferentia2 support. It comes with 1 Inferentia2 chip with 2 Neuron Cores. This means we can use 2 Neuron Cores to minimize latency for our image generation.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import time
+from sagemaker.huggingface.model import HuggingFaceModel
+ 
+# create Hugging Face Model Class
+huggingface_model = HuggingFaceModel(
+   model_data=s3_model_uri,        # path to your model.tar.gz on s3
+   role=role,                      # iam role with permissions to create an Endpoint
+   transformers_version="4.34.1",  # transformers version used
+   pytorch_version="1.13.1",       # pytorch version used
+   py_version='py310',             # python version used
+   model_server_workers=1,         # number of workers for the model server
+)
+ 
+# deploy the endpoint endpoint
+predictor = huggingface_model.deploy(
+    initial_instance_count=1,      # number of instances
+    instance_type="ml.inf2.8xlarge", # AWS Inferentia Instance
+    volume_size = 100
+)
+# ignore the "Your model is not compiled. Please compile your model before using Inferentia." warning, we already compiled our model.
+# We need to sent a warmup request to the endpoint, which loads the model on the neuron device
+# this takes around 2 minutes
+print("send warmup request")
+try:
+    predictor.predict({"inputs": [{"role":"user","content":"warmup"}]})
+except:
+    time.sleep(90)</code></pre></div></figure>
+<h2 id="5-run-inference-and-chat-with-llama-2">5. Run inference and chat with Llama 2</h2>
+<p>The <code>.deploy()</code> returns an <code>HuggingFacePredictor</code> object which can be used to request inference. Our endpoint expects a <code>json</code> with <code>messages</code>. Since we are leveraging the new <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/transformers/main/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.apply_chat_template">apply_chat_template</a> in our inference.py script we can send "openai" like converstaions to our model.</p>
+<p>Additionally we can send inference parameters, e.g. <code>top_p</code> or <code>temperature</code> using the <code>parameters</code> key.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># OpenAI like conversational messages
+messages = [
+  {"role": "system", "content": "You are an helpful AWS Expert Assistant. Respond only with 1-2 sentences."},
+  {"role": "user", "content": "What is Amazon SageMaker?"},
+]
+ 
+# generation parameters
+parameters = {
+    "do_sample" : True,
+    "top_p": 0.6,
+    "temperature": 0.9,
+    "top_k": 50,
+    "max_new_tokens": 512,
+    "repetition_penalty": 1.03,
+}
+ 
+# run prediction
+response = predictor.predict({
+  "inputs": messages,
+  "parameters": parameters
+  }
+)
+ 
+# lets our response to the messages and print the generation
+messages.append({"role": "assistant", "content": response["generation"]})
+ 
+# small helper function to print the messages
+def pretty_print(messages):
+    for message in messages:
+        print(f"{message['role']}: {message['content']}")
+ 
+pretty_print(messages)</code></pre></div></figure>
+<p>Since Llama is a conversational model lets ask a follow up question. Therefore we can extend our <code>messages</code> with a new message.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># add follow up question
+messages.append({"role": "user", "content": "Can I run Hugging Face Transformers on it?"})
+ 
+# run prediction
+response = predictor.predict({
+  "inputs": messages,
+  "parameters": parameters
+  }
+)
+ 
+# lets our response to the messages and print the generation
+messages.append({"role": "assistant", "content": response["generation"]})
+pretty_print(messages)</code></pre></div></figure>
+<p>Result:</p>
+<p><strong>system</strong>: You are an helpful AWS Expert Assistant. Respond only with 1-2 sentences.<br>
+<strong>user</strong>: What is Amazon SageMaker?<br>
+<strong>assistant</strong>: Amazon SageMaker is a fully managed service that provides a range of machine learning (ML) algorithms, tools, and frameworks to build, train, and deploy ML models at scale. It allows data scientists and engineers to focus on building better ML models instead of managing infrastructure.<br>
+<strong>user</strong>: Can I run Hugging Face Transformers on it?<br>
+<strong>assistant</strong>: Yes, you can run Hugging Face Transformers on Amazon SageMaker. Amazon SageMaker provides a pre-built Python SDK that supports popular deep learning frameworks like Hugging Face Transformers, making it easy to use these frameworks in your machine learning workflows.</p>
+<p>If you are interested in the performance of Inferentia2 for throughput and latency check out <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/blog/inferentia-llama2">Make your llama generation time fly with AWS Inferentia2</a> blog post.</p>
+<h3 id="delete-model-and-endpoint">Delete model and endpoint</h3>
+<p>To clean up, we can delete the model and endpoint.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">predictor.delete_model()
+predictor.delete_endpoint()</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this end-to-end tutorial, we walked through deploying Llama 2, a large conversational AI model, for low-latency inference using AWS Inferentia2 and Amazon SageMaker.</p>
+<p>We converted the model with <code>optimum-neuron</code>, created a custom inference script, deployed a real-time endpoint, and chatted with Llama 2 using Inferentia2 acceleration.</p>
+<p>If you are interested in the performance of Inferentia2 for throughput and latency check out <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/blog/inferentia-llama2">Make your llama generation time fly with AWS Inferentia2</a> blog post.</p>
+<p>The combination of large AI models like Llama 2 and purpose-built inference chips like Inferentia2 enables low-latency deployments. Using Amazon SageMaker we can go from training to production hosting with just a few lines of code.</p>
+<hr>
+<p>Thanks for reading! If you have any questions, feel free to contact me on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

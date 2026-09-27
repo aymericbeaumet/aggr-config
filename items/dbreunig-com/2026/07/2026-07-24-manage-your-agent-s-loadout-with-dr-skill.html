@@ -1,0 +1,50 @@
+<div id="readability-page-1" class="page"><div itemprop="articleBody">
+    <h3 id="keep-your-agents-skills-and-tools-in-check">Keep Your Agent’s Skills and Tools in Check</h3>
+
+<p>When I wrote “<a href="https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html">How to Fix Your Context</a>”, it was really hard to find real-world examples of the <strong>Tool Loadout</strong> pattern. But as <a href="https://learn.microsoft.com/en-us/agent-framework/agents/skills?pivots=programming-language-csharp">Skills</a> have grown in popularity, our contexts have become cluttered.</p>
+
+<p>Recently, I met a developer who told me how his enterprise agent was loading <em>over 600 skills</em>. All the skills created by colleagues were getting pulled in <em>by default</em>, without alerting the dev, silently degrading the context before a word was typed.</p>
+
+<p>Last week, my <a href="https://hermes-agent.nousresearch.com/">Hermes agent</a> kept loading the wrong note-taking skill. SSH’ing into the machine, I discovered Hermes ships with nearly 100 skills. Deleting the stock note-taking skill helped, but didn’t fully solve the issue. And I wasn’t eager to pore over every Hermes skill.</p>
+
+<p>So I built <a href="https://github.com/dbreunig/drskill"><code>drskill</code></a>, a tool that evaluates all the skills and MCPs in your global or project environment.</p>
+
+<p>Install <code>drskill</code> with <code>uv tool install drskill</code> or <code>pip install drskill</code>.</p>
+
+<p>Then run <code>drskill scan</code>:</p>
+
+<p><img src="https://www.dbreunig.com/img/resized/drskill-1.png.jpg" alt="" width="1600" height="669" decoding="async"></p>
+
+<p>Here, <code>drskill</code> spots an error (my <a href="https://www.dbreunig.com/2026/03/04/the-spec-driven-development-triangle.html"><code>plumb</code></a> skill is missing a description) and some warnings (a skill I was developing for <a href="https://overturemaps.org">Overture</a> is installed twice, in two different places). <code>drskill</code> prints the path (and a solution, if relevant) and lets me fix these quickly.</p>
+
+<p><code>drskill</code> looks for 34 different issue categories, across MCPs and Skills. If you pass in the <code>--deep</code> flag, it will use an LLM (you need to provide your own key) to judge whether two skills are distinct, if their descriptions collide, or whether their scopes overlap.</p>
+
+<p>If I run <code>drskill list</code>, I can see my current loadout. Adding <code>--harness claude-code</code> limits it to just what Claude Code sees:</p>
+
+<p><img src="https://www.dbreunig.com/img/resized/drskill-2.png.jpg" alt="" width="1600" height="667" loading="lazy" decoding="async"></p>
+
+<p>If I want to know what parts of the loadout I actually <em>use</em>, I can run <code>drskill audit</code>. This scans my traces and finds all the times skills or tools are called and prints a report:</p>
+
+<p><img src="https://www.dbreunig.com/img/resized/drskill-3.png.jpg" alt="" width="1600" height="668" loading="lazy" decoding="async"></p>
+
+<p>In only a week, <code>drskill</code> has been earning its keep. Beyond debugging Hermes and spotting some local issues, it’s been helpful when building my own skills and testing how they might play nicely in production.</p>
+
+<p>I’ve heard from people using it to:</p>
+
+<ul>
+  <li><strong>Learn why an agent reaches for the wrong skill or tool</strong>, e.g. two descriptions overlap so a router cannot tell them apart.</li>
+  <li><strong>Catch config risks before they ship</strong>, e.g. a secret in a committed file or an unpinned server package.</li>
+  <li><strong>Notice when their loadout changes</strong>, e.g. a skill that drifted from its lockfile or a server that rewrote a tool description.</li>
+  <li><strong>Write skill and tool descriptions that don’t clash with other libraries</strong>.</li>
+  <li><strong>See which skills and MCP tools their agents actually use</strong>, and read the queries that triggered them.</li>
+</ul>
+
+<p><code>drskill</code> has some nice convenience functions for using it locally or as part of CI.</p>
+
+<p><a href="https://github.com/dbreunig/drskill">Check it out!</a> And let me know how it helps you or could be improved.</p>
+
+<hr>
+
+
+
+  </div></div>

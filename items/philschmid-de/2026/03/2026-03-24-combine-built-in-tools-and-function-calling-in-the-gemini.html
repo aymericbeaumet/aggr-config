@@ -1,0 +1,75 @@
+<div id="readability-page-1" class="page"><div><p>Most useful agents need several tools at once. A DevOps agent that spots a CVE also needs to file a ticket for it. Until recently, you had orchestrate those handoffs yourself or only use custom tools without built-in tools.</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions?ua=chat#combining_built-in_tools_and_function_calling">Tool combination in the Gemini API</a> now lets you combine <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/tools">built-in tools</a> with custom function declarations in a single request. Gemini decides which tools to call, in what order, and circulates context between them automatically.</p>
+<p>Below are two examples of tool combination.</p>
+<h2 id="example-1-tool-combination-with-function-calling">Example 1: Tool Combination with Function Calling</h2>
+<p>Combine Google Search, URL Context, and a custom function in one request. The model searches the web, reads a page, and calls your function without you specifying the order.</p>
+<p>Get a <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/apikey">Gemini API key</a> and install the SDK:</p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">pip install google-genai</code></pre></div></figure>
+<p>Define a custom function and pass it alongside built-in tools:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+client = genai.Client()
+ 
+file_incident = {
+    "type": "function",
+    "name": "file_incident",
+    "description": "Files a security incident in the internal tracking system.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "cve_id": {"type": "string", "description": "CVE identifier"},
+            "severity": {"type": "string", "description": "Critical, High, Medium, or Low"},
+            "summary": {"type": "string", "description": "Brief description of the vulnerability"},
+        },
+        "required": ["cve_id", "severity", "summary"],
+    },
+}
+ 
+interaction = client.interactions.create(
+    model="gemini-3-flash-preview",
+    input="Search for the latest critical CVE affecting react, read the full advisory page, and file an incident for it.",
+    tools=[
+        {"type": "google_search"},
+        {"type": "url_context"},
+        {"type": "function", "name": "file_incident", "parameters": ...},
+    ],
+)
+ 
+for output in interaction.outputs:
+    print(f"{output.type}...")
+    if output.type == "function_call":
+        print(f"Function: {output.name}")
+        print(f"Arguments: {output.arguments}")
+ 
+# google_search_call...
+# google_search_result...
+# google_search_call...
+# google_search_result...
+# thought...
+# function_call...
+# Function: file_incident
+# Arguments: {'summary': 'Unauthenticated remote code execution (RCE) vulnerability in React Server Components (RSC) affecting React 19.0, 19.1.x, and 19.2.0. The vulnerability (React2Shell) stems from insecure deserialization in the RSC "Flight" protocol, allowing an attacker to execute arbitrary code via a crafted HTTP request. Patches are available in React versions 19.0.1, 19.1.2, and 19.2.1.', 'severity': 'Critical', 'cve_id': 'CVE-2025-55182'}</code></pre></div></figure>
+<h2 id="example-2-cross-turn-context-circulation">Example 2: Cross-Turn Context Circulation</h2>
+<p>Context circulation preserves built-in tool results across turns. Pass <code>previous_interaction_id</code> and follow-up questions can reason over earlier results without re-executing tools. The model can still make new tool calls if it needs fresh data or thinks it needs to.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+client = genai.Client()
+ 
+# Turn 1: URL Context reads Philipp's about page
+turn1 = client.interactions.create(
+    model="gemini-3-flash-preview",
+    input="Who is Philipp Schmid? https://www.philschmid.de/philipp-schmid",
+    tools=[{"type": "url_context"}],
+)
+print(turn1.outputs[-1].text)
+ 
+# Turn 2: Follow-up uses context from turn 1
+turn2 = client.interactions.create(
+    model="gemini-3-flash-preview",
+    input="What is his twitter handle?",
+    tools=[{"type": "url_context"}],
+    previous_interaction_id=turn1.id,
+)
+print(turn2.outputs[-1].text)</code></pre></div></figure>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

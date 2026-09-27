@@ -1,0 +1,541 @@
+<div id="readability-page-1" class="page"><div>
+            <p>
+      		This is the fifth in a series of articles
+      		(<a href="https://nicholas.carlini.com/writing/2020/digital-logic-game-of-life.html">[1]</a>,
+              <a href="https://nicholas.carlini.com/writing/2020/intro-to-circuits-game-of-life.html">[2]</a>,
+      		<a href="https://nicholas.carlini.com/writing/2020/improved-logic-gates-game-of-life.html">[3]</a>,
+      		<a href="https://nicholas.carlini.com/writing/2021/unlimited-register-machine-game-of-life.html">[4]</a>)
+      		discussing implementing
+      		digital logic on Conway's game of life. This will also be the third time that
+      		I redesign everything from the ground up, completely re-thinking what a logic
+      		gate actually does.
+      	  </p>
+      
+      	  <p>
+      		By the end of this post, I'll describe how to construct circuits that are somewhere
+      		beteween 8 and 50
+      		times more efficient than the implementation from the last rewrite in the <a href="https://nicholas.carlini.com/writing/2020/improved-logic-gates-game-of-life.html">third post</a>, which
+      		itself is at least another order of magnitude more efficient than the first initial construction. For example,
+      		the entire Fibonacci counter circuit shown below is <i>smaller</i> than just the four-bit adder from the first post!
+      	  </p>
+      
+      	  <br>
+      	  
+      	  <hr>
+      
+      	  
+      	  
+      
+      	  <p>
+      		So this is part five in this series. Why am I re-designing everything again?
+      		Well, the previous approaches, even as efficient as I could make them, still
+      		were to inefficient for my taste. I want better.
+      	  </p>
+      
+      	  
+      	  
+      	  <p>
+      		In each of the past four articles there was a direct one-to-one
+      		correspondence between a wire (in a physical electronic circuit)
+      		and a glider stream (on the game of life).
+      
+      		If a glider stream is present, then the wire currently holds the value 1;
+      		and if there is no glider stream present then the wire holds the value 0.
+      	  </p>
+      
+      
+      	  <p>
+      		To see why this setup is fairly ineffecient, consider for example how we might compute the AND
+      		of two 8-bit integers with our previous construction.
+      		We'd need eight wires coming from the
+      		left, eight wires coming from the bottom, and eight AND gates.
+      		A circuit that actually performs this computation is drawn at right,
+      		and has a cost of 64 “tiles” in an 8x8 grid.
+      		And only <b>eight</b> of these are actually filled with gates---the rest of the empty tiles are just
+      		used for moving the data from one location to another.
+      	  </p>
+      
+      	  <p>
+      		Now this design basically makes sense if you're trying to build things
+      		out of physical transistors. (Or vaccuum tubes, if you're into that.)
+      		Two-state binary logic is really easy for design purposes and just makes
+      		everything easier.
+      	  </p>
+      
+      	  <p>
+      		But we're not dealing with the physical world. So can we do better?
+      	  </p>
+      
+      	  
+      	  
+      	  
+      
+      	  <p>
+      		Our new construction is going to
+      		have no basis in physical reality, and would be impossible directly to implement with
+      		standard digital logic gates in hardware. But we don't care about the physical
+      		world---for some time now we've been designing circuits that would have been
+      		physically impossible to build in real hardware.
+      	  </p>
+      
+      	  <p>
+      		(It's not anything new that our circuits aren't physically realizable.
+      		Our clock, for example, has always just been a NOT gate connected into itself---which
+      		in the game of life generates a perfect clock signal but would just be all kinds
+      		of wrong if tried it in reality.)
+      	  </p>
+      	  
+      
+      	  
+      
+      	  <p>
+      		In our new construction, instead of a wire representing a single value boolean of
+      		either true (1) or false (0), our wires are now going to carry eight bit integers.
+      		And so any wire at a given point can hold one of 256 distinct different
+      		values.
+      	  </p>
+      
+      	  <p>
+      		(For the purpose of this post, for the sake of clarity, I'm going to pretend that we're
+      		just working with 4-bit integers. It'll make everything simpler.)
+      	  </p>
+      
+      	  <p>
+      		The wire shown at right is carrying the value 3 in our new construction. The way that you
+      		can tell that it's holding this value is that when you look at the position of
+      		the gliders when the simulation is at time step zero mod 4, the presence or absence
+      		of gliders in the indicated location allows
+      		you to read off the binary value 0011, which decodes to the
+      		decimal value 3.
+      	  </p>
+      
+      	  <p>
+      		Noticed though that it's (very!) important we read off the value when
+      		the current time is 0 mod 4.
+      		If we had gotten this wrong and instead and read off
+      		the data when the current time was different we might have instead read the
+      		glider configuration 0110, which converts to 6,
+      		or we might have read 1100, which converts 12, or
+      		maybe even 1001, which converts to 9.
+      	  </p>
+      
+      	  <p>
+      		And this is actually going to be the main difficutly with multiplexing logic gates:
+      		we're going to have to keep track of the <i>phase</i> at every moment in time so we
+      		know how to read off the correct value from each wire.
+      	  </p>
+      
+      	  
+      	  
+      	  
+      	  
+      	  <p>
+      		How do we actually generate a signal's multiplexed? Well for this we
+      		need a gate that will generate a glider stream where only 1 out of
+      		every 4 (or 8, in practice, but 4 for this post) possible glider locations is filled in.
+      	  </p>
+      
+      	  <p>
+      		The example drawn at right does exactly this. All we have here is a
+      		LWSS gun that creates the output stream, and then we hit this with
+      		a quarter-period glider stream. I've timed the collision just right so
+      		that when they hit each other a little box is left over that will clear
+      		out the next LWSS and so we end up with a period of 4.
+      	  </p>
+      
+      	  
+      	  
+      	  
+      	  
+      	  <p>
+      		Performing digital logic on wires carrying eight bits is (almost) identical to
+      		performing digital logic on wires carrying Boolean values.
+      		That makes this new modification rather appealing, because we can actually (for the most part) use
+      		the same logic we built <a href="https://nicholas.carlini.com/writing/2020/improved-logic-gates-game-of-life.html">last time</a>.
+      	  </p>
+      
+      	  
+      
+      	  <p>
+      		For example right we see the exact same AND gate which we previously used to compute
+      		the AND of two Boolean values, but this time we're using it to compute the AND of two
+      		4-bit values.
+      	  </p>
+      
+      	  <p>
+      		The input coming from the left is the decimal value 3 (0011),
+      		and the input coming from the bottom is the decimal value 6 (0110).
+      		And so the
+      		output we expect should be the decimal value 2, because 3 AND 6 = 0011 AND 0110 = 0010 = 2.
+      		And indeed we can see that it is by
+      		reading off the binary value 0010 when the phase is 0 mod 4.
+      	  </p>
+      
+      	  <p>
+      		The reason that this works is because the glider that represents the least significant
+      		bit coming from the left only ever interacts with the glider that represents the least significant bit on
+      		the wire coming from the bottom. Similarly, the gliders that represents the second-to-least
+      		significant bits only (potentially) hit each other, and so on for all eight glider pairs.
+      	  </p>
+      
+      	  <p>
+      		And so what we've basically done here is used the one logic gate to actually perform eight
+      		different ANDs at the exact same time.
+      		This is why I call this approach <i>multiplexing</i>, because we're using the same
+      		glider stream to perform different calculations at different time setps.
+      	  </p>
+      
+      	  <p>
+      		(“Now wait a second”, you say. “Why do we only have wires cary eight bits?
+      		Why not 10? Or 32?” That's actually a good question! There's no fundamental reason we
+      		couldn't carry either 10 (or 32) bits on the wire. We would just need to remind ourself that
+      		whenever we're reading off the result, we should be reading off when the current time step is
+      		0 mod 10 or 0 mod 32.)
+      	  </p>
+      
+      	  
+      	  
+      	  
+      
+      
+      	  
+      	  <p>
+      		I've glossed over one very important problem when showing the above example. Let's look at what happens
+      		if we <i>naively</i> compute the AND of the value 0001 (coming in from the left) and the value
+      		0001 (coming in from the bottom).
+      		We would expect the answer to again be 0001, because that's the right answer. Except
+      		it turns out that we get zero!
+      		(It only worked above because I cheated and used a fix we're about to develop.)
+      	  </p>
+      
+      	  <p>
+      		Why did this happen? Well when you look at the circuit it's actually obvious. The gliders
+      		aren't hitting at the right time to actually have the bits overlap in the right way, and so
+      		the glider on the left isn't actually allowed to pass through.
+      	  </p>
+      
+      	  <p>
+      		Now one thing we could try to do is declare the AND gate to be broken, and require that it makes
+      		gliders from the bottom interact exactly with the corresponding glider coming from the left.
+      		There are two reasons, though, that this won't work.
+      
+      		</p><ol>
+      		  <li>
+      			Most importantly, it complicates every single gate construction significantly. It was already hard
+      			enough to cram an OR gate into 150x150 game of life cells. Doing that while <i>also</i>
+      			keeping the phase aligned is probably impossible.
+      		  </li>
+      		  <li>
+      			But also, this would bake into the construction of the OR gate that we wanted wires to hold
+      			8 bits. For now I do. But what if in the future I wanted them to hold 27 bits? We'd have to
+      			completely re-design every gate just to allow this change.
+      		  </li>
+      		</ol>
+      	  
+      
+      	  
+      	  
+      	  
+      
+      	  
+      	  <p>
+      		Instead of fixing the problem “in hardware”, and modifying the construction of the
+      		gates, let's see if we can fix it “in software”, and modify the compiler that
+      		transforms circuits into the game of life.
+      	  </p>
+      	  
+      	  <p>
+      		To do this, we'll start by creating a new phase-fixing
+      		gate that doesn't actally change the value that's being carried along any wire, but
+      		instead just adds a little bit of latency which adjusts the phase of the wire.
+      		So for example, if we add these proper phase adjusting gates to the OR gate above then
+      		we get this here and everything works out perfectly.
+      	  </p>
+      
+      	  
+      
+      	  <p>
+      		Because it will be useful later, let's define the <i>latency</i> of a gate as the number of
+      		time steps it takes for a glider to exit the gate after entering it. So for example, if you're
+      		really patient, you could calculate, for example, that the latency of the AND gate is 10 gliders long from the left
+      		input to the output, or 11 gliders long from the bottom input to the output.
+      	  </p>
+      
+      
+      	  <p>
+      		Does this work? Definitely. It does. But is it efficient? Not at all! 
+      		In fact, it's going to quadruple the number of gates we must use in any
+      		circuit. Requiring four gates where one was required previously basically
+      		completely eliminates any gains from having a multi-phased wire setup.
+      	  </p>
+      
+      	  <p>
+      		But wait, it gets worse. This simple greedy approach for adding new gates works when you have
+      		acyclic circuits, but what happens when the circuits are actually cyclic?
+      	  </p>
+      	  
+      	  
+      
+      
+      	  
+      	  
+      	  
+      
+      	  <p>
+      		Let's imagine that I was trying to build a
+      		circuit that has an OR gate connecting back onto itself, with the idea that I can use this
+      		as a kind of memory cell that can only be written to once.
+      	  </p>
+      
+      	  
+      	  
+      	  <p>
+      		This circuit might look like something at right. We send in the value 0001 from the left.
+      		And for a little while, everything is okay. But quckly we run into a problem! When the data
+      		from the OR gate comes back around the second time, the phase is wrong! And so we end up ORing
+      		the value 0001 from the left (as before) with the value 0010 (which is wrong!).
+      		This gives a new value of 0011 (or 3) going around the circuit.
+      	  </p>
+      
+      	  <p>
+      		And it only gets worse from here. Now we have the value 3 going around the circuit, which
+      		causes the resulting output to get ever further off, because next
+      		time we OR this incorrectly to get a 7 around the circuit, until
+      		eventually we have a full 15 traveling around the circuit.
+      	  </p>
+      
+      	  <p>
+      		What's going wrong here? Again this is a problem of phase. If we pause the circuit at 0 mod 4
+      		and look at the output of the OR gate, we find that actually, the value has been shifted,
+      		and it's ORing 0001 from the left, but 0010 from the bottom.
+      		We're all out of phase!
+      	  </p>
+      
+      	  <p>
+      		Somehow, after going through the OR gate, we shouldn't be trying to decode things by
+      		0 mod 4, we should be reading off the resulting value 1 mod  .
+      	  </p>
+      
+      	  <p>
+      		The fix here can't be just <i>local</i> looking at the input and output of each gate in isolation.
+      		We also have to somehow track of what's going on at a <i>global</i> scale so that when we add a
+      		delay gate to one part of the circuit, we don't end up also breaking another part of the circuit.
+      
+      		For example, the fix on the above circuit is to add  a gate that delays the loop by 3
+      		time steps longer than previously. This will make the the gliders require exactly
+      		3 + 1 = 0 mod 4 time steps to travel around the loop, and so everything will run smoothly.
+      	  </p>
+      
+      
+      	  
+      	  
+      	  
+      
+      	  <p>
+      		In general, how should we calculate were to add delay gates?
+      	  </p>
+      
+      	  <p>
+      		Let's start out by defining the variables and constraints that we're going to be working with.
+      		Starting with variables: every gate is going to have an input phase (for each
+      		of their inputs), and an output phase (for each of their outputs).
+      		And then we have a constraint: the phase at the output of a gate should be exactly
+      		equal to the phase at the input plus the latency from the input to the output.
+      	  </p>
+      
+      	  <p>
+      		Now these variables are not “free” variables that we can modify arbitrarily.
+      		If the input phase to a NOT gate is 0 mod 4, then the output has to be 14 mod 4 = 2 mod 4
+      		because that's how long it takes the glider to travel through the gate.
+      		We can't do anything about that. It's just a fact about the gate.
+      	  </p>
+      
+      	  <p>
+      		We can express this with a linear equation
+      		not_input_phase + 14 ≡ not_output_phase (mod 4).
+      	  </p>
+      
+      	  <p>
+      		Now we can actually go through and do this for every single gate, for example the rotate gates
+      		have a latency of 13 mod 4 each and the duplicate gate has a latency
+      		of 10 from left-to-right and 11 from left-to-down.
+      	  </p>
+      
+      	  <p>
+      		Okay but that's not all the constraints we have. There is a wire that goes from the <i>output</i>
+      		of the NOT gate to the <i>input</i> of the first rotation gate. So we need to add a new
+      		constraint that these match:
+      		not_output_phase + 10 ≡ first_rotate_input_phase (mod 4).
+      		(Where did this 10 come from? That's the phase-offset from just traveling through empty space.)
+      	  </p>
+      	  
+      	  <p>
+      		But now here's where we actuall have some slack. Because this is a wire, we have the option of adding some extra
+      		latecy with a delay gate. So in reality the equatino that we should have is more like
+      		not_output_phase + 10 + optional_latency ≡ first_rotate_input_phase (mod 4)
+      	  </p>
+      
+      	  <pre><code>      0mod4_out_0 + 50 + latency_for_wire_12 = or_in_0
+      or_in_1 + 21  = or_out_0
+      or_in_0 + 14  = or_out_0
+      or_out_0 + 10 + latency_for_wire_13 = dup_270_in_0
+      dup_270_in_0 + 10  = dup_270_out_0
+      dup_270_in_0 + 11  = dup_270_out_1
+      dup_270_out_1 + 10 + latency_for_wire_14 = Ar270_in_0
+      Ar270_in_0 + 13  = Ar270_out_0
+      Ar270_out_0 + 10 + latency_for_wire_15 = Br270_in_0
+      Br270_in_0 + 13  = Br270_out_0
+      Br270_out_0 + 10 + latency_for_wire_16 = or_in_1
+      		</code></pre>
+      	  
+      
+      	  <p>
+      		And now this is where the magic happens. These constraints form a system of linear equations
+      		modulo 8, which we can rewrite as a matrix 
+      
+      </p><pre><code>                                              [ 0mod4_out_0         ]
+      [1 7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]     [ or_in_0             ]       [0]
+      [0 1 7 0 0 0 0 0 0 0 0 0 6 0 0 0 0]     [ or_in_1             ]       [6]
+      [0 0 0 1 7 0 0 0 0 0 0 0 0 0 0 0 0]     [ or_out_0            ]       [3]
+      [0 0 1 0 7 0 0 0 0 0 0 0 0 0 0 0 0]     [ dup_270_in_0        ]       [2]
+      [0 0 0 0 1 7 0 0 0 0 0 0 0 6 0 0 0]     [ dup_270_out_0       ]       [6]
+      [0 0 0 0 0 1 7 0 0 0 0 0 0 0 0 0 0]     [ dup_270_out_1       ]       [6]
+      [0 0 0 0 0 1 0 7 0 0 0 0 0 0 0 0 0]     [ r270_in_0           ]       [5]
+      [0 0 0 0 0 0 0 1 7 0 0 0 0 0 6 0 0]  *  [ r270_out_0          ]   =   [6]
+      [0 0 0 0 0 0 0 0 1 7 0 0 0 0 0 0 0]     [ r270_in_0           ]       [3]
+      [0 0 0 0 0 0 0 0 0 1 7 0 0 0 0 6 0]     [ r270_out_0          ]       [6]
+      [0 0 0 0 0 0 0 0 0 0 1 7 0 0 0 0 0]     [ latency_for_wire_12 ]       [3]
+      [0 0 0 7 0 0 0 0 0 0 0 1 0 0 0 0 6]     [ latency_for_wire_13 ]       [6]
+      [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]     [ latency_for_wire_14 ]       [0]
+                                              [ latency_for_wire_15 ]  
+                                              [ latency_for_wire_16 ]    
+      </code></pre>
+      	  
+      
+      	  <p>
+      		And now we just need to write a fairly simple <a href="https://en.wikipedia.org/wiki/Row_echelon_form">RREF</a> operation that works
+      		with integers in <a href="https://en.wikipedia.org/wiki/Finite_field">GF(8)</a> and we're done.
+      	  </p>
+      
+      	  <pre><code>      1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   |  0
+      0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   |  0
+      0 0 1 0 0 0 0 0 0 0 0 0 2 0 0 0 0   |  2
+      0 0 0 1 0 0 0 0 0 0 0 0 2 0 0 0 0   |  3
+      0 0 0 0 1 0 0 0 0 0 0 0 2 0 0 0 0   |  0
+      0 0 0 0 0 1 0 0 0 0 0 0 2 0 6 6 6   |  0
+      0 0 0 0 0 0 1 0 0 0 0 0 2 0 6 6 6   |  2
+      0 0 0 0 0 0 0 1 0 0 0 0 2 0 6 6 6   |  3
+      0 0 0 0 0 0 0 0 1 0 0 0 2 0 0 6 6   |  5
+      0 0 0 0 0 0 0 0 0 1 0 0 2 0 0 6 6   |  2
+      0 0 0 0 0 0 0 0 0 0 1 0 2 0 0 0 6   |  4
+      0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 6   |  1
+      0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2   |  2
+      </code></pre>
+      	  
+      
+      	  <p>
+      		The first 12 rows of this tell us the phase of each of the nodes in the graph (so for example this tells us the phase of the “0mod”gate that emits gliders at
+      		time steps 0 mod 4 is ... 0 mod 4. Very good.
+      		It also tells us the phase of the or gate inputs are 0 and 2, etc reading down.
+      		The 13th row is the one that's interesting. If we decoded this off, what it's actually saying
+      		is that any solution is valid as long as
+      
+      		</p><pre><code>      2*(latency_13 + latency_14 + latency_15 + latency_16) = 2
+      		</code></pre>
+      
+      	  
+      
+      	  	  
+      	  <p>
+      		If you think about it for a minute this makes sense. Adding a delay gate anywhere along
+      		the loop gives the same effect as far as the total overall latecy is concerned.
+      		So we just need to pick one of these (my code arbitrarily chooses the first)
+      		and set it's additional delay to 1, and we're good!
+      	  </p>
+      
+      	  <p>
+      		At right you can see the final result of doing this, and what do you know, it's perfect.
+      		Now this all may seem very complicated, and I'm not going to lie, it actually is.
+      		I was stuck on this issue of phase for over a year. Now obviously I wasn't spending every
+      		waking minute of my time thinking about it, and once you see the solution it really just
+      		seems obvious, but it's one of the most annoying problems I've had to solve.
+      	  </p>
+      
+      	  
+      	  
+      	  
+      	  <p>
+      		<img src="https://nicholas.carlini.com/writing/2022/gameoflife/explain_fib.png">
+      	  </p>
+      
+      	  <p>
+      		We're now ready to put it all together. We can use our program
+      		to fix the phase of any circuit we want to design.
+      	  </p>
+      
+      	  <p>
+      		Okay so how does that Fibonacci circuit at the top work?
+      		If you've read the prior post, there's not really any new ideas here, and it would have
+      		technically been possible to do previously---I'm
+      		just using the fact that we have 8-bit wires for this to make it more efficient.
+      	  </p>
+      
+      	  <p>
+      		The clock on the left drives the circuit. This clock feeds into
+      		six 4-bit registers that each hold a single decimal digit
+      		(encoded with <a href="https://en.wikipedia.org/wiki/Binary-coded_decimal">binary-coded decimal</a>).
+      		These registers come in pairs of two, holding the current counter
+      		state at the previous two timesteps.
+      	  </p>
+      
+      	  <p>
+      		The 4-bit adders above this add together the prior two states, and
+      		then above that is the BCD conversion logic that takes values greater
+      		than 10 and subtracts 10 from these (so that, for example, 11 maps
+      		back to 1). In practice this is implemented with another 4-bit adder
+      		that's adding 6 (because ~6 = 10 in 4-bit math).
+      		This new data gets sent both down to the shift registers, and
+      		also up to the display.
+      	  </p>
+      
+      	  <p>
+      		The first step of the seven-segment display is to convert the decimal
+      		value into the on/off values for each segment of the display. This
+      		is done with a small ROM lookup table (I'll describe this magic next
+      		time when I start getting into the full CPU) and the decoded values
+      		from here then go into the display itself.
+      	  </p>
+      	  
+      
+      	  
+      	  
+      	  
+      
+      	  <p>
+      		To get a sense of scale for just how much better things have gotten over
+      		the last few posts, let's just look at the Fibonacci counter at the top
+      		and compare it to the 4-bit adder I built the first time around.
+      		Note that these are <i>to scale</i> snapshots!
+      	  </p>
+      
+      	  
+      	  <p><img src="https://nicholas.carlini.com/writing/2022/gameoflife/old_adder.png">
+      	  <img src="https://nicholas.carlini.com/writing/2022/gameoflife/new_fib.png"></p>
+      
+      	  <p>
+      		Despite containing three 4-bit binary-coded decimal adders
+      		(so, three 4-bit adders, plus 3 conditional subtraction circuits),
+      		plus six 4-bit counters,
+      		plus three BCD to seven segment display decoder, plus three seven
+      		segment displays ... it's still smaller!
+      	  </p>
+      	  
+      	  
+      	  
+      	  <p>
+      		Now, with this final (I hope!) rewrite out of the way, it's time to go and
+      		actually build a real CPU using all these fancy gates we've just developed.
+      		So look forward to that next time.
+      	  </p>
+      
+      	</div></div>

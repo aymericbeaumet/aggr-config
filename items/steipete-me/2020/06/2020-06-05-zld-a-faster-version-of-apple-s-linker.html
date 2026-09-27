@@ -1,0 +1,58 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2020/zld/benchmarks.png" alt="" loading="lazy"><p>zld is <a href="https://github.com/michaeleisel/zld">a drop-in replacement of Apple’s linker</a> that uses optimized data structures and parallelizing to speed things up. It comes with a great promise:</p>
+<blockquote>
+<p>“Feel free to file an issue if you find it’s not at least 40% faster for your case” — <a href="https://github.com/michaeleisel">Michael Eisel, Maintainer</a></p>
+</blockquote>
+<p>In our setup, zld indeed improves overall build time by approximately 25 percent, measured from a clean build to the running application. Building <a href="https://pspdfkit.com/guides/ios/current/getting-started/example-projects/">PSPDFCatalog</a> in debug mode with <a href="https://pspdfkit.com/blog/2015/ccache-for-fun-and-profit/">ccache</a> enabled and everything precached takes roughly:</p>
+<ul>
+<li>ld — 4:40min</li>
+<li>zld — 3:30min</li>
+</ul>
+<p>If you’re asking yourself, is this safe? Well, <a href="https://twitter.com/alanzeino/status/1268230184215252992?s=21">Instagram uses it too</a>.</p>
+<p>Heads up: <code>zld</code> seems to <a href="https://steipete.me/posts/building-with-swift-trunk/">cause issues when using the Swift trunk toolchain</a>.</p>
+<h2 id="installation">Installation</h2>
+<p>zld is easy to enable for your project:</p>
+<ol>
+<li><code>brew install michaeleisel/zld/zld</code></li>
+<li><code>OTHER_LDFLAGS = -fuse-ld=/usr/local/bin/zld</code></li>
+</ol>
+<p>In our setup, things aren’t quite so easy, as we have a few additional requirements:</p>
+<ul>
+<li>The build should work independently of <code>zld</code> installed, so people can opt in on their own and don’t have a surprising build failure after pulling master. This is even truer for CI.</li>
+<li>We have a large <a href="https://pspdfkit.com/blog/2019/benefits-of-a-monorepo/">monorepo</a> with different projects in different folders, which is managed by shared <code>xcconfig</code> files.</li>
+</ul>
+<p>I wrote a <code>zld-detect</code> wrapper that conditionally forwards to <code>zld</code> if found. Otherwise, it uses Apple’s default linker:</p>
+<pre><code data-language="plaintext">#!/bin/sh
+
+# /usr/local/bin is not always included in the Xcode context.
+export PATH="$PATH:/usr/local/bin"
+
+# Detect if zld is available.
+if type -p zld &gt;/dev/null 2&gt;&amp;1; then
+  exec zld "$@"
+else
+  exec ld "$@"
+fi</code></pre>
+<p>The second problem (different paths) was solved by defining a <code>REPOROOT = "$(SRCROOT)/../..";</code> in each project, so that we could build a path from the root of the monorepo and only have one location for the <code>zld-detect</code> script:</p>
+<pre><code data-language="plaintext">OTHER_LDFLAGS = -ObjC -Wl,-no_uuid -fuse-ld=$(REPOROOT)/iOS/Resources/zld-detect</code></pre>
+<h2 id="mac-catalyst">Mac Catalyst</h2>
+<p>After implementing the above, our Mac Catalyst builds started failing:</p>
+<pre><code data-language="plaintext">Building for Mac Catalyst, but linking in .tbd built for , file '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks//CoreImage.framework/CoreImage.tbd' for architecture x86_64</code></pre>
+<p>It seems there’s some special code in the linker that helps with linking the correct framework for Mac Catalyst, which isn’t yet part of the v510 release. Apple released <a href="https://opensource.apple.com/source/ld64/">v520 and v530 of the ld64 project</a>, so there’s a good chance this will be fixed once <code>zld</code> merges with upstream (<a href="https://github.com/michaeleisel/zld/issues/43">Issue #43</a>).</p>
+<p>Writing this conditionally in <code>xcconfig</code> is tricky, as there’s no support for a separate architecture like <code>[sdk=maccatalyst]</code> (Apple folks: FB6822740).</p>
+<p>Here’s how things look if we put everything together:</p>
+<pre><code data-language="plaintext">// Settings to improve link time performance for debug/test builds
+// https://github.com/michaeleisel/zld#a-faster-version-of-apples-linker
+// Linker fails for Mac Catalyst — maybe try once it's updated to v530.
+// This is always defined as YES or NO.
+PSPDF_ZLD = -fuse-ld=$(REPOROOT)/iOS/Resources/zld-detect
+PSPDF_LINKER_MACCATALYST_YES = ""
+PSPDF_LINKER_MACCATALYST_NO = $(PSPDF_ZLD)
+// This will be the case on iOS.
+PSPDF_LINKER_MACCATALYST_ = $(PSPDF_ZLD)
+PSPDF_LINKER_IF_NOT_CATALYST = $(PSPDF_LINKER_MACCATALYST_$(IS_MACCATALYST))
+PSPDF_NORELEASE_LDFLAGS = -ObjC -Wl,-no_uuid $(PSPDF_LINKER_IF_NOT_CATALYST)</code></pre>
+<p>In <code>Defaults-Debug.xcconfig</code> and <code>Defaults-testing.xcconfig</code></p>
+<pre><code data-language="plaintext">// Use fast linker if available.
+OTHER_LDFLAGS = $(inherited) $(PSPDF_NORELEASE_LDFLAGS)</code></pre>
+<p>Update: Xcode also supports the <a href="https://twitter.com/thi_dt/status/1268848373953474560"><code>LD</code></a> <code>xcconfig</code> key to make this even easier to configure.</p>
+<p>That’s it! <a href="https://twitter.com/steipete">Let me know on Twitter</a> if this was helpful.</p></article></div>

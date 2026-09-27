@@ -1,0 +1,132 @@
+<div id="readability-page-1" class="page"><div itemprop="articleBody">
+    <h3 id="handling-your-long-context-today--designing-your-agent-tomorrow">Handling Your Long Context Today &amp; Designing Your Agent Tomorrow</h3>
+
+<p><img src="https://www.dbreunig.com/img/resized/thumb_index.jpg" alt="" width="1600" height="935" decoding="async"></p>
+
+<h3 id="context-rot-is-the-worst-context-failure">Context Rot is the Worst Context Failure</h3>
+
+<p>“Context Rot” is a common problem agent designers must avoid and mitigate.</p>
+
+<p>The <a href="https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf">Gemini 2.5 paper</a> was one of the first technical reports that flagged the issue, noting that the performance of their <a href="https://www.dbreunig.com/2025/06/17/an-agentic-case-study-playing-pok%C3%A9mon-with-gemini.html">Pokémon-playing harness</a> rapidly deteriorated as the context grew beyond 100,000 tokens; a figure <em>far</em> below Gemini 2.5’s 1 million input token limit. We covered this in our <a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html#context-distraction">context failures piece</a>, but <a href="https://research.trychroma.com/context-rot">the Chroma team published the canonical exploration</a> of the effect, dubbing it <strong>context rot</strong>.</p>
+
+<p><img src="https://www.dbreunig.com/img/resized/context_rot.jpg" alt="A figure from the Chroma post showing performance declining as the input length increases" width="1600" height="936" loading="lazy" decoding="async"></p>
+
+<p>A key takeaway from Gemini’s Pokémon troubles and the Chroma post is that context rot is not a <em>capacity problem</em>. It’s a <em>quality problem</em>. As the context grows beyond a model’s soft limit, the model continues to issue output as its accuracy declines. This makes for a pernicious problem, one that sneaks up on us the longer we run agents.</p>
+
+<p>Of all the <a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">context fails</a>, context rot is the worst.</p>
+
+<hr>
+
+<h3 id="enter-recursive-language-models">Enter Recursive Language Models</h3>
+
+<p>Defined by Alex Zhang and Omar Khattab, <a href="https://alexzhang13.github.io/blog/2025/rlm/">Recursive Language Models</a> (or RLMs) are a simple idea:</p>
+
+<ol>
+  <li>Load long context into a <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a> environment<sup id="fnref:repl"><a href="#fn:repl" rel="footnote" role="doc-noteref">1</a></sup>, stored as variables.</li>
+  <li>Allow an LLM to use the REPL environment to explore and analyze the context.</li>
+  <li>Provide a function in the REPL to trigger a sub-LLM call.</li>
+</ol>
+
+<p>That’s it. That’s an RLM. The LLM will use the REPL to filter, chunk, and sample the long context as needed to complete its task. It will use the sub-LLM function to task new LLM instances to explore, analyze, or validate the context. Eventually, the sum of the LLM’s findings will be synthesized into a final answer.</p>
+
+<p>With this setup, the long context(s) can be <em>really</em> long. I’ve given RLMs logfiles more than 400 megabytes in size, with no issues. In the original <a href="https://alexzhang13.github.io/blog/2025/rlm/">RLM post</a>, Alex reports that performance doesn’t degrade when &gt;10 million tokens are provided.</p>
+
+<p><img src="https://www.dbreunig.com/img/resized/rlm_plot.jpg" alt="Alex Zhang's RLM paper shows RLM significantly mitigates the context rot decline." width="1600" height="823" loading="lazy" decoding="async"></p>
+
+<p>Note the orange lines on the right: as the context length increases, performance very slowly degrades, hovering around 50-60%. Compare this to the non-RLM results (with the same GPT-5 model), which dramatically decline until failing entirely at 262,000 tokens.</p>
+
+<hr>
+
+<h3 id="rlms-work-by-turning-long-context-problems-into-coding--reasoning-problem">RLMs Work By Turning Long Context Problems Into Coding &amp; Reasoning Problem</h3>
+
+<p>The key attribute of RLMs is that they maintain two distinct pools of context: <em>tokenized context</em> (which fills the LLM’s context window) and <em>programmatic context</em> (information that exists in the coding environment). By giving the LLM access to the REPL, where the <em>programmatic context</em> is managed, the LLM controls what moves from <em>programmatic</em> space to <em>token</em> space.</p>
+
+<p>And it turns out modern LLMs are quite good at this!</p>
+
+<p>Let’s look at an example.</p>
+
+<p>Here I’ve given Kimi K2 a very large <a href="https://huggingface.co/datasets/andyyang/stable_diffusion_prompts_2m">dataset of Stable Diffusion prompts</a> (prompts people provided to generate images). I then ask the RLM to identify the most common celebrities used in these prompts (and of course, I’m <a href="https://www.cmpnd.ai/blog/rlms-in-dspy.html">using RLM in DSPy</a>). If you’re curious, <a href="https://gist.github.com/dbreunig/afdd86cb560847f54359dcc3ee233766">here’s the code</a>.</p>
+
+<p>I give the RLM a budget of 5 iterations to accomplish the task. Below, you can swipe/page through each iteration, which shows the LLM’s reasoning and the code it executed in the REPL. There’s a few things to keep in mind as you read through:</p>
+
+<ul>
+  <li>Every time the LLM calls <code>print</code> in the REPL, it’s bringing new context into the <em>token</em> space. (I’ve omitted this output for brevity)</li>
+  <li>When the LLM calls <code>llm_query</code> (highlighted in blue) in the REPL, it’s tasking another LLM instance with a sub-call. It stores the result of this function as a variable, usually.</li>
+  <li>On the last iteration, the LLM calls a special function <code>SUBMIT</code>, which indicates it has finished with the task.</li>
+</ul>
+
+<p>Click through and read, it really illuminates how a RLM works:</p>
+
+
+
+
+<p>We can clearly see the LLM exploring and sampling the context, planning an approach, testing the approach, scaling the approach, then finally synthesizing its findings into a final answer. (In this case, it was correct!)</p>
+
+<p>The context I gave this RLM – the collection of Stable Diffusion prompts – exceeds the maximum context window of any LLM. It would fail before it started, whereas a DSPy RLM harness around Kimi K2 took only a couple minutes.</p>
+
+<p>It’s incredible, but with this example we can identify a couple limitations of RLMs.</p>
+
+<p>First, it’s relatively slow. Answering this question took over a dozen LLM calls and several minutes. And we were using <a href="https://groq.com/blog/introducing-kimi-k2-0905-on-groqcloud">Kimi K2 on Groq</a>. Try this with GPT-5.3 or Opus 4.6 and you’ll be waiting around even longer.</p>
+
+<p>Second, as you read through the reasoning and code in the example above it becomes apparent that you need strong models to drive RLMs. <a href="https://huggingface.co/Qwen/Qwen3-30B-A3B">Qwen3-30B-A3B</a> couldn’t complete this task. It got confused, lost track of progress, and ended up running out of budget before submitting an answer<sup id="fnref:qwen"><a href="#fn:qwen" rel="footnote" role="doc-noteref">2</a></sup>.</p>
+
+<p>This brings us to the second reason RLMs work so well (in addition to maintaining the two <em>token</em> and <em>programmatic</em> context pools): RLMs exploit the coding reasoning gains of the last +18 months.</p>
+
+<p>We’ve covered before <a href="https://www.dbreunig.com/2024/12/18/synthetic-data-the-growing-ai-perception-divide.html">how LLMs are getting better at verifiable tasks because it’s relatively easy to synthesize data and evaluate verifiable tasks</a>, like math and coding. We’ve spent many billions of dollars post-training coding skills into frontier models. RLMs wrap long contexts in a coding environment so they’re addressable by the LLM’s incredible coding abilities, <em>turning context rot into a coding problem.</em></p>
+
+<p>Even better, RLMs get to use the REPL not just as a tool for exploring and managing long contexts, but also as a deterministic scratchpad. This proves to be a killer resource for many tasks. You occasionally see this benefit in action in ChatGPT or Claude, when the LLM will fire up a Python script to answer a question<sup id="fnref:python"><a href="#fn:python" rel="footnote" role="doc-noteref">3</a></sup>. This hybrid capability of RLMs – the ability to use probabilistic, fuzzy LLM logic for some challenges and deterministic code for others – will likely become a stronger attribute as RLM harnesses mature and models are fine-tuned.</p>
+
+<hr>
+
+<h3 id="the-potential-of-rlms-agent-discovery-mechanisms">The Potential of RLMs: Agent Discovery Mechanisms</h3>
+
+<p>The ability of RLMs to mitigate the effects of context rot are really incredible. However, this isn’t the potential that excites me most. What excites me about RLMs is their ability to explore, develop, and test approaches to solving a problem.</p>
+
+<p>If you start experimenting with RLMs (and I <em>strongly</em> suggest you should), be sure to continually review your traces. Set <code>verbose</code> to <code>true</code> and/or wire up DSPy to <a href="https://mlflow.org/">MLFlow</a>. As you watch these models explore the context and try out different approaches (taking your iteration budget into consideration<sup id="fnref:kimi"><a href="#fn:kimi" rel="footnote" role="doc-noteref">4</a></sup>), you’ll notice repeating patterns. In the example above, if I asked the RLM to find the top celebrities, aesthetic styles, or vehicles requested in the image generation prompts, it would repeatedly deploy similar tactics to situate itself and complete the task.</p>
+
+<p><em>There is no reason we can’t identify these repeating patterns, decompose them, and optimize them.</em></p>
+
+<p>This is what excites me about RLMs: if you run them on the same task several times, you’re generating emergent agent designs. These traces can then be used to explicitly define an agent, with higher reliability and lower latency. RLM passes discover the best approach to the problem, which we can then optimize.</p>
+
+<hr>
+
+<h3 id="the-limitations-of-rlms">The Limitations of RLMs</h3>
+
+<p>But if that’s the potential, how should you use RLMs today? In the last couple months I’ve seen teams use them for very large context scenarios, from general coding tasks across massive codebases to research and exploration across massive datasets.</p>
+
+<p>At the moment, using RLMs on small context problems probably isn’t worth the squeeze. You’ll end up waiting around while the RLM explores context that could have simply been part of the prompt.</p>
+
+<p>Further, RLMs do not solve other <a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">context fails</a>, like <em>context poisoning</em> or <em>context confusion</em>. If bad information is in your programmatic context, there’s good odds it could influence the RLM in undesirable ways.</p>
+
+<hr>
+
+<h3 id="the-next-chain-of-thought">The Next “Chain of Thought”?</h3>
+
+<p>RLMs are slow, synchronous, and merely borrowing the current capabilities of models rather than leveraging models post-trained to be <em>good</em> at RLM patterns. There is <em>so</em> much low-hanging fruit here.</p>
+
+<p>But that’s exactly what makes them exciting. <a href="https://www.dbreunig.com/2025/04/11/what-we-mean-when-we-say-think.html">Chain of thought</a> was also simple and general (just ask the model to “think step by step”) and it unlocked enormous latent potential in LLMs, that was only fully realized through the creation of reasoning models. RLMs have the same shape: a test-time strategy that’s easy to implement today and will only get better as models are trained to exploit it.</p>
+
+<p>You probably don’t need to rush out and refactor your agents today. But if your agents touch large contexts, start experimenting with RLM traces today. You’ll learn something about your problem…and you might discover your next agent architecture in the output.</p>
+
+<hr>
+
+
+
+<div role="doc-endnotes">
+  <ol>
+    <li id="fn:repl">
+      <p>“REPL” stands for “read-eval-print loop”. It is an interactive coding environment where one can enter arbitrary code and get back output. If you open your terminal and type <code>python</code>, you’ll find yourself in a REPL.&nbsp;<a href="#fnref:repl" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:qwen">
+      <p>The team at MIT behind RLM <a href="https://huggingface.co/mit-oasys/rlm-qwen3-8b-v0.1">has just released a version of Qwen3-8B post-trained on RLM traces</a>. I hear it works pretty well, but no amount of fine-tuning or RL is going to help Qwen-8B code or reason as well as GPT or Opus.&nbsp;<a href="#fnref:qwen" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:python">
+      <p>Both ChatGPT and Claude used to do this when asked, “How many R’s are in Strawberry,” though it appears both rely on reasoning or, in the case of ChatGPT, hide the previously visible Python code.&nbsp;<a href="#fnref:python" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:kimi">
+      <p>I was continually amazed how well models would leverage their budgets. Kimi, in particular, wasn’t shy about ending early if the task proved simple. But it would also spend LLM sub-calls freely once it had a working approach, saturating my connection with Groq.&nbsp;<a href="#fnref:kimi" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+  </div></div>

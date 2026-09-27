@@ -1,0 +1,144 @@
+<div id="readability-page-1" class="page"><div><p>Google's Gemma 4 family of open models is now available through the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api">Gemini API</a> and <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/prompts/new_chat?model=gemma-4-31b-it">Google AI Studio</a>. Built from the same research behind Gemini 3, these models bring advanced reasoning, native function calling, multimodal understanding, and 256K context windows to an open, Apache 2.0-licensed package you can run anywhere.</p>
+<p>Two models are available through the Gemini API today:</p>
+<ul>
+<li><code>gemma-4-26b-a4b-it</code></li>
+<li><code>gemma-4-31b-it</code></li>
+</ul>
+<h2 id="what-makes-gemma-4-different">What makes Gemma 4 different</h2>
+<p>Gemma 4 models handle function calling, structured JSON output, and system instructions at the model level rather than through prompt engineering. The 31B dense model currently ranks as the #3 open model on the Arena AI text leaderboard, with the 26B MoE model at #6, competing with models 20x their size.</p>
+<p>Key capabilities:</p>
+<ul>
+<li>256K context window on both models</li>
+<li>Native function calling and structured output</li>
+<li>Multimodal text, images, and video</li>
+<li>140+ languages trained natively</li>
+<li>Apache 2.0 license full commercial use, no restrictions</li>
+</ul>
+<h2 id="getting-started-with-ai-studio">Getting started with AI Studio</h2>
+<p>The fastest way to try Gemma 4 is <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/prompts/new_chat?model=gemma-4-31b-it">Google AI Studio</a>. Select <code>gemma-4-26b-a4b-it</code> or <code>gemma-4-31b-it</code> from the model picker, type a prompt, and start chatting. You can test system instructions, adjust temperature, and experiment with multimodal inputs all through the browser. No API key or code required.</p>
+<p>Or click <strong>Get Code</strong> to export Python, JavaScript, or cURL snippets from any conversation.</p>
+<h2 id="using-gemma-4-with-the-gemini-api">Using Gemma 4 with the Gemini API</h2>
+<p>Install the Python SDK:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">pip install google-genai</code></pre></div></figure>
+<p>Set your API key as an environment variable. You can create one at <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">export GEMINI_API_KEY="your-api-key"</code></pre></div></figure>
+<h3 id="text-generation">Text generation</h3>
+<p>Generate text with Gemma 4:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+client = genai.Client()
+ 
+response = client.models.generate_content(
+    model="gemma-4-26b-a4b-it",
+    contents="Compare ramen and udon in 3 bullet points: broth, noodle texture, and best season to eat."
+)
+print(response.text)</code></pre></div></figure>
+<p>Pass a system instruction to set the model's behavior:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+from google.genai import types
+ 
+client = genai.Client()
+ 
+response = client.models.generate_content(
+    model="gemma-4-31b-it",
+    config=types.GenerateContentConfig(
+        system_instruction="You are a wise Kyoto tea master. Speak calmly and poetically, using nature metaphors. Keep answers under 3 sentences."
+    ),
+    contents="What is the purpose of the tea ceremony?"
+)
+print(response.text)</code></pre></div></figure>
+<h3 id="multi-turn-conversations">Multi-turn conversations</h3>
+<p>The SDK provides a chat interface that tracks conversation history automatically:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+client = genai.Client()
+chat = client.chats.create(model="gemma-4-26b-a4b-it")
+ 
+response = chat.send_message("What are the three most famous castles in Japan?")
+print(response.text)
+ 
+response = chat.send_message("Which one should I visit in spring for cherry blossoms?")
+print(response.text)</code></pre></div></figure>
+<h3 id="image-understanding">Image understanding</h3>
+<p>Pass an image alongside your text prompt:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+from google.genai import types
+ 
+client = genai.Client()
+ 
+with open("path/to/image.png", "rb") as f:
+    image_bytes = f.read()
+ 
+response = client.models.generate_content(
+    model="gemma-4-26b-a4b-it",
+    contents=[
+        types.Part.from_bytes(data=image_bytes, mime_type="image/png"),
+        "Describe this image in 2-3 sentences as if writing a caption for a Japanese travel magazine."
+    ]
+)
+print(response.text)</code></pre></div></figure>
+<h3 id="function-calling">Function calling</h3>
+<p>Define tools as function declarations. The model decides when to call them:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+from google.genai import types
+ 
+# Define the function declaration
+get_weather = {
+    "name": "get_weather",
+    "description": "Get current weather for a given location.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "location": {
+                "type": "string",
+                "description": "City and state, e.g. 'San Francisco, CA'",
+            },
+        },
+        "required": ["location"],
+    },
+}
+ 
+client = genai.Client()
+tools = types.Tool(function_declarations=[get_weather])
+config = types.GenerateContentConfig(tools=[tools])
+ 
+response = client.models.generate_content(
+    model="gemma-4-26b-a4b-it",
+    contents="Should I bring an umbrella to Kyoto today?",
+    config=config,
+)
+ 
+# The model returns a function call instead of text
+if response.candidates[0].content.parts[0].function_call:
+    fc = response.candidates[0].content.parts[0].function_call
+    print(f"Function: {fc.name}")
+    print(f"Arguments: {fc.args}")</code></pre></div></figure>
+<h3 id="google-search">Google Search</h3>
+<p>Ground Gemma 4 responses in real-time web data with Google Search:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+from google.genai import types
+ 
+client = genai.Client()
+ 
+response = client.models.generate_content(
+    model="gemma-4-26b-a4b-it",
+    contents="What are the dates for cherry blossom season in Tokyo this year?",
+    config=types.GenerateContentConfig(
+        tools=[{"google_search":{}}]
+    ),
+)
+ 
+print(response.text)
+ 
+# Access grounding metadata for citations
+for chunk in response.candidates[0].grounding_metadata.grounding_chunks:
+    print(f"Source: {chunk.web.title} — {chunk.web.uri}")</code></pre></div></figure>
+<h2 id="where-to-go-next">Where to go next</h2>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com">Google AI Studio</a> — Try Gemma 4 in the browser</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs">Gemini API documentation</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemma/docs">Gemma Documentation</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemma/cookbook">Gemma Cookbooks</a></li>
+</ul>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

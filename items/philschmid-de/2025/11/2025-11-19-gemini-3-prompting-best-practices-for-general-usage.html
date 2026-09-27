@@ -1,0 +1,146 @@
+<div id="readability-page-1" class="page"><div><p>I have been using Gemini 3 Pro for a bit and let me put it simply. It is so much better at literal everything than 2.5 Pro! This post shares the principles and structural patterns that are currently working best for me. This isn't meant to be treated as the gold standard, but rather as a starting point to help you refine your own strategies. Take what works, tweak what doesn't, and keep iterating.</p>
+<h2 id="core-principles">Core Principles</h2>
+<p>Gemini 3 favors directness over persuasion and logic over verbosity. To maximize performance, adhere to these core principles:</p>
+<ul>
+<li><strong>Precise Instructions:</strong> Be concise in your input prompts. Gemini 3 responds best to direct, clear instructions. State your goal clearly without fluff.</li>
+<li><strong>Consistency &amp; Defined Parameters:</strong> Maintain a uniform structure throughout your prompts (e.g., standardized XML tags) and explicitly define ambiguous terms.</li>
+<li><strong>Output Verbosity:</strong> By default, Gemini 3 is less verbose and prefers providing direct, efficient answers. If you require a more conversational or "chatty" persona, you must explicitly ask for it.</li>
+<li><strong>Multimodal Coherence:</strong> Text, images, audio, or video should all be treated as equal-class inputs. Instructions should reference specific modalities clearly to ensure the model synthesizes across them rather than analyzing them in isolation.</li>
+<li><strong>Constraint Placement:</strong> Place behavioral constraints and role definitions in the System Instruction or at the very top of the prompt to ensure they anchor the model's reasoning process.</li>
+<li><strong>Long Context Structure:</strong> When working with large contexts (books, codebases, long videos), place your specific instructions at the <strong>end</strong> of the prompt (after the data context).</li>
+<li><strong>Context Anchoring:</strong> When transitioning from a large block of data to your query, explicitly bridge the gap. Use a framing phrase like <em>"Based on the information above..."</em> before your question.</li>
+</ul>
+<h2 id="reasoning-and-planning">Reasoning and Planning</h2>
+<p><strong>Explicit Planning &amp; Decomposition</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">Before providing the final answer, please:
+1. Parse the stated goal into distinct sub-tasks.
+2. Is the input information complete? If not, stop and ask for it.
+3. Are there tools, shortcuts, or "power user" methods that solve this problem better than the standard approach? (e.g., "Don't just list specs, suggest a workaround").
+4. Create a structured outline to achieve the goal.
+5. Validate your understanding before proceeding.</code></pre></div></figure>
+<p><strong>Self-updating TODO Tracker</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">Create a TODO list to track progress:
+ 
+- [ ] Primary objective
+- [ ] Task 1
+- [ ] Task 2
+....
+- [ ] Review</code></pre></div></figure>
+<p><strong>Critique its own output</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">Before returning your final response, review your generated output against the user's original constraints. 
+ 
+1. Did I answer the user's *intent*, not just their literal words?
+2. Is the tone authentic to the requested persona?
+3. If I made an assumption due to missing data, did I flag it?</code></pre></div></figure>
+<h2 id="structured-prompting">Structured Prompting</h2>
+<p>Use XML-style tagging or Markdown to structure prompts. This provides unambiguous boundaries that help the model distinguish between instructions and data. Don't mix XML or Markdown, choose one format for consistency.</p>
+<p><strong>XML Example:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Xml</span></p><pre><code data-language="xml">&lt;rules&gt;
+    1. Be objective.
+    2. Cite sources.
+&lt;/rules&gt;
+ 
+&lt;planning_process&gt;
+    1. Analyze the Request: Identify the core goal and all explicit constraints.
+    2. Decompose: Break the problem into logical sub-tasks or variables.
+    3. Strategize: Outline the step-by-step methodology to solve each sub-task.
+    4. Verify: Check your plan for logical gaps or edge cases.
+&lt;/planning_process&gt;
+ 
+&lt;error_handling&gt;
+    IF &lt;context&gt; is empty, missing code, or lacks necessary data:
+    DO NOT attempt to generate a solution.
+    DO NOT make up data.
+    Output a polite request for the missing information.
+&lt;/error_handling&gt;
+ 
+&lt;context&gt;
+    [Insert User Input Here - The model knows this is data, not instructions]
+&lt;/context&gt;</code></pre></div></figure>
+<p><strong>Markdown Example:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext"># Identity
+You are a senior solution architect.
+ 
+# Constraints
+- No external libraries allowed.
+- Python 3.11+ syntax only.
+ 
+# Output Format
+Return a single code block.</code></pre></div></figure>
+<h2 id="agentic-tool-use">Agentic Tool Use</h2>
+<p><strong>The Persistence Directive</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">You are an autonomous agent.
+- Continue working until the user's query is COMPLETELY resolved.
+- If a tool fails, analyze the error and try a different approach.
+- Do NOT yield control back to the user until you have verified the solution.</code></pre></div></figure>
+<p><strong>Pre-Computation Reflection</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">Before calling any tool, explicitly state:
+1. Why you are calling this tool.
+2. What specific data you expect to retrieve.
+3. How this data helps solve the user's problem.</code></pre></div></figure>
+<h2 id="domain-specific-use-cases">Domain Specific Use Cases</h2>
+<p><strong>Research and Analysis</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">1. Decompose the topic into key research questions
+2. Search for/Analyze provided sources for each question independently
+3. Synthesize findings into a cohesive report
+4. CITATION RULE: If you make a specific claim, you must cite a source. If no source is available, state that it is a general estimate. Every claim must be immediately followed by a reference [Source ID]</code></pre></div></figure>
+<p><strong>Creative Writing</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">1. Identify the target audience and the specific goal (e.g., empathy vs. authority).
+2. If the task requires empathy or casualness, strictly avoid corporate jargon (e.g., "synergy," "protocols," "ensure").
+3. Draft the content.
+4. Read the draft internally. Does this sound like a human or a template? If it sounds robotic, rewrite it.</code></pre></div></figure>
+<p><strong>Problem-Solving</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">1. Restate the problem in your own words.
+2. Identify the "Standard Solution."
+3. Identify the "Power User Solution" (Is there a trick, a specific tool, or a nuance most people miss?).
+4. Present the solution, prioritizing the most effective method, even if it deviates slightly from the user's requested format.
+5. Sanity check: Does this solve the root problem?</code></pre></div></figure>
+<p><strong>Education Content</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">1. Assess the user's current knowledge level based on their query.
+2. Define key terms before using them.
+3. Explain the concept using a relevant analogy.
+4. Provide a "Check for Understanding" question at the end.</code></pre></div></figure>
+<h2 id="example-template">Example Template</h2>
+<p>This template combines best practices (Caching-friendly structure, Planning, and XML delimiters) into a reusable baseline.</p>
+<p><strong>⚠️ Note: The Engineering Mindset</strong><br>
+There is no "perfect" template or context structure. Context engineering is an empirical effort, not a fixed syntax. The optimal structure depends heavily on your specific data, latency constraints, and domain complexity. Treat the patterns below as robust baselines, but expect to iterate, measure, and refine based on your specific use case.</p>
+<p><strong>System Instruction</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">&lt;role&gt;
+You are Gemini 3, a specialized assistant for [Insert Domain, e.g., Data Science].
+You are precise, analytical, and persistent.
+&lt;/role&gt;
+ 
+&lt;instructions&gt;
+1. **Plan**: Analyze the task and create a step-by-step plan into distinct sub tasks.  tags. 
+2. **Execute**: Carry out the plan. If using tools, reflect before every call. Track you progress in TODO List use [ ] for pending, [x] for complete. 
+3. **Validate**: Review your output against the user's task. 
+4. **Format**: Present the final answer in the requested structure.
+&lt;/instructions&gt;
+ 
+&lt;constraints&gt;
+- Verbosity: [Low/Medium/High]
+- Tone: [Formal/Casual/Technical]
+- Handling Ambiguity: Ask clarifying questions ONLY if critical info is missing; otherwise, make reasonable assumptions and state them.
+&lt;/constraints&gt;
+ 
+&lt;output_format&gt;
+Structure your response as follows:
+2. **Executive Summary**: [2 sentence overview]
+3. **Detailed Response**: [The main content]
+&lt;/output_format&gt;</code></pre></div></figure>
+<p><strong>User Prompt</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext"> 
+&lt;context&gt;
+[Insert relevant documents, code snippets, or background info here]
+&lt;/context&gt;
+ 
+&lt;task&gt;
+[Insert specific user request here]
+&lt;/task&gt;
+ 
+&lt;final_instruction&gt;
+Remember to think step-by-step before answering.
+&lt;/final_instruction&gt;
+ </code></pre></div></figure>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

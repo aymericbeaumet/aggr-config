@@ -1,0 +1,594 @@
+<div id="readability-page-1" class="page"><div>
+      <p>
+        Yesterday I was forwarded a bunch of messages that Prof. Ben Zhao
+        (a computer science professor
+        <span id="footnote1">
+          <a href="#footnote1">
+            <label for="foot">[a]</label>
+          </a>
+          <span>
+            A full professor with tenure, so I feel entirely within my rights to call him out here.
+          </span>
+        </span>
+        at the University of Chicago) wrote about me on a public Discord server with 15,000 members, including this gem:
+      </p>
+
+      <p>
+        <img src="https://nicholas.carlini.com/writing/2024/motivation.png">
+      </p>
+
+      <p>
+        Now I'll be the first to admit it: I study how to attack systems
+        not because I'm driven by some fundamental desire to “do good”,
+        but because it's what I enjoy and find interesting and exciting.
+        Some people in the world are motivated by doing good;
+        they become public defenders, or work at homeless shelters, or care for the elderly,
+        and are better people than you or me.
+        But I'm motivated by solving puzzles, and so that's what I do.
+        
+      </p>
+
+      <p>
+        So I thought that, in this post, I would explain why I write attack papers that expose security vulnerabilities.
+        Because you can have fun writing attack papers and still also <i>“give a shit about people”</i>.
+      </p>
+
+      <br>
+      <h2>
+        The Spectrum of Attacks
+      </h2>
+
+      <p>
+        Before I start responding to this message,
+        I need to start with some background.
+      </p>
+      
+      <p>
+        All security vulnerabilities lie on a spectrum of how hard they are to resolve.
+        On one end, there are vulnerabilities that are easily patched, and on the other side, are those that are not.
+        Whenever doing security research, it's important to understand which you are dealing with. Here's a handy visual aid I drew:
+        <span id="footnote1">
+          <a href="#footnote1">
+            <label for="foot">[b]</label>
+          </a>
+          <span>
+            What? You don't like my MS Paint skills?
+          </span>
+        </span>
+      </p>
+
+      <p>
+        <img src="https://nicholas.carlini.com/writing/2024/spectrum.png">
+      </p>
+      
+      <h3>
+        Patchable vulnerabilities
+      </h3>
+      
+      <p>
+        A vulnerability is patchable if the people who built the system can fix it,
+        and in fixing it, can prevent the exploitation of the system.
+      </p>
+
+      <p>
+        The classical example of this is a web server with some vulnerability---say,
+        a <a href="https://en.wikipedia.org/wiki/SQL_injection">SQL injection</a> vulnerability or
+        <a href="https://en.wikipedia.org/wiki/Cross-site_scripting">XSS</a> vulnerability.
+        Once someone has shown the web server is vulnerable to this attack and notifies
+        the developers, it's basically trivial to roll out a fix and prevent any future
+        exploitation of the system.
+        You don't have to wait for users to update their software,
+        you just push it to production.
+        And the fact that the system <i>was</i> vulnerable can't impact
+        anyone else in the future.
+      </p>
+
+      <p>
+        And so for vulnerabilities like this, it makes complete sense to give the
+        developers time to fix the vulnerability before going public.
+      </p>
+
+      <h3>
+        Unpatchable vulnerabilities
+      </h3>
+
+      <p>
+        A vulnerability is basically unpatchable if there's nothing that
+        you can do to prevent its exploitation. The most extreme example
+        of this would be an exploit on one of the foundational cryptographic
+        primitives that we take for granted, like AES or RSA.
+      </p>
+
+      <p>
+        If someone found a way to decrypt AES or RSA-encrypted messages,
+        sure you could “patch” the vulnerability by creating AES “2.0” or switching to another non-broken cipher.
+        But there are probably petabytes of data out there already on the Internet
+        that are encrypted with AES. Anyone who had downloaded any of these
+        encrypted files could now decrypt them.
+        And so these vulnerabilities, while from one view are “patchable”,
+        aren't actually.
+      </p>
+
+      <p>
+        This means that for vulnerabilities like this, it makes sense to go public
+        immediately. Because basically all of the damage that can be cause
+        already has been: waiting to disclose is only going to mean more people
+        will become impacted as they use the vulnerable system.
+        Sure you might want to find the most high profile targets to disclose to
+        and give a heads up, but it's important to go public quickly.
+      </p>
+
+      <h3>
+        Why does the spectrum matter?
+      </h3>
+
+      <p>
+        Identifying where a given vulnerability lies on the spectrum is important
+        because it helps to determine <i>how</i> you should disclose the vulnerability.
+        <span id="footnote1">
+          <a href="#footnote1">
+            <label for="foot">[c]</label>
+          </a>
+          <span>
+            Of course there are other considerations. If publishing your exploit would
+            literally cause someone else to be murdered, maybe you shouldn't.
+            But what if not publishing it could cause five more people to be murdered in the future?
+            Now we have ourselves a proper trolley problem.
+            Things are always going to be fuzzy in the real world,
+            and in this post I'm going to focus on this one aspect which will become
+            important later.
+          </span>
+        </span>
+      </p>
+
+      <p>
+        As I've discussed above, the more patchable a vulnerability is, the more you should favor giving
+        the system owners time to fix the vulnerability before going public.
+      </p>
+
+      <p>
+        On the other hand, the <i>less</i> patchable a vulnerability is,
+        the more you should favor going public immediately---because what
+        good does it do to disclose the vulnerability to only a few people
+        if they're not going to be able to do anything about it?
+      </p>
+
+      
+      <br>
+      <h2>
+        How I handle disclosing attacks
+      </h2>
+
+      <p>
+        Okay so that's some general discussion around vulnerabilities.
+        Let me now talk about specific case studies for how I've handled
+        various vulnerabilities I've found.
+        Since I've spent basically all of my adult life finding vulnerabilities in
+        computer systems, I've decided to pick and choose a few examples I
+        think best explore how this is handled both in standard security,
+        but also how I try to apply it to ML security.
+      </p>
+
+      <h3>
+        Web application vulnerabilities
+      </h3>
+
+      <p>
+        The early 2010s were a great time to attack web applications.
+        Everything was moving online, but no one knew how to secure anything.
+        Over a period of a few years, I found easily a hundred XSS/CSRF/SQLi
+        vulnerabilities in web applications.
+        In fact, the front page of my web-site used to lead with the sentence
+        <i>“I occasionally look for vulnerabilities in websites. (There’s a reasonable chance if you’ve found this site, it’s because of that.)”</i>
+      </p>
+
+      <p>
+        And every time I did, I would report these vulnerabilities to the developers.
+        Then they'd fix it. Maybe I'd get a bug bounty.
+        And then I'd move on.
+        I wouldn't even go public with these, except in cases where it was on
+        some open source software and the developers wanted to create a CVE,
+        because there wasn't really anything to be learned by this specific exploit.
+      </p>
+
+      <h3>
+        Telebears: The Berkeley Enrollment System
+      </h3>
+
+      <p>
+        Let me give you one specific web application vulnerability I found that
+        required some more thought. It was one of the first vulnerabilities I found
+        and was my first experience with responsible disclosure.
+      </p>
+      
+      <p>
+        When I was a freshman at Berkeley,
+        I found a vulnerability in the tool that students would use to manage
+        their enrollment in the university.
+        This system did many things e.g., it managed your classes and would even let you
+        withdraw from the university.
+        I found a severe vulnerability that would let me make arbitrary changes to
+        any other student's enrollment status if they visited a webpage I controlled.
+      </p>
+
+      <p>
+        This was a <i>very</i> severe vulnerability. I could have caused massive
+        havoc.
+        Coupled with a vulnerability I found in the university's email client,
+        I could have sent an email to every student in the university so that,
+        upon opening the email, they would drop out of the university completely.
+      </p>
+
+      <p>
+        But it was also a very patchable attack: it was just a few XSS and CSRF vulnerabilities
+        that could be chained together.
+      </p>
+
+      <p>
+        Unfortunately, this tool was old. Very old.
+        (The system was called “Telebears” because it was a web front-end
+        from the before-times when you would have to call in to a phone system to
+        enroll in classes. And it had some quirks... Only a few hundred people could use the
+        system at once because that's how many phone lines they had.
+        Every Sunday the system would go down for twelve hours
+        because they would turn it all off and back on again.
+        You couldn't use the back button on your browser because state was
+        maintained by the server, from a time when you'd be keying numbers on a phone.)
+      </p>
+
+      <p>
+        This means that everyone who built it had long since left the university,
+        and there was no one who could fix it.
+        So what did I do?
+        I sat on the vulnerability. For four years I didn't go public with it.
+        (In fact, I think this is the first time I've ever mentioned it publicly.)
+      </p>
+
+      <p>
+        Why wait? Because (a) I knew that this attack would be trivial to
+        immediately exploit if I went public, (b) I knew it would take them a while to fix it, but
+        most importantly, (c) going public sooner wouldn't minimize the harm in any way.
+        It's not like students had a choice to stop using the system.
+        And it's not like other universities were in any danger of looking at
+        this system and saying “we should use that too!”
+        Waiting here was the safest option. And so I waited.
+      </p>
+
+      
+      <h3>
+        Attacks on Chrome extensions
+      </h3>
+
+      <p>
+        Let's now skip ahead a few years to the <a href="https://nicholas.carlini.com/papers/2012_usenix_chromeextensions.pdf">first research paper</a> I ever worked on.
+        With (who would later become) my PhD advisor,
+        we found that most of the most popular Chrome extensions were vulnerable
+        to a variety of attacks that could let us do very bad things.
+        Over half of the extensions we studied were vulnerable to attack,
+        impacting millions of users.
+      </p>
+
+      <p>
+        Again, we reported these vulnerabilities to the developers and let them fix the
+        specific attacks we found before going public with our paper.
+        But we did eventually go public with the paper,
+        because the <i>class</i> of vulnerabilities we found were not going to be
+        fixed by just fixing the specific attacks we found.
+      </p>
+
+      <p>
+        This is an important theme we'll return to again and again. When a vulnerability
+        is not just a single bug, but an instance of a new class of bugs,
+        it's important to go public with it so that others can learn from it and
+        not make the same mistakes in the future.
+      </p>
+
+      <h3>
+        ML Attacks
+      </h3>
+
+      <p>
+        Let's again skip forward in time.
+        This time to 2018 when I started attacking machine learning models.
+        Whereas before I was attacking standard security systems with well-defined
+        disclosure policies, now I was attacking systems a new field with no such policies.
+      </p>
+
+      <p>
+        And what set this field most significantly apart was the fact that no one was really
+        using machine learning models in 2018.
+        And so while we thought about the possibility for performing some kind of
+        responsible disclosure, we decided that there wouldn't be much of a benefit.
+        And so, except for notifying the authors of the models we attacked that their
+        models were vulnerable and making sure we hadn't made any errors in our papers,
+        we felt it was completely reasonable to go public with our attacks.
+        (And I don't think anyone has disagreed with us on this.)
+      </p>
+      
+      <h3>
+        Practical Poisoning Attacks
+      </h3>
+
+      <p>
+        But a lot has changed since 2018. Most importantly: machine learning models
+        are now used everywhere. And so that means that now, when we discover attacks,
+        we're considerably more careful about how we disclose them.
+      </p>
+
+      <p>
+        For example, earlier this year, at IEEE S&amp;P, I presented a
+        <a href="https://arxiv.org/abs/2302.10149">recent paper</a> of ours that shows
+        how to “poison” machine learning models in a way that is
+        practical and costs under a hundred dollars.
+      </p>
+
+      <p>
+        This attack worked by purchasing expired domains that hosted images
+        that were used to train machine learning models. We could then host
+        whatever malicious images we wanted on these domains, and then whenever
+        anyone trained a model using these images, they would be training
+        on our malicious images.
+      </p>
+
+      <p>
+        Before going public with this attack, we made sure to contact the people
+        who owned these datasets that linked to expired domains, and let them know
+        they should probably include integrity checks in their data pipelines.
+        And they did exactly that! They rolled out a fix before we went
+        public with our attack, minimizing the potential harms of doing this work.
+        (We also had an exploit on Wikipedia which we disclosed to them as well.)
+      </p>
+
+      <p>
+        But we felt strongly it was important to publicize this attack:
+        poisoning as a <i>category</i> of attacks wasn't going to be fixed by any one
+        person, and
+        we wanted to make sure that people were aware of the risks as early as possible.
+      </p>
+
+      <h3>
+        Practical Model Stealing
+      </h3>
+
+      <p>
+        In another <a href="https://arxiv.org/abs/2403.06634">recent paper</a> (that I will present at ICML next month), I showed how to
+        develop an attack that would let me steal (part) of a language model hosted
+        by another company. I used this attack to, e.g., steal part of OpenAI's
+        ChatGPT model for a few hundred dollars.
+      </p>
+
+      <p>
+        But because this attack was a vulnerability in the way some specific API
+        was implemented, I was able to contact OpenAI and they were able to roll
+        out a fix before we went public with the attack.
+      </p>
+
+      <p>
+        But again we definitely wanted to go public with this attack.
+        While it's true that it does pose some risk to a company's business,
+        the underlying vulnerability is a fairly simple consequence of (1) how
+        language models work, and (2) some facts about linear algebra.
+        Someone else was bound to be able to re-discover this attack, and if
+        we didn't go public with it, then the next person to discover it might
+        not be so nice and just sit on it to exploit it for their own gain.
+        (As it happens, someone else did discover this attack independently
+        and went public with it the week after we did.)
+      </p>
+
+
+      <h3>
+        Training data extraction attacks
+      </h3>
+
+      <p>
+        Finally, more broadly, a lot of my recent work has been focused on showing how to extract training
+        data from machine learning models. That is: you train a model on some private
+        dataset, release the model, and then I show how to recover some of the
+        original training data you used to train your model.
+      </p>
+
+      <p>
+        We basically go public with these attacks as soon as we find them,
+        because delaying the disclosure won't help anyone.
+        All that might happen is someone else might train another model on
+        sensitive data, and as a result expose more peoples' data.
+      </p>
+
+      <p>
+        The one exception to this is <a href="https://arxiv.org/abs/2311.17035">an attack we discovered on ChatGPT</a> that allowed us to
+        extract training data from the model. We reported this attack to OpenAI
+        and let them take a full 90 days to patch before we went public with exploit.
+        But again: the reason we did this is because patching was possible. The exploit
+        was on the API, which could be changed. And so by delaying we can reduce the
+        potential harm of the attack.
+      </p>
+
+      <p>
+        In contrast, when we find attacks on papers that propose privacy-preserving
+        encryption schemes, we go public with them as soon as we can.
+        This is because, like AES, there's nothing to patch.
+        As soon as someone releases an encrypted dataset, it's public forever---even if someone finds a way to break the encryption.
+        And because when the defense is created it had no users, every day we wait before
+        going public was another day that someone might have used the (broken) defense
+        and exposed their data.
+      </p>
+      
+
+      <h3>
+        Malaysia Government's Immigration System
+      </h3>
+
+      <p>
+        Incidentally, does anyone know how to get in touch with the Malaysian government?
+        I have a Moderate severity vulnerability in their passport/immigration system
+        that I've been sitting on for a few months because I can't find a way to
+        contact them, and it's definitely easily patchable so I'd like to disclose it.
+      </p>
+
+
+      <br>
+      <h2>
+        What is Ben going on about?
+      </h2>
+
+      <p>
+        To be clear, Ben's belief that I don't care about actually improving
+        security isn't recent. It's not like he woke up on the wrong side of the bed
+        and was grumpy that afternoon. He apparently actually believes it:
+        here's a quote I was sent of him saying basically the same thing last year as well:
+      </p>
+
+      <p>
+        <img src="https://nicholas.carlini.com/writing/2024/motivation2.png">
+      </p>
+      
+      <p>
+        So what's the context on this?
+        Ben's research group has published several defenses that I've broken.
+        And so I guess he's unhappy that I break his things.
+      </p>
+
+      <p>
+        Most recently, I helped write a paper that shows how to break his
+        <a href="https://arxiv.org/abs/2302.04222">Glaze</a>
+        defense that aims to protect artists from having their images used to
+        train machine learning models.
+      </p>
+
+      <p>
+        This is a noble goal. Unfortunately, the approach that Ben is taking is
+        fundamentally flawed. I'm not going to go into the details of the attack
+        here, because that's a story for another day. If you want to read the
+        paper, you can find it <a href="https://arxiv.org/abs/2406.12027">here</a>.
+      </p>
+
+      <p>
+        But the short version of the story is this:
+        Ben's idea is that artists should add some adversarial noise to their
+        images before releasing them to the public. This adversarial noise is
+        supposed to make it so that, if someone tries to train a machine learning
+        model on these images, the model will be bad.
+      </p>
+
+      <p>
+        But the most important thing to notice with this defense is that it's
+        unpatchable in the same way that a break on AES would be unpatchable.
+        Once someone has published their adversarially noised images, they've
+        lost control of them---they can't update them after that.
+        And someone who wanted to train a model on these protected images
+        only needs to download a bunch of images all at once,
+        wait a few weeks or months for an attack on the defense,
+        and then can <i>retroactively</i> train a model on these images.
+      </p>
+
+      <p>
+        As it turns out, the attack is quite simple: it's not that hard to remove this
+        adversarial noise through various techniques,
+        and then, you can train a good model on these images.
+        This makes the any exploit on the defense violate the security of everyone
+        who has uploaded their images up to this point.
+      </p>
+
+      <p>
+        Sure, a future (second) version of the defense might prevent this attack---but
+        the damage has already been done for everyone who published their images
+        with the first version of the defense. You can't patch the images that have
+        already been released.
+      </p>
+
+      <p>
+        What this means is that it is strictly better to publish the attack on
+        this defense <i>as early as possible</i>.
+        We did provide Ben's group with an initial draft of the paper to make sure
+        they could check any errors in our work, but it doesn't make sense to
+        wait for a patch in the same way as it would be for the other cases
+        I've discussed above.
+        Every day we wait to publish the attack is another day that someone
+        might publish more of their images with this defense, and then be
+        vulnerable to attack later.
+      </p>
+
+
+      <br>
+      <h2>
+        Why I attack, then
+      </h2>
+
+      <p>
+        As I said at the top, I mainly attack systems because it's fun.
+        I enjoy solving puzzles, and a defense is just a puzzle waiting to be solved.
+      </p>
+
+      <p>
+        And, for some reason, I seem to be one of the few people who really wants to
+        spend time breaking things. (If you look at adversarial examples, for instance,
+        I've coauthored more attacks on adversarial example defenses than the rest of the community combined.)
+        It may be true that attacking things is easier than defending them,
+        but if no one else is going to attack then I'll be happy to be the one who does.
+      </p>
+
+      <p>
+        But I also attack systems because
+        you can't fix something if you don't know it's broken,
+        and so someone needs to show what's broken.
+      </p>
+
+      <p>
+        <b>And here's where it really comes down to why I attack things:
+          because I think it's important work to do.</b>
+        If you can find something that (a) you're interested in and (b) is important to do,
+        you'll be far more productive than trying to force yourself into
+        doing something that you don't care about.
+        And this is something that I care about.
+      </p>
+
+      <p>
+        Philosophizing aside, let's get back to the paper at hand.
+        There is no single benchmark for security. You can't just
+        evaluate your defense on <i>“the attack benchmark”</i> and call it a day.
+        Because the only attack that matters is the one that's designed to
+        break your specific defense.
+        This means it's an important part of the research process to understand that
+        once you publish a defense paper, other people will try to break it.
+        Because it's exceptionally important that we know which defenses do and don't work in
+        this new machine learning era we're entering.
+      </p>
+
+      <p>
+        You won't always make friends by doing this.
+        Some people will take it personally when you break their defenses.
+        But that's okay; the people who are worth being friends with
+        won't mind, and will appreciate the work you're doing.
+      </p>
+
+      <p>
+        As a note, if you're someone who also enjoys solving puzzles, I'd encourage you to
+        also try your hand at breaking things. It's a lot of fun, and you'll learn
+        a lot about how systems work. (In fact, I'd say the best way to learn how
+        systems work is to try and break them. The only way you'll come up with
+        an exploit is by understanding the system better than the person who
+        built it in the first place! Because they (presumably) aren't aware of any
+        exploits, and so if you understand it less well, you won't find any either.)
+      </p>
+      
+      
+      <br>
+      <h2>
+        Conclusion
+      </h2>
+
+      <p>
+        So no, Ben, just because someone spends their days breaking things doesn't mean
+        they don't care about the impact of their work.
+        I, for one, spend <i>a lot</i> of time trying to minimize the damage that my
+        work may cause.
+      </p>
+
+      <p>
+        But sometimes the best thing to do is to just rip off the bandage.
+        When a vulnerability is so unpatchable that delaying disclosure
+        only increases the damage that will be done, it's better to just
+        go public.
+      </p>
+      
+    </div></div>

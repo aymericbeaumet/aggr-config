@@ -1,0 +1,54 @@
+<div id="readability-page-1" class="page"><div itemprop="articleBody">
+    <h3 id="the-best-way-to-define-a-harness-is-as-a-situated-agent">The best way to define a harness is as a “situated agent”</h3>
+
+<p><a href="https://x.com/hwchase17">Harrison Chase</a> once excitedly shared an insight that agents are comprised of 4 things: a system prompt, a planning tool, a file system, and subagents. In the year-plus since he said that, I think this remains largely true. (Though you might tweak it to have general tools, etc.)</p>
+
+<p>Lately, we’ve been experiencing a wave of <em>harnesses</em>. It seems like everyday a new coding harness lands. I’m sure we’ll see another few dozen before the month is out.</p>
+
+<p>Recently, there’s been:</p>
+
+<ul>
+  <li><a href="https://databricks.com/blog/introducing-omnigent-meta-harness-combine-control-and-share-your-agents">Omnigent</a> from Databricks, which is a “meta-harness” that calls out to Claude Code, Codex, Pi, and others.</li>
+  <li><a href="https://deepseek.com/harness/en">DeepSeek Harness</a> landed with the new DeepSeek V4-Pro, and is totally modular. Models, tools, skills, sessions, sandboxes, storage, loops, scheduling, and the UI are all swappable</li>
+  <li><a href="https://block.xyz/inside/introducing-buzz-where-humans-and-agents-work-together">Buzz</a> is Block’s new thing, and because it’s Jack Dorsey it’s a Nostr social network for agents and humans.</li>
+  <li><a href="https://qm.ycombinator.com">QM</a> from YCombinator gives us org-shaped scoping: each employee, Slack room, and project gets its own memory, files, credentials, permissions, schedules, and sandboxed execution.</li>
+  <li><a href="https://blog.cloudflare.com/agents-platform-flue-sdk">Flue</a> from CloudFlare uses a declarative pattern, which is pretty unique becaause it hides the loop from users.</li>
+  <li><a href="https://developer.meta.com/ai/products/muse-code/">Muse Code</a> from Meta, whose model, Muse Spark 1.2, was co-trained with the harness itself.</li>
+</ul>
+
+<p>And then there’s <a href="https://github.com/openclaw/openclaw">OpenClaw</a>, <a href="https://github.com/nanocoai/nanoclaw">NanoClaw</a>, <a href="https://github.com/NousResearch/hermes-agent">Hermes</a>, <a href="https://conductor.build/">Conductor</a>, <a href="https://github.com/PrimeIntellect-ai/prime-agent">Prime Agent</a>, and more.</p>
+
+<p>We’ve seen enough at this point that the common patterns are starting to emerge. Each brings something unique, but <em>they’re more alike than different</em>. And that’s great, because that lets us find the metapattern here. Which brings us back to “situated agents.”</p>
+
+<p>I like this framing. Harrison’s 4 elements of an agent remain – the system prompt, planning tool, file system, and subgents – describing the core loop. This is the core loop the developer controls with the keyboard. The <em>harness</em> manages everything beyond this, the world the developer sits within.</p>
+
+<p>Imagine the simplest coding agent, and you at the keys. Let’s slowly zoom out and consider all the elements <em>the harness</em> can manage:</p>
+
+<ol>
+  <li><strong>The Session:</strong> The current task and context, as both a trajectory and a durable, branchable log. You can zoom backwards, fork, and replay it.</li>
+  <li><strong>The Environment:</strong> The instance, defined as a sandbox, terminal, worktree, computer, and/or container.</li>
+  <li><strong>The Repo:</strong> The project. Versioned with Git, it contains your code, history, current work, <code>AGENTS.md</code>, guides, and hooks.</li>
+  <li><strong>Memory:</strong> The person’s predilections, accrued over time, managing progress and past decisions.</li>
+  <li><strong>Skills:</strong> The domain, artifacts describing reusable workflows or domain knowledge worth wielding in this situation.</li>
+  <li><strong>The Team:</strong> Your colleagues and counterparts. Shared rooms, shared traces, project tracking tools, issues, and bug reports.</li>
+  <li><strong>The Organization:</strong> The policies and audits, defined by legal, leadership, and procurement.</li>
+  <li><strong>The Model:</strong> The LLMs themselves, the common artifact shared by all. Stochastic blobs we all poke trying to evoke positive outcomes. Log or train on their quirks and adjust.</li>
+</ol>
+
+<p><em>As we move outward, each layer is used by more people and changed less often.</em></p>
+
+<p>Harnesses account for the above layers, fanning out from the agent, to determine what ends up in the context, how the loop runs, and what gets saved.</p>
+
+<p>With this wave of new harenesses, we’re seeing innovation around each layer. Buzz’s channels, Claude Tag, and others are experimenting with multiplayer agent environments. Omnigent’s policies manage what <em>can</em> happen in a given session, pushing down an organization’s requirements. And Meta trained Muse Spark to know it’s harness (<a href="https://www.dbreunig.com/2026/05/10/overfitting-the-harness.html">much like others</a>, they just don’t write about it…)</p>
+
+<p>The burst of harness innovation, I believe, isn’t going to slow because managing these layers is <em>much stickier</em> than less-situated agents. It’s trivial to jump from Claude Code to Codex when one tires of Opus’s writing, but if the entire org and team have already <em>set up</em> a system that manages <em>all of the above</em>, it’s really hard to shift.</p>
+
+<p>People at Cursor and Copilot are nodding right now, welcoming us all, wondering what took so long.</p>
+
+<p>It’s going to be funny if the network effects the AI labs have been searching for <em>end up looking just like the network effects of the SaaS era</em>. Coding harnesses, managing the environments <em>around</em> the agent, look a whole lot like the SaaS platforms of old.</p>
+
+<hr>
+
+
+
+  </div></div>

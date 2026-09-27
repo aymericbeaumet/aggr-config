@@ -1,0 +1,209 @@
+<div id="readability-page-1" class="page"><div><p>The Gemini Deep Research Agent autonomously plans, searches, and synthesizes long-horizon research tasks into detailed, cited reports.</p>
+<p>Deep Research handles long-running tasks by executing in the background. It is exclusively available through the <strong>Interactions API</strong> (not <code>generate_content</code>).</p>
+<p>Two new versions are available:</p>
+<ul>
+<li><code>deep-research-preview-04-2026</code>: Designed for speed &amp; efficiency, ideal to be streamed back to a client UI</li>
+<li><code>deep-research-max-preview-04-2026</code>: Maximum comprehensiveness for automated context gathering &amp; synthesis</li>
+</ul>
+<h2 id="whats-new">What's new</h2>
+<ul>
+<li><strong>Collaborative planning:</strong> Review and refine the research plan before execution</li>
+<li><strong>Native charts &amp; infographics:</strong> Agent-generated charts, graphs, and infographics</li>
+<li><strong>Remote MCP server:</strong> Connect external tools via the Model Context Protocol</li>
+<li><strong>Extended tooling:</strong> Google Search, URL Context, Code Execution, MCP, and File Search</li>
+<li><strong>Multimodal research grounding:</strong> Pass images, PDFs, and audio as research context</li>
+</ul>
+<h2 id="setup">Setup</h2>
+<p>Install the Python SDK:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Shell</span></p><pre><code data-language="shell">pip install google-genai</code></pre></div></figure>
+<p>Set your API key as an environment variable. You can create one at <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Shell</span></p><pre><code data-language="shell">export GEMINI_API_KEY="your-api-key"</code></pre></div></figure>
+<h2 id="run-your-first-deep-research-task">Run your first Deep Research task</h2>
+<p>Start a research task with <code>background=True</code> and poll for the result. Deep Research is asynchronous as tasks can take several minutes to complete.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">import time
+from google import genai
+ 
+client = genai.Client()
+ 
+interaction = client.interactions.create(
+    input="Research the history of Google TPUs.",
+    agent="deep-research-preview-04-2026",
+    background=True,
+)
+ 
+while True:
+    interaction = client.interactions.get(interaction.id)
+    if interaction.status == "completed":
+        print(interaction.outputs[-1].text)
+        break
+    elif interaction.status == "failed":
+        print(f"Research failed: {interaction.error}")
+        break
+    time.sleep(10)</code></pre></div></figure>
+<h2 id="collaborative-planning">Collaborative planning</h2>
+<p>Set <code>collaborative_planning=True</code> to get a research plan back instead of running immediately. Iterate on the plan with <code>previous_interaction_id</code>, then set <code>collaborative_planning=False</code> to execute.</p>
+<p>Step 1: Request a plan</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">import time
+from google import genai
+ 
+client = genai.Client()
+ 
+plan = client.interactions.create(
+    agent="deep-research-preview-04-2026",
+    input="Research Google TPUs vs competitor hardware.",
+    agent_config={"type": "deep-research", "collaborative_planning": True},
+    background=True,
+)
+ 
+while (result := client.interactions.get(id=plan.id)).status != "completed":
+    time.sleep(5)
+ 
+print(result.outputs[-1].text)</code></pre></div></figure>
+<p><strong>Refine the plan:</strong> Use <code>previous_interaction_id</code> to continue the conversation. Keep <code>collaborative_planning=True</code> to stay in planning mode. Repeat as needed.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">refined = client.interactions.create(
+    agent="deep-research-preview-04-2026",
+    input="Add a section comparing power efficiency.",
+    agent_config={"type": "deep-research", "collaborative_planning": True},
+    previous_interaction_id=plan.id,
+    background=True,
+)
+ 
+while (result := client.interactions.get(id=refined.id)).status != "completed":
+    time.sleep(5)
+ 
+print(result.outputs[-1].text)</code></pre></div></figure>
+<p><strong>Approve and execute:</strong> Set <code>collaborative_planning=False</code> to approve the plan and start the research.</p>
+<p><strong>Important:</strong> You must explicitly set <code>collaborative_planning=False</code> on the final turn. Simply sending "go ahead" without flipping the flag will not trigger report generation.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">report = client.interactions.create(
+    agent="deep-research-preview-04-2026",
+    input="Plan looks good!",
+    agent_config={"type": "deep-research", "collaborative_planning": False},
+    previous_interaction_id=refined.id,
+    background=True,
+)
+ 
+while (result := client.interactions.get(id=report.id)).status != "completed":
+    time.sleep(5)
+ 
+print(result.outputs[-1].text)</code></pre></div></figure>
+<h2 id="native-charts-and-infographics">Native charts and infographics</h2>
+<p>Set <code>visualization="auto"</code> and ask for visuals in your prompt. The agent generates charts and infographics returned as base64-encoded images.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">import base64
+from google import genai
+ 
+client = genai.Client()
+ 
+interaction = client.interactions.create(
+    agent="deep-research-preview-04-2026",
+    input="Analyze global semiconductor market trends. Include charts showing market share changes.",
+    agent_config={"type": "deep-research", "visualization": "auto"},
+    background=True,
+)
+ 
+while (result := client.interactions.get(id=interaction.id)).status != "completed":
+    time.sleep(5)
+ 
+for output in result.outputs:
+    if output.type == "text":
+        print(output.text)
+    elif output.type == "image" and output.data:
+        image_bytes = base64.b64decode(output.data)
+        # display(Image(data=image_bytes))  # Jupyter</code></pre></div></figure>
+<p><strong>Tip:</strong> Setting <code>visualization="auto"</code> enables the capability, but best results are achieved by explicitly asking for what you want.</p>
+<h2 id="remote-mcp-servers">Remote MCP servers</h2>
+<p>Connect remote MCP servers to give the agent access to external tools. Pass the server <code>name</code>, <code>url</code>, and optional auth headers.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">interaction = client.interactions.create(
+    agent="deep-research-preview-04-2026",
+    input="Research how recent geopolitical events influenced USD interest rates",
+    tools=[
+        {
+            "type": "mcp_server",
+            "name": "Finance Data Provider",
+            "url": "https://finance.example.com/mcp",
+            "headers": {"Authorization": "Bearer my-token"},
+        }
+    ],
+    background=True,
+)</code></pre></div></figure>
+<p>MCP servers support no-auth, bearer token, and OAuth. For OAuth, fetch the token with a library like <code>google-auth</code> and pass it in <code>headers</code>. Use <code>allowed_tools</code> to restrict which tools the agent can call from the server.</p>
+<h2 id="tool-configuration">Tool configuration</h2>
+<p>By default the agent uses Google Search, URL Context, and Code Execution. You can customize the tools the agent can use by providing a list of <code>tools</code>, similar to models. This allows you to, for example, only search the web (via <code>google_search</code> and <code>url_context</code>), only search private sources (via <code>file_search</code> and custom MCP servers), or search a mix of both.</p>
+<div><table><thead><tr><th>Tool</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>Google Search</td><td><code>google_search</code></td><td>✅</td><td>Search the public web</td></tr><tr><td>URL Context</td><td><code>url_context</code></td><td>✅</td><td>Read and summarize web pages</td></tr><tr><td>Code Execution</td><td><code>code_execution</code></td><td>✅</td><td>Run code for calculations and data analysis</td></tr><tr><td>MCP Server</td><td><code>mcp_server</code></td><td>—</td><td>Connect remote MCP servers</td></tr><tr><td>File Search</td><td><code>file_search</code></td><td>—</td><td>Search uploaded document corpora</td></tr></tbody></table></div>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py"># Only web search allowed
+interaction = client.interactions.create(
+    agent="deep-research-preview-04-2026",
+    input="Latest developments in quantum computing.",
+    tools=[{"type": "google_search"}],
+    background=True,
+)</code></pre></div></figure>
+<p><strong>Note:</strong> Passing no <code>tools</code> at all defaults to Search, URL Context, and Code Execution enabled.</p>
+<h2 id="multimodal-research-grounding">Multimodal research grounding</h2>
+<p>Pass images, PDFs, and documents alongside your text prompt to ground the research.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">interaction = client.interactions.create(
+    agent="deep-research-preview-04-2026",
+    input=[
+        {"type": "text", "text": "What has been the impact of this research paper?"},
+        {"type": "document", "uri": "https://arxiv.org/pdf/1706.03762", "mime_type": "application/pdf"},
+    ],
+    background=True,
+)</code></pre></div></figure>
+<h2 id="real-time-streaming-with-visuals-and-thought-summaries">Real-time streaming with visuals and thought summaries</h2>
+<p>Stream research progress in real time. Enable <code>thinking_summaries="auto"</code> to receive the agent's intermediate reasoning alongside text and generated images.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">import base64
+from google import genai
+from IPython.display import Image, display
+ 
+client = genai.Client()
+ 
+interaction_id = None
+last_event_id = None
+is_complete = False
+ 
+def process_stream(stream):
+    global interaction_id, last_event_id, is_complete
+    for chunk in stream:
+        if chunk.event_type == "interaction.start":
+            interaction_id = chunk.interaction.id
+        if chunk.event_id:
+            last_event_id = chunk.event_id
+        if chunk.event_type == "content.delta":
+            if chunk.delta.type == "text":
+                print(chunk.delta.text, end="", flush=True)
+            elif chunk.delta.type == "thought_summary":
+                print(f"\n💭 {chunk.delta.content.text}", flush=True)
+            elif chunk.delta.type == "image" and chunk.delta.data:
+                image_bytes = base64.b64decode(chunk.delta.data)
+                display(Image(data=image_bytes))
+        elif chunk.event_type in ("interaction.complete", "error"):
+            is_complete = True
+            if chunk.event_type == "interaction.complete":
+                print("\n✅ Research Complete")
+ 
+stream = client.interactions.create(
+    input="Research AI chip market trends. Include charts comparing vendors.",
+    agent="deep-research-preview-04-2026",
+    background=True,
+    stream=True,
+    agent_config={
+        "type": "deep-research",
+        "thinking_summaries": "auto",
+        "visualization": "auto",
+    },
+)
+process_stream(stream)
+ 
+# Reconnect if the connection drops
+while not is_complete and interaction_id:
+    status = client.interactions.get(interaction_id)
+    if status.status != "in_progress":
+        break
+    stream = client.interactions.get(
+        id=interaction_id, stream=True, last_event_id=last_event_id,
+    )
+    process_stream(stream)</code></pre></div></figure>
+<h2 id="where-to-go-next">Where to go next</h2>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/deep-research">Deep Research documentation</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com">Try Deep Research in Google AI Studio</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">Interactions API Documentation</a></li>
+</ul></div></div>

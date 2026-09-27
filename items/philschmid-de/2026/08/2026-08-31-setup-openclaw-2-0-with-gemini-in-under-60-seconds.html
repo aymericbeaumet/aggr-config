@@ -1,0 +1,84 @@
+<div id="readability-page-1" class="page"><div><p>Five commands, zero fluff: install OpenClaw 2.0 (<code>v2026.8.1</code>), link <a target="_blank" rel="noopener noreferrer" href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-3-7-flash/">Gemini 3.8 Flash</a>, our fastest (up to <a target="_blank" rel="noopener noreferrer" href="https://artificialanalysis.ai/#speed">+300 token/sec</a>) agentic model for coding and agents, and start chatting with live Google search grounding in under a minute.</p>
+<h2 id="what-is-openclaw-20">What is OpenClaw 2.0?</h2>
+<p><a target="_blank" rel="noopener noreferrer" href="https://openclaw.ai">OpenClaw</a> is a personal AI assistant that actually does things. It runs on your devices, in your chats, with your rules.</p>
+<ul>
+<li><strong>Chat from anywhere:</strong> Chat from the browser Control UI, Telegram, Discord, WhatsApp, or Slack.</li>
+<li><strong>Integrated tooling:</strong> Browser automation, terminal execution, filesystem access, and web search grounding.</li>
+<li><strong>Remember:</strong> Keeps memory across sessions so it knows your preferences, projects, and people.</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://openclaw.ai/blog/openclaw-2-accidentally">OpenClaw 2.0</a> (<code>v2026.8.1</code>) is the largest update yet: simpler install, a rebuilt browser app that opens straight into a conversation, and setup you can finish by talking to your Claw. Full notes: <a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/releases/2026.8.1">v2026.8.1</a>.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li><strong>Node.js:</strong> <code>Node 26</code> (recommended) or <code>Node 22.22.3+</code> / <code>24.15+</code> (<code>node --version</code>).</li>
+<li><strong>Gemini API Key:</strong> Grab a free key from <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/apikey">Google AI Studio</a>.</li>
+</ul>
+<h2 id="1-install-openclaw-20">1. Install OpenClaw 2.0</h2>
+<p>Install OpenClaw globally via npm:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">npm install -g openclaw@2026.8.1</code></pre></div></figure>
+<p>Verify your installation:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">openclaw --version
+# Output: OpenClaw 2026.8.1 (ea80657)</code></pre></div></figure>
+<h2 id="2-configure-gemini-authentication">2. Configure Gemini Authentication</h2>
+<p>Export your Gemini API key in your current shell:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">export GEMINI_API_KEY="your-gemini-api-key-here"</code></pre></div></figure>
+<p>To persist it into OpenClaw's local profile store:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">openclaw onboard --non-interactive --accept-risk --skip-health \
+  --mode local \
+  --auth-choice gemini-api-key \
+  --gemini-api-key "$GEMINI_API_KEY"</code></pre></div></figure>
+<p><em>(Note: You can safely ignore any onboarding tip about configuring a Brave API key—Gemini's built-in Google Search grounding is used automatically.)</em></p>
+<h2 id="3-set-gemini-38-flash-as-default">3. Set Gemini 3.8 Flash as Default</h2>
+<p>Set <strong>Gemini 3.8 Flash</strong> as the default agent model:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">openclaw models set google/gemini-3.8-flash</code></pre></div></figure>
+<p><em>(Note: If OpenClaw displays a warning that the model is not in the local catalog, it is safe to ignore. The model is dynamically resolved and validated against Google AI Studio in the next step.)</em></p>
+<p>Verify model discovery and authentication status:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">openclaw models list --provider google</code></pre></div></figure>
+<h2 id="4-test-inference-via-cli">4. Test Inference via CLI</h2>
+<p>Run a standalone agent turn in your terminal:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">openclaw agent --local --agent main --message "Hello! What model are you running?"</code></pre></div></figure>
+<p>Output:</p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="text">I am currently running on google/gemini-3.8-flash.
+What would you like to call me?</code></pre></div></figure>
+<p><img src="https://www.philschmid.de/static/blog/openclaw-v2-gemini/cli-setup.png" alt="OpenClaw CLI Setup"></p>
+<h2 id="5-start-the-gateway--launch-control-ui">5. Start the Gateway &amp; Launch Control UI</h2>
+<p>Set the gateway to local mode and start it:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">openclaw config set gateway.mode local
+openclaw gateway run</code></pre></div></figure>
+<p><em>(To run as a persistent background daemon instead: <code>openclaw gateway install &amp;&amp; openclaw gateway start</code>. To stop it: <code>openclaw gateway stop --force</code>)</em></p>
+<p>Open the Control UI in your browser:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">openclaw dashboard</code></pre></div></figure>
+<p>The browser will open to <code>http://127.0.0.1:18789/</code> authenticated with your local session token:</p>
+<p><img src="https://www.philschmid.de/static/blog/openclaw-v2-gemini/openclaw-control-ui.png" alt="OpenClaw Control UI with Gemini 3.8 Flash"></p>
+<h2 id="next-steps">Next Steps</h2>
+<h3 id="google-search-grounding-enabled-by-default">Google Search Grounding (Enabled by Default)</h3>
+<p>Google Search grounding is <strong>enabled by default</strong> when <code>GEMINI_API_KEY</code> is present. No extra configuration or search keys are required.</p>
+<ul>
+<li>Test it directly via CLI:
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">openclaw capability web search --query "Latest gemini models"</code></pre></div></figure>
+</li>
+<li>In chat sessions, Gemini autonomously runs web searches with citations whenever fresh context is needed.</li>
+</ul>
+<p><img src="https://www.philschmid.de/static/blog/openclaw-v2-gemini/openclaw-websearch.png" alt="Google Search Grounding in OpenClaw Control UI"></p>
+<ul>
+<li>See: <a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/tools/gemini-search">Google Search Grounding in OpenClaw</a></li>
+</ul>
+<h3 id="leveraging-other-gemini-capabilities">Leveraging Other Gemini Capabilities</h3>
+<ul>
+<li><strong><a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/tools/image-generation">Image Generation</a>:</strong> Set Google's image model using <code>openclaw models set-image google/gemini-3.1-flash-image</code>.</li>
+<li><strong><a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/tools/video-generation">Video Generation</a>:</strong> Generate 4–8s videos with <code>google/veo-3.1-fast-generate-preview</code>.</li>
+<li><strong><a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/tools/music-generation">Music Generation</a>:</strong> Prompt-driven music via <code>google/lyria-3-clip-preview</code>.</li>
+<li><strong><a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/providers/google#text-to-speech">Text-to-Speech</a>:</strong> Gemini batch TTS with natural language style prompting (<code>gemini-3.1-flash-tts-preview</code>).</li>
+<li><strong><a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/providers/google#realtime-voice">Realtime Voice</a>:</strong> Low-latency bidirectional voice streams via Gemini Live API (<code>gemini-3.1-flash-live-preview</code>).</li>
+</ul>
+<p>Full <a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/providers/google">Google Documentation</a>.</p>
+<h3 id="connecting-chat-channels">Connecting Chat Channels</h3>
+<p>Connect your Gemini assistant to your favorite messaging apps using simple CLI commands:</p>
+<ul>
+<li><strong>Browse all channels:</strong> <code>openclaw channels list --all</code></li>
+<li><strong>Interactive setup:</strong> <code>openclaw channels add</code></li>
+<li><strong>Telegram:</strong> <code>openclaw channels add --channel telegram --token "&lt;BOT_TOKEN&gt;"</code></li>
+<li><strong>WhatsApp (QR code):</strong> <code>openclaw channels login --channel whatsapp</code></li>
+<li><strong>Discord:</strong> <code>openclaw channels add --channel discord --token "&lt;BOT_TOKEN&gt;"</code></li>
+<li><strong>Verify channel status:</strong> <code>openclaw channels status --probe</code></li>
+</ul>
+<p>Full <a target="_blank" rel="noopener noreferrer" href="https://docs.openclaw.ai/channels">Chat Channels Documentation</a>.</p></div></div>

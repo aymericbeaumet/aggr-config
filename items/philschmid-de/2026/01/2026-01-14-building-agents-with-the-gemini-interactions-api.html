@@ -1,0 +1,265 @@
+<div id="readability-page-1" class="page"><div><blockquote>
+<p><strong>Alternative Version:</strong> This guide uses the <strong>Interactions API</strong> (Beta). For the <code>GenerateContent</code> API approach, see <a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/building-agents">Building Agents with Gemini 3</a>.</p>
+</blockquote>
+<p>It seems complicated, when you watch an AI agent edit multiple files, run commands, handle errors, and iteratively solve a problem, it feels like magic. But it isn't. The secret to building an agent is that there is no secret.</p>
+<p>The core of an Agent is surprisingly simple: It is a Large Language Model (LLM) running in a loop, equipped with tools it can choose to use.</p>
+<p>If you can write a loop in Python, you can build an agent. This guide walks you through building a CLI Agent using the <strong>Interactions API</strong>, which handles conversation state on the server so you don't have to.</p>
+<h2 id="what-actually-is-an-agent">What actually is an Agent?</h2>
+<p>Traditional software workflows are prescriptive and follow predefined paths (<code>Step A -&gt; Step B -&gt; Step C</code>), <strong>Agents</strong> are System that uses an LLM to dynamically decide the control flow of an application to achieve a user goal.</p>
+<p>An agent generally consists of these core components:</p>
+<ol>
+<li><strong>The Model (Brain):</strong> The reasoning engine, in our case a Gemini model. It reasons through ambiguity, plans steps, and decides when it needs outside help.</li>
+<li><strong>Tools (Hands and Eyes):</strong> Functions the agent can execute to interact with the outside world/environment (e.g., searching the web, reading a file, calling an API).</li>
+<li><strong>Context/Memory (Workspace):</strong> The information the agent has access to at any moment. Managing this effectively, known as <strong>Context Engineering</strong>.</li>
+<li><strong>The Loop (Life):</strong> A <code>while</code> loop that allows the model to: Observe → Think → Act → Observe again, until the task is complete.</li>
+</ol>
+<p><img src="https://www.philschmid.de/static/blog/building-agents/agent.png" alt="agent"></p>
+<p><strong>"The Loop"</strong> of nearly every agent is an iterative process:</p>
+<ol>
+<li><strong>Define Tool Definitions:</strong> You describe your available tools (e.g., <code>get_weather</code>) to the model using a structured format.</li>
+<li><strong>Call the LLM:</strong> You send the user's prompt <em>and</em> the tool definitions to the model.</li>
+<li><strong>Model Decision:</strong> The model analyzes the request. If a tool is needed, it returns a structured <code>tool use</code> containing the tool name and arguments.</li>
+<li><strong>Execute Tool (Client Responsibility):</strong> The client/application code intercepts this <code>tool use</code>, executes the actual code or API call, and captures the result.</li>
+<li><strong>Respond and Iterate:</strong> You send the result (the <code>tool response</code>) back to model. The model uses this new information to decide the next step, either calling another tool or generating the final response.</li>
+</ol>
+<p>The new <strong>Interactions API</strong> simplifies this loop by managing the conversation state on the server, so you don't have to manually track history.</p>
+<p><strong>Why Interactions API?</strong></p>
+<ul>
+<li><strong>Server-side state</strong>: Use <code>previous_interaction_id</code> instead of re-sending history</li>
+<li><strong>Automatic thought signatures</strong>: No manual management required</li>
+<li><strong>Unified interface</strong>: Same API for models and agents (like <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/deep-research">Deep Research</a>)</li>
+</ul>
+<p>Currently in Beta. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">official documentation</a> for details.</p>
+<h2 id="building-an-agent">Building an Agent</h2>
+<p>Let's build an agent step-by-step, progressing from basic text generation to a functional CLI agent using Gemini 3 Flash and the Interactions API.</p>
+<p><em>Prerequisites: Install the SDK (<code>pip install google-genai</code>) and set your <code>GEMINI_API_KEY</code> environment variable (<a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/app/apikey">Get it in AI Studio</a>).</em></p>
+<h3 id="step-1-basic-text-generation-and-abstraction">Step 1: Basic Text Generation and Abstraction</h3>
+<p>The first step is to create a baseline interaction with the LLM, for us Gemini 3 Flash. We are going to create a simple Agent class abstraction to structure our code, which we will extend throughout this guide. We will first start with a simple chatbot that maintains a conversation history using the Interactions API's server-side state.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+class Agent:
+    def __init__(self, model: str):
+        self.model = model
+        self.client = genai.Client()
+        self.last_interaction_id = None
+ 
+    def run(self, contents: str):
+        response = self.client.interactions.create(
+            model=self.model,
+            input=contents,
+            previous_interaction_id=self.last_interaction_id
+        )
+        self.last_interaction_id = response.id
+        return response
+ 
+agent = Agent(model="gemini-3-flash-preview")
+response1 = agent.run(
+    contents="Hello, What are top 3 cities in Germany to visit? Only return the names of the cities."
+)
+ 
+print(f"Model: {response1.outputs[-1].text}")
+# Output: Berlin, Munich, Cologne 
+response2 = agent.run(
+    contents="Tell me something about the second city."
+)
+ 
+print(f"Model: {response2.outputs[-1].text}")
+# Output: Munich is the capital of Bavaria and is known for its Oktoberfest.</code></pre></div></figure>
+<p>This is <em>not</em> an agent yet. It is a standard chatbot. It maintains state but cannot take action, has no "hands or eyes".</p>
+<h3 id="step-2-giving-it-hands--eyes-tool-use">Step 2: Giving it Hands &amp; Eyes (Tool Use)</h3>
+<p>To start turning this an agent, we need <strong>Tool Use</strong> or Function Calling. We provide the agent with tools. This requires defining the implementation (the Python code) and the definition (the schema the LLM sees). If the LLM believes that tool will help solve a user's prompt, it will return a structured request to call that function instead of just text.</p>
+<p>We are going to create 3 tools, <code>read_file</code>, <code>write_file</code>, and <code>list_dir</code>. A tool Definition is a JSON schema that defines the <code>name</code>, <code>description</code>, and <code>parameters</code> of the tool, wrapped in a structure the Interactions API understands.</p>
+<p><em><strong>Best Practice</strong>: Use the <code>description</code> fields to explain when and how to use the tool. The model relies heavily on these to understand when and how to use the tool. Be explicit and clear.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import os
+import json
+ 
+read_file_tool = {
+    "type": "function",
+    "name": "read_file",
+    "description": "Reads a file and returns its contents.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "file_path": {
+                "type": "string",
+                "description": "Path to the file to read.",
+            }
+        },
+        "required": ["file_path"],
+    },
+}
+ 
+list_dir_tool = {
+    "type": "function",
+    "name": "list_dir",
+    "description": "Lists the contents of a directory.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "directory_path": {
+                "type": "string",
+                "description": "Path to the directory to list.",
+            }
+        },
+        "required": ["directory_path"],
+    },
+}
+ 
+write_file_tool = {
+    "type": "function",
+    "name": "write_file",
+    "description": "Writes a file with the given contents.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "file_path": {
+                "type": "string",
+                "description": "Path to the file to write.",
+            },
+            "contents": {
+                "type": "string",
+                "description": "Contents to write to the file.",
+            },
+        },
+        "required": ["file_path", "contents"],
+    },
+}
+ 
+def read_file(file_path: str) -&gt; dict:
+    with open(file_path, "r") as f:
+        return f.read()
+ 
+def write_file(file_path: str, contents: str) -&gt; bool:
+    """Writes a file with the given contents."""
+    with open(file_path, "w") as f:
+        f.write(contents)
+    return True
+ 
+def list_dir(directory_path: str) -&gt; list[str]:
+    """Lists the contents of a directory."""
+    full_path = os.path.expanduser(directory_path)
+    return os.listdir(full_path)
+ 
+file_tools = {
+    "read_file": {"definition": read_file_tool, "function": read_file},
+    "write_file": {"definition": write_file_tool, "function": write_file},
+    "list_dir": {"definition": list_dir_tool, "function": list_dir},
+}</code></pre></div></figure>
+<p>Now we integrate the <code>tools</code> and function calls into our Agent class.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+class Agent:
+    def __init__(self, model: str, tools: dict):
+        self.model = model
+        self.client = genai.Client()
+        self.last_interaction_id = None
+        self.tools = tools
+ 
+    def run(self, contents: str):
+        response = self.client.interactions.create(
+            model=self.model,
+            input=contents,
+            tools=[tool["definition"] for tool in self.tools.values()],
+            previous_interaction_id=self.last_interaction_id
+        )
+        self.last_interaction_id = response.id
+        return response
+ 
+agent = Agent(model="gemini-3-flash-preview", tools=file_tools)
+ 
+response = agent.run(
+    contents="Can you list my files in the current directory?"
+)
+for output in response.outputs:
+    if output.type == "function_call":
+        print(f"Function call: {output.name} with arguments {output.arguments}")
+# Output: Function call: list_dir with arguments {'directory_path': '.'}</code></pre></div></figure>
+<p>Great! The model has successfully called the tool. Now, we need to add the tool execution logic to our Agent class and the loop return the result back to the model.</p>
+<h3 id="step-3-closing-the-loop-the-agent">Step 3: Closing the Loop (The Agent)</h3>
+<p>An Agent isn't about generating one tool call, but about generating a series of tool calls, returning the results back to the model, and then generating another tool call, and so on until the task is completed.</p>
+<p>The <code>Agent</code> class handles the core loop: intercepting the <code>function_call</code>, executing the tool on the client side, and sending back the <code>function_result</code> using the <code>previous_interaction_id</code> to maintain context. Instead of manually re-sending the entire conversation history, the Interactions API uses <code>previous_interaction_id</code> to chain interactions. The server maintains the context, so you only need to send new inputs (user messages or tool results).</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># ... Code for the tools and tool definitions from Step 2 should be here ...
+ 
+from google import genai
+ 
+class Agent:
+    def __init__(self, model: str, tools: dict, system_instruction: str = "You are a helpful assistant."):
+        self.model = model
+        self.client = genai.Client()
+        self.last_interaction_id = None
+        self.tools = tools
+        self.system_instruction = system_instruction
+ 
+    def run(self, contents: str | list):        
+        response = self.client.interactions.create(
+            model=self.model,
+            input=contents,
+            system_instruction=self.system_instruction,
+            tools=[tool["definition"] for tool in self.tools.values()],
+            previous_interaction_id=self.last_interaction_id
+        )
+        self.last_interaction_id = response.id
+ 
+        tool_results = []
+        for output in response.outputs:
+            if output.type == "function_call":
+                print(f"[Function Call] {output.name}({output.arguments})")
+                
+                if output.name in self.tools:
+                    result = self.tools[output.name]["function"](**output.arguments)
+                else:
+                    result = "Error: Tool not found"
+                
+                print(f"[Function Response] {result}")
+                tool_results.append({
+                    "type": "function_result",
+                    "call_id": output.id,
+                    "name": output.name,
+                    "result": str(result)
+                })
+        
+        # If there were tool calls, send results back to the model
+        if tool_results:
+            return self.run(tool_results)
+        
+        return response
+ 
+agent = Agent(
+    model="gemini-3-flash-preview", 
+    tools=file_tools, 
+    system_instruction="You are a helpful Coding Assistant. Respond like you are Linus Torvalds."
+)
+ 
+response = agent.run(
+    contents="Can you list my files in the current directory?"
+)
+print(response.outputs[-1].text)
+# Output: [Function Call] list_dir({'directory_path': '.'})
+# [Function Response] ['.venv', ... ]
+# There. Your current directory contains: `LICENSE`,</code></pre></div></figure>
+<p>Congratulations. You just built your first functioning agent using the Interactions API.</p>
+<h3 id="phase-4-multi-turn-cli-agent">Phase 4: Multi-turn CLI Agent</h3>
+<p>Now we can run our agent in a simple CLI loop. It takes surprisingly little code to create highly capable behavior.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># ... Code for the Agent, tools and tool definitions from Step 3 should be here ...
+ 
+agent = Agent(
+    model="gemini-3-flash-preview", 
+    tools=file_tools, 
+    system_instruction="You are a helpful Coding Assistant. Respond like you are Linus Torvalds."
+)
+ 
+print("Agent ready. Ask it to check files in this directory.")
+while True:
+    user_input = input("You: ")
+    if user_input.lower() in ['exit', 'quit']:
+        break
+ 
+    response = agent.run(user_input)
+    print(f"Linus: {response.outputs[-1].text}\n")</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>Building an agent is no longer magic; it is a practical engineering task. As we've shown, you can build a working prototype in under 100 lines of code.</p>
+<p>The <strong>Interactions API</strong> is designed to make agent development even simpler. Our goal is to provide a unified, developer-friendly interface that handles the complexity of state management, tool orchestration, and long-running tasks—so you can focus on building great agent experiences.</p>
+<p>We believe a cleaner, more consistent API foundation enables the broader ecosystem to thrive, and open source libraries, frameworks, and tooling can build more powerful abstractions on top. Making it easier for developers at every level to build with Gemini.</p>
+<p><strong>This API is in Beta, and we want your feedback!</strong> We're actively listening to developers to shape the future of this API. What features would help your agent workflows? What pain points are you experiencing? Let us know.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

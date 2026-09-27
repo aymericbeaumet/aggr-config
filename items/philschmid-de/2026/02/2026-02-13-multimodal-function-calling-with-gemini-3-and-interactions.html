@@ -1,0 +1,130 @@
+<div id="readability-page-1" class="page"><div><p>Building AI agents that can truly "see" requires more than just passing images in prompts. Coding agents need to read screenshots of UIs they're building. Computer use agents need to capture and analyze browser screenshots. Research agents need to process charts and diagrams from documents.</p>
+<p>Multimodal function calling allows tools to return images the model can process natively, similar to how you pass images in prompts. Instead of describing what's in a file, your tool returns the actual image and Gemini 3 processes it natively.</p>
+<p>This guide shows you how Multimodal Function Calling works using the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">Interactions API</a>. The Interactions API is a unified interface for interacting with Gemini models and agents. It simplifies state management and tool orchestration, making it easy to build multi-turn agentic workflows.</p>
+<p><img src="https://www.philschmid.de/static/blog/interactions-multimodal-fc/chart.png" alt="chart"></p>
+<p>The key difference from standard function calling is in the <code>function_result</code> returns the actual image data. Gemini 3 processes this content natively—describing images, analyzing documents, or using visual information to make decisions.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">{
+  "type": "function_result",
+  "call_id": "abc123",
+  "name": "read_image",
+  "result": [
+    {"type": "text", "text": "Additional context..."},
+    {"type": "image", "data": "&lt;base64&gt;", "mime_type": "image/png"}
+  ]
+}</code></pre></div></figure>
+<h2 id="example-reading-images-from-fileystem">Example: Reading images from Fileystem</h2>
+<p>Let's build a tool that reads images from disk and returns them to the model for description. Get a <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/apikey">Gemini API key</a> and install the Google GenAI SDK:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">pip install google-genai</code></pre></div></figure>
+<p>Set your API key:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">export GEMINI_API_KEY="your-api-key"</code></pre></div></figure>
+<h3 id="1-define-the-tool">1. Define the tool</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">read_image = {
+    "type": "function",
+    "name": "read_image",
+    "description": "Reads an image file from disk and returns its contents.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "path": {
+                "type": "string", 
+                "description": "The path to the image file to read"
+            }
+        },
+        "required": ["path"]
+    }
+}</code></pre></div></figure>
+<h3 id="2-implement-the-tool-execution">2. Implement the tool execution</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import base64
+from pathlib import Path
+ 
+def execute_read_image(path: str) -&gt; list[dict]:
+    """Read image from disk and return as function result content."""
+    image_path = Path(path)
+    
+    if not image_path.exists():
+        return [{"type": "text", "text": f"Error: Image not found at {path}"}]
+    
+    mime_types = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+    }
+    mime_type = mime_types.get(image_path.suffix.lower(), "image/png")
+    
+    image_data = base64.b64encode(image_path.read_bytes()).decode()
+    return [{"type": "image", "data": image_data, "mime_type": mime_type}]</code></pre></div></figure>
+<h3 id="3-create-the-agentic-loop">3. Create the agentic loop</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+client = genai.Client()
+ 
+image_path = "path/to/your/image.png"
+prompt=f"Use the read_image tool to read '{image_path}' and describe what you see."
+ 
+# Step 1: Send the initial request with our tool
+interaction = client.interactions.create(
+    model="gemini-3-flash-preview",
+    input=prompt,
+    tools=[read_image],
+)
+ 
+# Step 2: Handle the function call
+for output in interaction.outputs:
+    if output.type == "function_call" and output.name == "read_image":
+      
+        image_result = execute_read_image(output.arguments.get("path"))
+        
+        # Step 3: Send the image back to the model
+        interaction = client.interactions.create(
+            model="gemini-3-flash-preview",
+            input=[{
+                "type": "function_result",
+                "call_id": output.id,
+                "name": output.name,
+                "result": image_result,  # Contains the image!
+            }],
+            tools=[read_image],
+            previous_interaction_id=interaction.id,
+        )
+        
+        # Step 4: Get the model's description
+        for out in interaction.outputs:
+            if out.type == "text":
+                print(out.text)</code></pre></div></figure>
+<h2 id="concluding-how-it-works">Concluding how it works</h2>
+<p>The interaction flow has four steps:</p>
+<ol>
+<li><strong>User request</strong> → You send a prompt asking the model to use the tool</li>
+<li><strong>Function call</strong> → Model responds with a <code>function_call</code> specifying which tool to use and arguments</li>
+<li><strong>Tool execution</strong> → You execute the tool and return the result (including the image)</li>
+<li><strong>Model response</strong> → Model processes the image and generates a text description</li>
+</ol>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># The function_call output from the model looks like:
+{
+    "type": "function_call",
+    "id": "call_abc123",
+    "name": "read_image",
+    "arguments": {"path": "photo.jpg"}
+}
+ 
+# Your function_result response looks like:
+{
+    "type": "function_result",
+    "call_id": "call_abc123",
+    "name": "read_image",
+    "result": [
+        {"type": "image", "data": "iVBORw0KGgo...", "mime_type": "image/png"}
+    ]
+}</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>Multimodal function calling unlocks multimodal agentic use cases. By returning images directly in your <code>function_result</code>, you give Gemini 3 the ability to see what your tools see.</p>
+<p>This pattern extends beyond file reading. You can build tools that capture screenshots, fetch images from APIs, render charts, or process scanned documents. Combined with the Interactions API's stateful sessions, you have everything you need to build sophisticated visual agents.</p>
+<p><strong>Next steps:</strong></p>
+<ul>
+<li>Try the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions">Interactions API quickstart</a> notebook</li>
+<li>Explore <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/computer-use">Computer Use</a> for browser automation with visual feedback</li>
+<li>Build tools that return PDFs or multiple images for complex document workflows</li>
+</ul>
+<hr>
+<p><strong>This API is in Beta, and we want your feedback!</strong> We're actively listening to developers to shape the future of this API. What features would help your agent workflows? What pain points are you experiencing? Please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

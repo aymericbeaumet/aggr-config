@@ -1,0 +1,115 @@
+<div id="readability-page-1" class="page"><div><p>The Model Context Protocol (MCP) has exploded roughly 1 year ago, everyone rushed to build MCP servers. The hype was real. Yet, most MCP servers disappoint. Most developers blame the protocol. The protocol feels like it's dying on social media.</p>
+<p>But enterprise adoption tells a different story. Companies are deploying MCP servers. The integrations are live. But the results? Disappointing. Why?</p>
+<p>Developers treat MCP like a REST API wrapper. MCP is a User Interface for Agents. Different users, different design principles.</p>
+<p><strong>The protocol works fine. The servers don't.</strong></p>
+<p>This post breaks down why MCP servers fail, six best practices for building ones that work, and how Skills and MCP complement each other.</p>
+<h2 id="what-is-mcp">What is MCP?</h2>
+<p>MCP (Model Context Protocol) provides a universal connection between LLMs and external tools, data sources, and services. Before MCP, every integration required custom connectors. MCP standardizes three primitives:</p>
+<ul>
+<li><strong>Tools</strong>: Functions the agent can call (<code>search_documents</code>, <code>create_issue</code>)</li>
+<li><strong>Resources</strong>: Data the agent can read (files, database records)</li>
+<li><strong>Prompts</strong>: Pre-built workflows the user or agent can invoke</li>
+</ul>
+<p>The idea behind MCP is to build your MCP server once, and use with any agent.</p>
+<h2 id="what-mcp-is-not">What MCP is NOT</h2>
+<p>MCP servers are not thin wrappers around your existing API. A Good REST API is not a good MCP server. We assume just because LLMs are "smart", they can use APIs as a human would. Thats wrong.</p>
+<p>REST API design principles advocate for composability, discoverability, flexibility, and stability. Small endpoints developers combine. Self-documenting schemas.</p>
+<p>These principles work for human developers. They don't work for AI agents. MCP is a User Interface for AI agents. Different users, different design principles.</p>
+<div><table><thead><tr><th>REST API Principles</th><th>Developers</th><th>Agents</th></tr></thead><tbody><tr><td><strong>Discovery</strong></td><td>Cheap (read docs once)</td><td>Expensive (schema in every request)</td></tr><tr><td><strong>Composability</strong></td><td>Mix and match small endpoints</td><td>Multi-step tool calls, slow iteration</td></tr><tr><td><strong>Flexibility</strong></td><td>Many options &gt; more flexibility</td><td>Complexity leads to hallucination</td></tr></tbody></table></div>
+<p>Additionally, MCP servers are not data dump services. Throwing large scale raw data at an agent bloats its context window.</p>
+<p><strong>A Practical Example: Order Tracking</strong></p>
+<p>You're building an agent that tracks orders.</p>
+<p>As a human developer, you read the API docs once, write a script calling <code>GET /users</code>, <code>GET /orders</code>, <code>GET /shipments</code> in sequence, debug it, deploy it.</p>
+<p>A bad MCP server exposes those three endpoints as tools. The agent must load all three tool description, make 3 round-trips and stores all intermediate results in conversation history.</p>
+<p>A good MCP server exposes one tool, <code>track_order(email)</code>. The tool calls all three internally and returns "Order #12345 shipped via FedEx, arriving Thursday." Same outcome, one call, outcome oriented.</p>
+<p>MCP is a User Interface for a non-human user. Same product thinking, different user.</p>
+<h2 id="how-to-build-a-good-mcp-server-best-practices">How to Build a Good MCP Server (Best Practices)</h2>
+<p>To fix your server, you need to curate the experience. Here are the six best practices for building a good MCP server.</p>
+<h3 id="1-outcomes-not-operations">1. Outcomes, Not Operations</h3>
+<p><strong>Trap:</strong> Converting REST endpoints 1:1 into MCP tools.</p>
+<p><strong>Fix:</strong> Design tools around what the user/agent wants to achieve.</p>
+<p>Don't expose three separate tools for order status:</p>
+<ul>
+<li><code>get_user_by_email()</code></li>
+<li><code>list_orders(user_id)</code></li>
+<li><code>get_order_status(order_id)</code></li>
+</ul>
+<p>This forces the agent to orchestrate three round-trips. Instead of three atomic tools, give the agent one high-level tool: <code>track_latest_order(email)</code>. Do the orchestration in your code, not in the LLM's context window.</p>
+<h3 id="2-flatten-your-arguments">2. Flatten Your Arguments</h3>
+<p><strong>Trap:</strong> Using complex nested dictionaries or configuration objects as arguments.</p>
+<p><strong>Fix:</strong> Top-level primitives and constrained types.</p>
+<div><table><thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead><tbody><tr><td><code>def search_orders(filters: dict) -&gt; list</code></td><td><code>def search_orders(email: str, status: Literal["pending", "shipped", "delivered"] = "pending", limit: int = 10) -&gt; list</code></td></tr><tr><td>Agent guesses the structure</td><td>Clear, typed, constrained</td></tr><tr><td>Hallucinates keys, misses required fields</td><td><code>Literal</code> constrains choices, defaults reduce decisions</td></tr></tbody></table></div>
+<h3 id="3-instructions-are-context">3. Instructions are Context</h3>
+<p><strong>Trap:</strong> Empty docstrings, generic error messages.</p>
+<p><strong>Fix:</strong> Every piece of text is part of the agent's context.</p>
+<p>Docstrings are instructions. Specify:</p>
+<ul>
+<li>When to use the tool ("Use when the user asks about order status")</li>
+<li>How to format arguments ("Email must be lowercase")</li>
+<li>What to expect back ("Returns order ID and current status")</li>
+</ul>
+<p>Error Messages are context too! If a tool call fails, don't throw a Python exception. Return a helpful string: <em>"User not found. Please try searching by email address instead."</em> The agent sees the error as an observation and uses your instruction to self-correct in the next turn.</p>
+<h3 id="4-curate-ruthlessly">4. Curate Ruthlessly</h3>
+<p><strong>Trap:</strong> Exposing everything your API can do. Returning everything the API returns.</p>
+<p><strong>Fix:</strong> Design for discovery, not exhaustive exposure.</p>
+<p>Agents operate under tight context constraints. Every tool description, every response payload, every error message, it all competes in the context window.</p>
+<ul>
+<li>5–15 tools per server.</li>
+<li>One server, one job.</li>
+<li>Delete unused tools.</li>
+<li>Split by persona. (Admin/user)</li>
+</ul>
+<p>Build for discovery. The agent should find the right tool quickly and get an actionable response.</p>
+<h3 id="5-name-tools-for-discovery">5. Name Tools for Discovery</h3>
+<p><strong>Trap:</strong> Generic names like <code>create_issue</code> or <code>send_message</code>.</p>
+<p><strong>Fix:</strong> Service-prefixed, action-oriented names.</p>
+<p>Your MCP server runs alongside others. If GitHub and Jira both have <code>create_issue</code>, the agent guesses.
+Pattern: <code>{service}_{action}_{resource}</code>. Examples: <code>slack_send_message</code>, <code>linear_list_issues</code>, <code>sentry_get_error_details</code>.</p>
+<p>Note: Some MCP clients prefix tools with the server name automatically.</p>
+<h3 id="6-paginate-large-results">6. Paginate Large Results</h3>
+<p><strong>Trap:</strong> Returning hundreds of records.</p>
+<p><strong>Fix:</strong> Paginate with metadata.</p>
+<ul>
+<li>Respect a <code>limit</code> parameter (default 20–50)</li>
+<li>Return <code>has_more</code>, <code>next_offset</code>, <code>total_count</code></li>
+<li>Never load all results into memory</li>
+</ul>
+<h2 id="practical-example-gmail-mcp-server">Practical Example: Gmail MCP Server</h2>
+<p>You're building an MCP server for Gmail. Here's how most developers approach it versus the agent-first design.</p>
+<h3 id="before">Before</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Reading an email requires 2 tools + understanding nested types
+def messages_list(query: str, max_results: int) -&gt; {"messages": [{"id": str, "threadId": str}], "nextPageToken": str}: ...
+def messages_get(message_id: str, format: str) -&gt; {"id": str, "snippet": str, "payload": {"headers": list, "body": {"data": str}}}: ...
+ 
+# Sending an email requires base64-encoding a MIME message
+def messages_send(message: {"raw": str}) -&gt; {"id": str, "threadId": str}: ...  # raw = base64url RFC 2822
+ 
+# Creating a draft has nested message object
+def drafts_create(draft: {"message": {"raw": str}}) -&gt; {"id": str, "message": {"id": str}}: ...</code></pre></div></figure>
+<p><strong>Problems:</strong> Agent must construct <code>{"raw": base64(...)}</code> and parse nested <code>payload.body.data</code>. Generic names.</p>
+<h3 id="after">After</h3>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Reading: 2 flat tools with curated returns
+def gmail_search(query: str, limit: int = 10) -&gt; [{"id": str, "subject": str, "sender": str, "date": str, "snippet": str}]: ...
+def gmail_read(message_id: str) -&gt; {"subject": str, "sender": str, "body": str, "attachments": [str]}: ...
+ 
+# Writing: Simple examples, not including cc, bcc.
+def gmail_send(to: List[str], subject: str, body: str, reply_to_id: str = None) -&gt; {"success": bool, "message_id": str}: ...</code></pre></div></figure>
+<h2 id="skills-vs-mcp-complementary-not-competitive">Skills vs. MCP: Complementary, Not Competitive</h2>
+<p>Skills package instructions, metadata, and resources that the agent uses when relevant. They're filesystem-based with progressive disclosure. Each skill has a name, description, which is part of the Model context. The Model/Agent can then decide to use the skill or not based on the given context.</p>
+<div><table><thead><tr><th>Level</th><th>When Loaded</th><th>Token Cost</th><th>Content</th></tr></thead><tbody><tr><td><strong>Metadata</strong></td><td>Startup</td><td>~100 tokens</td><td><code>name</code> and <code>description</code> from YAML</td></tr><tr><td><strong>Instructions</strong></td><td>When triggered</td><td>&lt;5k tokens</td><td>SKILL.md body</td></tr><tr><td><strong>Resources</strong></td><td>As needed</td><td>Unlimited</td><td>Scripts via bash</td></tr></tbody></table></div>
+<p>Skills don't add tool definitions directly, but can include scripts that run locally to provide capabilities similar to MCP servers. The difference is that skills leverage generic execution tools (like <code>bash</code>) rather than defining new tool schemas. Leading to potentially more steps and discovery needed. MCP provides a structured interfaces. The model gets parameter validation, typed responses.</p>
+<p>Neither is better than the other. It depends on the use case and your preference. In company contexts, MCP servers shine when teams expose their own services. Skills complement this by teaching agents when and how to combine those tools for specific workflows. Use both.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>When building an MCP Server you are not building infrastructure, you are building an interface for AI agents.</p>
+<ol>
+<li><strong>Outcomes over operations:</strong> Design for agent goals</li>
+<li><strong>Flatten arguments:</strong> Primitives and enums</li>
+<li><strong>Instructions are context:</strong> Docstrings and errors matter</li>
+<li><strong>Curate ruthlessly:</strong> Fewer tools, tighter responses</li>
+<li><strong>Name for discovery:</strong> Service-prefixed names</li>
+<li><strong>Paginate results:</strong> Metadata for large lists</li>
+</ol>
+<p>MCP is a User Interface for AI agents. Build it like one.</p>
+<p><em>Other resources: <a target="_blank" rel="noopener noreferrer" href="https://block.xyz/inside/designing-high-quality-mcp-servers">Block's MCP Playbook</a>, <a target="_blank" rel="noopener noreferrer" href="https://github.blog/ai-and-ml/generative-ai/how-to-build-secure-and-scalable-remote-mcp-servers/">GitHub's Security Guide</a>, <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=96G7FLab8xc">FastMCP AI Engineering Summit</a>.</em></p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

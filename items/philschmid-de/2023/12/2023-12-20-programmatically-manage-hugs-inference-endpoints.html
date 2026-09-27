@@ -1,0 +1,84 @@
+<div id="readability-page-1" class="page"><div><p>Infrastructure as Code (IaC) allows us to manage and provise infrastructure through programmatic interfaces. This approach can help companies to easier manage, update and use Generative AI in more automatic setups.</p>
+<p>By leveraging IaC, we can streamline the deployment and maintenance of models and unlock new capabilities like batch processing, automatic model end-to-end model evaluation.</p>
+<p>I am happy to share the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/huggingface_hub/guides/inference_endpoints">huggingface_hub</a> python library now supports <a target="_blank" rel="noopener noreferrer" href="https://ui.endpoints.huggingface.co/">Hugging Face Inference Endpoints</a>. This allows you to programmatically manage Inference Endpoints. You can now create, update, pause, delete or send requests using the <code>huggingface_hub</code> library.</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://ui.endpoints.huggingface.co/">Hugging Face Inference Endpoints</a> offers an easy and secure way to deploy Generative AI models for use in production. Inference Endpoints empower developers and data scientists alike to create AI applications without managing infrastructure: simplifying the deployment process to a few clicks, including handling large volumes of requests with autoscaling, reducing infrastructure costs with scale-to-zero, and offering advanced security.</p>
+<p>The <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/huggingface_hub/index">huggingface_hub</a> library allows you to interact with the <strong><a target="_blank" rel="noopener noreferrer" href="https://hf.co/">Hugging Face Hub</a></strong>, a machine learning platform for creators and collaborators.</p>
+<h2 id="end-to-end-example">End-to-End Example</h2>
+<p>This tutorial will guide you through an example of managing Inference Endpoints using the <strong><code>huggingface_hub</code></strong> library. We'll focus on the model <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/HuggingFaceH4/zephyr-7b-beta">Zehpyr</a> for this example. Support for managing inference endpoints came with version <code>0.20</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">pip install "huggingface_hub&gt;=0.20.1" --upgrade</code></pre></div></figure>
+<p>Before we can create and managed our endpoints we need to login using a <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/settings/tokens">Hugging Face Token.</a> We also want to define our <code>namespace</code> the namespace is the organization/account we use. It is the identifier in the url when you go to your profile, e.g. <code>huggingface</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from huggingface_hub import login
+ 
+# set credentials
+login(token="YOUR_TOKEN")
+# set namespace for IE account
+namespace="huggingface"</code></pre></div></figure>
+<p>The <code>huggingface_hub</code> library provides a <code>create_inference_endpoints</code> method which accepts the same parameters as the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/inference-endpoints/api_reference">HTTP Endpoint from Inference Endpoints</a>. This means we need to define:</p>
+<ul>
+<li><code>endpoint_name</code>: The name for the endpoint</li>
+<li><code>repository</code>: The model repository to use</li>
+<li><code>framework</code>: The framework to use, most likely <code>pytorch</code></li>
+<li><code>task</code>: The task to use for LLMs this is <code>text-generation</code></li>
+<li><code>vendor</code>: The cloud provider to use, e.g. <code>aws</code></li>
+<li><code>region</code>: The region to use, e.g. <code>us-east-1</code></li>
+<li><code>type</code>: The type security type to use, e.g. <code>protected</code></li>
+<li><code>instance_size</code>: The instance size to use can be found in the UI</li>
+<li><code>instance_type</code>: The instance type to use can be found in the UI</li>
+<li><code>accelerator</code>: The accelerator to use, e.g. <code>gpu</code></li>
+<li><code>namespace</code>: The namespace to use, e.g. <code>huggingface</code></li>
+<li><code>custom_image</code>: The custom image to use, this is optional and can be used to define a custom image to use.</li>
+</ul>
+<p>We are going to use <code>custom_image</code> to use <a target="_blank" rel="noopener noreferrer" href="https://github.com/huggingface/text-generation-inference">Text Generation Inference</a>. This is the same image you get when going to the UI and deploying a LLM.</p>
+<p>In our example we want to use the model <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/HuggingFaceH4/zephyr-7b-beta">Zephyr</a>. First lets define our custom image. The <code>custom_image</code> allows us also to define TGI specific parameters like <code>MAX_BATCH_PREFILL_TOKENS</code>, <code>MAX_INPUT_LENGTH</code> and <code>MAX_TOTAL_TOKENS</code>. Below is an example of how those, make sure to adjust them to your needs, e.g. input length.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># define TGI as custom image
+custom_image = {
+    "health_route": "/health",  # Health route for TGI
+    "env": {
+        "MAX_BATCH_PREFILL_TOKENS": "2048", # can be adjusted to your needs
+        "MAX_INPUT_LENGTH": "1024", # can be adjusted to your needs
+        "MAX_TOTAL_TOKENS": "1512", # can be adjusted to your needs
+        "MODEL_ID": "/repository",  # IE will save the model in /repository
+    },
+    "url": "ghcr.io/huggingface/text-generation-inference:1.3.3",
+}</code></pre></div></figure>
+<p>After we defined our custom image we can create our inference endpoint.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Create Inference Endpoint to run Zephyr 7B
+print("Creating Inference Endpoint for Zephyr 7B")
+zephyr_endpoint = create_inference_endpoint(
+    "zehpyr-ie-test",
+    repository="HuggingFaceH4/zephyr-7b-beta",
+    framework="pytorch",
+    task="text-generation",
+    vendor="aws",
+    region="us-east-1",
+    type="protected",
+    instance_size="medium",
+    instance_type="g5.2xlarge",
+    accelerator="gpu",
+    namespace=namespace,
+    custom_image=custom_image,
+)</code></pre></div></figure>
+<p>The <code>huggingface_hub</code> library will return an <code>InferenceEndpoint</code> object. This object allows us to interact with the endpoint. This means we can directly send requests, pause, delete or update the endpoint. We can also call the <code>wait</code> method to wait for the endpoint to be ready for inference. This is super handy when you want to run inference right after creating the endpoint, e.g. for batch processing or automatic model evaluation.</p>
+<p><em>Note: This may take a few minutes.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">print("Waiting for endpoint to be deployed")
+zephyr_endpoint.wait()</code></pre></div></figure>
+<p>After the endpoint is ready the <code>.wait()</code> method will return. This means we can test our endpoint and send requests.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">print("Running Inference")
+res = zephyr_endpoint.client.text_generation(
+    "&lt;|system|&gt;\nYou are a friendly chatbot who always responds in the style of a pirate.&lt;/s&gt;\n&lt;|user|&gt;\nHow many helicopters can a human eat in one sitting?&lt;/s&gt;\n&lt;|assistant|&gt;"
+)
+print(res)
+# Matey, I'm afraid I've never heard of a human eating a helic</code></pre></div></figure>
+<p>For more details about how to use the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/huggingface_hub/v0.19.3/en/package_reference/inference_client#huggingface_hub.InferenceClient">InferenceClient</a>, check out the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/huggingface_hub/guides/inference">Inference guide</a>.</p>
+<p>If we want to temporarily pause the endpoint you can call the <code>pause</code> method.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">print("Pausing Inference Endpoint")
+zephyr_endpoint.pause()</code></pre></div></figure>
+<p>To delete the endpoint we call the <code>delete</code> method.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">print("Deleting Inference Endpoint")
+zephyr_endpoint.delete()</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this tutorial, you've learned how to use the <code>huggingface_hub</code> library to create, send requests to, pause, and delete Hugging Face Inference Endpoints. This allows for efficient and scalable management of Generative AI models in production environments.</p>
+<p>We have a more in depth documentation about managing Inference Endpoints in our <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/huggingface_hub/guides/inference_endpoints">documentation</a>. The <code>huggingface_hub</code> offers more capabilities like listing endpoints, updating scaling and more.</p>
+<p>If you are missing a feature or have feedback, please let us know.</p>
+<hr>
+<p>Thanks for reading! If you have any questions, feel free to contact me on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

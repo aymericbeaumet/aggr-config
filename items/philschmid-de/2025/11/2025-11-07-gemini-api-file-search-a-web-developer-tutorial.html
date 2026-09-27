@@ -1,0 +1,213 @@
+<div id="readability-page-1" class="page"><div><p>The Gemini API File Search tool is a fully managed RAG (Retrieval-Augmented Generation) system built directly into the Gemini API. It automatically manages file storage, chunks your data, creates embeddings, and seamlessly injects the most relevant context into your prompts.</p>
+<p>This must be expensive? No, file storage and embedding generation at query time are completely free of charge. You only pay for the initial indexing of your files at a fixed rate of $0.15 (based on the embedding) per 1 million tokens.</p>
+<p>This tutorial will walk you through the complete lifecycle of using File Search with the JavaScript/TypeScript, you will learn how to:</p>
+<ol>
+<li>Create a File Search Store</li>
+<li>Find a Store by Display Name</li>
+<li>Upload Multiple Files Concurrently</li>
+<li>Advanced Upload: Chunking &amp; Metadata</li>
+<li>Run a Standard Generation Query (RAG)</li>
+<li>Find a Specific Document</li>
+<li>Delete a Document</li>
+<li>Update a Document</li>
+<li>Cleanup: Delete the File Search Store</li>
+</ol>
+<p>Before we start, make sure you have an <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/api-keys">API key from Google AI Studio</a> and have installed the latest SDK:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">npm install @google/genai</code></pre></div></figure>
+<p>Initialize your client in your JavaScript environment:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">import { GoogleGenAI } from '@google/genai';
+import fs from 'fs';
+import path from 'path';
+ 
+const ai = new GoogleGenAI({});</code></pre></div></figure>
+<h3 id="1-create-a-file-search-store">1) Create a File Search Store</h3>
+<p>A <strong>File Search Store</strong> is a persistent container for your document chunks and embeddings. It's distinct from raw file storage and can hold gigabytes of data.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">const fileStoreName = 'my-example-store';
+ 
+const createStoreOp = await ai.fileSearchStores.create({
+  config: { displayName: fileStoreName }
+});
+ 
+console.log(`Store created with Name: ${createStoreOp.name}`);</code></pre></div></figure>
+<h3 id="2-find-a-store-by-display-name">2) Find a Store by Display Name</h3>
+<p>Often the creation of a store and the use are in a different application session. Since the API assigns a unique ID (<code>fileSearchStores/xyz...</code>), you need to look it up by the human-readable <code>displayName</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">let fileStore = null;
+// List stores with a page size limit
+const pager = await ai.fileSearchStores.list({ config: { pageSize: 10 } });
+let page = pager.page;
+ 
+// Iterate through pages until we find a match
+searchLoop: while (true) {
+  for (const store of page) {
+    if (store.displayName === fileStoreName) {
+      fileStore = store;
+      break searchLoop;
+    }
+  }
+  if (!pager.hasNextPage()) break;
+  page = await pager.nextPage();
+}
+ 
+if (!fileStore) {
+  throw new Error(`Store with display name '${fileStoreName}' not found.`);
+}
+console.log(`Found store: ${fileStore.name}`);</code></pre></div></figure>
+<h3 id="3-upload-multiple-files-concurrently">3) Upload Multiple Files Concurrently</h3>
+<p>Speed matters. When ingesting a folder of documents, don't process them sequentially. The API supports concurrent operations, so we can use <code>Promise.all</code> to upload and process multiple files at once.</p>
+<p>We'll use the helper method <code>uploadToFileSearchStore</code>, which handles uploading the raw file and initiating the indexing process in one step. We then monitor <code>operation.done</code> to ensure processing completes before moving on.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">const docsDir = "docs"; // Ensure you have a 'docs' folder with some text files
+const files = fs.readdirSync(docsDir).map(file =&gt; path.join(docsDir, file));
+ 
+await Promise.all(files.map(async (filePath) =&gt; {
+  // 1. Initiate upload and indexing
+  let operation = await ai.fileSearchStores.uploadToFileSearchStore({
+    file: filePath,
+    fileSearchStoreName: fileStore.name,
+    config: {
+      displayName: path.basename(filePath),
+    }
+  });
+ 
+  // 2. Poll until the document is fully processed
+  while (!operation.done) {
+    await new Promise(resolve =&gt; setTimeout(resolve, 1000)); // wait 1s
+    operation = await ai.operations.get({ operation });
+  }
+  console.log(`Processing complete for: ${path.basename(filePath)}`);
+  return operation;
+}));</code></pre></div></figure>
+<h3 id="4-upload-with-custom-chunking-strategies">4) Upload with Custom Chunking Strategies</h3>
+<p>By default, Gemini handles chunking intelligently. However, for specific use cases you might want tighter control over how your data is split.</p>
+<p>You can define a&nbsp;<code>chunkingConfig</code>&nbsp;during upload to specify parameters like&nbsp;<code>maxTokensPerChunk</code>&nbsp;and&nbsp;<code>maxOverlapTokens</code> and <code>customMetadata</code> to attach key-value pairs to the document.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">const specialDocPath = 'special-docs/technical-manual.txt';
+ 
+let advancedUploadOp = await ai.fileSearchStores.uploadToFileSearchStore({
+  file: specialDocPath,
+  fileSearchStoreName: fileStore.name,
+  config: {
+    displayName: 'technical-manual.txt',
+    customMetadata: [
+      { key: "doc_type", stringValue: "manual" },
+    ],
+    chunkingConfig: {
+      whiteSpaceConfig: {
+        maxTokensPerChunk: 500, // Smaller chunks for more precise retrieval
+        maxOverlapTokens: 50    // Ensure context isn't lost between chunks
+      }
+    }
+  }
+});
+ 
+// Wait for the file to process
+while (!advancedUploadOp.done) {
+  await new Promise(resolve =&gt; setTimeout(resolve, 1000));
+  advancedUploadOp = await ai.operations.get({ operation: advancedUploadOp });
+}
+console.log("Advanced file processed.");</code></pre></div></figure>
+<h3 id="5-run-a-generation-query-using-file-search-rag">5) Run a Generation Query using File Search (RAG)</h3>
+<p>We don't need to manually retrieve chunks. We just tell the Gemini model to use the <code>fileSearch</code> tool and point it to our store name. Gemini understands it needs more information, searches the store, and grounds its response automatically.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">const response = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: "What is Gemini and what is the File API?",
+  config: {
+    tools: [{
+      fileSearch: {
+        fileSearchStoreNames: [fileStore.name]
+      }
+    }]
+  }
+});
+ 
+console.log("Model response:", response.text);
+// Optionally check response.candidates[0].groundingMetadata for citations!</code></pre></div></figure>
+<p>Because we tagged our technical manual in Step 4, we can now force Gemini to&nbsp;<em>only</em>&nbsp;look at documents matching that tag by using a&nbsp;metadataFilter.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">const responseFiltered = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: "How do I reset the device according to the manual?",
+  config: {
+    tools: [{
+      fileSearch: {
+        fileSearchStoreNames: [fileStore.name],
+        metadataFilter: 'doc_type="manual"'
+      }
+    }]
+  }
+});
+ 
+console.log("Filtered response:", responseFiltered.text);</code></pre></div></figure>
+<h3 id="6-find-a-specific-document-within-a-store">6) Find a Specific Document within a Store</h3>
+<p>You'll often need to manage individual documents within your store. You can find a specific document by its display name.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">const docToFind = 'doc1.txt';
+let targetDoc = null;
+ 
+let documentPager = await ai.fileSearchStores.documents.list({
+  parent: fileStore.name,
+});
+ 
+// Iterate through the store's document list
+searchDocsLoop: while (true) {
+  for (const document of documentPager.page) {
+    if (document.displayName === docToFind) {
+      targetDoc = document;
+      break searchDocsLoop;
+    }
+  }
+  if (!documentPager.hasNextPage()) break;
+  documentPager = await documentPager.nextPage();
+}
+ 
+if (!targetDoc) throw new Error(`Document '${docToFind}' not found.`);</code></pre></div></figure>
+<h3 id="7-delete-a-document">7) Delete a Document</h3>
+<p>Currently, the standard flow to update a document in File Search is to delete the old version and upload a new one.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">await ai.fileSearchStores.documents.delete({
+    name: targetDoc.name,
+    config: { force: true } // Required to permanently delete from the store
+});</code></pre></div></figure>
+<h3 id="8-update-a-document">8) Update a Document</h3>
+<p>File Search documents are immutable once indexed. To "update" a document, you must find it, delete it, and upload the new version.
+In this step, we will automate this entire loop to update <code>doc1.txt</code> with new information.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">const docToUpdate = 'doc1.txt'; // assuming it has new content
+const localDocPath = path.join(docsDir, docToUpdate);
+ 
+// 1. Find the existing document ID in the store based on its display name
+let documentPager = await ai.fileSearchStores.documents.list({ parent: fileStore.name });
+let foundDoc = null;
+findLoop: while (true) {
+  for (const doc of documentPager.page) {
+    if (doc.displayName === docToUpdate) {
+      foundDoc = doc;
+      break findLoop;
+    }
+  }
+  if (!documentPager.hasNextPage()) break;
+  documentPager = await documentPager.nextPage();
+}
+ 
+// 2. If we found it, delete it
+if (foundDoc) {
+   await ai.fileSearchStores.documents.delete({
+     name: foundDoc.name,
+     config: { force: true } // 'force' is required to delete indexed docs
+   });
+}
+ 
+// 3. Upload the new version
+let updateOp = await ai.fileSearchStores.uploadToFileSearchStore({
+  file: localDocPath,
+  fileSearchStoreName: fileStore.name,
+  config: { displayName: docToUpdate }
+});
+while (!updateOp.done) {
+   await new Promise(resolve =&gt; setTimeout(resolve, 1000));
+   updateOp = await ai.operations.get({ operation: updateOp });
+}
+ 
+console.log("Revision uploaded and indexed successfully.");</code></pre></div></figure>
+<h3 id="9-cleanup-delete-the-file-search-store">9) Cleanup: Delete the File Search Store</h3>
+<p>You are currently limited to 10 File Search Stores per project, so it's important to clean up resources when you are finished with development.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JavaScript</span></p><pre><code data-language="js">await ai.fileSearchStores.delete({
+    name: fileStore.name,
+    config: { force: true }
+});</code></pre></div></figure>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

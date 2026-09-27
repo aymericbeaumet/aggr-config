@@ -1,0 +1,162 @@
+<div id="readability-page-1" class="page"><div><p>IDEFICS is an open-access visual language model with 80 billion parameters that can generate text based on sequences of images and text. It was created to reproduce capabilities similar to Deepmind's closed-source Flamingo or Open AI GPT-4V model using only publicly available data and models.</p>
+<p>In this blog you will learn how to deploy Idefics model to Amazon SageMaker. We are going to use the Hugging Face LLM DLC is a new purpose-built Inference Container to easily deploy LLMs in a secure and managed environment. The DLC is powered by <a target="_blank" rel="noopener noreferrer" href="https://github.com/huggingface/text-generation-inference">Text Generation Inference (TGI)</a> a scalelable, optimized solution for deploying and serving Large Language Models (LLMs). The Blog post also includes Hardware requirements for the different model sizes.</p>
+<p>In the blog will cover how to:</p>
+<ol>
+<li><a href="#1-setup-development-environment">Setup development environment</a></li>
+<li><a href="#2-retrieve-the-new-hugging-face-llm-dlc">Retrieve the new Hugging Face LLM DLC</a></li>
+<li><a href="#3-hardware-requirements">Hardware requirements</a></li>
+<li><a href="#4-deploy-idefics-80b-to-amazon-sagemaker">Deploy Idefics 80B to Amazon SageMaker</a></li>
+<li><a href="#5-run-inference-and-chat-with-the-model">Run inference and chat with the model</a></li>
+<li><a href="#5-clean-up">Clean up</a></li>
+</ol>
+<p>Before we gets started lets a quick look at Idefics</p>
+<h2 id="what-is-hugging-face-idefics">What is Hugging Face IDEFICS?</h2>
+<p>IDEFICS (<strong>I</strong>mage-aware <strong>D</strong>ecoder <strong>E</strong>nhanced à la <strong>F</strong>lamingo with <strong>I</strong>nterleaved <strong>C</strong>ross-attention<strong>S</strong>) is an open-access visual language model developed by Hugging Face. It is a reproduction of Flamingo, a closed-source model created by Deepmind.</p>
+<p>Like GPT-4V, IDEFICS is a multimodal model that accepts sequences of images and text as input and generates text as output. The model can answer questions about images, describe visual contents, and create stories grounded in multiple images.</p>
+<p>IDEFICS comes in two main variants, a 9B and 80B parameter version. Hugging Face also provides fine-tuned versions called <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/HuggingFaceM4/idefics-80b-instruct">idefics-80b-instruct</a> and <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/HuggingFaceM4/idefics-9b-instruct">idefics-9b-instruct</a> that have been adapted for conversational use cases.</p>
+<p>IDEFICS is trained solely on publicly available data like Wikipedia, LAION, and a new 115B token dataset called OBELICS. It is built on top of existing models like <code>CLIP-ViT-H-14-laion2B-s32B-b79K</code> and <code>Llama</code>.</p>
+<p><img src="https://www.philschmid.de/static/blog/sagemaker-idefics/guarding_baguettes.png" alt="guarding_baguettes"></p>
+<p>You can learn more about Idefics in the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/blog/idefics">Hugging Face blog post</a>.</p>
+<h2 id="1-setup-development-environment">1. Setup development environment</h2>
+<p>We are going to use the <code>sagemaker</code> python SDK to deploy Idefics to Amazon SageMaker. We need to make sure to have an AWS account configured and the <code>sagemaker</code> python SDK installed.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">!pip install "sagemaker&gt;=2.192.0" --upgrade --quiet</code></pre></div></figure>
+<p>If you are going to use Sagemaker in a local environment. You need access to an IAM Role with the required permissions for Sagemaker. You can find <a target="_blank" rel="noopener noreferrer" href="https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html">here</a> more about it.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import sagemaker
+import boto3
+sess = sagemaker.Session()
+# sagemaker session bucket -&gt; used for uploading data, models and logs
+# sagemaker will automatically create this bucket if it not exists
+sagemaker_session_bucket=None
+if sagemaker_session_bucket is None and sess is not None:
+    # set to default bucket if a bucket name is not given
+    sagemaker_session_bucket = sess.default_bucket()
+ 
+try:
+    role = sagemaker.get_execution_role()
+except ValueError:
+    iam = boto3.client('iam')
+    role = iam.get_role(RoleName='sagemaker_execution_role')['Role']['Arn']
+ 
+sess = sagemaker.Session(default_bucket=sagemaker_session_bucket)
+ 
+print(f"sagemaker role arn: {role}")
+print(f"sagemaker session region: {sess.boto_region_name}")
+ </code></pre></div></figure>
+<h2 id="2-retrieve-the-new-hugging-face-llm-dlc">2. Retrieve the new Hugging Face LLM DLC</h2>
+<p>Compared to deploying regular Hugging Face models we first need to retrieve the container uri and provide it to our <code>HuggingFaceModel</code> model class with a <code>image_uri</code> pointing to the image. To retrieve the new Hugging Face LLM DLC in Amazon SageMaker, we can use the <code>get_huggingface_llm_image_uri</code> method provided by the <code>sagemaker</code> SDK. This method allows us to retrieve the URI for the desired Hugging Face LLM DLC based on the specified <code>backend</code>, <code>session</code>, <code>region</code>, and <code>version</code>. You can find the available versions <a target="_blank" rel="noopener noreferrer" href="https://github.com/aws/deep-learning-containers/blob/master/available_images.md#huggingface-text-generation-inference-containers">here</a></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from sagemaker.huggingface import get_huggingface_llm_image_uri
+ 
+# retrieve the llm image uri
+llm_image = get_huggingface_llm_image_uri(
+  "huggingface",
+  version="1.1.0"
+)
+ 
+# print ecr image uri
+print(f"llm image uri: {llm_image}")</code></pre></div></figure>
+<h2 id="3-hardware-requirements">3. Hardware requirements</h2>
+<p>Idefics comes in 2 different sizes - 9B &amp; 80B parameters. The hardware requirements will vary based on the model size deployed to SageMaker. Below is a set up minimum requirements for each model size we tested.</p>
+<p><em>Note: We haven't tested GPTQ models yet.</em></p>
+<div><table><thead><tr><th>Model</th><th>Instance Type</th><th>Quantization</th><th># of GPUs per replica</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/HuggingFaceM4/idefics-9b">Idefics 9B</a></td><td><code>(ml.)g5.12xlarge</code></td><td><code>-</code></td><td>4</td></tr><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/HuggingFaceM4/idefics-80b">Idefics 80B</a></td><td><code>(ml.)g5.48xlarge</code></td><td><code>bitsandbytes</code></td><td>8</td></tr><tr><td><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/HuggingFaceM4/idefics-80b">Idefics 80B</a></td><td><code>(ml.)p4d.24xlarge</code></td><td><code>-</code></td><td>8</td></tr></tbody></table></div>
+<p><em>Note: Amazon SageMaker currently doesn't support instance slicing meaning, e.g. for Idefics 80B you cannot run multiple replica on a single instance.</em></p>
+<p>These are the setups we have validated for Idefics instruct 9B and 80B models to work on SageMaker.</p>
+<h2 id="4-deploy-idefics-80b-to-amazon-sagemaker">4. Deploy Idefics 80B to Amazon SageMaker</h2>
+<p>To deploy <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/HuggingFaceM4/idefics-80b-instruct">HuggingFaceM4/idefics-80b-instruct</a> to Amazon SageMaker we create a <code>HuggingFaceModel</code> model class and define our endpoint configuration including the <code>hf_model_id</code>, <code>instance_type</code> etc. We will use a <code>g5.12xlarge</code> instance type, which has 4 NVIDIA A10G GPUs and 96GB of GPU memory.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import json
+from sagemaker.huggingface import HuggingFaceModel
+ 
+# sagemaker config
+instance_type = "ml.p4d.24xlarge"
+number_of_gpu = 8
+health_check_timeout = 300
+ 
+# Define Model and Endpoint configuration parameter
+config = {
+  'HF_MODEL_ID': "HuggingFaceM4/idefics-80b-instruct", # model_id from hf.co/models
+  'SM_NUM_GPUS': json.dumps(number_of_gpu), # Number of GPU used per replica
+  'MAX_INPUT_LENGTH': json.dumps(1024),  # Max length of input text
+  'MAX_TOTAL_TOKENS': json.dumps(2048),  # Max length of the generation (including input text)
+  'MAX_BATCH_TOTAL_TOKENS': json.dumps(8192),  # Limits the number of tokens that can be processed in parallel during the generation
+  # ,'HF_MODEL_QUANTIZE': "bitsandbytes", # comment in to quantize
+}
+ 
+# create HuggingFaceModel with the image uri
+llm_model = HuggingFaceModel(
+  role=role,
+  image_uri=llm_image,
+  env=config
+)</code></pre></div></figure>
+<p>After we have created the <code>HuggingFaceModel</code> we can deploy it to Amazon SageMaker using the <code>deploy</code> method. We will deploy the model with the <code>ml.g5.12xlarge</code> instance type. TGI will automatically distribute and shard the model across all GPUs.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Deploy model to an endpoint
+# https://sagemaker.readthedocs.io/en/stable/api/inference/model.html#sagemaker.model.Model.deploy
+llm = llm_model.deploy(
+  initial_instance_count=1,
+  instance_type=instance_type,
+  container_startup_health_check_timeout=health_check_timeout, # 10 minutes to be able to load the model
+)
+ </code></pre></div></figure>
+<p>SageMaker will now create our endpoint and deploy the model to it. This can takes a 10-15 minutes.</p>
+<h2 id="5-run-inference-and-chat-with-the-model">5. Run inference and chat with the model</h2>
+<p>After our endpoint is deployed we can run inference on it. We will use the <code>predict</code> method from the <code>predictor</code> to run inference on our endpoint. We can inference with different parameters to impact the generation. Parameters can be defined as in the <code>parameters</code> attribute of the payload. You can find a full list of paramters in the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.github.io/text-generation-inference/">documentation</a> at the bottom in the GenerateParameters object.</p>
+<p>The <code>HuggingFaceM4/idefics-80b-instruct</code> is a instruction tuned model meaning we can instruct with it using the following prompt:</p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">User:&lt;fake_token_around_image&gt;&lt;image&gt;&lt;fake_token_around_image&gt;{in_context_prompt}&lt;end_of_utterance&gt;\n
+Assistant: {in_context_answer}&lt;end_of_utterance&gt;\n
+User:&lt;fake_token_around_image&gt;&lt;image&gt;&lt;fake_token_around_image&gt;{prompt}&lt;end_of_utterance&gt;\n
+Assistant:</code></pre></div></figure>
+<p>More <a target="_blank" rel="noopener noreferrer" href="https://github.com/huggingface/transformers/issues/25803">here</a> for TGI we currenlty need to add the <code>&lt;image&gt;</code> as "markdown" url with <code>![](https://t4.ftcdn.net/jpg/00/97/58/97/360_F_97589769_t45CqXyzjz0KXwoBZT9PRaWGHRk5hQqQ.jpg)</code>. In the version 1.1.0 of TGI we can only provide urls to images. To run secure inference and use local image we will upload those to s3 and make them available via signed urls and delete them after inference again. Therefore we create a helper method <code>run_inference</code>, which accepts our prompt and an path to an image. The image will be uploaded to s3 and a signed url will be created. We will then run inference on our endpoint and delete the image again.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from botocore.client import Config
+ 
+s3 = sess.boto_session.client('s3', config=Config(signature_version='s3v4'))
+ 
+prompt_template="User:{prompt}![]({image})&lt;end_of_utterance&gt;\nAssistant:"
+parameters = {
+    "do_sample": True,
+    "top_p": 0.2,
+    "temperature": 0.4,
+    "top_k": 50,
+    "max_new_tokens": 512,
+    "stop": ["User:","&lt;end_of_utterance&gt;"]
+  }
+ 
+def run_inference(prompt=None,image_path=None):
+    # params
+    bucket = sess.default_bucket()
+    key = os.path.join("input", os.path.basename(image_path))
+ 
+    # Upload image to S3
+    s3.upload_file(image_path, bucket, key)
+ 
+    # Generate pre-signed URL valid for 5 minutes
+    url = s3.generate_presigned_url(
+        ClientMethod='get_object',
+        Params={'Bucket': bucket, 'Key': key},
+        ExpiresIn=300
+    )
+    # create prompt with image and text
+    parsed_prompt = prompt_template.format(image=url,prompt=prompt)
+ 
+    # Make calls the endpoint including the prompt and parameters
+    chat = llm.predict({"inputs":parsed_prompt,"parameters":parameters})
+ 
+    # Delete image from S3
+    s3.delete_object(Bucket=bucket, Key=key)
+ 
+    # return the generated text
+    return chat[0]["generated_text"][len(parsed_prompt):].strip()</code></pre></div></figure>
+<p>Lets get an image from internet we can use to run a request. We will use the following image:</p>
+<p><img src="https://www.philschmid.de/static/blog/sagemaker-idefics/powercord.jpeg" alt="powercord"></p>
+<p>Lets ask if i can use this power cord in the U.S.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">prompt = "Can i use the cable in the U.S.?"
+ 
+# run inference
+res = run_inference(prompt=prompt,image_path="../assets/powercord.jpeg")
+ 
+print(res)
+# No, the cable is not compatible with U.S. outlets. It has a European plug, which has two round prongs, and it is not compatible with the standard U.S. outlets that have two flat prongs.</code></pre></div></figure>
+<p>Thats correct the cable is a European cable and not suitable for the U.S.</p>
+<h2 id="6-clean-up">6. Clean up</h2>
+<p>To clean up, we can delete the model and endpoint.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">llm.delete_model()
+llm.delete_endpoint()</code></pre></div></figure>
+<hr>
+<p>Thanks for reading! If you have any questions, feel free to contact me on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

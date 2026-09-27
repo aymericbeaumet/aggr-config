@@ -1,0 +1,257 @@
+<div id="readability-page-1" class="page"><article id="article"><p>Objective-C originates from the early 1980s, and while the language has evolved a lot over the years, it’s still no match for really modern languages like Swift. With Swift 3.0 on the horizon, it’s smart to write new apps in Swift. However at PSPDFKit, we are still firmly in the Objective-C world. We build and distribute a binary framework to render and edit PDF documents. Getting all the PDF details right is a complex problem. In addition to core PDF functionality, we also offer a lot of UI classes to help with typical use cases. This results in a code base that is around 600k lines — a mix of <a href="https://steipete.me/blog/2016/a-pragmatic-approach-to-cross-platform/">shared C++ code</a> and Objective-C++ for UI and wrapped models. Our headers are entirely modern Objective-C <a href="https://steipete.me/blog/2015/pspdfkit-ios-5-0/">annotated with generics and nullability</a> to ensure everything works great with Swift. Even though we are currently still stuck in the Objective-C world, it is not all that grim! With some ingenuity one can leverage many of the benefits of Swift even in a code base like ours. Here we’ll list some of the approaches we use to bring the old and new world closer together.</p>
+<p><strong>Don’t miss our follow-up article: <a href="https://steipete.me/blog/2017/even-swiftier-objective-c/">Even Swiftier Objective-C</a>!</strong></p>
+<h2 id="why-not-simply-use-swift">Why not simply use Swift?</h2>
+<p>Okay — let’s talk about the elephant in the room. Swift is an amazing language and there are many reasons why you should use it. There are also many situations and requirements that make Objective-C the smarter choice. It really depends on the application, the use case you are addressing, your team and the scope and nature of the project. It’s great that Apple gives us a choice here.</p>
+<ul>
+<li>
+<p>Swift is evolving incredibly fast. Apple’s open process is nothing short of amazing, especially considering the tight-lipped nature of the company. And while calling the initial release of Swift a 1.0 was quite bold, it quickly grew into a language that is fast, safe and allows you to write beautiful code. It’s also a fast-moving target and there are still many, partly scary, bugs and issues that early adopters run into. For a smaller project or your typical app Swift might work well. Large projects might be put off by the compile time or optimization issues or just don’t have the resources to stop development and spend weeks to update the codebase to Swift 3 (which can be quite a <a href="http://ericasadun.com/2016/05/18/if-i-had-my-druthers-swift-2-2-swift-3-0-abis-etc/" title="If I had my druthers: Swift 2.2, Swift 3.0, ABIs, etc">disruptive</a> <a href="https://twitter.com/andy_matuschak/status/648671170695335936" title="Report from the field: porting our 30k of Swift to Swift 2 took the eminent @NachoSoto a solid week; and we still have some bugs. Yikes. :/">task</a>).</p>
+</li>
+<li>
+<p><a href="http://mjtsai.com/blog/2016/05/21/dynamic-swift-2/" title="Dynamic Swift">Swift in its current form is in many ways more like C++ in that it is quite static</a>. There is no dynamic message sending and the runtime allows fewer changes than Objective-C. In the past this has led to both huge problems (such as optimization issues or monkey-patching code that should not be touched) but also to very elegant solutions (like the dynamic property resolution of Core Data objects via <code>NSManagedObject</code>, <code>NSUndoManager</code>, <code>UIAppearance</code> and many other features that you love in Apple’s frameworks). <a href="https://twitter.com/smileyborg/status/735247732877582337">It <em>is</em> a difficult topic, and even people from Apple’s UIKit team are wary of the dangers.</a></p>
+</li>
+<li>
+<p>Using Swift without <a href="http://thread.gmane.org/gmane.comp.lang.swift.evolution/17276" title="Winding down the Swift 3 release">binary compatibility</a> would mean that we have to offload technical details to our customers and restrict them in their choice of Xcode to a point where they might not be able to update to Xcode 7.3.1 if our SDK is still compiled with 7.3.0. Each minor compiler version change can produce code that is not compatible with other versions. This is additional technical complexity that we do not want to burden our customers with. We know that we are an edge case. For most projects this doesn’t matter as much. We also fully believe that delaying the stable Swift ABI is a good thing. It’s inconvenient in the short-term, but <a href="http://ericasadun.com/2016/05/17/more-about-the-swift-abi-postponement-the-laws-of-abi-changes/" title="The laws of ABI changes">will result in a better language in the long-term</a>. Our customers also care about a small binary size and might not like 6&nbsp;MB additional payload per architecture for Swift. As we always support the latest two iOS versions, this means that we probably can’t use Swift for at least another two years.</p>
+</li>
+</ul>
+<p>We use Swift more and more when writing tests and example code and really like it. At the same time we’re worried about the Xcode 8 transition and the additional complexity this burdens on our team. While the ABI is still in flux we can’t use Swift in our main SDK. Instead we decided to use Objective-C++ to complement pure Objective-C where appropriate.</p>
+<p>Many people are afraid of this step as it sounds like a very complicated thing to do: Adding C++ in your code, a language that can be very complex — hard to learn and even harder to master — makes it seem like a lot of time and effort. But it really isn’t. Instead of thinking about Objective-C++ as Objective-C with C++, rather think about Objective-C++ as a small language addition to Objective-C. In our Objective-C classes, we only use a very tiny amount of C++ to benefit from the convenience, safety, and performance features of C++. In contrast to full blown C++ implementations, learning a small subset for use in a mainly Objective-C codebase is very easy, even for developers without any prior C++ experience.</p>
+<h2 id="getting-started-with-objective-c">Getting started with Objective-C++</h2>
+<p>Let’s have a look at the steps needed to use Objective-C++ in your project, assuming you already have a project written in Objective-C.</p>
+<ol>
+<li>Rename the file you want to use Objective-C++ in from <code>&lt;MyClass&gt;.m</code> to <code>&lt;MyClass&gt;.mm</code></li>
+<li>There is no Step 2.</li>
+</ol>
+<p>It’s really that simple. Objective-C is highly interoperable with C++. You don’t need to setup anything or alter your build settings at all. Granted, not all C code is valid C++ code. You might need to add a few additional casts, but you’ll mostly be fine. Xcode&nbsp;7 does <a href="http://lists.llvm.org/pipermail/cfe-commits/Week-of-Mon-20140929/115672.html">not yet</a> support modules in Objective-C++, so you’ll have to use the older <code>#import</code> syntax instead of <code>@import</code>.</p>
+<p>Now that we see that it is actually very easy to support Objective-C++ in your applications, let’s have a look at what we can do with it. Here are our favorite features.</p>
+<h3 id="auto">auto</h3>
+<p>Consider this code:</p>
+<pre><code data-language="objc">NSArray *files = [NSFileManager.defaultManager contentsOfDirectoryAtURL:samplesURL includingPropertiesForKeys:nil options:0 error:NULL];
+PSPDFDocument *document = [[PSPDFDocument alloc] initWithBaseURL:samplesURL files:files];</code></pre>
+<p>This was an actual bug in one of our tests where <code>files</code> contained <code>NSURL</code> objects when the document expects a list of file names as strings. This ended up in the test passing because the document filtered out the files and nobody noticed the log messages for a while. If we had used the new <a href="http://drekka.ghost.io/objective-c-generics/" title="Objective-C Generics">generics feature of Objective-C</a> that Apple added because of Swift 2, the compiler would have caught this:</p>
+<p><img src="https://steipete.me/assets/img/2016/swifty-objective-c/array-error.png" alt="Xcode Error Message" loading="lazy"></p>
+<p>When using generics it gets quite annoying to type the type specifier:</p>
+<pre><code data-language="objc">NSDictionary&lt;NSNumber*, NSArray&lt;PSPDFAnnotation*&gt;*&gt; *allAnnotationsDict = [document allAnnotationsOfType:PSPDFAnnotationTypeAll];</code></pre>
+<p>Now that’s quite a mouthful! We can simplify this while maintaining the correct template parameters with C++:</p>
+<pre><code data-language="objc">auto allAnnotationsDict = [document allAnnotationsOfType:PSPDFAnnotationTypeAll];</code></pre>
+<p>Much better — and it’s still obvious what <code>allAnnotationsDict</code> is. <code>auto</code> will transform at compile time to the above — it doesn’t require any runtime features. Joe Groff from the Swift compiler team mentioned that <a href="https://twitter.com/jckarter/status/735887898717741060">top-of-tree clang now supports <code>__auto_type</code> for type inference in plain C and ObjC</a> - so eventually you can use this without even paying the C++ compile time overhead.</p>
+<h3 id="inline-blocks">Inline blocks</h3>
+<p>Consider this inline block that processes an annotation for saving. It requires three parameters, which makes the declaration almost unbearably long. You would usually change this into a helper function — but that can’t capture variables and might make things even more complex.</p>
+<pre><code data-language="objc">void (^processAnnotation)(PSPDFAnnotation *annotation, BOOL addToIndex, NSUInteger objectID) =
+      ^(PSPDFAnnotation *annotation, BOOL addToIndex, NSUInteger objectID) {
+	// code
+};</code></pre>
+<p>Another problem with this declaration is, that it’s very redundant. Every parameter type is written twice. Developers usually don’t like redundancy, so let’s clean that up.</p>
+<p><code>auto</code> again to the rescue!</p>
+<pre><code data-language="objc">auto processAnnotation = ^(PSPDFAnnotation *annotation, BOOL addToIndex, NSUInteger objectID) {
+	// code
+};</code></pre>
+<h3 id="let">let</h3>
+<p>One benefit of Swift is that <code>let</code> is the most used and convenient way to declare variables, so their result is automatically <code>const</code>. Meanwhile <code>const</code> also exists in C — it’s just very ugly:</p>
+<pre><code data-language="objc">NSString *const password = @"test123";</code></pre>
+<p>With <code>auto</code>, this can be rewritten to be more readable:</p>
+<pre><code data-language="objc">const auto password = @"test123";</code></pre>
+<p>You could even go more crazy and use a macro:</p>
+<pre><code data-language="objc">#define let auto const
+
+let password = @"test123";</code></pre>
+<h3 id="vector">vector</h3>
+<p>In Swift, you can put any data type into an array:</p>
+<pre><code data-language="plaintext">let anglePoints = [CGPoint(x: 0, y: 0), CGPoint(x: 32, y: 32), CGPoint(x: 32, y: 0)]</code></pre>
+<p>In Objective-C <code>NSArray</code> can only contain objects. This is both more complicated and — because of boxing — slower for primitive types. Of course you can always make a C array, however this makes it much harder to do common operations like adding and removing elements or saving the array somewhere else, likely requiring manual memory management and calling <code>malloc()</code>. With Objective-C++ we can simply use <a href="http://www.cplusplus.com/reference/vector/vector/" title="C++ std::vector Reference"><code>std::vector</code></a>:</p>
+<pre><code data-language="plaintext">auto points = std::vector&lt;CGPoint&gt;{{0, 0}, {.x=32, .y=32}, {32, 0}};</code></pre>
+<p>Both explicit <code>struct</code> field naming or the shorter implicit version <code>{0, 0}</code> work — no need to write the <code>(CGPoint)</code> cast as <code>vector&lt;CGPoint&gt;</code> already knows which data types to expect. As a bonus, C++ containers can be <code>const</code> which automatically makes them immutable.</p>
+<h3 id="vector---nsarray">vector &lt;-&gt; NSArray</h3>
+<p>You sometimes find situations where you need to convert a <code>vector</code> to an <code>NSArray</code> or vice versa. This is quite easy, but it’s even nicer if you use a helper for that.</p>
+<pre><code data-language="objc">template &lt;typename T&gt;
+static inline NSArray *PSPDFArrayWithVector(const std::vector&lt;T&gt; &amp;vector,
+                                            id(^block)(const T &amp;value)) {
+    NSMutableArray *result = [NSMutableArray arrayWithCapacity:vector.size()];
+    for (const T &amp;value : vector) {
+        [result addObject:block(value)];
+    }
+
+    return result;
+}
+
+template &lt;typename T&gt;
+static inline std::vector&lt;T&gt; PSPDFVectorWithElements(id&lt;NSFastEnumeration&gt; array,
+                                                     T(^block)(id value)) {
+    std::vector&lt;T&gt; result;
+    for (id value in array) {
+        result.push_back(block(value));
+    }
+
+    return result;
+}</code></pre>
+<h3 id="operator-overloading">Operator overloading</h3>
+<p>Did you ever need to calculate a <code>CGRect</code>, <code>CGSize</code>, or any other geometric type from Core&nbsp;Graphics? They are all <code>struct</code>s, which have many benefits but are annoying when it comes to calculations as you — again — have to write redundant code:</p>
+<pre><code data-language="objc">const CGSize zoomSize = CGSizeMake(self.bounds.size.width/zoomScale, self.bounds.size.height/zoomScale);</code></pre>
+<p>In Swift it’s quite easy to define an operator that makes this simpler. But we can do that in Objective-C++ as well!</p>
+<pre><code data-language="objc">CGSize operator/(const CGSize &amp;lhs, CGFloat f) {
+    return (CGSize){lhs.width / f, lhs.height / f};
+}
+
+const CGSize zoomSize = self.bounds.size / zoomScale;</code></pre>
+<h3 id="locks">Locks</h3>
+<p>Locks are needed when building thread safe APIs. In plain Objective-C you would do something like this:</p>
+<pre><code data-language="objc">@interface PSPDFDocumentParser () {
+    NSLock *_parserLock;
+}
+@end
+
+@implementation PSPDFDocumentParser
+
+- (instancetype)initWithDocumentProvider:(PSPDFDocumentProvider *)documentProvider {
+    if ((self = [super init])) {
+        _parserLock = [NSLock new];
+    }
+    return self;
+}
+
+- (void)parse {
+    [_parserLock lock];
+    // Do stuff that needs locking
+    [_parserLock unlock];
+}
+
+@end</code></pre>
+<p>This is a lot of code for something that just describes a condition under which your code should execute. With Objective-C++ we can make this much simpler:</p>
+<pre><code data-language="objc">@interface PSPDFDocumentParser () {
+    std::mutex _parserLock;
+}
+@end
+
+@implementation PSPDFDocumentParser
+- (void)parse {
+    std::lock_guard&lt;std::mutex&gt; parserGuard(_parserLock);
+    // Do stuff that needs locking
+}
+@end</code></pre>
+<p>The C++ lock is automatically released when it goes out of scope. The <a href="https://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization" title="Resource Acquisition Is Initialization">RAII</a> pattern is everywhere in C++ and it’s really great and deterministic. This allows us to do work that requires locking inline with a return statement as the lock is only unlocked after the return.</p>
+<p>If we only need to lock a small part of a method, we can simply create a smaller scope to do so:</p>
+<pre><code data-language="objc">- (void)parse {
+    // Do stuff without locking
+    {
+        std::lock_guard&lt;std::mutex&gt; parserGuard(_parserLock);
+        // Do stuff that needs locking
+    }
+    // Do stuff without locking
+}</code></pre>
+<p>And if you need a recursive lock instead, you can use <code>std::recursive_mutex</code> instead of <code>std::mutex</code>.</p>
+<p>Alternative: There’s a simple pure Objective-C solution by making a method that takes a block parameter that gets executed while that lock is locked. For example, see <code>[NSManagedObjectContext performBlock:]</code>.</p>
+<h3 id="templates">Templates</h3>
+<p>Sometimes templates are quite useful to avoid repetitive code. Consider a helper that compares primitives like <code>CGFloat</code> or <code>NSInteger</code>. You can always box them and call <code>compare:</code>, however this can be quite costly. The better way is to use a templated function:</p>
+<pre><code data-language="objc">template &lt;typename T&gt;
+inline NSComparisonResult PSPDFCompare(const T value1, const T value2) {
+    if (value1 &lt; value2) return (NSComparisonResult)NSOrderedAscending;
+    else if (value1 &gt; value2) return (NSComparisonResult)NSOrderedDescending;
+    else return (NSComparisonResult)NSOrderedSame;
+}</code></pre>
+<p>Another very useful helper is a conditional cast, that checks if the class is of the correct type.</p>
+<pre><code data-language="objc">template&lt;typename T&gt;
+static inline T *PSPDFDynamicCast(__unsafe_unretained id obj) {
+    if ([obj isKindOfClass:[T class]]) {
+        return obj;
+    }
+    return nil;
+}
+
+// Usage:
+auto objectOrNil = PSPDFDynamicCast&lt;PSPDFNavigationController&gt;(self.navigationController);</code></pre>
+<h3 id="variable-declaration-in-if">Variable declaration in if</h3>
+<p>A typical pattern in Swift is to declare a variable right in the if-else block:</p>
+<pre><code data-language="swift">if let nav = controller.navigationController {
+    nav.pushViewController(myViewController, animated: true)
+} else {
+    //show an alert or something else
+}</code></pre>
+<p>With the additions of Objective-C++, we can do something very similar:</p>
+<pre><code data-language="objc">if (const auto nav = controller.navigationController) {
+    //...
+}</code></pre>
+<h3 id="stl-algorithms">STL algorithms</h3>
+<p>There are <a href="http://www.cplusplus.com/reference/algorithm/">many useful algorithms in the standard template library</a>. Instead of a code snippet, <a href="https://channel9.msdn.com/Events/GoingNative/2013/Cpp-Seasoning">watch the C++ Seasoning talk from Sean Parent</a> - it will blow your mind.</p>
+<h3 id="gotchas-and-downsides">Gotchas and downsides</h3>
+<p>You probably knew this was coming: What are the downsides of all these easy tweaks? We don’t want to lie to you, there are a couple of them, but we think the benefits outweigh the issues by far.</p>
+<h4 id="compile-times">Compile times</h4>
+<p>When changing the file extension from <code>.m</code> to <code>.mm</code>, clang will start evaluating your file from a C++ point of view and C++ is a bit more strict in terms of automatic casting. So you will sometimes get a couple of warnings, especially from macros like <code>MAX()</code> in your code. You can resolve these issues through explicit casts or by using the equivalent C++ function — in this case <code>std::max()</code>. If this is a problem — or if Objective-C maybe is a bit too lax on types from time to time — you’ll have to make a decision on how to proceed.</p>
+<p>Compiling <code>.mm</code> files will take a bit longer than standard <code>.m</code> files, however in our experience it’s worth the slight compile time penalty. If you are working on a large codebase the extra time can pile up, however it is possible to offset much of that time by using some additional <a href="https://steipete.me/blog/2015/ccache-for-fun-and-profit/">compilation caching</a>. Heavy use of templates <a href="http://eigen.tuxfamily.org/">or libraries that use templates</a> will have a larger impact though.</p>
+<h4 id="tooling">Tooling</h4>
+<p>Another risk is that not many people are using Objective-C++ extensively, so it’s more likely to run into compiler bugs or edge cases. We’ve only had one issue so far where the Clang Analyzer crashed, but we managed to get such an issue some time earlier in pure Objective-C code as well.</p>
+
+<p>Or — if you add it, put it either in separate <code>.hpp</code> headers or behind <code>#if __cplusplus</code> — otherwise you’ll quickly have to convert your entire project to <code>.mm</code> and make the headers inaccessible to Swift.</p>
+<h4 id="accidental-copies">Accidental copies</h4>
+<p>C++ loves copying things. Consider this code:</p>
+<pre><code data-language="objc">@property (nonatomic) std::vector&lt;int&gt; values;
+
+// later on
+self.values.emplace_back(5);</code></pre>
+<p>This code has no effect. The property will return a <em>copy</em> of the vector which you mutate, and which will be destructed right after the call. There are many ways to fix this — using a shared pointer is one solution:</p>
+<pre><code data-language="objc">@property (nonatomic) std::shared_ptr&lt;std::vector&lt;int&gt;&gt; values;
+
+// later on
+self.values.get().emplace_back(5);</code></pre>
+<p>C++11 added <code>unique_ptr</code>, <code>shared_ptr</code> and <code>weak_ptr</code> to the language — in many ways they are similar to ARC, just faster and deterministic, as there’s no autorelease pool that might hold onto things. Shared pointers are great and really, calling <code>new</code> or <code>delete</code> in most cases is bad design and can be replaced by <a href="https://mbevin.wordpress.com/2012/11/18/smart-pointers" title="Smart Pointers Explained">smart pointers</a>.</p>
+<h2 id="objective-c-features">Objective-C features</h2>
+<p>We make use of a number of Objective-C features that not everybody may know about and we have a number of helper functions available that make code more readable, especially when dealing with collections.</p>
+<h3 id="ns_noescape">NS_NOESCAPE</h3>
+<p>In Swift, there’s a <code>@noescape</code> declaration that allows the compiler to optimize code inside blocks. While there’s no <code>NS_NOESCAPE</code> yet, we can help ourselves:</p>
+<pre><code data-language="objc">// Equivalent to Swift's @noescape
+#define PSPDF_NOESCAPE __attribute__((noescape))</code></pre>
+<p>Of course we submitted <a href="http://openradar.appspot.com/25737301">rdar://25737301</a> for that, and there’s also a <a href="https://github.com/apple/swift-evolution/blob/master/proposals/0012-add-noescape-to-public-library-api.md">Swift proposal</a> to add this to the Objective-C side of the language — so this is likely something that we’ll see soon.</p>
+<h3 id="dot-syntax">Dot syntax</h3>
+<p>This is a controversial topic. We use dot syntax for any method that does not have side effects — even if it is not declared as a property:</p>
+<pre><code data-language="objc">// Typical
+[UIApplication sharedApplication].keyWindow
+
+// Shorter
+UIApplication.sharedApplication.keyWindow</code></pre>
+<p>Apple converted many methods that should have been properties, but which simply predate properties, to properties in the iOS 7 SDK. There’s no functional difference, just that this now plays better with auto completion. The downside here is that Xcode does not autocomplete method calls with dot syntax yet.</p>
+<h3 id="map-filter-flatmap">map, filter, flatMap</h3>
+<p>The bread and butter data structures like <code>NSArray</code> and <code>NSSet</code> really miss higher order functions. While there are <em>some</em> useful methods, they really are perversely long and not convenient to use.</p>
+<p>Consider this code that collects selected annotations from page views:</p>
+<pre><code data-language="objc">- (NSArray&lt;PSPDFAnnotation *&gt; *)selectedAnnotations {
+    NSMutableArray&lt;PSPDFAnnotation *&gt; *selectedAnnotations = [NSMutableArray array];
+    for (PSPDFPageView *visiblePageView in self.visiblePageViews) {
+        if (visiblePageView.selectedAnnotations.count &gt; 0) {
+            [selectedAnnotations addObjectsFromArray:visiblePageView.selectedAnnotations];
+        }
+    }
+    return [selectedAnnotations copy];
+}</code></pre>
+<p>Let’s see how the same code looks with using our <code>flatMap</code> helper:</p>
+<pre><code data-language="objc">- (NSArray&lt;PSPDFAnnotation *&gt; *)selectedAnnotations {
+    return [self.visiblePageViews pspdf_flatMap:^NSArray&lt;PSPDFAnnotation *&gt; *(PSPDFPageView *pageView) {
+        return pageView.selectedAnnotations;
+    }];
+}</code></pre>
+<p>The whole helper is very straightforward. There are variants out there that return a block, which allows better chaining. We opted for a more Objective-C-like API that does not crash when the array is <code>nil</code>:</p>
+<pre><code data-language="objc">- (NSArray *(^)(NSArray * _Nullable (^)(__kindof id obj)))pspdf_flatMapBlock {
+    return ^(NSArray *(^block)(id obj)) {
+        NSMutableArray *result = [NSMutableArray new];
+        for (id obj in self) {
+            NSArray * _Nullable array = block(obj);
+            [result pspdf_addObjectsFromArray:array];
+        }
+        return [result copy];
+    };
+}
+
+- (NSArray *)pspdf_flatMap:(PSPDF_NOESCAPE NSArray * _Nullable (^)(__kindof id obj))block {
+    return self.pspdf_flatMapBlock(block);
+}</code></pre>
+<p>We have similar methods available for things like filter or map, together with a bunch of other helpers like <code>-[NSArray pspdf_mutatedArrayUsingBlock:]</code> to encapsulate a lot of boiler plate code that everybody has written hundreds of times. While our helpers are currently not open source, there are quite a few open source projects that can help. <a href="https://github.com/zwaldowski/BlocksKit/blob/master/BlocksKit/Core/NSArray%2BBlocksKit.h" title="BlocksKit">BlocksKit has quite a nice implementation of the above.</a></p>
+<h2 id="conclusion">Conclusion</h2>
+<p>We use the methods mentioned in this post on a daily basis inside <a href="https://pspdfkit.com/">PSPDFKit</a> and are convinced that it makes our code not only more readable but also increases the safety of the codebase. Many of the aforementioned approaches also speed up development time, as we no longer have to write the same boiler plate code over and over again — something all too common when working with Objective-C development. There are many other apps and frameworks that use Objective-C++. <a href="https://github.com/realm/realm-cocoa/tree/master/Realm">Realm Cocoa</a>, <a href="https://www.fiftythree.com/">Paper by FiftyThree</a>, <a href="https://github.com/couchdeveloper/RXPromise">RxPromise</a>, <a href="https://github.com/dropbox/djinni">Dropbox Djinni</a>, <a href="https://github.com/facebook/componentkit">Facebook’s ComponentKit</a> and <a href="https://github.com/facebook/pop">Pop</a> — even many frameworks from Apple such as Core&nbsp;Graphics, <a href="https://github.com/WebKit/webkit/blob/master/Source/WebKit2/UIProcess/API/Cocoa/WKWebView.mm">WebKit/WKWebView</a> or <a href="https://github.com/opensource-apple/objc4/tree/master/runtime">the Objective-C runtime itself</a>.</p>
+<p>Thanks to some fantastic folks on Twitter that helped reviewing and improving this article, including <a href="https://twitter.com/cmchem">@cmchem</a>, <a href="https://twitter.com/NachoSoto">@NachoSoto</a>, <a href="https://twitter.com/ppaulojr">@ppaulojr</a>, <a href="https://twitter.com/anlumo1">@anlumo1</a>, <a href="https://twitter.com/petersibley">@petersibley</a> and <a href="https://twitter.com/neilkimmett">@neilkimmett</a>.</p>
+<p>Made it till the end? Enjoy working on hard problems? <a href="https://steipete.me/careers">We are a remote company and hiring.</a></p>
+<p><em>Update</em>: We’ve published a second article, “<a href="https://steipete.me/blog/2017/even-swiftier-objective-c/">Even Swiftier Objective-C</a>”, that builds on the information presented herein, and includes information presented at the 2017 WWDC.</p>
+<h2 id="further-reading">Further reading</h2>
+<ul>
+<li><a href="https://mbevin.wordpress.com/2012/11/18/smart-pointers" title="Smart Pointers Explained">Smart Pointers</a></li>
+<li><a href="https://web.archive.org/web/20101203170217/http://developer.apple.com/library/mac/#/web/20101204020949/http://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/ObjectiveC/Articles/ocCPlusPlus.html">Apple’s (sadly deleted, but archived) documentation on Objective-C++</a> (Apple is using ObjC++ extensively in various system frameworks like Core&nbsp;Graphics and many parts of Xcode are written in it, so unlike the documentation, <a href="https://programmers.stackexchange.com/questions/80166/is-objective-c-being-phased-out">it won’t go away.</a>)</li>
+<li><a href="https://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization" title="Resource Acquisition Is Initialization">Resource Acquisition Is Initialization</a></li>
+<li><a href="https://realm.io/news/altconf-peter-steinberger-objective-c++-what-could-possibly-go-wrong/">Talk by @steipete: [Objective] C++: What Could Possibly Go Wrong?</a></li>
+<li><a href="http://componentkit.org/docs/why-cpp.html">ComponentKit: Why C++</a></li>
+<li><a href="https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996">Effective Modern C++ (book)</a></li>
+</ul></article></div>

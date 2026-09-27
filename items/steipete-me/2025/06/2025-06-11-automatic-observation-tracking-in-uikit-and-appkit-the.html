@@ -1,0 +1,249 @@
+<div id="readability-page-1" class="page"><article id="article"><p><strong>TL;DR</strong>: iOS 18 and macOS 15 secretly ship with automatic observation tracking for UIKit/AppKit. Enable it with a plist key, and your views magically update when your <code>@Observable</code> models change. No more manual <code>setNeedsDisplay()</code> calls!</p>
+
+<p>Remember when SwiftUI came out and we all marveled at how views automatically updated when <code>@Published</code> properties changed? Well, Apple has been quietly working on bringing that same magic to UIKit and AppKit. The best part? It shipped in iOS 18/macOS 15, but hardly anyone knows about it. You don’t even need Xcode 26, it’s just one simple plist entry away.</p>
+<h2 id="the-problem-weve-all-faced">The Problem We’ve All Faced</h2>
+<p>Let’s be honest - keeping your UI in sync with your data model in UIKit has always been a chore. Here’s the dance we’ve all done:</p>
+<pre><code data-language="swift">class ProfileViewController: UIViewController {
+    var user: User? {
+        didSet {
+            updateUI()
+        }
+    }
+    
+    func updateUI() {
+        nameLabel.text = user?.name
+        avatarImageView.image = user?.avatar
+        // ... 20 more lines of manual updates
+        setNeedsLayout()
+    }
+}</code></pre>
+<p>Forgot to call <code>updateUI()</code>? Enjoy your stale UI. Called it too often? Hello, performance issues. It’s tedious and error-prone.</p>
+<h2 id="enter-automatic-observation-tracking">Enter Automatic Observation Tracking</h2>
+<p>With the new observation framework, this entire pattern becomes obsolete. Here’s the same code with automatic tracking:</p>
+<pre><code data-language="swift">import Observation
+
+@Observable
+class User {
+    var name: String = ""
+    var avatar: UIImage?
+    var unreadCount = 0
+    
+    var hasUnread: Bool {
+        unreadCount &gt; 0
+    }
+}
+
+class ProfileViewController: UIViewController {
+    let user = User()
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        // UIKit tracks these property accesses automatically!
+        nameLabel.text = user.name
+        avatarImageView.image = user.avatar
+        badgeView.isHidden = !user.hasUnread
+    }
+}</code></pre>
+<p>That’s it. Change <code>user.name</code> anywhere in your app, and the label updates. No manual calls, no forgotten updates, no performance overhead from unnecessary refreshes. It just works.</p>
+<h2 id="where-observation-tracking-works">Where Observation Tracking Works</h2>
+<p>The automatic observation tracking is supported in a variety of UIKit and AppKit methods. For most cases, <code>viewWillLayoutSubviews()</code> in UIKit view controllers, <code>layoutSubviews()</code> in UIKit views, and their AppKit equivalents (<code>viewWillLayout()</code> and <code>layout()</code>) are the go-to choices.</p>
+<details>
+<summary><strong>View the complete list of supported methods</strong></summary>
+<h3 id="uiview">UIView</h3>
+<ul>
+<li><a href="https://developer.apple.com/documentation/uikit/automatic-trait-tracking"><code>updateProperties()</code></a> (iOS 26+)</li>
+<li><a href="https://developer.apple.com/documentation/uikit/uiview/1622482-layoutsubviews"><code>layoutSubviews()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/uikit/uiview/1622512-updateconstraints"><code>updateConstraints()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/uikit/uiview/1622529-draw"><code>draw(_:)</code></a></li>
+</ul>
+<h3 id="uiviewcontroller">UIViewController</h3>
+<ul>
+<li><a href="https://developer.apple.com/documentation/uikit/automatic-trait-tracking"><code>updateProperties()</code></a> (iOS 26+)</li>
+<li><a href="https://developer.apple.com/documentation/uikit/uiviewcontroller/1621437-viewwilllayoutsubviews"><code>viewWillLayoutSubviews()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/uikit/uiviewcontroller/1621398-viewdidlayoutsubviews"><code>viewDidLayoutSubviews()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/uikit/uiviewcontroller/1621379-updateviewconstraints"><code>updateViewConstraints()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/uikit/uiviewcontroller/4195484-updatecontentunavailableconfigur"><code>updateContentUnavailableConfiguration(using:)</code></a></li>
+</ul>
+<h3 id="uipresentationcontroller">UIPresentationController</h3>
+<ul>
+<li><a href="https://developer.apple.com/documentation/uikit/uipresentationcontroller/1618335-containerviewwilllayoutsubviews"><code>containerViewWillLayoutSubviews()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/uikit/uipresentationcontroller/1618329-containerviewdidlayoutsubviews"><code>containerViewDidLayoutSubviews()</code></a></li>
+</ul>
+<h3 id="uibutton">UIButton</h3>
+<ul>
+<li><a href="https://developer.apple.com/documentation/uikit/uibutton/3750773-updateconfiguration"><code>updateConfiguration()</code></a></li>
+<li>When executing the <a href="https://developer.apple.com/documentation/uikit/uibutton/3750772-configurationupdatehandler"><code>configurationUpdateHandler</code></a></li>
+</ul>
+
+<ul>
+<li><a href="https://developer.apple.com/documentation/uikit/uicollectionviewcell/3600950-updateconfiguration"><code>updateConfiguration(using:)</code></a> (UICollectionViewCell)</li>
+<li><a href="https://developer.apple.com/documentation/uikit/uitableviewcell/3601058-updateconfiguration"><code>updateConfiguration(using:)</code></a> (UITableViewCell)</li>
+<li><a href="https://developer.apple.com/documentation/uikit/uitableviewheaderfooterview/3601061-updateconfiguration"><code>updateConfiguration(using:)</code></a> (UITableViewHeaderFooterView)</li>
+<li>When executing the <code>configurationUpdateHandler</code></li>
+</ul>
+<h3 id="nsview-appkit">NSView (AppKit)</h3>
+<ul>
+<li><a href="https://developer.apple.com/documentation/appkit/nsview/1526891-updateconstraints"><code>updateConstraints()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/appkit/nsview/1526146-layout"><code>layout()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/appkit/nsview/1483686-draw"><code>draw(_:)</code></a></li>
+<li><a href="https://developer.apple.com/documentation/appkit/nsview/1526068-updatelayer"><code>updateLayer()</code></a></li>
+</ul>
+<h3 id="nsviewcontroller-appkit">NSViewController (AppKit)</h3>
+<ul>
+<li><a href="https://developer.apple.com/documentation/appkit/nsviewcontroller/1434401-updateviewconstraints"><code>updateViewConstraints()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/appkit/nsviewcontroller/1434481-viewwilllayout"><code>viewWillLayout()</code></a></li>
+<li><a href="https://developer.apple.com/documentation/appkit/nsviewcontroller/1434491-viewdidlayout"><code>viewDidLayout()</code></a></li>
+</ul>
+</details>
+<h2 id="enabling-the-magic">Enabling the Magic</h2>
+<p>Here’s where it gets interesting. This feature isn’t enabled by default (yet). You need to add a key to your Info.plist:</p>
+<h3 id="for-uikit-ios-18">For UIKit (iOS 18+)</h3>
+<pre><code data-language="xml">&lt;key&gt;UIObservationTrackingEnabled&lt;/key&gt;&lt;true/&gt;</code></pre>
+<h3 id="for-appkit-macos-15">For AppKit (macOS 15+)</h3>
+<pre><code data-language="xml">&lt;key&gt;NSObservationTrackingEnabled&lt;/key&gt;&lt;true/&gt;</code></pre>
+<p>This plist key enables observation tracking in iOS 18 and macOS 15. Starting with their 26 releases, this is on by default and the key will simply be ignored.</p>
+<h2 id="ios-26-and-beyond">iOS 26 and Beyond</h2>
+<p>iOS 26 (already in beta!) brings improvements. The new <code>updateProperties()</code> method on both <code>UIView</code> and <code>UIViewController</code> provides an even better place for observable property access. For a comprehensive overview of all iOS 26 UIKit additions, check out <a href="https://www.swiftjectivec.com/ios-26-notable-uikit-additions/">Jordan Morgan’s excellent writeup</a>.</p>
+<pre><code data-language="swift">class MyView: UIView {
+    let model: MyModel
+    
+    override func updateProperties() {
+        super.updateProperties()
+        // This runs before layoutSubviews for even better performance
+        backgroundColor = model.backgroundColor
+        layer.cornerRadius = model.cornerRadius
+    }
+}</code></pre>
+<p>This method is specifically designed for property updates and runs before <code>layoutSubviews</code>, allowing for more efficient updates and clearer separation of concerns.</p>
+<p>Just like the layout system has <code>setNeedsLayout()</code> and <code>layoutIfNeeded()</code>, the property update system provides <a href="https://developer.apple.com/documentation/uikit/uiview/setNeedsUpdateProperties"><code>setNeedsUpdateProperties()</code></a> and <a href="https://developer.apple.com/documentation/uikit/uiview/updatePropertiesIfNeeded"><code>updatePropertiesIfNeeded()</code></a>. You can call <code>setNeedsUpdateProperties()</code> to schedule a property update on the next update cycle, or use <code>updatePropertiesIfNeeded()</code> to force an immediate update if one is pending. This gives you fine-grained control over when property updates occur, which is especially useful for optimizing performance in complex view hierarchies.</p>
+<p>Apple’s <a href="https://developer.apple.com/documentation/uikit/automatic-trait-tracking">automatic trait tracking documentation</a> provides detailed guidance on using these new APIs. Plus, automatic observation tracking is enabled by default in iOS 26, so you won’t even need the plist key anymore.</p>
+<h2 id="the-gotchas">The Gotchas</h2>
+<p>Of course, it’s not all roses. Here are a few things to watch out for:</p>
+<ul>
+<li><strong>Observation happens in specific methods</strong>: Only properties accessed in the supported methods (see list above) are tracked</li>
+<li><strong>Timing matters</strong>: If you’re doing expensive computations, consider caching results since these methods can be called frequently</li>
+<li><strong>Memory considerations</strong>: Observable objects are retained while being observed, so be mindful of retain cycles</li>
+<li><strong>Thread safety</strong>: While <code>@Observable</code> is thread-safe, mutations from different threads could lead to inconsistent UI representations. Keep all mutations on the main thread to avoid surprises</li>
+</ul>
+<h2 id="a-pattern-to-avoid">A Pattern to Avoid</h2>
+<p>You might be tempted to create a method that pre-accesses all observable properties:</p>
+<pre><code data-language="swift">// ❌ Don't do this
+override func trackObservableProperties() {
+    // Accessing all properties upfront
+    _ = model.backgroundColor
+    _ = model.cornerRadius
+    _ = model.title
+    // ... etc
+}</code></pre>
+<p>This is an anti-pattern for two reasons:</p>
+<ol>
+<li>
+<p><strong>Inefficiency</strong>: It establishes observation dependencies for ALL properties, even those not used in the current UI state. The beauty of automatic observation is that it only tracks properties actually accessed during updates.</p>
+</li>
+<li>
+<p><strong>Fragility</strong>: You’re maintaining a duplicate list of properties that can easily fall out of sync with your actual UI code.</p>
+</li>
+</ol>
+<p>Instead, access properties directly where they’re used:</p>
+<pre><code data-language="swift">// ✅ Do this
+override func layoutSubviews() {
+    super.layoutSubviews()
+    // Only accessed properties create dependencies
+    if model.isOptionEnabled {
+        view.foo = model.bar  // Only bar is observed
+    } else {
+        view.foo = model.baz  // Only baz is observed
+    }
+}</code></pre>
+<p>This way, only the properties actually affecting your UI get observation dependencies, making your code both more efficient and maintainable.</p>
+<h2 id="performance-considerations">Performance Considerations</h2>
+<p>You might be wondering about performance. The beauty of this system is that it only tracks dependencies when views are actually laying out. If a view isn’t visible, it’s not tracking. The observation framework uses a sophisticated dependency graph that ensures minimal overhead.</p>
+<h2 id="complete-example-project">Complete Example Project</h2>
+<p>Automatic observation tracking is one of those features that makes you wonder how you lived without it. It brings the best parts of SwiftUI’s reactive programming model to UIKit and AppKit, without requiring a complete rewrite of your app.</p>
+<p>All the code snippets in this post come from a fully working example project. Check it out on GitHub: <a href="https://github.com/steipete/ObservationTrackingExample">ObservationTrackingExample</a></p>
+<h2 id="the-missing-piece-custom-traits">The Missing Piece: Custom Traits</h2>
+<p>If you’ve used SwiftUI, you know the joy of <code>@EnvironmentObject</code> - drop an object at the root, access it anywhere. UIKit developers have been jealous of this pattern for years. Well, jealous no more. (Mac devs miss out tho - there’s no equivalent on AppKit yet)</p>
+<p>Since iOS 17, UIKit has quietly introduced custom traits - a way to attach arbitrary values to the trait collection that flows through your view hierarchy. These aren’t just for dark mode and size classes anymore. Keith Harrison has an <a href="https://useyourloaf.com/blog/custom-traits-and-swiftui/">excellent deep dive into custom traits</a> if you want the full story.</p>
+<p>The magic happens when you combine custom traits with observable objects. You get automatic propagation AND automatic updates. It’s like having your cake and eating it too.</p>
+<details>
+<summary><strong>View the complete Example</strong></summary>
+<p>Let’s build an app-wide state container that any view can access and observe:</p>
+<pre><code data-language="swift">import UIKit
+import Observation
+
+@Observable 
+class AppModel {
+    var currentUser: User?
+    var theme: Theme = .light
+    var isOnline = true
+    
+    // Add more app-wide state as needed
+}
+
+// Define a custom trait for your app model
+struct AppModelTrait: UITraitDefinition {
+    static let defaultValue: AppModel? = nil
+}
+
+// Add convenient accessors
+extension UITraitCollection {
+    var appModel: AppModel? {
+        self[AppModelTrait.self]
+    }
+}
+
+extension UIMutableTraits {
+    var appModel: AppModel? {
+        get { self[AppModelTrait.self] }
+        set { self[AppModelTrait.self] = newValue }
+    }
+}</code></pre>
+<h2 id="injecting-the-model">Injecting the Model</h2>
+<p>At your app’s root (usually in your scene delegate or root view controller), inject the model:</p>
+<pre><code data-language="swift">class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+    let appModel = AppModel()
+    
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        window = UIWindow(windowScene: windowScene)
+        let rootViewController = MainTabBarController()
+        
+        // Inject the app model into the trait system
+        rootViewController.traitOverrides.appModel = appModel
+        
+        window?.rootViewController = rootViewController
+        window?.makeKeyAndVisible()
+    }
+}</code></pre>
+<h2 id="observing-changes-anywhere">Observing Changes Anywhere</h2>
+<p>Now the magic part - any view controller in your hierarchy can access and observe the model:</p>
+<pre><code data-language="swift">class ProfileViewController: UIViewController {
+    let nameLabel = UILabel()
+    let statusIndicator = UIView()
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        
+        guard let model = traitCollection.appModel else { return }
+        
+        // These automatically update when model properties change!
+        nameLabel.text = model.currentUser?.name ?? "Guest"
+        statusIndicator.backgroundColor = model.isOnline ? .systemGreen : .systemRed
+        
+        // Theme updates
+        view.backgroundColor = model.theme.backgroundColor
+        nameLabel.textColor = model.theme.textColor
+    }
+}</code></pre>
+<p>No delegates. No notifications. No manual updates. Change <code>appModel.currentUser</code> anywhere in your app, and every view observing it updates automatically.</p>
+</details>
+<h2 id="resources">Resources</h2>
+<ul>
+<li><a href="https://developer.apple.com/documentation/observation">Apple’s Observation Framework Documentation</a></li>
+<li><a href="https://developer.apple.com/videos/play/wwdc2023/10149/">WWDC 2023: Discover Observation in Swift</a> (covers the foundation)</li>
+<li><a href="https://github.com/steipete/ObservationTrackingExample">Example Project on GitHub</a></li>
+<li><a href="https://forums.swift.org/t/observation-tracking-in-uikit">Swift Forums Discussion on Observation Tracking</a></li>
+<li><a href="https://useyourloaf.com/blog/custom-traits-and-swiftui/">Custom Traits and SwiftUI</a> by Keith Harrison</li>
+</ul></article></div>

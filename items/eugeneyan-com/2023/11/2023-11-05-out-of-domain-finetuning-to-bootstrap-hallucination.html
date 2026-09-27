@@ -1,0 +1,200 @@
+<div id="readability-page-1" class="page"><div>
+            <p>It’s easy to finetune models for our specific tasks; we just need a couple hundred or a few thousand samples. However, collecting these samples is costly and time-consuming. What if, we could bootstrap our tasks with <em>out-of-domain</em> data? We’ll explore this idea here.</p>
+
+<p>The task is to finetune a model to detect factual inconsistencies aka hallucinations. We’ll focus on <em>news</em> summaries in the <a href="https://arxiv.org/abs/2211.08412v1" target="_blank">Factual Inconsistency Benchmark</a> (FIB). It is a challenging dataset—even after finetuning for 10 epochs on the training split, the model still does poorly on the validation split (middle in image below).</p>
+
+<p>To examine how out-of-domain data helps, we re-instantiate our model and finetune on <em>Wikipedia</em> summaries for 3 epochs before finetuning for 10 epochs on FIB. This led to PR AUC of 0.85 (right below)—a 23% improvement over finetuning on FIB alone. Also, the probability distributions are better separated, making the model more suitable for production where we have to pick a threshold to classify a summary as inconsistent.</p>
+
+<p><img src="https://eugeneyan.com/assets/finetune-comparison.webp" loading="lazy" title="Evals on non-finetuned vs. task-specific finetuning vs. out-of-domain + task-specific finetuning" alt="Evals on non-finetuned vs. task-specific finetuning vs. out-of-domain + task-specific finetuning"></p>
+<p>Evals on non-finetuned vs. task-specific finetuning vs. out-of-domain + task-specific finetuning</p>
+
+<p>Okay, that was the high-level overview. Next, let’s dive into the details and visuals.</p>
+
+<h2 id="classifying-factual-inconsistencies-via-nli">Classifying factual inconsistencies via NLI</h2>
+
+<p>We can detect factually inconsistent summaries via the natural language inference (NLI) task. The NLI task works like this: Given a premise sentence and a hypothesis sentence, the goal is to predict if the hypothesis is entailed by, neutral, or contradicts the premise.</p>
+
+<p><img src="https://eugeneyan.com/assets/llm-patterns-aieng-2023-55-cropped.webp" loading="lazy" title="Entailment, neutral, and contradiction labels in NLI" alt="Entailment, neutral, and contradiction labels in NLI"></p>
+<p>Entailment, neutral, and contradiction labels in NLI (<a href="https://eugeneyan.com/speaking/ai-eng-summit/" target="_blank">source</a>)</p>
+
+<p>We can apply NLI to <a href="https://eugeneyan.com/writing/abstractive/" target="_blank">abstractive summaries</a> too. Here, the source document is the premise and the summary is the hypothesis. Thus, if the summary contradicts the source, that’s a factual inconsistency aka hallucination.</p>
+
+<p><img src="https://eugeneyan.com/assets/llm-patterns-aieng-2023-56-cropped.webp" loading="lazy" title="Entailment, neutral, and contradiction labels in abstractive summaries" alt="Entailment, neutral, and contradiction labels in abstractive summaries"></p>
+<p>Entailment, neutral, and contradiction labels in abstractive summaries (<a href="https://eugeneyan.com/speaking/ai-eng-summit/" target="_blank">source</a>)</p>
+
+<p>For the model, we’ll use a variant of <a href="https://arxiv.org/abs/1910.13461" target="_blank">BART</a> that has been <a href="https://huggingface.co/facebook/bart-large-mnli" target="_blank">finetuned</a> on the <a href="https://arxiv.org/abs/1704.05426" target="_blank">MNLI dataset</a>. By default, an NLI model outputs probabilities for entailment (label = 2), neutral (label = 1), and contradiction (label = 0). To get the probability of factual inconsistency, we’ll drop the neutral dimension, apply a softmax on the remaining two dimensions, and take the probability of contradiction. It’s really just a single line of code:</p>
+
+<div><pre><code data-language="python">def get_prob_of_contradiction(logits: torch.Tensor) -&gt; torch.Tensor:
+    """
+    Returns probability of contradiction aka factual inconsistency.
+    
+    Args:
+        logits (torch.Tensor): Tensor of shape (batch_size, 3). The second dimension 
+        represents the probabilities of contradiction, neutral, and entailment.
+
+    Returns:
+        torch.Tensor: Tensor of shape (batch_size,) with probability of contradiction.
+
+    Note:
+        This function assumes the probability of contradiction is in index 0 of logits.
+    """
+    
+    # Drop neutral logit (index=1), softmax, and get prob of contradiction (index=0)
+    prob = F.softmax(logits[:, [0, 2]], dim=1)[:, 0]
+    
+    return prob
+</code></pre></div>
+
+<h2 id="finetuning-to-classify-factual-inconsistencies-in-fib">Finetuning to classify factual inconsistencies in FIB</h2>
+
+<p>The <a href="https://arxiv.org/abs/2211.08412v1" target="_blank">Factual Inconsistency Benchmark (FIB)</a> is a dataset for evaluating whether language models can spot factual inconsistencies in summaries. It is based on news summaries from <a href="https://arxiv.org/abs/1602.06023" target="_blank">CNN/Daily Mail</a> and <a href="https://arxiv.org/abs/1808.08745" target="_blank">XSUM</a>, with 100 and 500 news articles from each respectively. Each news article comes with a pair of summaries where one is factually consistent with the source document while the other isn’t.</p>
+
+<p><img src="https://eugeneyan.com/assets/fib.webp" loading="lazy" title="Given a gold summary and a distractor, can we assign a higher score to the factually consistent summary vs. the factually inconsistent summary?" alt="Given a gold summary and a distractor, can we assign a higher score to the factually consistent summary vs. the factually inconsistent summary?"></p>
+<p>Given a gold summary and a distractor, can we assign a higher score to the factually consistent summary vs. the factually inconsistent summary? (<a href="https://arxiv.org/abs/2211.08412v1" target="_blank">source</a>)</p>
+
+<p>Four of the authors annotated the summaries, and each summary was annotated by two annotators. First, they annotated reference summaries as factually consistent or inconsistent. Then, they edited the factually inconsistent summaries to be factually consistent with an emphasis on making minimal edits. Most edits involved removing or changing keywords or phrases that were not found in the news article.</p>
+
+<p>To prepare for finetuning and evaluation, we first excluded the CNN/Daily Mail documents and summaries—they were found to be low quality during visual inspection. Then, we balanced the dataset by keeping one consistent summary and one inconsistent summary for each news article. Finally, we split it into training and validation sets, where validation made up 20% of the data (i.e., 100 news articles). To prevent data leakage, the same news article doesn’t appear across training and validation splits.</p>
+
+<p>Upon visual inspection, it seems challenging to distinguish between consistent vs. inconsistent summaries. The latter tends to contain words from or similar to the source document but phrased to be factually inconsistent. Here’s the first sample in the dataset:</p>
+
+
+
+<blockquote>
+  <p><strong>Source:</strong> Vehicles and pedestrians will <span>now embark and disembark the Cowes ferry separately</span> following Maritime and Coastguard Agency (MCA) guidance. Isle of Wight Council said its <span>new procedures</span> were in response to a <span>resident’s complaint</span>. Councillor Shirley Smart said it would “initially result in a <span>slower service</span>”. Originally passengers and vehicles boarded or disembarked the so-called “floating bridge” at the same time. Ms Smart, who is the executive member for economy and tourism, said the council already had measures in place to control how passengers and vehicles left or embarked the chain ferry “in a <span>safe</span> manner”. However, it was “responding” to the MCA’s recommendations “following this complaint”. She added: “This may initially result in a slower service while the measures are introduced and our customers get used to the changes.” The service has been in operation since 1859.</p>
+
+  <p><strong>Inconsistent summary:</strong> A <span>new service</span> on the Isle of Wight’s chain ferry has been <span>launched following a complaint from a resident</span>.</p>
+
+  <p><strong>Consistent summary:</strong> Passengers using a chain ferry have been warned <span>crossing times will be longer</span> because of <span>new safety measures</span>.</p>
+
+</blockquote>
+
+<p>Evaluating the non-finetuned model on FIB confirms our intuition: The model struggled and had low <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html" target="_blank">ROC AUC</a> and <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html" target="_blank">PR AUC</a> (below). Furthermore, probability distributions for consistent vs. inconsistent summaries weren’t well separated—this makes it unusable in production where we have to pick a threshold to classify outputs as inconsistent.</p>
+
+<p><img src="https://eugeneyan.com/assets/pre-ft.webp" loading="lazy" title="The non-finetuned model performs badly on FIB" alt="The non-finetuned model performs badly on FIB"></p>
+<p>The non-finetuned model performs badly on FIB</p>
+
+<p>After finetuning for 10 epochs via <a href="https://arxiv.org/abs/2305.14314" target="_blank">QLoRA</a>, ROC AUC and PR AUC improved slightly to 0.68 - 0.69 (below). Nonetheless, the separation of probabilities is still poor. Taking a threshold of 0.8, recall is a measly 0.02 while precision is 0.67.</p>
+
+<p><img src="https://eugeneyan.com/assets/post-ft-on-fib.webp" loading="lazy" title="Even after finetuning for 10 epochs, performance isn't much better" alt="Even after finetuning for 10 epochs, performance isn't much better"></p>
+<p>Even after finetuning for 10 epochs, performance isn't much better</p>
+
+<h2 id="pre-finetuning-on-usb-to-improve-performance-on-fib">Pre-finetuning on USB to improve performance on FIB</h2>
+
+<p>It seems that finetuning solely on FIB for 10 epochs wasn’t enough. What if we pre-finetune on a <em>different</em> dataset <em>before</em> finetuning on FIB?</p>
+
+<p>The <a href="https://arxiv.org/abs/2305.14296" target="_blank">Unified Summarization Benchmark</a> (USB) is made up of eight summarization tasks including abstractive summarization, evidence extraction, and factuality classification. While FIB documents are based on <em>news</em>, USB documents are based on a different domain—<em>Wikipedia</em>. Labels for factual consistency were created based on edits to summary sentences; inconsistent and consistent labels were assigned to the before and after versions respectively. Here’s the first sample in the dataset:</p>
+
+<blockquote>
+  <p><strong>Source:</strong> Wendy Jane Crewson was born in Hamilton, Ontario, the daughter of June Doreen (née Thomas) and Robert Binnie Crewson. Also in 2012, Crewson began playing Dr. Dana Kinny in the CTV medical drama “Saving Hope”, for which she received Canadian Screen Award for Best Supporting Actress in a Drama Program or Series in 2013.</p>
+
+  <p><strong>Inconsistent (before):</strong> Wendy Jane Crewson <span>(born May 9, 1956)</span> is a Canadian actress <span>and producer</span>.</p>
+
+  <p><strong>Consistent (after):</strong> Wendy Jane Crewson is a Canadian actress.</p>
+</blockquote>
+
+<p>Nonetheless, the labeling methodology isn’t perfect. Summaries that were edited due to grammatical or formatting errors were also labeled as non-factual. For example, in the second sample, the only difference between the consistent and inconsistent summary is that the latter is missing the word “the”. IMHO, both summaries are factually consistent.</p>
+
+<blockquote>
+  <p><strong>Source:</strong> When she returned to Canada, Crewson landed a leading role in the television movie “War Brides” (1980) directed by Martin Lavut, for which she received her first ACTRA Award nomination. From 1980 to 1983, she starred in the CBC drama series, “Home Fires”, a family saga set in Toronto during World War II. In 1991, Crewson appeared in her first breakthrough role in the American drama film “The Doctor” starring William Hurt.</p>
+
+  <p><strong>Inconsistent (before):</strong> She began her career appearing on Canadian television, before her breakthrough role in 1991 dramatic film “The Doctor”.</p>
+
+  <p><strong>Consistent (after):</strong> She began her career appearing on Canadian television, before her breakthrough role in <span>the</span> 1991 dramatic film “The Doctor”.</p>
+</blockquote>
+
+<p>Cleaning the USB data is beyond the scope of this write-up so we’ll just use the data as is. (Surprisingly—or unsurprisingly—finetuning on the imperfect USB data was still helpful.) For the training and validation sets, we’ll adopt the split provided by the authors.</p>
+
+<p>First, we re-instantiate the model before finetuning on the USB training split for 3 epochs with the same QLoRA parameters. Then, we evaluate on the FIB validation split.</p>
+
+<p>Finetuning on USB data didn’t seem to help with the FIB validation split. (To be clear, we’ve not finetuned on the FIB data (yet) so the poor performance is expected.) ROC AUC and PR AUC barely improved (below), and the separation of probabilities appears just as bad. Taking the same threshold of 0.8, recall is 0.10 while precision is 0.59. Considering that the FIB data is balanced, precision of 0.59 is barely better than a coin toss.</p>
+
+<p><img src="https://eugeneyan.com/assets/post-ft-on-usb.webp" loading="lazy" title="Finetuning on USB doesn't seem to help much with FIB..." alt="Finetuning on USB doesn't seem to help much with FIB..."></p>
+<p>Finetuning on 3 epochs of USB didn't seem to help much with FIB...</p>
+
+<p>But what happens when we add 10 epochs of finetuning on FIB? Our model now achieves PR AUC of 0.85—this is a 23% improvement over finetuning on FIB alone (PR AUC = 0.69). More importantly, the probability distributions of consistent vs. inconsistent summaries are better separated (right below), making the model more suitable for production. Relative to finetuning solely on FIB, at the same threshold of 0.8, we’ve increased recall from 0.02 to 0.50 (25x) and precision from 0.67 to 0.91 (+35%).</p>
+
+<p><img src="https://eugeneyan.com/assets/post-ft-on-usb+fib.webp" loading="lazy" title="Or did it? Adding 10 epochs of FIB led to greatly improved performance" alt="Or did it? Adding 10 epochs of FIB led to greatly improved performance"></p>
+<p>Or did it? Adding 10 epochs of FIB led to greatly improved performance</p>
+
+<p>Considering that evals for the USB-finetuned (PR AUC = 0.60) and non-finetuned (PR AUC = 0.56) models weren’t that different, this improvement is unexpected. It suggests that, though finetuning on USB didn’t directly improve performance on FIB, the model <em>did learn something useful</em> that enabled the same 10 epochs of FIB-finetuning to achieve far better results. This also means that it may be tricky to directly assess the impact of data blending.</p>
+
+<p><strong>Takeaway:</strong> Pre-finetuning on <em>Wikipedia</em> summaries improved factual inconsistency classification in <em>news</em> summaries, even though the former is <em>out-of-domain</em>.</p>
+
+<p>In other words, we <em>bootstrapped</em> on Wikipedia summaries to identify factually inconsistent news summaries. Thus,  we may not need to collect as much finetuning data for our tasks if there are open-source, permissive-use datasets that are somewhat related. While this may be obvious for some, it bears repeating that transfer learning for language modeling can extend beyond pretraining to finetuning (also see <a href="https://arxiv.org/abs/2203.02155" target="_blank">InstructGPT</a> and its <a href="https://arxiv.org/abs/2009.01325" target="_blank">predecessor</a>).</p>
+
+<p>(Also, it’ll likely work just as well if we blend both datasets and finetune via a single stage instead of finetuning in multiple stages on each dataset separately. That said, doing it in stages helped with understanding and visualizing the impact of each dataset.)</p>
+
+<p>• • •</p>
+
+<p>I hope you found this as exciting to read as it was for me to run these experiments. The code is available <a href="https://github.com/eugeneyan/visualizing-finetunes" target="_blank">here</a>. What interesting findings and tricks have you come across while finetuning your own models? Also, what other approaches work well for factual inconsistency detection? Please <a href="https://twitter.com/eugeneyan" target="_blank">DM me</a> or leave a comment below!</p>
+
+<h2 id="references">References</h2>
+<ul>
+  <li>Tam, Derek, et al. <a href="https://arxiv.org/abs/2211.08412v1" target="_blank">“Evaluating the factual consistency of large language models through summarization.”</a> arXiv preprint arXiv:2211.08412 (2022).</li>
+  <li>Krishna, Kundan, et al. <a href="https://arxiv.org/abs/2305.14296" target="_blank">“USB: A Unified Summarization Benchmark Across Tasks and Domains.”</a> arXiv preprint arXiv:2305.14296 (2023).</li>
+  <li>Lewis, Mike, et al. <a href="https://arxiv.org/abs/1910.13461" target="_blank">“Bart: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension.”</a> arXiv preprint arXiv:1910.13461 (2019).</li>
+  <li>Williams, Adina, Nikita Nangia, and Samuel R. Bowman. <a href="https://arxiv.org/abs/1704.05426" target="_blank">“A broad-coverage challenge corpus for sentence understanding through inference.”</a> arXiv preprint arXiv:1704.05426 (2017).</li>
+  <li>Nallapati, Ramesh, et al. <a href="https://arxiv.org/abs/1602.06023" target="_blank">“Abstractive text summarization using sequence-to-sequence rnns and beyond.”</a> arXiv preprint arXiv:1602.06023 (2016).</li>
+  <li>Narayan, Shashi, Shay B. Cohen, and Mirella Lapata. <a href="https://arxiv.org/abs/1808.08745" target="_blank">“Don’t give me the details, just the summary! topic-aware convolutional neural networks for extreme summarization.”</a> arXiv preprint arXiv:1808.08745 (2018).</li>
+  <li>Dettmers, Tim, et al. <a href="https://arxiv.org/abs/2305.14314" target="_blank">“Qlora: Efficient finetuning of quantized llms.”</a> arXiv preprint arXiv:2305.14314 (2023).</li>
+  <li>Ouyang, Long, et al. <a href="https://arxiv.org/abs/2203.02155" target="_blank">“Training language models to follow instructions with human feedback.”</a> Advances in Neural Information Processing Systems 35 (2022): 27730-27744.</li>
+  <li>Stiennon, Nisan, et al. <a href="https://arxiv.org/abs/2009.01325" target="_blank">“Learning to summarize with human feedback.”</a> Advances in Neural Information Processing Systems 33 (2020): 3008-3021.</li>
+</ul>
+
+<hr>
+<h2 id="appendix">Appendix</h2>
+
+<p>You may be wondering how the model performed on USB. I excluded it from the main write-up so as not to distract from the FIB dataset—there were already so many graphs!</p>
+
+<p><strong>Performance of non-finetuned model on USB:</strong> The non-finetuned model struggled with the USB validation split and was barely able to distinguish between factually consistent vs. factually inconsistent summaries. The bulk of the probability density for both labels is at 0.0. This may be due to the labeling methodology where some grammatical or formatting errors were incorrectly labeled as factually inconsistent. See the second sample <a href="#pre-finetuning-on-usb-to-improve-performance-on-fib">here</a>.</p>
+
+<p><img src="https://eugeneyan.com/assets/usb-pre-ft.webp" loading="lazy" title="Similarly, the non-finetuned model performs poorly on USB" alt="Similarly, the non-finetuned model performs poorly on USB"></p>
+<p>Similarly, the non-finetuned model performs poorly on USB</p>
+
+<p><strong>Performance of finetuned model on USB:</strong> After three epochs, PR AUC increased from 0.62 to 0.92. Also, the separation of distributions is closer to what we’d like to see in production. Nonetheless, given the concerns with the labels, it’s hard to say if it’s learned to classify factual inconsistencies or other errors such as grammar and formatting.</p>
+
+<p><img src="https://eugeneyan.com/assets/usb-post-ft.webp" loading="lazy" title="But after 3 epochs it does much better" alt="But after 3 epochs it does much better"></p>
+<p>But after 3 epochs it does much better</p>
+
+
+
+<p><strong>Thanks</strong> to <a href="https://twitter.com/sh_reya" target="_blank">Shreya Shankar</a> for reading drafts of this—the highlights in the sample summaries were her brilliant idea.</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Nov 2023). Out-of-Domain Finetuning to Bootstrap Hallucination Detection. eugeneyan.com.
+        https://eugeneyan.com/writing/finetuning/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2023finetune,
+  title   = {Out-of-Domain Finetuning to Bootstrap Hallucination Detection},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2023},
+  month   = {Nov},
+  url     = {https://eugeneyan.com/writing/finetuning/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

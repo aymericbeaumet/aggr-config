@@ -1,0 +1,100 @@
+<div id="readability-page-1" class="page"><div id="quarto-content">
+
+
+    
+
+<main id="quarto-document-content">
+
+
+
+
+  
+
+
+
+
+<p><img src="https://hamel.dev/blog/posts/evals-skills/cover-original.png"></p>
+<p>Today, Shreya Shankar and I are publishing <a href="https://github.com/ai-evals-course/evals-skills">evals skills</a>, a set of skills for AI product evals<a href="#fn1" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>Eval tools often get in the way. They nudge you toward <a href="https://hamel.dev/blog/posts/evals-faq/index.html#q-should-i-use-ready-to-use-evaluation-metrics">generic off-the-shelf metrics</a> and <a href="https://parlance-labs.com/blog/posts/auto-evals.html">fully automated evals</a> before you’ve looked at your data. These skills help you avoid common mistakes we’ve seen helping 50+ companies and teaching students in our <a href="https://maven.com/parlance-labs/evals">AI Evals course</a>.</p>
+<section id="why-skills-for-evals">
+
+<p>There are many <a href="https://hamel.dev/blog/posts/revenge/index.html">easily avoidable footguns</a> in evals. These skills help you avoid them.</p>
+<p><strong>evals-start</strong> is the entry point. It looks at your situation and routes you to the right skill. Most of the time it will send you to one of these two:</p>
+<ul>
+<li><strong>eval-audit</strong>, if you already have an eval pipeline. It inspects your setup and recommends next steps. <a href="#fn2" id="fnref2" role="doc-noteref"><sup>2</sup></a></li>
+<li><strong>error-discovery</strong>, if you have traces but haven’t analyzed them yet. It builds a customized annotation interface and helps you sample traces intelligently. Shreya does a live walkthrough of using this skill <a href="https://youtu.be/tqUDjc1HzO4">here</a>.</li>
+</ul>
+</section>
+<section id="the-skills">
+<h2 data-anchor-id="the-skills">The skills</h2>
+<p>Install the skills:</p>
+<div id="cb1"><pre><code>npx skills add https://github.com/ai-evals-course/evals-skills</code></pre></div>
+<p>Then give your agent this prompt:</p>
+<blockquote>
+<p>Run the evals-start skill from the evals plugin and follow the skill it picks. If it picks eval-audit, investigate each diagnostic area using a separate subagent in parallel, then synthesize the findings into a single report.</p>
+</blockquote>
+<p>If you’re experienced with evals, skip the router and pick the skill you need:</p>
+<table>
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th>Skill</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>evals-start</td>
+<td>Entry point. Routes to the skill that matches your situation</td>
+</tr>
+<tr>
+<td>eval-audit</td>
+<td>Audit an eval pipeline and surface problems with prioritized severity</td>
+</tr>
+<tr>
+<td>error-discovery</td>
+<td>Build a review app, select diverse samples, and organize your notes into failure modes</td>
+</tr>
+<tr>
+<td>generate-synthetic-data</td>
+<td>Create diverse synthetic test inputs using dimension-based tuple generation</td>
+</tr>
+<tr>
+<td>write-judge-prompt</td>
+<td>Design LLM-as-Judge evaluators for subjective quality criteria</td>
+</tr>
+<tr>
+<td>validate-evaluator</td>
+<td>Calibrate LLM judges against human labels using data splits, TPR/TNR, and bias correction</td>
+</tr>
+<tr>
+<td>evaluate-rag</td>
+<td>Evaluate retrieval and generation quality in RAG pipelines</td>
+</tr>
+<tr>
+<td>build-review-interface</td>
+<td>Build custom annotation interfaces for human trace review</td>
+</tr>
+</tbody>
+</table>
+
+<p>These skills are only a starting point. To make them better, tune them to be more specific to your data and domain.</p>
+<p>The repo is <a href="https://github.com/ai-evals-course/evals-skills">ai-evals-course/evals-skills</a>.</p>
+<p>You can find me on <a href="https://x.com/hamelhusain">X</a> or email me through my <a href="https://ai.hamel.dev">newsletter</a>.</p>
+
+
+</section>
+
+
+<section id="quarto-appendix" role="doc-endnotes"><h2>Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Not foundation model benchmarks like MMLU or HELM that measure general LLM capabilities. Product evals measure whether <em>your</em> pipeline works on <em>your</em> task with <em>your</em> data. If you aren’t familiar with product-specific AI evals, check out my <a href="https://hamel.dev/blog/posts/evals-faq/index.html">AI Evals FAQ</a>.<a href="#fnref1" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The audit isn’t a complete solution, but it will catch common problems.<a href="#fnref2" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></main> 
+
+</div></div>

@@ -1,0 +1,227 @@
+<div id="readability-page-1" class="page"><div><p><em>Last updated: 2025-08-16. <a target="_blank" rel="noopener noreferrer" href="https://github.com/philschmid/gemini-samples/blob/main/gemini-cli-cheatsheet.md">Markdown version</a> of the Gemini CLI cheatsheet.</em></p>
+<p>The <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a> is an open-source AI agent that brings the power of Gemini directly into your terminal, allowing you to perform a wide range of tasks such as coding, problem-solving, and task management using natural language. This cheatsheet provides a quick reference for installing, configuring, and using the Gemini CLI, with a focus on users authenticating via a Gemini API key.</p>
+<p><img src="https://www.philschmid.de/static/blog/gemini-cli-cheatsheet/architecture.png" alt="Gemini CLI Architecture"></p>
+<h2 id="-getting-started">🚀 Getting Started</h2>
+<h3 id="installation">Installation</h3>
+<p><strong>Install Globally:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">npm install -g @google/gemini-cli</code></pre></div></figure>
+<p><strong>Run without Installing:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">npx @google/gemini-cli</code></pre></div></figure>
+<h3 id="authentication-with-a-gemini-api-key">Authentication with a Gemini API Key</h3>
+<p>Authenticate with an API key before first use. See the <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/authentication.md">authentication guide</a> for details.</p>
+<ol>
+<li>
+<p><strong>Get Your Key:</strong> Get an API key from <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/app/apikey">Google AI Studio</a>.</p>
+</li>
+<li>
+<p><strong>Set Your Key:</strong> Make the key available to the CLI with one of these methods.</p>
+<p><strong>Method 1: Shell Environment Variable</strong>
+Set the <code>GEMINI_API_KEY</code> environment variable. To use it across terminal sessions, add this line to your shell's profile (e.g., <code>~/.bashrc</code>, <code>~/.zshrc</code>).</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"</code></pre></div></figure>
+<p><strong>Method 2: Environment File</strong>
+Create a <code>.env</code> file in <code>~/.gemini/</code> for global use or <code>./.gemini/</code> for a specific project. The CLI automatically loads it.</p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext"># In .gemini/.env
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY"</code></pre></div></figure>
+</li>
+</ol>
+<h3 id="basic-invocation">Basic Invocation</h3>
+<p><strong>Interactive Mode (REPL):</strong>
+Start a conversational session.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">gemini</code></pre></div></figure>
+<p><strong>Non-Interactive Mode:</strong>
+Pass a prompt and get a single response.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">gemini -p "Summarize the main points of the attached file. @./summary.txt"</code></pre></div></figure>
+<p><strong>Piping to the CLI:</strong>
+Pipe content to the CLI.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">echo "Count to 10" | gemini</code></pre></div></figure>
+<p><strong>Sandbox Mode:</strong>
+Run tools in a secure sandbox (requires Docker or Podman).</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">gemini --sandbox -p "your prompt"</code></pre></div></figure>
+<p><strong>Other Flags:</strong></p>
+<ul>
+<li><code>-m, --model &lt;model&gt;</code>: Use a specific model.</li>
+<li><code>-i, --prompt-interactive &lt;prompt&gt;</code>: Start an interactive session with an initial prompt.</li>
+<li><code>-d, --debug</code>: Enable debug output.</li>
+<li><code>--yolo</code>: Auto-approve all tool calls.</li>
+<li><code>--checkpointing</code>: Save a project snapshot before file modifications. Use <code>/restore</code> to revert changes.</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md#command-line-arguments">Full list of flags</a>.</p>
+<h2 id="️-configuration">⚙️ Configuration</h2>
+<h3 id="settings-files-settingsjson">Settings Files (<code>settings.json</code>)</h3>
+<p>Customize the CLI by creating a <code>settings.json</code> file. Settings are applied with the following precedence:</p>
+<ol>
+<li><strong>Project:</strong> <code>.gemini/settings.json</code> (overrides user).</li>
+<li><strong>User:</strong> <code>~/.gemini/settings.json</code></li>
+<li><strong>System:</strong> <code>/etc/gemini-cli/settings.json</code> (applies to all users, has highest precedence).</li>
+</ol>
+<p><strong>Example <code>settings.json</code>:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">{
+  "theme": "GitHub",
+  "autoAccept": false,
+  "sandbox": "docker",
+  "vimMode": true,
+  "checkpointing": { "enabled": true },
+  "fileFiltering": { "respectGitIgnore": true },
+  "usageStatisticsEnabled": true,
+  "includeDirectories": ["../shared-library", "~/common-utils"],
+  "chatCompression": { "contextPercentageThreshold": 0.6 },
+  "customThemes": {
+    "MyCustomTheme": {
+      "name": "MyCustomTheme", "type": "custom",
+      "Background": "#181818", "Foreground": "#F8F8F2",
+      "LightBlue": "#82AAFF", "AccentBlue": "#61AFEF", "AccentPurple": "#C678DD",
+      "AccentCyan": "#56B6C2", "AccentGreen": "#98C379", "AccentYellow": "#E5C07B",
+      "AccentRed": "#E06C75", "Comment": "#5C6370", "Gray": "#ABB2BF"
+    }
+  }
+}</code></pre></div></figure>
+<ul>
+<li><code>autoAccept</code>: Auto-approve safe, read-only tool calls.</li>
+<li><code>sandbox</code>: Isolate tool execution (e.g., <code>true</code>, <code>"docker"</code>, or <code>"podman"</code>).</li>
+<li><code>vimMode</code>: Enable Vim-style editing for the input prompt.</li>
+<li><code>checkpointing</code>: Enable the <code>/restore</code> command to undo file changes.</li>
+<li><code>includeDirectories</code>: Define a multi-directory workspace.</li>
+<li><code>chatCompression</code>: Configure automatic chat history compression.</li>
+<li><code>customThemes</code>: Define your own color themes.</li>
+<li><code>usageStatisticsEnabled</code>: Set to <code>false</code> to disable usage statistics.</li>
+</ul>
+<p>All details in the <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md">configuration guide</a>.</p>
+<h3 id="context-files-geminimd">Context Files (<code>GEMINI.md</code>)</h3>
+<p>Use <code>GEMINI.md</code> files to provide instructions to the model and tailor it to your project. Use <code>/init</code> to generate a starting <code>GEMINI.md</code> file for your project.</p>
+<p><strong>Hierarchical Loading:</strong>
+The CLI combines <code>GEMINI.md</code> files from multiple locations. More specific files override general ones. The loading order is:</p>
+<ol>
+<li><strong>Global Context:</strong> <code>~/.gemini/GEMINI.md</code> (for instructions that apply to all your projects).</li>
+<li><strong>Project/Ancestor Context:</strong> The CLI searches from your current directory up to the project root for <code>GEMINI.md</code> files.</li>
+<li><strong>Sub-directory Context:</strong> The CLI also scans subdirectories for <code>GEMINI.md</code> files, allowing for component-specific instructions.</li>
+</ol>
+<p>Use <code>/memory show</code> to see the final combined context being sent to the model.</p>
+<p><strong>Modularizing Context with Imports:</strong>
+You can organize <code>GEMINI.md</code> files by importing other Markdown files with the <code>@file.md</code> syntax. This only supports <code>.md</code> files.</p>
+<p><strong>Example <code>GEMINI.md</code> using imports:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Markdown</span></p><pre><code data-language="markdown"># Main Project Context: My Awesome App
+ 
+## General Instructions
+- All Python code must be PEP 8 compliant.
+- Use 2-space indentation for all new files.
+ 
+## Component-Specific Style Guides
+@./src/frontend/react-style-guide.md
+@./src/backend/fastapi-style-guide.md</code></pre></div></figure>
+<p>More in the <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md#context-files-geminimd">Full context file guide</a>.</p>
+<h3 id="ignoring-files-with-geminiignore">Ignoring Files with <code>.geminiignore</code></h3>
+<p>Create a <code>.geminiignore</code> file in your project root to exclude files and directories from Gemini's tools, similar to <code>.gitignore</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext"># .geminiignore
+/backups/
+*.log
+secret-config.json</code></pre></div></figure>
+<h2 id="️-working-with-tools">🛠️ Working with Tools</h2>
+<h3 id="some-built-in-tools">Some Built-in Tools</h3>
+<ul>
+<li><strong>File System Tools:</strong> For interacting with files and directories - <code>list_directory(path="/src")</code>, <code>glob(pattern="src/**/*.ts")</code>, <code>read_file(path="/path/to/file.txt")</code>, <code>write_file(file_path="/path/to/new_file.js", content="console.log('hello');")</code>, <code>replace(file_path="...", old_string="...", new_string="...")</code>, <code>search_file_content(pattern="myFunction", include="*.js")</code></li>
+<li><strong>Shell Tool:</strong> Executes shell commands. <strong>Use with caution.</strong> To restrict commands, use <code>excludeTools</code> in <code>settings.json</code>. For example: <code>"excludeTools": ["run_shell_command(rm)"]</code></li>
+<li><strong>Web Tools:</strong> For retrieving content and searching online - <code>google_web_search(query="Gemini API rate limits")</code>, <code>web_fetch(prompt="Summarize https://my-blog.com/article")</code></li>
+<li><strong>Memory Tool:</strong> For saving and recalling information across sessions - <code>save_memory(fact="My preferred CSS framework is Tailwind CSS.")</code></li>
+</ul>
+<h3 id="custom-tools-via-mcp-servers">Custom Tools via MCP Servers</h3>
+<p>Extend the CLI with your own tools by running Model Context Protocol (MCP) servers. Manage servers via <code>settings.json</code> or with the <code>gemini mcp &lt;add|list|remove&gt;</code> commands.</p>
+<p><strong>Capabilities:</strong></p>
+<ul>
+<li><strong>OAuth 2.0 Support:</strong> Securely connect to remote servers.</li>
+<li><strong>Rich Content Returns:</strong> Tools can return multi-modal content like text and images.</li>
+<li><strong>Prompts as Commands:</strong> Expose predefined prompts from your server as new slash commands in the CLI.</li>
+</ul>
+<p><strong>Example <code>mcpServers</code> configuration:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">"mcpServers": {
+  "myPythonServer": {
+    "command": "python",
+    "args": ["-m", "my_mcp_server", "--port", "8080"],
+    "cwd": "./mcp_tools/python",
+    "env": {
+      "DATABASE_URL": "$DB_URL_FROM_ENV"
+    },
+    "timeout": 15000,
+    "trust": false,
+    "includeTools": ["safe_tool_1", "safe_tool_2"],
+    "excludeTools": ["dangerous_tool"]
+  }
+}</code></pre></div></figure>
+<p><strong>Transport (choose one):</strong></p>
+<ul>
+<li><code>command</code>, <code>args</code>, <code>cwd</code>: Launch a local process via Stdio</li>
+<li><code>url</code>: SSE endpoint (e.g., <code>"http://localhost:8080/sse"</code>)</li>
+<li><code>httpUrl</code>: HTTP streaming endpoint (e.g., <code>"http://localhost:8080/mcp"</code>)</li>
+</ul>
+<p><strong>Optional:</strong></p>
+<ul>
+<li><code>env</code>: Environment variables. Use <code>$VAR_NAME</code> syntax to reference shell variables.</li>
+<li><code>headers</code>: Key-value map of HTTP headers for <code>url</code>/<code>httpUrl</code> transports.</li>
+<li><code>timeout</code>: Request timeout in milliseconds (default: 10 minutes).</li>
+<li><code>trust</code>: Bypass all tool confirmations for this server.</li>
+<li><code>includeTools</code>/<code>excludeTools</code>: Whitelist/blacklist specific tools. <code>excludeTools</code> takes precedence.</li>
+</ul>
+<p>Using OAuth take a look at <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md#oauth-support-for-remote-mcp-servers">mcp-server.md</a></p>
+<h2 id="-core-commands">⚡ Core Commands</h2>
+<h3 id="helpful-slash-commands-">Helpful Slash Commands (<code>/</code>)</h3>
+<div><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code>/compress</code></td><td>Replace the entire chat context with a summary to save tokens.</td></tr><tr><td><code>/copy</code></td><td>Copy the last response to the clipboard.</td></tr><tr><td><code>/mcp</code></td><td>List configured MCP servers and their available tools.</td></tr><tr><td><code>/clear</code></td><td>Clear the terminal screen and context (<code>Ctrl+L</code> also works).</td></tr><tr><td><code>/tools</code></td><td>List available tools.</td></tr><tr><td><code>/extensions</code></td><td>List active extensions.</td></tr><tr><td><code>/stats</code></td><td>Show session token usage and savings.</td></tr><tr><td><code>/memory show</code></td><td>Show the combined context from all <code>GEMINI.md</code> files.</td></tr><tr><td><code>/memory refresh</code></td><td>Reload all <code>GEMINI.md</code> files.</td></tr><tr><td><code>/chat save &lt;tag&gt;</code></td><td>Save the current conversation with a tag.</td></tr><tr><td><code>/chat resume &lt;tag&gt;</code></td><td>Resume a saved conversation.</td></tr><tr><td><code>/chat list</code></td><td>List saved conversation tags.</td></tr><tr><td><code>/restore</code></td><td>List or restore a project state checkpoint.</td></tr><tr><td><code>/auth</code></td><td>Change the current authentication method.</td></tr><tr><td><code>/bug</code></td><td>File an issue or bug report about the Gemini CLI.</td></tr><tr><td><code>/help</code></td><td>Display help information and available commands.</td></tr><tr><td><code>/theme</code></td><td>Change the CLI's visual theme.</td></tr><tr><td><code>/quit</code></td><td>Exit the Gemini CLI.</td></tr><tr><td><code>/ide</code></td><td>Manage integration with your IDE (e.g., <code>install</code>, <code>enable</code>).</td></tr><tr><td><code>/settings</code></td><td>Open a friendly editor to change your <code>settings.json</code> file.</td></tr><tr><td><code>/vim</code></td><td>Toggle Vim mode for input editing.</td></tr><tr><td><code>/init</code></td><td>Generate a starting <code>GEMINI.md</code> context file for your project.</td></tr><tr><td><code>/directory</code></td><td>Manage directories in a multi-directory workspace (e.g., <code>add</code>, <code>show</code>).</td></tr></tbody></table></div>
+<h3 id="context-commands-">Context Commands (<code>@</code>)</h3>
+<p>Reference files or directories in your prompt. The CLI respects <code>.gitignore</code> and <code>.geminiignore</code>. You can also reference images, PDFs, audio, and video files.</p>
+<p><strong>Include a single file:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">&gt; Explain this code to me. @./src/main.js</code></pre></div></figure>
+<p><strong>Include an image:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">&gt; Describe what you see in this screenshot. @./ux-mockup.png</code></pre></div></figure>
+<p><strong>Include a whole directory (recursively):</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">&gt; Refactor the code in this directory to use async/await. @./src/</code></pre></div></figure>
+<h3 id="shell-commands-">Shell Commands (<code>!</code>)</h3>
+<p>Run shell commands directly in the CLI.</p>
+<p><strong>Run a single command:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">&gt; !git status</code></pre></div></figure>
+<p><strong>Toggle Shell Mode:</strong>
+Enter <code>!</code> by itself to switch to a persistent shell mode. Type <code>!</code> again to exit.</p>
+<h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+<div><table><thead><tr><th>Shortcut</th><th>Description</th></tr></thead><tbody><tr><td><code>Ctrl+L</code></td><td>Clear the screen.</td></tr><tr><td><code>Ctrl+V</code></td><td>Paste text or an image from the clipboard.</td></tr><tr><td><code>Ctrl+Y</code></td><td>Toggle YOLO mode (auto-approve all tool calls).</td></tr><tr><td><code>Ctrl+X</code></td><td>Open the current prompt in an external editor.</td></tr></tbody></table></div>
+<h2 id="-advanced-features">✨ Advanced Features</h2>
+<h3 id="ide-integration-vs-code">IDE Integration (VS Code)</h3>
+<p>Connect the CLI to VS Code for a more powerful, context-aware experience.</p>
+<ul>
+<li><strong>Workspace Context:</strong> Automatically gets your recent files, cursor position, and selected text.</li>
+<li><strong>Native Diffing:</strong> View and approve code changes directly in your editor's diff viewer.</li>
+<li><strong>Commands:</strong> Use <code>/ide install</code> to set up and <code>/ide enable</code> to connect.</li>
+</ul>
+<h3 id="custom-commands">Custom Commands</h3>
+<p>Create custom commands using TOML files. Store them in <code>~/.gemini/commands/</code> (global) or <code>&lt;project&gt;/.gemini/commands/</code> (project-specific). See the <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/commands.md#custom-commands">custom commands guide</a> for more details.</p>
+<p><strong>Example: <code>~/.gemini/commands/test/gen.toml</code></strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Toml</span></p><pre><code data-language="toml"># Invoked as: /test:gen "Create a test for the login button"
+description = "Generates a unit test based on a description."
+prompt = """
+You are an expert test engineer. Based on the following requirement, please write a comprehensive unit test using the Jest testing framework.
+ 
+Requirement: {{args}}
+"""</code></pre></div></figure>
+<h3 id="extensions">Extensions</h3>
+<p>Create extensions to add functionality. Place them in <code>&lt;workspace&gt;/.gemini/extensions/</code> or <code>~/.gemini/extensions/</code>. Each extension is a directory with a <code>gemini-extension.json</code> file that can configure MCP servers, tools, and context files. For more details, see the <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-cli/blob/main/docs/extension.md">extensions guide</a>.</p>
+<p>For example:</p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">&lt;workspace&gt;/.gemini/extensions/my-extension/gemini-extension.json</code></pre></div></figure>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">{
+  "name": "my-extension",
+  "version": "1.0.0",
+  "mcpServers": {
+    "my-server": {
+      "command": "node my-server.js"
+    }
+  },
+  "contextFileName": "GEMINI.md",
+  "excludeTools": ["run_shell_command"]
+}</code></pre></div></figure>
+<h3 id="checkpointing--restore">Checkpointing &amp; Restore</h3>
+<p>When <code>checkpointing</code> is on, the CLI saves a project snapshot before tools modify files.</p>
+<p><strong>Enable in <code>settings.json</code> or with a flag:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">gemini --checkpointing</code></pre></div></figure>
+<p><strong>Restore to a previous state:</strong></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># List available checkpoints
+/restore
+ 
+# Restore a specific checkpoint
+/restore &lt;checkpoint_file_name&gt;</code></pre></div></figure>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

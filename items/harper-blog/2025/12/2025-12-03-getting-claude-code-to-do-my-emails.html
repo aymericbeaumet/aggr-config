@@ -1,0 +1,71 @@
+<div id="readability-page-1" class="page"><article><p>Over the last week or so, I have been using Claude Code to help me with some email, and scheduling. It started cuz the holidays are overwhelming, and I felt like I was constantly behind. My inbox was overflowing with everything I had deemed important, and I hadn’t been able to make a dent. It was stressful. It still is!</p><figure><picture><source type="image/webp" srcset="https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/R0002380_hu_4ddb9aa970ce0498.webp 480w, https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/R0002380_hu_10960b75163dd173.webp 768w, https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/R0002380_hu_542b3728f4cd5cb0.webp 1200w" sizes="(max-width: 480px) 100vw, (max-width: 768px) 100vw, 800px"><source srcset="https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/R0002380_hu_fada049883606885.jpeg 480w, https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/R0002380_hu_abf896329ad70afb.jpeg 768w, https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/R0002380_hu_aa7268237e08600f.jpeg 1200w" sizes="(max-width: 480px) 100vw, (max-width: 768px) 100vw, 800px"><img src="https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/R0002380_hu_abf896329ad70afb.jpeg" alt="Maybe a storm?, Ricoh GRiiix, 11/2025" width="768" height="432" loading="lazy" decoding="async"></picture><figcaption>Maybe a storm?, Ricoh GRiiix, 11/2025</figcaption></figure><p>I had just seen the <a href="https://zo.computer">zo.computer</a> launch (neat project!) and it reminded me that <a href="https://pipedream.com">Pipedream</a> has this wild MCP server that you can use to connect to literally anything Pipedream supports. This means I could use it to do my emails! Problem solved. Problem created. More problems created! WHY ARE WE COUNTING PROBLEMS!</p><h2 id="how-why-humans-are-dying-and-going-extinct">How? Why? HUMANS ARE DYING AND GOING EXTINCT</h2><p>I love email. I really do. Typically I am really great at managing my email. However, when the email gets overwhelming - I end up ignoring it. Which means it gets worse. Which means everyone loses.</p><p>I just need a way to start doing my email that is pretty low pressure. Using Claude Code has made it MUCH easier.</p><ol><li>I boot up a Claude Code session hooked to the proper MCP servers.</li><li>I ask it to check my email</li><li>It tells me what email is in my inbox that needs addressing (unread, then read email)</li><li>Either offers to start fixing emails, or just starts writing drafts intelligently (checks my calendar, searches for context, etc).</li><li>Says “We are done!”</li><li>I go to my email client, and check the drafts. Edit and send most of them cuz they are great. Reject a few.</li><li>Rinse Repeat</li><li>Bacon</li></ol><p>Basically, I just have Claude Code check my email, and then pops out a message like “your brother emailed asking about thanksgiving plans” and I say “cool. Tell him we will be there, and will bring turkey juice or whatever you call stuffing” and then Claude Code will write an email that is approximately what I said but in the style it found from your past emails.</p><p>I then specifically save it as a draft that I review heavily before sending.</p><blockquote><p>I trust these agents to write code way way more than I trust them to write an email to a friend, stranger or business partner. It is pretty close, but not quite close enough to go yolo mode and let it send. Maybe soon? Or maybe a different email address? Who knows.</p></blockquote><p>It works remarkably well. However, there are some gotchas</p><h3 id="funny-story-that-isnt-so-funny">Funny story that isn’t so funny.</h3><p>A while back I was prototyping an email triaging agent with some code I had written, and it was working well but not great. A friend connected me to a person who was looking for someone to write a book about AI. The agent was like “this person wants to talk about writing a book about ai, they want a skeptical and academic perspective about AI’s impact” and I was like “I LOVE THIS. But this isn’t for me. I have some friends that would be good.” However, there was a bug, and the agent was drafting replies before getting feedback from me. And it ended up sending the previous draft that said very formally: “I would love to do this.”</p><p>The person excitedly replied and was like “let’s do this.”</p><p>That is when I found out that I fucked up. So I replied back and was like “well. My agents said yes for me before talking. Here is what I meant to say” and that person rightfully replied “<strong>F U</strong>”</p><h3 id="you-cannot-trust-these-things">You cannot trust these things.</h3><p>This is why I am cautiously doing it again. Haha. This time I am way more careful, and the agent cannot send email only draft it. I am finding that I am editing every email - but only a little, and maybe less and less. Feels like a year ago with codegen.</p><p>Thus far it works pretty well. It allows me to get through a lot of email that I normally would ignore, giving me space to focus on the emails I really want to reply to. Basically it cleans up the cruft (vendors, services, etc) and allows me to hang out with my friends. Perfect AI usage.</p><p>I recommend it.</p><h2 id="replicate-my-setup-if-you-dare">Replicate my setup?? If you dare!</h2><p>I didn’t want to start fresh every time so I built a super simple Claude Code “directory.”</p><p>It has most of the things that you will need to handle triaging your inbox.</p><pre><code>📁 .
+├── 📁 .claude
+│   ├── 📄 CLAUDE.md
+│   ├── 📄 settings.json
+│   └── 📁 skills
+│       ├── 📁 crm-management
+│       │   └── 📄 SKILL.md
+│       └── 📁 email-management
+│           └── 📄 SKILL.md
+├── 📄 .mcp.json</code></pre><p>There are a few important parts:</p><h3 id="the-claudemd">The CLAUDE.md</h3><p>This is highly personal (how do you manage YOUR inbox), and very important. The first thing I did was have Claude go through the past couple hundred emails I have sent, and develop a vibe for how I write emails. After a bit of back and forth, we have this:</p><pre><code data-language="prompt">1. **Find the thread**: Search for the original email/thread to get context
+2. **Get thread details**: Retrieve the thread ID, message ID, AND recipient email address for proper threading
+3. **Check for calendar events**: If the email mentions an event, proactively check calendar and add it
+4. **Draft the email**:
+    - **CRITICAL**: Always explicitly provide the `To:` email address - the MCP tool does NOT auto-extract it from threads
+    - Keep it ultra-concise (but adjust based on context - some emails need warmth)
+    - Match Harper's voice (casual, direct, no fluff)
+    - No signatures or sign-offs
+5. **Always create as DRAFT**: Never send directly - always save as draft
+6. **Ensure proper threading**: When replying, use thread ID and in-reply-to message ID so the draft appears in the conversation thread
+7. **Iterate on feedback**: Harper will refine the wording - update the draft as needed</code></pre><h3 id="the-skills">The skills</h3><p>Then I went through and did a bunch of emails via Claude Code. It did ok. But I was able to coach it, and once it was in a good place I had it make a skill based on what we discovered together.</p><pre><code data-language="prompt">## Core Principles
+
+1. **Always draft, never send** - Save emails as drafts so Harper can review before sending
+2. **Threading is critical** - Replies must appear in the correct conversation thread
+3. **Match Harper's voice** - Ultra-concise, casual, no signatures
+4. **Extract structured data** - Pull event details, action items, contact info from emails</code></pre><p>And</p><pre><code data-language="prompt">## Success Criteria
+
+You've successfully handled email tasks when:
+- Drafts appear in correct conversation threads
+- Harper says "looks good" without needing changes
+- Calendar events are added proactively
+- Inbox summaries surface what matters
+- Process feels efficient and natural
+
+## Remember
+
+Email is personal communication using Harper's voice. The goal is to save time while maintaining authentic, effective communication that sounds like Harper wrote it.
+
+When in doubt: shorter, more casual, and always draft first.</code></pre><p>Having Claude build its own skills is clutch. You really need to iterate to make it happen.</p><h3 id="the-tools">the tools!</h3><p>I am still mad about MCP as a concept, but not mad enough not to use it.</p><p>The goal is to simply give Claude Code a suite of tools that allows it to do its job well.</p><pre><code>{
+  "mcpServers": {
+    "pd": {
+      "type": "http",
+      "url": "https://mcp.pipedream.net/v2"
+    },
+    "pagen": {
+      "type": "stdio",
+      "command": "pagen",
+      "args": [
+        "mcp"
+      ],
+      "env": {}
+    },
+    "toki": {
+      "type": "stdio",
+      "command": "toki",
+      "args": [
+        "mcp"
+      ],
+      "env": {}
+    },
+    "chronicle": {
+      "type": "stdio",
+      "command": "chronicle",
+      "args": [
+        "mcp"
+      ],
+      "env": {}
+    }
+  }
+}</code></pre><h3 id="pipedream">Pipedream</h3><p>The <a href="https://pipedream.com/docs/connect/mcp/developers">Pipedream MCP</a> is very straight forward. You essentially add it to your Claude Code (works in other clients too), and then it will pop you through their auth. Once auth’d you add various services. Those services are then exposed as MCP tools. These are clutch. You can then use Claude to wire together some workflows.</p><p>I currently use their Gmail, Google Calendar, and Contacts connections.</p><h3 id="the-others">The others:</h3><p>I created 3 simple MCP servers that I wanted to exist:</p><h4 id="toki">Toki</h4><p>a super straight forward todo tracker on the CLI. The plan is to build out support for various backends. Currently it is just local.</p><p>It works as a cli app or as a mcp server:</p><p>You can try it out here:</p><ul><li><a href="https://github.com/harperreed/toki">harperreed/toki</a></li><li><code>brew install harperreed/tap/toki</code></li></ul><h4 id="chronicle">Chronicle</h4><p>a log for agent actions. I want my agents to log what they have been up to!</p><p>You can try it out here:</p><ul><li><a href="https://github.com/harperreed/chronicle">harperreed/chronicle</a></li><li><code>brew install harperreed/tap/chronicle</code></li></ul><h4 id="pagen">pagen</h4><p>a misspelled crm that acts as my <strong>p</strong>ersonal <strong>agen</strong>t backend. This allows me to have reasonable understanding of where I am from a comms, etc standpoint</p><p>You can try it out here:</p><ul><li><a href="https://github.com/harperreed/pagen">harperreed/pagen</a></li><li><code>brew install harperreed/tap/pagen</code></li></ul><h3 id="wrapping-it-together">Wrapping it together.</h3><p>The robust skill, the claude.md and the MCP tools make this a pretty easy and helpful system for triaging email. It is not perfect, but it does work nicely.</p><p>I do recommend playing around with this. I would maybe be cautious about blindly trusting it. Lol.</p><h2 id="wanna-try-it">Wanna try it?!</h2><p>I made a simple plugin that should do this for you. All you gotta do is install it!</p><p>Installation Now:</p><pre><code>/plugin marketplace add harperreed/office-admin-claude
+/plugin install office-admin
+/setup-office-admin</code></pre><p>YMMV</p><h2 id="this-is-obviously-the-future">This is obviously the future.</h2><p>Whether we like it or not, it appears that agentic email will be a thing. It is early enough that we will start to see people like myself building bespoke and custom experiences that largely do what a product will do. Somehow Google will launch a version directly in gmail, that somehow doesn’t work. My guess is that the best versions will be like Mimestream or superhuman that are primarily agentic. I hope it isn’t primarily chat - but we shall see.</p><p>I do recommend playing with this. Especially if you have a lot of email that you need to take care of. I think of it as clearing brush. You don’t want to fuck up the flowers (all of you. you are my flowers), but you don’t mind cutting down the weeds (all of them! You can see the random emails about business loans lurking in the corners..)</p><h3 id="privacy-what-privacy">Privacy, what privacy!!</h3><p>My emails are going through Pipedream, and Anthropic. This is not ideal. it is obviously a privacy concern. I can’t wait to run these things locally, and maybe have an MCP server that interacts directly with Google Suite.</p><h3 id="be-cautious">Be cautious</h3><figure><picture><source type="image/webp" srcset="https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/L1030630_hu_64359b6f3278052a.webp 480w, https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/L1030630_hu_44e90d32d571cc42.webp 768w, https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/L1030630_hu_6df87531ee1a4653.webp 1200w" sizes="(max-width: 480px) 100vw, (max-width: 768px) 100vw, 800px"><source srcset="https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/L1030630_hu_79396ffc2105ef6c.jpeg 480w, https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/L1030630_hu_d2bc369b181a3eb8.jpeg 768w, https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/L1030630_hu_2a4d94443032aa2e.jpeg 1200w" sizes="(max-width: 480px) 100vw, (max-width: 768px) 100vw, 800px"><img src="https://harper.blog/2025/12/03/claude-code-email-productivity-mcp-agents/L1030630_hu_d2bc369b181a3eb8.jpeg" alt="Not even once, Leica Q, 11/2017" width="768" height="768" loading="lazy" decoding="async"></picture><figcaption>Not even once, Leica Q, 11/2017</figcaption></figure><p>Giving your agents access to things that affect other people is scary and should be done with caution. It works pretty well for me, but I did totally fuck up a few situations trying this out.</p><p>My inbox is pristine. DO NOT SEND ME EMAILS! IT IS BEAUTIFUL!</p></article></div>

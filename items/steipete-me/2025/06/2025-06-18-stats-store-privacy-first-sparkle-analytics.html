@@ -1,0 +1,29 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/stats-store/hero.png" alt="" loading="lazy"><p><strong>tl;dr</strong>: I built a <a href="https://stats.store">free, open source analytics backend</a> for Sparkle because all existing solutions are ancient, and I wanted to know how many people use <a href="https://vibetunnel.sh">VibeTunnel</a> without being creepy about it.</p>
+<p>I’m philosophically against deep app analytics. Everything I make is open source and free, and integrating an analytics SDK just didn’t feel right. Sparkle has this neat little <a href="https://sparkle-project.org/documentation/system-profiling/">system profiling</a> feature that’s perfect for people like me - it just tells you the macOS version and how many people opened your app this week. No IP addresses, no invasive tracking, just enough to stay motivated.</p>
+<p>The problem? When I checked for backend implementations, <a href="https://sparkle-project.org/documentation/system-profiling/">everything was ancient</a>. So naturally, I thought: “How hard can it be?”</p>
+<h2 id="building-statsstore-with-agents">Building stats.store with agents</h2>
+<p>I fired up <a href="https://aistudio.google.com/">Google’s AI Studio</a> and wrote a simple spec (you can see it on <a href="https://github.com/steipete/stats-store/tree/main/docs/spec.md">GitHub</a>). Then I fed it into <a href="https://v0.dev">v0</a> - they use Next.js, Supabase, Tailwind, and <a href="https://ui.shadcn.com/">shadcn/ui</a>, a stack I already know and love.</p>
+<p>After about five or six rounds of typing “continue” into v0, I had something workable. But v0 is great for frontend, less so when things get complex. It started making mistakes it couldn’t fix. So I <a href="https://github.com/steipete/stats-store">synced to GitHub</a> and let <a href="https://steipete.me/posts/2025/claude-code-is-my-computer/">Claude Code</a> take over. Claude added tests, dark mode, improved the design, and fixed the API flow.</p>
+<p>Total time? Six hours. All while working on the next VibeTunnel release. Plus an hour picking the perfect domain (I really like stats.store).</p>
+<h2 id="what-is-statsstore">What is stats.store?</h2>
+<p>It’s exactly what I needed: a modern, privacy-first analytics backend for Sparkle. You get basic update statistics, macOS version distribution, and a clean dashboard - all while respecting user privacy.</p>
+<p><strong>What gets collected:</strong></p>
+<ul>
+<li><strong>System info:</strong> macOS version, CPU type (Intel/Apple Silicon), Mac model, core count, RAM, system language</li>
+<li><strong>App usage:</strong> Version numbers, update timestamps, daily unique users (via salted IP hashes)</li>
+</ul>
+<p><strong>What doesn’t get collected:</strong></p>
+<ul>
+<li>No IP addresses, names, or emails</li>
+<li>No usage patterns or behavior tracking</li>
+<li>No location data beyond language preference</li>
+<li>No device IDs or fingerprinting</li>
+</ul>
+<p>Everything is designed to answer simple questions: How many people use my app? What macOS versions should I support? When do people actually update? The whole thing is <a href="https://github.com/steipete/stats-store">open source and MIT-licensed</a>.</p>
+<h2 id="free-for-open-source">Free for Open Source</h2>
+<p>Here’s the deal: if you’re building open source Mac apps, it’s completely free. I’ll cover the hosting (Vercel and Supabase make this pretty cheap anyway).</p>
+<p>Want in? Just <a href="mailto:peter@steipete.me">email me</a>. I’ll add your app to the backend - and by backend, I mean I’ll literally go into Supabase and edit the table. We’re keeping it scrappy. All you have to do is <a href="https://github.com/steipete/stats-store#how-it-works-">redirect the appcast URLs</a>, stats.store will fetch the correct one and pass them along.</p>
+<p>If enough people join, we’ll have a nice community dataset showing how fast Mac users update their OS and what hardware they’re running. Could be interesting!</p>
+<h2 id="try-it">Try It</h2>
+<p>Check out <a href="https://stats.store">stats.store</a>. If you have a Sparkle-based Mac app and want simple, privacy-respecting analytics, let me know. Together we can build something useful for the Mac developer community.</p>
+<p><em>Questions? Hit me up on <a href="https://twitter.com/steipete">Twitter</a> or <a href="mailto:peter@steipete.me">email</a>.</em></p></article></div>

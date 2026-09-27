@@ -1,0 +1,83 @@
+<div id="readability-page-1" class="page"><div>
+            <p>Product <a href="https://eugeneyan.com/tag/eval/" target="_blank">evals</a> are misunderstood. Some folks think that adding another tool, metric, or LLM-as-judge will solve the problems and save the product. But this sidesteps the core problem and avoids the real work. Evals aren’t static artifacts or quick fixes; they’re practices that apply the scientific method, eval-driven development, and AI output monitoring.</p>
+
+<p><strong>Building product evals is simply the scientific method in disguise.</strong> That’s the secret sauce. It’s a cycle of inquiry, experimentation, and analysis.</p>
+
+<p>It starts with <em>observation</em> aka Look at The Data™. This means examining our inputs, AI outputs, and how users interact with our systems. By looking at the data, we learn where the system works well, and perhaps more crucially, where it fails. Identifying these failure modes is the starting point for meaningful improvement.</p>
+
+<p>Then, we <em>annotate</em> some data, prioritizing problematic outputs. This means labeling samples of successes and failures to build a balanced and representative dataset. Ideally, we should have a 50:50 split of passes and fails that spans the distribution of inputs. This dataset forms the foundation for targeted evals that track performance on the issues we’ve identified.</p>
+
+<p>Next, we <em>hypothesize</em> why specific failures occur. Perhaps our RAG’s retrieval isn’t returning the relevant context, or maybe the model struggles to follow the complex—and sometimes conflicting—instructions. By looking at data such as retrieved documents, reasoning traces, and erroneous outputs, we can prioritize failures to fix and hypotheses to test.</p>
+
+<p>Then, we <em>design and run experiments</em> to test our hypotheses. Experiments could involve rewriting prompts, updating retrieval components, or switching to a different model. A good experiment defines the outcomes that confirm or invalidate the hypotheses. Ideally, it should also include a baseline or control condition against which to compare.</p>
+
+<p><em>Measuring outcomes and analyzing errors</em> is often the most challenging step. Unlike casual vibe checks, this requires quantifying whether an experiment’s updates actually improved outcomes: Did accuracy increase? Were fewer defects generated? Does the new version do better in pairwise comparisons? We can’t improve outcomes if we can’t measure it.</p>
+
+<p>If an experiment succeeds, we apply the update; if it fails, we dig into the error analysis, refine our hypotheses, and try again. Through this iterative loop, product evals becomes the data flywheel that improves our product, reduces defects, and earns user trust.</p>
+
+<p><img src="https://eugeneyan.com/assets/eval-method.webp" loading="lazy" title="Image" alt="Image"></p>
+<p>Applying the scientific method to building AI products.</p>
+
+<p><strong>Eval-driven development (EDD) helps us build better AI products.</strong> It’s similar to <a href="https://en.wikipedia.org/wiki/Test-driven_development" target="_blank">test-driven development</a> where we write tests before implementing software that passes those tests. EDD follows the same philosophy: Before developing an AI feature, we define success criteria, via product evals, to ensure alignment and measurability from day one. Here’s a secret: Machine learning teams have practiced this for decades, where we build models and systems against <a href="https://en.wikipedia.org/wiki/Training,_validation,_and_test_data_sets" target="_blank">validation and test sets</a>. The ideas are similar though they have different names.</p>
+
+<p>In EDD, evals guide our development. We start by evaluating a baseline, perhaps a simple prompt, to get an initial benchmark. From then on, every prompt tweak, every system update, every iteration, is evaluated. Did simplifying the prompt improve faithfulness? Did updating retrieval increase the recall of relevant documents? Or did the update worsen performance?</p>
+
+<p>Because EDD provides immediate, objective feedback, we can see what’s improving and what’s not. This cycle—write evals, make changes, run evals, integrate improvements—ensures measurable progress. Instead of relying on vague, intuition-based perceptions, we build a feedback loop grounded in software engineering practices.</p>
+
+<p><img src="https://eugeneyan.com/assets/edd.webp" loading="lazy" title="Image" alt="Image"></p>
+<p>First, write some evals; then, build systems that pass those evals.</p>
+
+<p><strong>Human oversight is still needed even with automated evaluators (aka LLM-as-judge).</strong> While automated evals help scale monitoring, they can’t compensate for neglect. If we’re not actively reviewing AI outputs and customer feedback, automated evaluators won’t save our product.</p>
+
+<p>To evaluate and monitor AI products, we typically sample outputs and annotate them for quality and defects. With enough high-quality annotations, we can <a href="https://eugeneyan.com/writing/aligneval/" target="_blank">calibrate automated evaluators</a> to align with human judgment. This could mean measuring recall or precision on binary labels, or correlation when deciding between outputs via pairwise comparisons. Once properly aligned, these evaluators help scale the continuous monitoring of AI systems.</p>
+
+<p>But having automated evaluators doesn’t remove the need for human oversight. We still need to periodically sample and annotate data, and analyze user feedback. Ideally, we should design products that capture implicit feedback through user interactions. Nonetheless, explicit feedback, while less frequent and occasionally biased, can also be valuable. (Read <a href="https://eugeneyan.com/writing/llm-patterns/#collect-user-feedback-to-build-our-data-flywheel" target="_blank">more</a>.)</p>
+
+<p>Also, while automated evaluators scale well, they aren’t perfect. But neither are human annotators. Nonetheless, by collecting more and higher-quality annotations, we can better align these evaluators. Organizational discipline is crucial to maintain this feedback loop of sampling data, annotating outputs, and improving automated evaluators.</p>
+
+<p><img src="https://eugeneyan.com/assets/ai-monitoring.webp" loading="lazy" title="Image" alt="Image"></p>
+<p>Automated evaluators amplify our existing annotation and feedback processes.</p>
+
+<p>• • •</p>
+
+<p>While building with AI can feel like magic, building AI products still takes elbow grease. If teams don’t apply the scientific method, practice eval-driven development, and monitor the system’s output, buying or building yet another evaluation tool won’t save the product.</p>
+
+<p>By the way, if you want to learn more about evals, my friends Hamel and Shreya are hosting their <em>final</em> cohort of “AI Evals for Engineers and PMs” in July. Here’s a <a href="https://maven.com/parlance-labs/evals?promoCode=eugene-is-all-you-need" target="_blank">35% discount code</a>.</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Apr 2025). An LLM-as-Judge Won't Save The Product—Fixing Your Process Will. eugeneyan.com.
+        https://eugeneyan.com/writing/eval-process/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2025eval-process,
+  title   = {An LLM-as-Judge Won't Save The Product—Fixing Your Process Will},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2025},
+  month   = {Apr},
+  url     = {https://eugeneyan.com/writing/eval-process/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

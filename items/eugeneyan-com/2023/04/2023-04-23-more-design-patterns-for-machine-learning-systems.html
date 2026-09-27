@@ -1,0 +1,313 @@
+<div id="readability-page-1" class="page"><div>
+            
+
+
+
+<p>Design patterns are reusable, time-tested solutions to common problems in software engineering. They distill best practices and past knowledge into pragmatic advice for practitioners, and provide a shared vocabulary so we can collaborate effectively.</p>
+
+<p>Here, I’d like to share a couple of patterns I’ve seen in machine learning systems. Some of them, such as process data once and evaluate before deploy, may seem basic to seasoned practitioners. Nonetheless, I’m including them because they’re essential, and surprisingly, not all teams adopt them. Please skip them if you’re already familiar with them.</p>
+<ul>
+  <li><a href="#process-raw-data-only-once-to-reduce-redundancy">Process Raw Data Only Once</a></li>
+  <li><a href="#human-in-the-loop-to-collect-explicit-labels">Human-In-The-Loop</a></li>
+  <li><a href="#data-augmentation-to-increase-data-size-and-diversity">Data Augmentation</a></li>
+  <li><a href="#hard-negative-mining-to-get-difficult-samples">Hard Negative Mining</a></li>
+  <li><a href="#reframing-to-simplify-the-problem-or-label">Reframing</a></li>
+  <li><a href="#cascade-to-split-a-problem-into-smaller-problems">Cascade</a></li>
+  <li><a href="#data-flywheel-to-continuously-improve--build-a-moat">Data Flywheel</a></li>
+  <li><a href="#business-rules-layer-to-augment-or-override-outputs">Business Rules Layer</a></li>
+  <li><a href="#evaluate-before-deploy-for-safety-and-reliability">Evaluate before Deploy</a></li>
+</ul>
+
+<p>(If you like this, you may also be interested in a previous post on <a href="https://eugeneyan.com/writing/design-patterns/" target="_blank">design patterns in ML code</a>, largely inspired by the classic <a href="https://en.wikipedia.org/wiki/Design_Patterns" target="_blank">Gang of Four book</a>.)</p>
+
+<h2 id="process-raw-data-only-once-to-reduce-redundancy">Process Raw Data Only Once: To reduce redundancy</h2>
+
+<p>A key pattern when designing data pipelines is to process and aggregate raw data just once, preferably early on. This way, we can work with the processed data downstream instead of reading and computing over the raw data again and again.</p>
+<ul>
+  <li><strong>Pros:</strong> Reduces redundancy and streamlines data processing jobs, making pipelines more efficient and maintainable. This reduces compute and storage costs.</li>
+  <li><strong>Cons</strong>: It can be challenging to process and aggregate data in a way so it flexibly supports various use cases. And if we try to please everyone, we lose the benefits of early processing and might be better off working with the raw data.</li>
+</ul>
+
+<p>Imagine we’re part of an e-commerce company that tracks user behavior via clickstream logs. The logs capture pages they visit, products they viewed, and actions they took (e.g., click, add-to-cart, purchase). This dataset is enormous (one object per event) and in a format not suited for analytics, such as in a Kafka queue as JSON instead of tables.</p>
+
+<p>To build a dashboard for the conversion funnel, we’ll want to group logs by session and aggregate metrics on page visits, click-through rate, add-to-cart rate, conversion rate, etc. You can imagine other teams wanting to do similar analysis on this data too. Thus, instead of multiple teams building duplicate pipelines to process the raw data, we can <strong>process it once</strong> and store it in a tabular format for everyone to use. This way, we can efficiently query the processed or aggregated data for analytics and machine learning.</p>
+
+<p>Similarly, if we wanted to build a <a href="https://eugeneyan.com/writing/patterns-for-personalization/#sequential-learning-about-item-order-in-a-sequence" target="_blank">session-based recommender</a> that recommends products based on a user’s in-session events, we could aggregate the data by session to get arrays of events ordered by time. This way, multiple teams can train their recommenders on these sequences instead of processing the raw logs from scratch during every training run.</p>
+
+<p>The natural extension of this pattern is the <a href="https://eugeneyan.com/writing/feature-stores/#access-reducing-duplication--encouraging-reusability" target="_blank">feature store pattern</a> which centralizes feature computation and storage. Feature stores enable feature reuse and consistency across applications, and <strong>reduce duplicate effort, compute, and storage</strong>.</p>
+
+<h2 id="human-in-the-loop-to-collect-explicit-labels">Human-In-The-Loop: To collect explicit labels</h2>
+
+<p>If our ML system involves supervised learning, we can’t get away with not having labels. And if we don’t have labels—such as when we’re solving a new problem—we can apply HITL to collect them. We can collect labels explicitly (e.g., annotation) or implicitly (e.g., organic clicks, purchases). This section will focus on collecting explicit labels.</p>
+<ul>
+  <li><strong>Pros:</strong> Human annotators can deal with ambiguous or complex examples where heuristics or automated methods might fail. Also, collecting input from domain experts can ensure labels reflect the nuances of reality and their expertise.</li>
+  <li><strong>Cons:</strong> Human annotation is expensive and takes time, making it a bottleneck.</li>
+</ul>
+
+<p>One way to collect labels is to <strong>ask users directly</strong>. For example, <a href="https://stackoverflow.blog/2020/06/25/how-does-spam-protection-work-on-stack-exchange/" target="_blank">Stack Exchange lets users flag posts as spam</a> and then uses these labels to train spam detection models. Similarly, <a href="https://engineering.linkedin.com/blog/2020/fighting-harassment" target="_blank">LinkedIn relies on users to report messages as harassment</a> while <a href="https://www.uber.com/blog/project-radar-intelligent-early-fraud-detection/" target="_blank">Uber receives fraud reports</a> when users dispute charges or file a chargeback.</p>
+
+<p><img src="https://eugeneyan.com/assets/flag-spam.webp" loading="lazy" title="Flagging a post as spam, abusive, low quality, etc on Stack Exchange" alt="Flagging a post as spam, abusive, low quality, etc on Stack Exchange"></p>
+<p>Flagging a post as spam, abusive, low quality, etc on Stack Exchange</p>
+
+<p>Another approach is to use third-party or internal <strong>annotation services</strong>. For example, <a href="https://doordash.engineering/2020/08/28/overcome-the-cold-start-problem-in-menu-item-tagging/" target="_blank">DoorDash used a mix of Mechanical Turk and professional annotators</a> to categorize menu items by cuisine style, flavor, etc. Similarly, <a href="https://medium.com/airbnb-engineering/building-airbnb-categories-with-ml-and-human-in-the-loop-e97988e70ebb" target="_blank">Airbnb relied on HITL</a> to categorize listings into various groups such as places of interest, activities, home types, and more.</p>
+
+<p>As an example of having expert annotators, Uber had internal analysts review fraud trends. These experts analyzed and identified new fraud patterns that machine learning models trained on past data might missed (i.e., false negatives), before crafting heuristics to programmatically identify them in future transactions. They also confirmed whether flagged transactions were indeed fraudulent (i.e., true positives).</p>
+
+<p>That said, we may not require as much HITL in the future. Recent studies have found <strong>large language models (LLMs)</strong> to perform on par, or better than, people at labeling ground truth.</p>
+
+<p>For example, a <a href="https://arxiv.org/abs/2303.15056" target="_blank">study</a> found that <code>gpt-3.5-turbo</code> outperformed Mechanical Turk workers for four out of five annotation tasks (relevance, topic detection, stance detection, and frame detection) on 2,382 tweets. Furthermore, the cost was less than $0.003/annotation, making it 5% of the cost of Mechanical Turk per annotation.</p>
+
+<p>Another <a href="https://arxiv.org/abs/2304.06588" target="_blank">study</a> used <code>gpt-4</code> to classify the political affiliation of Twitter users based on their tweets. Here, LLMs not only outperformed experts and crowdsourced workers in terms of accuracy, they also had higher inter-rater reliability. Even when the crowdsourced and expert labels were ensembled via majority vote, LLMs still performed better.</p>
+
+<p><img src="https://eugeneyan.com/assets/llm-annotation.webp" loading="lazy" title="LLMs outperform crowdsource and expert annotators, even when the latter is ensembled" alt="LLMs outperform crowdsource and expert annotators, even when the latter is ensembled"></p>
+<p>LLMs outperform crowdsource and expert annotators, even when the latter is ensembled</p>
+
+<h2 id="data-augmentation-to-increase-data-size-and-diversity">Data Augmentation: To increase data size and diversity</h2>
+
+<p>Data augmentation is the process of artificially increasing the size and diversity of training data by generating new examples from existing data.</p>
+<ul>
+  <li><strong>Pros:</strong> Valuable when ground truth data is limited, imbalanced, or lacks diversity. Data augmentation can make training data more representative and varied, thus helping to improve model generalizability and reduce overfitting.</li>
+  <li><strong>Cons:</strong> Challenging to apply to tabular data (compared to image and text data). It can also be tricky to ensure that synthetic data matches the distribution of actual data.</li>
+</ul>
+
+<p>The classic example of data augmentation is in <strong>computer vision</strong>. In this <a href="https://pytorch.org/vision/main/transforms.html" target="_blank">PyTorch example</a>, images are augmented through geometric transforms such as cropping, rotation, and flipping, as well as color transforms such as grayscale, blurring, and inversion. These simple transforms increase the volume and diversity of training data, improving the performance of CV models while reducing the cost of data collection and labeling.</p>
+
+<p>An example of data augmentation on <strong>text</strong> comes from DoorDash. They varied sentence order in food descriptions and randomly removed information such as menu categories. This helped simulate the variation in real-world menus where merchants don’t always have detailed descriptions or menu categories. When training their models, they used a ratio of 100 synthetic labels to 1 actual label.</p>
+
+<p><img src="https://eugeneyan.com/assets/text-augmentation.webp" loading="lazy" title="Data augmentation on text via varying sentence or word order" alt="Data augmentation on text via varying sentence or word order"></p>
+<p>Data augmentation on text via varying sentence or word order</p>
+
+<p>Besides data augmentation, another way to expand the dataset is by <strong>creating synthetic data</strong>. For example, <a href="https://blog.cloudflare.com/data-generation-and-sampling-strategies/" target="_blank">Cloudflare generated synthetic data</a> to increase the diversity of their training data that is used to train models to classify malicious HTTP requests.</p>
+
+<p>To create negative samples, they generated pseudo-random strings based on a probability distribution of existing tokens in the training data. They also made it harder by adding complex tokens such as valid URIs, user agents, XML content, and even “dangerous” n-grams that frequently occur in malicious payloads. The goal was to desensitize the model to individual tokens and keywords and have it focus on the higher-level structural and semantic aspects of the payload. This reduced the false positive rate by ~80%.</p>
+
+<p>Similarly, <a href="https://arxiv.org/abs/2006.14109" target="_blank">Meta used synthetic data generators to create sensitive data</a> such as social security numbers, credit card numbers, addresses, etc. Uber also generated synthetic data, based on their experience with and assumptions of fraud attacks, to validate their anomaly detection algorithms during automated testing of data pipelines. Libraries such as <a href="https://github.com/joke2k/faker" target="_blank">Faker</a> makes it easy to generate fake names, addresses, phone number, and more.</p>
+
+<h2 id="hard-negative-mining-to-get-difficult-samples">Hard Negative Mining: To get difficult samples</h2>
+
+<p>Hard mining can be considered an extension of data augmentation where we find or generate challenging data points to train the model on. The intent is to improve model performance on these difficult cases by exposing it to more of them during training.</p>
+<ul>
+  <li><strong>Pros:</strong> Often leads to improved model performance. At the very least, we can better measure how our models perform on these difficult cases.</li>
+  <li><strong>Cons:</strong> Finding these hard examples can be, well, hard. It’s also not as simple as training the model solely on these hard examples too (see Meta example below).</li>
+</ul>
+
+<p>One approach to hard mining is to analyze model predictions for <strong>misclassified or low-confidence examples</strong>, find similar examples (e.g., nearest neighbors), and emphasize them in subsequent training. This forces the model to learn from its mistakes and improve.</p>
+
+<p>When Meta built <a href="https://arxiv.org/abs/2006.11632" target="_blank">embedding-based retrieval</a> for search, they used hard mining to address the problem of easy negatives in the training data (i.e., random negatives). Easy negatives led to the model performing poorly on harder negatives. Counterintuitively, they found that models trained on hard negatives did not perform better than models trained on random negatives. This was because the hardest negatives did not reflect actual search behavior on Facebook where most documents (e.g., people, places) were relatively easy.</p>
+
+<p>Through experimentation, they found that sampling hard negatives from rank 101 - 500 (in the search results) led to the best performance. Overall, blending random and hard negatives improved recall, saturating at an easy:hard ratio of 100:1. (DoorDash also had this ratio of synthetic to actual labels when training their models.)</p>
+
+<p>Another approach is to <strong>blend hard negatives in <a href="https://arxiv.org/abs/2101.10382" target="_blank">curriculum learning</a></strong>, where the training data is sorted to gradually increase sample difficulty. The model starts learning from easy samples before progressively tackling harder samples as it becomes more capable.</p>
+
+<p>Cloudflare adopted this approach by training their malicious payload classifier on easy synthetic data, followed by increasingly difficult synthetic data, before finally fine-tuning on real data. To make the task harder, they appended noise of varying complexity to malicious and benign samples, with the goal of making the model more robust to padding attacks. This improved the true positive rate for fuzzed content from 91% to 97.5%.</p>
+
+<h2 id="reframing-to-simplify-the-problem-or-label">Reframing: To simplify the problem or label</h2>
+
+<p>To reframe is to make a problem easier to solve by refining the initial problem statement or transforming the target feature. For example, we might reframe a regression problem into a classification problem, and vice versa.</p>
+<ul>
+  <li><strong>Pros:</strong> Can lead to large model or business metric improvements without too much effort, especially if we’re just transforming the label or using a different technique.</li>
+  <li><strong>Cons:</strong> Uncommon to successfully reframe a problem. Successful examples are infrequent and it’s more art than science.</li>
+</ul>
+
+<p>For <a href="https://arxiv.org/abs/1907.00937" target="_blank">Amazon’s semantic search</a>, the team initially had a binary label: purchased or not. They then used a two part-hinge loss where \(\hat y\)&nbsp;is the cosine similarity between query and product embeddings, and&nbsp;\(y&nbsp;= 1\) if the product is purchased (in response to the query) and zero otherwise. The hinge loss ensured that&nbsp;\(\hat y&nbsp;&gt; 0.9\) when&nbsp;\(y&nbsp;= 1\) and&nbsp;\(\hat y&nbsp;&lt; 0.2\) when&nbsp;\(y&nbsp;= 0\).</p>
+
+<p>However, they found a large overlap in score distribution (left in image below) between the random negatives (red) and purchased positives (green). After some analysis, they found that this was due to products that were impressed but not purchased. Thus, they <strong>updated their target label</strong> to distinguish between products that were impressed but not purchased (grey) and random negatives (red). They also used a three-part hinge loss, where \(\hat y &lt; 0.55\) if the product was impressed but not purchased. This improved the separation of scores between random negatives (red) and purchased positives (green).</p>
+
+<p><img src="https://eugeneyan.com/assets/amazon-search-hinge-loss.webp" loading="lazy" title="Score distribution with two-part (left) and three-part (right) hinge loss" alt="Score distribution with two-part (left) and three-part (right) hinge loss"></p>
+<p>Score distribution with two-part (left) and three-part (right) hinge loss</p>
+
+<p>Another example of reframing is <a href="https://shopify.engineering/categorizing-products-at-scale" target="_blank">Shopify’s product classifier</a>. To simplify the problem of classifying items into a 5,000 class, hierarchical taxonomy, they <strong>converted <em>n</em> one-vs-all classifiers into a single binary classifier</strong>. They did this by exploding the training data to create a row for each category for each product, and then appending the category to the features. Finally, if the product-category pair is valid, it gets a label of 1, and 0 otherwise. They also considered hierarchy by giving parents of a valid category a label of 1.</p>
+
+<p>This allowed them to train a single logistic regression model instead of \(n\) individual classifiers, reducing computation cost and keeping the system simple. Accounting for parent-child relationships also enabled them to learn from the taxonomy structure.</p>
+
+<p>During inference, they start at the root level category, categorizing the product into the top-level node with the highest score. This continues by scoring the product for each of the node’s children, picking the node with the highest score, until the leaf node is reached.</p>
+
+<p><img src="https://eugeneyan.com/assets/shopify-classification.webp" loading="lazy" title="Categorizing products by traversing through the product taxonomy" alt="Categorizing products by traversing through the product taxonomy"></p>
+<p>Categorizing products by traversing through the product taxonomy</p>
+
+<p>A final example is the reframing of recommendations <strong>from the co-occurrence problem</strong> (e.g., matrix factorization) <strong>into a sequential problem</strong> (e.g., RNNs, Transformers). One of the earliest papers to do this applied <a href="https://arxiv.org/abs/1511.06939" target="_blank">GRUs for session-level recommendations</a>. It was motivated by the need to learn from short, session-level data due to the lack of long user histories (such as those that Amazon or Netflix has).</p>
+
+<p>Since then, a large portion of recsys research has shifted towards the sequential paradigm, such as <a href="https://arxiv.org/abs/1808.09781" target="_blank">Self-Attentive Sequential Recommendations</a>, <a href="https://arxiv.org/abs/1905.06874" target="_blank">Behavior Sequence Transformer</a>, <a href="https://arxiv.org/abs/1904.06690" target="_blank">BERT4Rec</a>, and more. Empirically, these approaches have been more effective than co-occurrence techniques though the latter remains a competitive baseline.</p>
+
+<h2 id="cascade-to-split-a-problem-into-smaller-problems">Cascade: To split a problem into smaller problems</h2>
+
+<p>The cascade pattern splits an initial problem into smaller problems that can be solved sequentially. Thus, each subsequent model or system focuses on an increasingly difficult or smaller subset of the data. This is similar to the ensemble pattern but considers order.</p>
+<ul>
+  <li><strong>Pros:</strong> Allows cheaper heuristics and models to chip away at the problem upstream before the harder cases are sent downstream to costlier but more precise models. This improves overall efficiency and system performance. Also makes it easier to structure teams that can independently focus on each step of the cascade.</li>
+  <li><strong>Cons:</strong> Can lead to unintended coupling or degenerate interaction effects, where downstream models may overly rely on upstream models to act in a certain way.</li>
+</ul>
+
+<p>A classic example of a cascade is <a href="https://eugeneyan.com/writing/system-design-for-discovery/" target="_blank">recommender system design</a>, usually <strong>split into retrieval and ranking steps</strong>. Retrieval is a fast but coarse step to narrow down millions of items into hundreds of candidates. Ranking is a slower but more precise step to score the retrieval candidates. Structuring it as a cascade allows each step to optimize for different objectives—retrieval optimizes for recall and speed while ranking optimizes for precision.</p>
+
+<p><img src="https://eugeneyan.com/assets/twitter-recsys.webp" loading="lazy" title="Twitter's recsys: candidate sourcing (aka retrieval) -&gt; ranking -&gt; heuristics &amp; filtering -&gt; ads blending" alt="Twitter's recsys: candidate sourcing (aka retrieval) -&gt; ranking -&gt; heuristics &amp; filtering -&gt; ads blending"></p>
+<p>Candidate retrieval -&gt; ranking -&gt; heuristics &amp; filtering -&gt; ads blending</p>
+
+<p><a href="https://blog.twitter.com/engineering/en_us/topics/open-source/2023/twitter-recommendation-algorithm" target="_blank">Twitter’s recently open-sourced recsys</a> follows this pattern (image above). Their recsys is a cascade of (i) candidate sourcing (aka retrieval), (ii) heavy ranking, (iii) heuristics and filtering, and (iv) ads blending. Multiple components contribute to retrieval before the heavy ranker (a parallel <a href="https://arxiv.org/abs/2102.07619" target="_blank">masknet</a>) does the ranking. Finally, business rules are layered on.</p>
+
+<p>Stack Exchange also adopts a cascade pattern to identify spam. It starts with identifying users that post too often to be humanly possible. The spammer is then slapped with an HTTP 429 Error (Too Many Requests) and blocked or rate-limited.</p>
+
+<p><img src="https://eugeneyan.com/assets/se-spam.webp" loading="lazy" title="Image" alt="Image"></p>
+<p>Three layers of defense against spam: Post rates -&gt; heuristics -&gt; machine learning</p>
+
+<p>The second step in the cascade is based on heuristics. Specifically, they run posts through an “unholy amount of regular expressions” and some rules. If a post is caught, it is sent to users to check and potentially flag it as spam. If enough users flag it as spam, the post is marked as spam and the spammer is blocked, rate-limited, or prevented from posting.</p>
+
+<p>The final line of defense is a (machine learning?) system that identifies posts most likely to be spam. They&nbsp;<a href="https://aws.amazon.com/sagemaker/shadow-testing/" target="_blank">shadow-tested</a>&nbsp;it and found it to be extremely accurate, catching almost all of the blatantly obvious spam. Eventually, this system was armed to cast three automatic flags, drastically reducing the time to spam post deletion.</p>
+
+<h2 id="data-flywheel-to-continuously-improve--build-a-moat">Data Flywheel: To continuously improve &amp; build a moat</h2>
+
+<p>The data flywheel pattern revolves (pun intended) around continuously collecting data which then improves models which then improves user experience. This leads to more usage, which leads to more data to further improve models, creating a virtuous cycle.</p>
+<ul>
+  <li><strong>Pros:</strong> One of the few sources of long-term competitive advantage. While model architecture and system design can be copied, they’re moot without the data.</li>
+  <li><strong>Cons:</strong> It can lead to a feedback loop where bias perpetuates (e.g., popularity bias in recsys) though data augmentation can alleviate this.</li>
+</ul>
+
+<p>A prime example of the data flywheel is the <strong>recommendation systems</strong> at Amazon and Netflix. When users look for their next show on Netflix, their searches, clicks, previews, watch time, and ratings are logged. This data is then used to build recsys that learn from their preferences and serve personalized recommendations. As a result, users spend more time on Netflix, generating more data which further improves the recommendations.</p>
+
+<p>Another example is <strong><a href="https://twitter.com/karpathy/status/1599852921541128194" target="_blank">Tesla’s Autopilot</a></strong>. Tesla collects driving images and videos from its vehicles as a data source. From this data, they identify errors, find similar instances (e.g., nearest neighbors), and label them. These new labels are then used to retrain models which are then deployed to vehicles. Armed with the new models, the vehicles then gather more driving data, completing the data flywheel.</p>
+
+<p><img src="https://eugeneyan.com/assets/tesla-data-engine.webp" loading="lazy" title="Andrej Karpathy sharing about Telsa's data engine" alt="Andrej Karpathy sharing about Telsa's data engine"></p>
+<p>Andrej Karpathy sharing about Telsa's data engine</p>
+
+<p>A final example is <strong>ChatGPT</strong>. It was built as a way to collect feedback directly from users:</p>
+
+<blockquote>
+  <p>Sam Altman mentioned that one of the main reasons OpenAI built ChatGPT was so that they could get human feedback from end users back into their models. In other words, they started out as API-only, but realized that the best way to improve performance was to integrate forward over more layers of the value chain so they could get direct access to customers’ data. — <a href="https://every.to/chain-of-thought/a-few-things-i-believe-about-ai" target="_blank">Dan Shipper</a></p>
+</blockquote>
+
+<p>By building a simple chat UI and allowing users to provide feedback (thumbs up/down), OpenAI can now directly collect feedback to improve their models. GPT-4 is also integrated with Bing Search which responds with a summary of the top results. The response includes links to sources that users can browse and click on. Here, implicit user feedback (i.e., clicks on sources) also helps with improving document retrieval.</p>
+
+<h2 id="business-rules-layer-to-augment-or-override-outputs">Business Rules Layer: To augment or override outputs</h2>
+
+<p>The business rules layer allows us to incorporate domain expertise and business rules to augment or adjust the output of ML systems. I can’t recall the last time I came across a mature machine learning system that didn’t have this.</p>
+<ul>
+  <li><strong>Pros:</strong> Ensures that machine learning outputs align with business requirements and constraints. This helps improve system reliability, safety, and usability.</li>
+  <li><strong>Cons:</strong> If managed poorly, can lead to a byzantine web of interacting rules that override each other in unexpected ways. May also encourage the anti-pattern of adding rules to fix short-term problems without addressing the underlying issue.</li>
+</ul>
+
+<p>This pattern is common in recsys. For example, when <a href="https://ai.facebook.com/blog/powered-by-ai-instagrams-explore-recommender-system/" target="_blank">Instagram shared about their recommender infrastructure</a>, they also shared a sample recommender where the last step performs <strong>diversification in a round-robin fashion</strong>.</p>
+
+<div><pre><code data-language="python">user
+  .let(seed_id=user_id)
+  .liked(max_num_to_retrieve=30)
+  .account_nn(embedding_config=default)
+  .posted_media(max_media_per_account=10)
+  .filter(non_recommendable_model_threshold=0.2)
+  .rank(ranking_model=default)
+  .diversify_by(seed_id, method=round_robin)
+</code></pre></div>
+<p>An example recommender for Instagram. Note the diversification step in the last line.</p>
+
+<p>Similarly, Twitter uses <strong><a href="https://github.com/twitter/the-algorithm-ml/tree/main/projects/home/recap#overview" target="_blank">hand-tuned weights</a></strong> (below) to combine the outputs of their heavy ranker via a weighted sum across predicted engagement probabilities. In addition, at the heuristic and filtering stage (after retrieval and ranking), they <strong>apply heuristics</strong> such as <a href="https://github.com/twitter/the-algorithm/blob/main/home-mixer/server/src/main/scala/com/twitter/home_mixer/product/scored_tweets/scorer/DiversityDiscountProvider.scala#L20" target="_blank">author diversity</a>, <a href="https://github.com/twitter/the-algorithm/blob/main/home-mixer/server/src/main/scala/com/twitter/home_mixer/functional_component/scorer/FeedbackFatigueScorer.scala#L27" target="_blank">negative user feedback</a>, and <a href="https://github.com/twitter/the-algorithm/blob/main/home-mixer/server/src/main/scala/com/twitter/home_mixer/functional_component/scorer/VerifiedAuthorScalingScorer.scala#L21" target="_blank">Twitter verified boost</a>.</p>
+
+<div><pre><code data-language="python">scored_tweets_model_weight_fav: 0.5
+scored_tweets_model_weight_retweet: 1.0
+scored_tweets_model_weight_reply: 13.5
+scored_tweets_model_weight_good_profile_click: 12.0
+scored_tweets_model_weight_video_playback50: 0.005
+scored_tweets_model_weight_reply_engaged_by_author: 75.0
+scored_tweets_model_weight_good_click: 11.0
+scored_tweets_model_weight_good_click_v2: 10.0
+scored_tweets_model_weight_negative_feedback_v2: -74.0
+scored_tweets_model_weight_report: -369.0
+</code></pre></div>
+<p>Hand-tuned weights for various engagement probabilities on Twitter's recommender system.</p>
+
+<p>Other examples of heuristics and business rules affecting the final output include <a href="https://research.netflix.com/publication/Calibrated%20Recommendations" target="_blank">Netflix’s calibrated recommendations</a> to match users’ historical genre distribution, and <a href="https://arxiv.org/abs/1702.07969" target="_blank">Pinterest’s use of hand-tuned weights</a> (in the Memboost step) after retrieval and ranking.</p>
+
+<p>Also, if you’ve been using ChatGPT, you may have experienced its rules layer. These <strong>constraints ensure that its responses align with ethical guidelines and is safe for users</strong>. Try asking ChatGPT about a dangerous subject, or its opinion on a political figure. For the former, it declines to provide information (<em>“I’m sorry, but I cannot provide information or assistance on creating dangerous weapons…“</em>) while for the latter, it returns a neutral response (<em>“As an AI language model, I don’t have personal opinions or views.”</em>)</p>
+
+<p><img src="https://eugeneyan.com/assets/openai-rules.webp" loading="lazy" title="ChatGPT declining to provide information on dangerous subjects or political views." alt="ChatGPT declining to provide information on dangerous subjects or political views."></p>
+<p>ChatGPT declining to provide information on dangerous subjects or political views.</p>
+
+<h2 id="evaluate-before-deploy-for-safety-and-reliability">Evaluate before Deploy: For safety and reliability</h2>
+
+<p>This pattern represents the best practice of evaluating model (e.g., evaluation metrics) and system (e.g., error rate, latency) performance before integrating it into production. Not that different from testing builds before deployment IMO—in other words, <em>please do this.</em></p>
+<ul>
+  <li><strong>Pros:</strong> Reduces the risk of poor model performance, biased predictions, or other issues that may negatively affect user experience or business objectives.</li>
+  <li><strong>Cons:</strong> None that I can think of.</li>
+</ul>
+
+<p>To adopt this pattern, simply <strong>have a validation hold-out</strong> when (re)training models. Given the strong temporal aspect in most production systems, the validation set should typically be split by time; using a random split or cross-validation could lead to overly optimistic evaluation metrics, especially if future data leaks into the training set.</p>
+
+<p>Take recommendation systems as an example. We might hold out the last period of data (e.g., day, hour), refresh our models based on new data, and <strong>evaluate on the validation set</strong> via the usual metrics such as hit@k, NDCG, etc. (And then—specific to recsys—we might then train the model on the validation set too because we want to overfit.) We can also compare it against a naive baseline (e.g., popularity sort) to get a sense of the lift. If the refreshed model fails on any of the evaluation metrics, the pipeline should break and the model should not be released—better to have a stale model than a misbehaving one.</p>
+
+<p>• • •</p>
+
+<p>Wow, thanks for sticking till the end! We discussed nine design patterns in machine learning systems. You won’t find many of these—reframing, cascade, business rules, evaluate before deploy—explicitly mentioned in papers or tech blogs. And if you enjoyed this, you might also be interested in the <a href="https://eugeneyan.com/writing/design-patterns/#design-patterns-in-systems" target="_blank">proxy and mediator patterns</a> discussed previously.</p>
+
+<p>These patterns have served me well as I design, build, and operate ML systems. Also, given the increasing <a href="https://eugeneyan.com/writing/llm-experiments/#enterprisepersonal-search-and-qa" target="_blank">viability of using LLMs in production</a>, I wonder if these patterns are also applicable to LLM systems? Some I can think of include:</p>
+<ul>
+  <li>Having a business rules layer on LLM output for safety and reliability</li>
+  <li>Data flywheels to continuously collect user feedback to fine-tune models</li>
+  <li>Adopting the cascade pattern when building autonomous agents</li>
+</ul>
+
+<p>What other patterns have you seen in machine learning or LLM systems? Please share!</p>
+
+
+
+<h2 id="references">References</h2>
+<ul>
+  <li><a href="https://stackoverflow.blog/2020/06/25/how-does-spam-protection-work-on-stack-exchange/" target="_blank">How does spam protection work on Stack Exchange?</a></li>
+  <li><a href="https://engineering.linkedin.com/blog/2020/fighting-harassment" target="_blank">The technology behind fighting harassment on LinkedIn</a></li>
+  <li><a href="https://www.uber.com/blog/project-radar-intelligent-early-fraud-detection/" target="_blank">Project RADAR: Intelligent Early Fraud Detection System with Humans in the Loop</a></li>
+  <li><a href="https://doordash.engineering/2020/08/28/overcome-the-cold-start-problem-in-menu-item-tagging/" target="_blank">Using a HITL to Overcome the Cold Start Problem in Menu Item Tagging</a></li>
+  <li><a href="https://medium.com/airbnb-engineering/building-airbnb-categories-with-ml-and-human-in-the-loop-e97988e70ebb" target="_blank">Building Airbnb Categories with ML and Human-in-the-Loop</a></li>
+  <li><a href="https://arxiv.org/abs/2303.15056" target="_blank">ChatGPT Outperforms Crowd-Workers for Text-Annotation Tasks</a></li>
+  <li><a href="https://arxiv.org/abs/2304.06588" target="_blank">ChatGPT-4 Outperforms Experts and Crowd Workers in Annotating Political Twitter Messages with Zero-Shot Learning</a></li>
+  <li><a href="https://blog.cloudflare.com/data-generation-and-sampling-strategies/" target="_blank">Improving the accuracy of machine learning using data augmentation &amp; sampling</a></li>
+  <li><a href="https://arxiv.org/abs/2006.14109" target="_blank">Scalable Data Classification for Security and Privacy</a></li>
+  <li><a href="https://arxiv.org/abs/2006.11632" target="_blank">Embedding-based Retrieval in Facebook Search</a></li>
+  <li><a href="https://arxiv.org/abs/2101.10382" target="_blank">Curriculum Learning: A Survey</a></li>
+  <li><a href="https://arxiv.org/abs/1907.00937" target="_blank">Semantic Product Search</a></li>
+  <li><a href="https://shopify.engineering/categorizing-products-at-scale" target="_blank">Categorizing Products at Scale</a></li>
+  <li><a href="https://arxiv.org/abs/1511.06939" target="_blank">Session-based Recommendations with Recurrent Neural Networks</a></li>
+  <li><a href="https://arxiv.org/abs/1808.09781" target="_blank">Self-Attentive Sequential Recommendation</a></li>
+  <li><a href="https://arxiv.org/abs/1905.06874" target="_blank">Behavior Sequence Transformer for E-commerce Recommendation in Alibaba</a></li>
+  <li><a href="https://arxiv.org/abs/1904.06690" target="_blank">BERT4Rec: Sequential Recommendation with Bidirectional Encoder Representations from Transformer</a></li>
+  <li><a href="https://blog.twitter.com/engineering/en_us/topics/open-source/2023/twitter-recommendation-algorithm" target="_blank">Twitter’s Recommendation Algorithm</a></li>
+  <li><a href="https://arxiv.org/abs/2102.07619" target="_blank">MaskNet: Introducing Feature-Wise Multiplication to CTR Ranking Models by Instance-Guided Mask</a></li>
+  <li><a href="https://ai.facebook.com/blog/powered-by-ai-instagrams-explore-recommender-system/" target="_blank">Powered by AI: Instagram’s Explore recommender system</a></li>
+  <li><a href="https://research.netflix.com/publication/Calibrated%20Recommendations" target="_blank">Calibrated Recommendations</a></li>
+  <li><a href="https://arxiv.org/abs/1702.07969" target="_blank">Related Pins at Pinterest: The Evolution of a Real-World Recommender System</a></li>
+</ul>
+
+<p>OG image prompt on MidJourney: “a woman drawing a system design diagram, in the style of contrasting tones, artifacts of online culture, innovative page design, complexity theory, bold black and whites, bold color scheme, rectangular fields –ar 2:1”</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Apr 2023). More Design Patterns For Machine Learning Systems. eugeneyan.com.
+        https://eugeneyan.com/writing/more-patterns/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2023patterns2,
+  title   = {More Design Patterns For Machine Learning Systems},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2023},
+  month   = {Apr},
+  url     = {https://eugeneyan.com/writing/more-patterns/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

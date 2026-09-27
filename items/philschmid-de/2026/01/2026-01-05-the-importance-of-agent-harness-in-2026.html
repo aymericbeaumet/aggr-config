@@ -1,0 +1,45 @@
+<div id="readability-page-1" class="page"><div><p>We are at a turning point in AI. For years, we focused only on the model. We asked how smart/good the model was. We checked leaderboards and benchmarks to see if Model A beats Model B.</p>
+<p>The difference between top-tier models on static leaderboards is shrinking. But this could be an illusion. The gap between models becomes clear the longer and more complex a task gets. It comes down to durability: How well a model follows instructions while executing hundreds of tool calls over time. A 1% difference on a leaderboard cannot detect the reliability if a model drifts off-track after fifty steps.</p>
+<p>We need a new way to show capabilities, performance and improvements. We need systems that proves models can execute multi-day workstreams reliably. One Answer to this are Agent Harnesses.</p>
+<h2 id="what-is-an-agent-harness">What is an Agent Harness?</h2>
+<p>An Agent Harness is the infrastructure that wraps around an AI model to manage long-running tasks. It is not the agent itself. It is the software system that governs how the agent operates, ensuring it remains reliable, efficient, and steerable.</p>
+<p>It operates at a higher level than agent frameworks. While a framework provides the building blocks for tools or implements the agentic loop. The harness provides prompt presets, opinionated handling for tool calls, lifecycle hooks or ready-to-use capabilities like planning, filesystem access or sub-agent management. It is more than a framework, it comes with batteries included.</p>
+<p><img src="https://www.philschmid.de/static/blog/agent-harness-2026/agent-harness.jpeg" alt="Agent Harness Diagram"></p>
+<p>We can visualize this by comparing it to a computer:</p>
+<ul>
+<li><strong>The Model is the CPU:</strong> It provides the raw processing power.</li>
+<li><strong>The Context Window is the RAM:</strong> It is the limited, volatile working memory.</li>
+<li><strong>The Agent Harness is the Operating System:</strong> It curates the context, handles the "boot" sequence (prompts, hooks), and provides standard drivers (tool handling).</li>
+<li><strong>The Agent is the Application:</strong> It is the specific user logic running on top of the OS.</li>
+</ul>
+<p>The Agent harness implements "<a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/context-engineering">Context Engineering</a>" strategies like reducing context via compaction, offloading state to storage, or isolating tasks into sub-agents. For developers, this means you can skip building the operating system and focus solely on the application, defining your agent's unique logic.</p>
+<p>Currently, general-purpose harnesses are rare. <strong>Claude Code</strong> is a prime example of this emerging category, attempting to standardize with the Claude Agent SDK or LangChain DeepAgents. However, one could argue that <strong>all coding CLIs</strong> are, in a way, specialized agent harnesses designed for specific verticals.</p>
+<h2 id="the-benchmark-problem-and-the-need-for-agent-harnesses">The Benchmark Problem and the need for Agent Harnesses</h2>
+<p>In the past, benchmarks were mostly done on single-turn model outputs. Last year, we started to see a trend to evaluate systems instead of raw models, where the model is one component which could use tools or interacts with the environment, e.g. AIMO, SWE-Bench.</p>
+<p>These newer benchmarks struggle to measure <a target="_blank" rel="noopener noreferrer" href="https://www.philschmid.de/agents-pass-at-k-pass-power-k">reliability</a>. They rarely test how a model behaves after its 50th or 100th tool call/turn. This is where the real difficulty lies. A model might be smart enough to solve a hard puzzle in one or two tries, but fail to follow a initial instructions or correctly reasons over intermediate steps after running for an hour. Standard benchmarks struggle to capture the durabilitiy required for long workflows.</p>
+<p>As Benchmarks are going to become more complex we need to bridge the gap between benchmark claims and user experience. A Agent Harness can be essential for three critical reasons:</p>
+<ul>
+<li><strong>Validating Real-World Progress:</strong> Benchmarks are misaligned with user needs. As new models are released frequently, a harness allows users to easily test and compare how the latest models perform against their use cases and constraints.</li>
+<li><strong>Empowering User Experience:</strong> Without a harness, the user's experience might be behind the model's potential. Releasing a harness allows developers to build agents using proven tools and best practices. This ensures that users are interacting with the same system structure.</li>
+<li><strong>Hill Climbing via Real-World Feedback:</strong> A shared, stable environment (Harness) creates a feedback loop where researchers can iterate and improve ("hill climb") benchmarks based on actual user adoption.</li>
+</ul>
+<p>The ability to improve a system is proportional to how easily you can verify its output. <a target="_blank" rel="noopener noreferrer" href="https://www.jasonwei.net/blog/asymmetry-of-verification-and-verifiers-law">[Ref]</a> A Harness turns vague, multi-step agent workflows into structured data that we can log and grade, allowing us to hill-climb effectively.</p>
+<h2 id="the-bitter-lesson-of-building-agents">The "Bitter Lesson" of building Agents</h2>
+<p>Rich Sutton wrote an essay called <a target="_blank" rel="noopener noreferrer" href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html">the Bitter Lesson</a>. He argued that general methods that use computation beat hand-coded human knowledge every time. We see this lesson playing out in agent development right now.</p>
+<ul>
+<li>Manus refactored <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=6_BcCthVvb8">their harness five times in six months</a> to remove rigid assumptions.</li>
+<li>LangChain <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=2Muxy3wE-E0">re-architected their "Open Deep Research" agent three times</a> in a single year.</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools">Vercel removed 80% their agents tool</a> leading to fewer steps, fewer tokens, faster responses</li>
+</ul>
+<p>To survive the Bitter Lesson, our infrastructure (Harness) must be lightweight. Every new model release, has a different, optimal way to structure agents. Capabilities that required complex, hand-coded pipelines in 2024 are now handled by a single context-window prompt in 2026.</p>
+<p>Developers must build harnesses that allow them to rip out the "smart" logic they wrote yesterday. If you over-engineer the control flow, the next model update will break your system.</p>
+<h2 id="what-comes-next">What Comes Next?</h2>
+<p>We are heading toward a convergence of training and inference environments. We see a new bottleneck being context durability. The Harness will become the primary tool for solving "model drift". Labs will use the harness to detect exactly when a model stops following instructions or reasoning correctly after the 100th step. This data will be fed directly back into training to create models that don't get "tired" during long tasks.</p>
+<p>As builders and developers the focus should shift:</p>
+<ol>
+<li><strong>Start Simple:</strong> Do not build massive control flows. Provide robust atomic tools. Let the model make the plan. Implement guardrails, retries and verifications.</li>
+<li><strong>Build to Delete:</strong> Make your architecture modular. New models will replace your logic. You must be ready to rip out code.</li>
+<li><strong>The Harness is the Dataset:</strong> Competitive advantage is no longer the prompt. It is the trajectories your Harness captures. Every time your agent fails to follow an instruction late in a workflow can be ued for training the next iteration.</li>
+</ol>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

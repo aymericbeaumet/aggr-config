@@ -1,0 +1,432 @@
+<div id="readability-page-1" class="page"><div>
+<p>So far, I’ve written about two types of generative models, <a href="https://lilianweng.github.io/posts/2017-08-20-gan/">GAN</a> and <a href="https://lilianweng.github.io/posts/2018-08-12-vae/">VAE</a>. Neither of them explicitly learns the probability density function of real data, $p(\mathbf{x})$ (where $\mathbf{x} \in \mathcal{D}$) — because it is really hard! Taking the generative model with latent variables as an example, $p(\mathbf{x}) = \int p(\mathbf{x}\vert\mathbf{z})p(\mathbf{z})d\mathbf{z}$ can hardly be calculated as it is intractable to go through all possible values of the latent code $\mathbf{z}$.</p>
+<p>Flow-based deep generative models conquer this hard problem with the help of <a href="https://arxiv.org/abs/1505.05770">normalizing flows</a>, a powerful statistics tool for density estimation. A good estimation of $p(\mathbf{x})$ makes it possible to efficiently complete many downstream tasks: sample unobserved but realistic new data points (data generation), predict the rareness of future events (density estimation), infer latent variables, fill in incomplete data samples, etc.</p>
+<h2 id="types-of-generative-models">Types of Generative Models</h2>
+<p>Here is a quick summary of the difference between GAN, VAE, and flow-based generative models:</p>
+<ol>
+<li>Generative adversarial networks: GAN provides a smart solution to model the data generation, an unsupervised learning problem, as a supervised one. The discriminator model learns to distinguish the real data from the fake samples that are produced by the generator model. Two models are trained as they are playing a <a href="https://en.wikipedia.org/wiki/Minimax">minimax</a> game.</li>
+<li>Variational autoencoders: VAE inexplicitly optimizes the log-likelihood of the data by maximizing the evidence lower bound (ELBO).</li>
+<li>Flow-based generative models: A flow-based generative model is constructed by a sequence of invertible transformations. Unlike other two, the model explicitly learns the data distribution $p(\mathbf{x})$ and therefore the loss function is simply the negative log-likelihood.</li>
+</ol>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/three-generative-models.png">
+	<figcaption>Comparison of three categories of generative models.</figcaption>
+</figure>
+<h2 id="linear-algebra-basics-recap">Linear Algebra Basics Recap</h2>
+<p>We should understand two key concepts before getting into the flow-based generative model: the Jacobian determinant and the change of variable rule. Pretty basic, so feel free to skip.</p>
+<h2 id="jacobian-matrix-and-determinant">Jacobian Matrix and Determinant</h2>
+<p>Given a function of mapping a $n$-dimensional input vector $\mathbf{x}$ to a $m$-dimensional output vector, $\mathbf{f}: \mathbb{R}^n \mapsto \mathbb{R}^m$, the matrix of all first-order partial derivatives of this function is called the <strong>Jacobian matrix</strong>, $\mathbf{J}$ where one entry on the i-th row and j-th column is $\mathbf{J}_{ij} = \frac{\partial f_i}{\partial x_j}$.</p>
+<p>
+$$
+\mathbf{J} = \begin{bmatrix}
+\frac{\partial f_1}{\partial x_1} &amp; \dots &amp; \frac{\partial f_1}{\partial x_n} \\[6pt]
+\vdots &amp; \ddots &amp; \vdots \\[6pt]
+\frac{\partial f_m}{\partial x_1} &amp; \dots &amp; \frac{\partial f_m}{\partial x_n} \\[6pt]
+\end{bmatrix}
+$$
+</p>
+<p>The determinant is one real number computed as a function of all the elements in a squared matrix. Note that the determinant <em>only exists for <strong>square</strong> matrices</em>. The absolute value of the determinant can be thought of as a measure of <em>“how much multiplication by the matrix expands or contracts space”.</em></p>
+<p>The determinant of a nxn matrix $M$ is:</p>
+<p>
+$$
+\det M = \det \begin{bmatrix}
+a_{11} &amp; a_{12} &amp; \dots &amp; a_{1n} \\
+a_{21} &amp; a_{22} &amp; \dots &amp; a_{2n} \\
+\vdots &amp; \vdots &amp; &amp; \vdots \\
+a_{n1} &amp; a_{n2} &amp; \dots &amp; a_{nn} \\
+\end{bmatrix} = \sum_{j_1 j_2 \dots j_n} (-1)^{\tau(j_1 j_2 \dots j_n)} a_{1j_1} a_{2j_2} \dots a_{nj_n}
+$$
+</p>
+<p>where the subscript under the summation $j_1 j_2 \dots j_n$ are all permutations of the set {1, 2, …, n}, so there are $n!$ items in total; $\tau(.)$ indicates the <a href="https://en.wikipedia.org/wiki/Parity_of_a_permutation">signature</a> of a permutation.</p>
+<p>The determinant of a square matrix $M$ detects whether it is invertible: If $\det(M)=0$ then $M$ is not invertible (a <em>singular</em> matrix with linearly dependent rows or columns; or any row or column is all 0); otherwise, if $\det(M)\neq 0$, $M$ is invertible.</p>
+<p>The determinant of the product is equivalent to the product of the determinants: $\det(AB) = \det(A)\det(B)$. (<a href="https://proofwiki.org/wiki/Determinant_of_Matrix_Product">proof</a>)</p>
+<h2 id="change-of-variable-theorem">Change of Variable Theorem</h2>
+<p>Let’s review the change of variable theorem specifically in the context of probability density estimation, starting with a single variable case.</p>
+<p>Given a random variable $z$ and its known probability density function $z \sim \pi(z)$, we would like to construct a new random variable using a 1-1 mapping function $x = f(z)$. The function $f$ is invertible, so $z=f^{-1}(x)$. Now the question is <em>how to infer the unknown probability density function of the new variable</em>, $p(x)$?</p>
+<p>
+$$
+\begin{aligned}
+&amp; \int p(x)dx = \int \pi(z)dz = 1 \scriptstyle{\text{   ; Definition of probability distribution.}}\\
+&amp; p(x) = \pi(z) \left\vert\frac{dz}{dx}\right\vert = \pi(f^{-1}(x)) \left\vert\frac{d f^{-1}}{dx}\right\vert = \pi(f^{-1}(x)) \vert (f^{-1})'(x) \vert
+\end{aligned}
+$$
+</p>
+<p>By definition, the integral $\int \pi(z)dz$ is the sum of an infinite number of rectangles of infinitesimal width $\Delta z$. The height of such a rectangle at position $z$ is the value of the density function $\pi(z)$. When we substitute the variable, $z = f^{-1}(x)$ yields $\frac{\Delta z}{\Delta x} = (f^{-1}(x))’$ and $\Delta z =  (f^{-1}(x))’ \Delta x$. Here $\vert(f^{-1}(x))’\vert$ indicates the ratio between the area of rectangles defined in two different coordinate of variables $z$ and $x$ respectively.</p>
+<p>The multivariable version has a similar format:</p>
+<p>
+$$
+\begin{aligned}
+\mathbf{z} &amp;\sim \pi(\mathbf{z}), \mathbf{x} = f(\mathbf{z}), \mathbf{z} = f^{-1}(\mathbf{x}) \\
+p(\mathbf{x}) 
+&amp;= \pi(\mathbf{z}) \left\vert \det \dfrac{d \mathbf{z}}{d \mathbf{x}} \right\vert  
+= \pi(f^{-1}(\mathbf{x})) \left\vert \det \dfrac{d f^{-1}}{d \mathbf{x}} \right\vert
+\end{aligned}
+$$
+</p>
+<p>where $\det \frac{\partial f}{\partial\mathbf{z}}$ is the Jacobian determinant of the function $f$. The full proof of the multivariate version is out of the scope of this post; ask Google if interested ;)</p>
+<h2 id="what-is-normalizing-flows">What is Normalizing Flows?</h2>
+<p>Being able to do good density estimation has direct applications in many machine learning problems, but it is very hard. For example, since we need to run backward propagation in deep learning models, the embedded probability distribution (i.e. posterior $p(\mathbf{z}\vert\mathbf{x})$) is expected to be simple enough to calculate the derivative easily and efficiently. That is why Gaussian distribution is often used in latent variable generative models, even though most of real world distributions are much more complicated than Gaussian.</p>
+<p>Here comes a <strong>Normalizing Flow</strong> (NF) model for better and more powerful distribution approximation. A normalizing flow transforms a simple distribution into a complex one by applying a sequence of invertible transformation functions. Flowing through a chain of transformations, we repeatedly substitute the variable for the new one according to the change of variables theorem and eventually obtain a probability distribution of the final target variable.</p>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/normalizing-flow.png">
+	<figcaption>Illustration of a normalizing flow model, transforming a simple distribution $p\_0(\mathbf{z}\_0)$ to a complex one $p\_K(\mathbf{z}\_K)$ step by step.</figcaption>
+</figure>
+<p>As defined in Fig. 2,</p>
+<p>
+$$
+\begin{aligned}
+\mathbf{z}_{i-1} &amp;\sim p_{i-1}(\mathbf{z}_{i-1}) \\
+\mathbf{z}_i &amp;= f_i(\mathbf{z}_{i-1})\text{, thus }\mathbf{z}_{i-1} = f_i^{-1}(\mathbf{z}_i) \\
+p_i(\mathbf{z}_i) 
+&amp;= p_{i-1}(f_i^{-1}(\mathbf{z}_i)) \left\vert \det\dfrac{d f_i^{-1}}{d \mathbf{z}_i} \right\vert
+\end{aligned}
+$$
+</p>
+<p>Then let’s convert the equation to be a function of $\mathbf{z}_i$ so that we can do inference with the base distribution.</p>
+<p>
+$$
+\begin{aligned}
+p_i(\mathbf{z}_i) 
+&amp;= p_{i-1}(f_i^{-1}(\mathbf{z}_i)) \left\vert \det\dfrac{d f_i^{-1}}{d \mathbf{z}_i} \right\vert \\
+&amp;= p_{i-1}(\mathbf{z}_{i-1}) \left\vert \det \color{red}{\Big(\dfrac{d f_i}{d\mathbf{z}_{i-1}}\Big)^{-1}} \right\vert &amp; \scriptstyle{\text{; According to the inverse func theorem.}} \\
+&amp;= p_{i-1}(\mathbf{z}_{i-1}) \color{red}{\left\vert \det \dfrac{d f_i}{d\mathbf{z}_{i-1}} \right\vert^{-1}} &amp; \scriptstyle{\text{; According to a property of Jacobians of invertible func.}} \\
+\log p_i(\mathbf{z}_i) &amp;= \log p_{i-1}(\mathbf{z}_{i-1}) - \log \left\vert \det \dfrac{d f_i}{d\mathbf{z}_{i-1}} \right\vert
+\end{aligned}
+$$
+</p>
+<p>(*) A note on the <em>“inverse function theorem”</em>: If $y=f(x)$ and $x=f^{-1}(y)$, we have:</p>
+<p>
+$$
+\dfrac{df^{-1}(y)}{dy} = \dfrac{dx}{dy} = (\dfrac{dy}{dx})^{-1} = (\dfrac{df(x)}{dx})^{-1}
+$$
+</p>
+<p>(*) A note on <em>“Jacobians of invertible function”</em>: The determinant of the inverse of an invertible matrix is the inverse of the determinant: $\det(M^{-1}) = (\det(M))^{-1}$, <a href="#jacobian-matrix-and-determinant">because</a> $\det(M)\det(M^{-1}) = \det(M \cdot M^{-1}) = \det(I) = 1$.</p>
+<p>Given such a chain of probability density functions, we know the relationship between each pair of consecutive variables. We can expand the equation of the output $\mathbf{x}$ step by step until tracing back to the initial distribution $\mathbf{z}_0$.</p>
+<p>
+$$
+\begin{aligned}
+\mathbf{x} = \mathbf{z}_K &amp;= f_K \circ f_{K-1} \circ \dots \circ f_1 (\mathbf{z}_0) \\
+\log p(\mathbf{x}) = \log \pi_K(\mathbf{z}_K) 
+&amp;= \log \pi_{K-1}(\mathbf{z}_{K-1}) - \log\left\vert\det\dfrac{d f_K}{d \mathbf{z}_{K-1}}\right\vert \\
+&amp;= \log \pi_{K-2}(\mathbf{z}_{K-2}) - \log\left\vert\det\dfrac{d f_{K-1}}{d\mathbf{z}_{K-2}}\right\vert - \log\left\vert\det\dfrac{d f_K}{d\mathbf{z}_{K-1}}\right\vert \\
+&amp;= \dots \\
+&amp;= \log \pi_0(\mathbf{z}_0) - \sum_{i=1}^K \log\left\vert\det\dfrac{d f_i}{d\mathbf{z}_{i-1}}\right\vert
+\end{aligned}
+$$
+</p>
+<p>The path traversed by the random variables $\mathbf{z}_i = f_i(\mathbf{z}_{i-1})$ is the <strong>flow</strong> and the full chain formed by the successive distributions $\pi_i$ is called a <strong>normalizing flow</strong>. Required by the computation in the equation, a transformation function $f_i$ should satisfy two properties:</p>
+<ol>
+<li>It is easily invertible.</li>
+<li>Its Jacobian determinant is easy to compute.</li>
+</ol>
+<h2 id="models-with-normalizing-flows">Models with Normalizing Flows</h2>
+<p>With normalizing flows in our toolbox, the exact log-likelihood of input data $\log p(\mathbf{x})$ becomes tractable. As a result, the training criterion of flow-based generative model is simply the negative log-likelihood (NLL) over the training dataset $\mathcal{D}$:</p>
+<p>
+$$
+\mathcal{L}(\mathcal{D}) = - \frac{1}{\vert\mathcal{D}\vert}\sum_{\mathbf{x} \in \mathcal{D}} \log p(\mathbf{x})
+$$
+</p>
+<h2 id="realnvp">RealNVP</h2>
+<p>The <strong>RealNVP</strong> (Real-valued Non-Volume Preserving; <a href="https://arxiv.org/abs/1605.08803">Dinh et al., 2017</a>) model implements a normalizing flow by stacking a sequence of invertible bijective transformation functions. In each bijection $f: \mathbf{x} \mapsto \mathbf{y}$, known as <em>affine coupling layer</em>,  the input dimensions are split into two parts:</p>
+<ul>
+<li>The first $d$ dimensions stay same;</li>
+<li>The second part, $d+1$ to $D$ dimensions, undergo an affine transformation (“scale-and-shift”) and both the scale and shift parameters are functions of the first $d$ dimensions.</li>
+</ul>
+<p>
+$$
+\begin{aligned}
+\mathbf{y}_{1:d} &amp;= \mathbf{x}_{1:d} \\ 
+\mathbf{y}_{d+1:D} &amp;= \mathbf{x}_{d+1:D} \odot \exp({s(\mathbf{x}_{1:d})}) + t(\mathbf{x}_{1:d})
+\end{aligned}
+$$
+</p>
+<p>where $s(.)$ and $t(.)$ are <em>scale</em> and <em>translation</em> functions and both map $\mathbb{R}^d \mapsto \mathbb{R}^{D-d}$. The $\odot$ operation is the element-wise product.</p>
+<p>Now let’s check whether this transformation satisfy two basic properties  for a flow transformation.</p>
+<p><strong>Condition 1</strong>: “It is easily invertible.”</p>
+<p>Yes and it is fairly straightforward.</p>
+<p>
+$$
+\begin{cases}
+\mathbf{y}_{1:d} &amp;= \mathbf{x}_{1:d} \\ 
+\mathbf{y}_{d+1:D} &amp;= \mathbf{x}_{d+1:D} \odot \exp({s(\mathbf{x}_{1:d})}) + t(\mathbf{x}_{1:d})
+\end{cases}
+\Leftrightarrow 
+\begin{cases}
+\mathbf{x}_{1:d} &amp;= \mathbf{y}_{1:d} \\ 
+\mathbf{x}_{d+1:D} &amp;= (\mathbf{y}_{d+1:D} - t(\mathbf{y}_{1:d})) \odot \exp(-s(\mathbf{y}_{1:d}))
+\end{cases}
+$$
+</p>
+<p><strong>Condition 2</strong>: “Its Jacobian determinant is easy to compute.”</p>
+<p>Yes. It is not hard to get the Jacobian matrix and determinant of this transformation. The Jacobian is a lower triangular matrix.</p>
+<p>
+$$
+\mathbf{J} = 
+\begin{bmatrix}
+  \mathbb{I}_d &amp; \mathbf{0}_{d\times(D-d)} \\[5pt]
+  \frac{\partial \mathbf{y}_{d+1:D}}{\partial \mathbf{x}_{1:d}} &amp; \text{diag}(\exp(s(\mathbf{x}_{1:d})))
+\end{bmatrix}
+$$
+</p>
+<p>Hence the determinant is simply the product of terms on the diagonal.</p>
+<p>
+$$
+\det(\mathbf{J}) 
+= \prod_{j=1}^{D-d}\exp(s(\mathbf{x}_{1:d}))_j
+= \exp(\sum_{j=1}^{D-d} s(\mathbf{x}_{1:d})_j)
+$$
+</p>
+<p>So far, the affine coupling layer looks perfect for constructing a normalizing flow :)</p>
+<p>Even better, since (i) computing $f^-1$ does not require computing the inverse of $s$ or $t$ and (ii) computing the Jacobian determinant does not involve computing the Jacobian of $s$ or $t$, those functions can be <em>arbitrarily complex</em>; i.e. both $s$ and $t$ can be modeled by deep neural networks.</p>
+<p>In one affine coupling layer, some dimensions (channels) remain unchanged. To make sure all the inputs have a chance to be altered, the model reverses the ordering in each layer so that different components are left unchanged. Following such an alternating pattern, the set of units which remain identical in one transformation layer are always modified in the next. Batch normalization is found to help training models with a very deep stack of coupling layers.</p>
+<p>Furthermore, RealNVP can work in a multi-scale architecture to build a more efficient model for large inputs. The multi-scale architecture applies several “sampling” operations to normal affine layers, including spatial checkerboard pattern masking, squeezing operation, and channel-wise masking. Read the <a href="https://arxiv.org/abs/1605.08803">paper</a> for more details on the multi-scale architecture.</p>
+<h2 id="nice">NICE</h2>
+<p>The <strong>NICE</strong> (Non-linear Independent Component Estimation; <a href="https://arxiv.org/abs/1410.8516">Dinh, et al. 2015</a>) model is a predecessor of <a href="#realnvp">RealNVP</a>. The transformation in NICE is the affine coupling layer without the scale term, known as <em>additive coupling layer</em>.</p>
+<p>
+$$
+\begin{cases}
+\mathbf{y}_{1:d} &amp;= \mathbf{x}_{1:d} \\ 
+\mathbf{y}_{d+1:D} &amp;= \mathbf{x}_{d+1:D} + m(\mathbf{x}_{1:d})
+\end{cases}
+\Leftrightarrow 
+\begin{cases}
+\mathbf{x}_{1:d} &amp;= \mathbf{y}_{1:d} \\ 
+\mathbf{x}_{d+1:D} &amp;= \mathbf{y}_{d+1:D} - m(\mathbf{y}_{1:d})
+\end{cases}
+$$
+</p>
+<h2 id="glow">Glow</h2>
+<p>The <strong>Glow</strong> (<a href="https://arxiv.org/abs/1807.03039">Kingma and Dhariwal, 2018</a>) model extends the previous reversible generative models, NICE and RealNVP, and simplifies the architecture by replacing the reverse permutation operation on the channel ordering with invertible 1x1 convolutions.</p>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/one-glow-step.png">
+	<figcaption>One step of flow in the Glow model. (Image source: <a href="https://arxiv.org/abs/1807.03039" target="_blank">Kingma and Dhariwal, 2018</a>)</figcaption>
+</figure>
+<p>There are three substeps in one step of flow in Glow.</p>
+<p>Substep 1: <strong>Activation normalization</strong> (short for “actnorm”)</p>
+<p>It performs an affine transformation using a scale and bias parameter per channel, similar to batch normalization, but works for mini-batch size 1. The parameters are trainable but initialized so that the first minibatch of data have mean 0 and standard deviation 1 after actnorm.</p>
+<p>Substep 2: <strong>Invertible 1x1 conv</strong></p>
+<p>Between layers of the RealNVP flow, the ordering of channels is reversed so that all the data dimensions have a chance to be altered. A 1×1 convolution with equal number of input and output channels is <em>a generalization of any permutation</em> of the channel ordering.</p>
+<p>Say, we have an invertible 1x1 convolution of an input $h \times w \times c$ tensor $\mathbf{h}$ with a weight matrix $\mathbf{W}$ of size $c \times c$. The output is a $h \times w \times c$ tensor, labeled as $f = \texttt{conv2d}(\mathbf{h}; \mathbf{W})$. In order to apply the change of variable rule, we need to compute the Jacobian determinant $\vert \det\partial f / \partial\mathbf{h}\vert$.</p>
+<p>Both the input and output of 1x1 convolution here can be viewed as a matrix of size $h \times w$. Each entry $\mathbf{x}_{ij}$ ($i=1,\dots,h, j=1,\dots,w$) in $\mathbf{h}$ is a vector of $c$ channels and each entry is multiplied by the weight matrix $\mathbf{W}$ to obtain the corresponding entry $\mathbf{y}_{ij}$ in the output matrix respectively. The derivative of each entry is $\partial \mathbf{x}_{ij} \mathbf{W} / \partial\mathbf{x}_{ij} = \mathbf{W}$ and there are $h \times w$ such entries in total:</p>
+<p>
+$$
+\log \left\vert\det \frac{\partial\texttt{conv2d}(\mathbf{h}; \mathbf{W})}{\partial\mathbf{h}}\right\vert
+= \log (\vert\det\mathbf{W}\vert^{h \cdot w}\vert) = h \cdot w \cdot \log \vert\det\mathbf{W}\vert
+$$
+</p>
+<p>The inverse 1x1 convolution depends on the inverse matrix $\mathbf{W}^{-1}$. Since the weight matrix is relatively small, the amount of computation for the matrix determinant (<a href="https://www.tensorflow.org/api_docs/python/tf/linalg/det">tf.linalg.det</a>) and inversion (<a href="https://www.tensorflow.org/api_docs/python/tf/linalg/inv">tf.linalg.inv</a>) is still under control.</p>
+<p>Substep 3: <strong>Affine coupling layer</strong></p>
+<p>The design is same as in RealNVP.</p>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/glow-table.png">
+	<figcaption>Three substeps in one step of flow in Glow. (Image source: <a href="https://arxiv.org/abs/1807.03039" target="_blank">Kingma and Dhariwal, 2018</a>)</figcaption>
+</figure>
+<h2 id="models-with-autoregressive-flows">Models with Autoregressive Flows</h2>
+<p>The <strong>autoregressive</strong> constraint is a way to model sequential data, $\mathbf{x} = [x_1, \dots, x_D]$: each output only depends on the data observed in the past, but not on the future ones. In other words, the probability of observing $x_i$ is conditioned on $x_1, \dots, x_{i-1}$ and the product of these conditional probabilities gives us the probability of observing the full sequence:</p>
+<p>
+$$
+p(\mathbf{x}) = \prod_{i=1}^{D} p(x_i\vert x_1, \dots, x_{i-1}) = \prod_{i=1}^{D} p(x_i\vert x_{1:i-1})
+$$
+</p>
+<p>How to model the conditional density is of your choice. It can be a univariate Gaussian with mean and standard deviation computed as a function of $x_{1:i-1}$, or a multilayer neural network with $x_{1:i-1}$ as the input.</p>
+<p>If a flow transformation in a normalizing flow is framed as an autoregressive model — each dimension in a vector variable is conditioned on the previous dimensions — this is an <strong>autoregressive flow</strong>.</p>
+<p>This section starts with several classic autoregressive models (MADE, PixelRNN, WaveNet) and then we dive into autoregressive flow models (MAF and IAF).</p>
+<h2 id="made">MADE</h2>
+<p><strong>MADE</strong> (Masked Autoencoder for Distribution Estimation; <a href="https://arxiv.org/abs/1502.03509">Germain et al., 2015</a>) is a specially designed architecture to enforce the autoregressive property in the autoencoder <em>efficiently</em>. When using an autoencoder to predict the conditional probabilities, rather than feeding the autoencoder with input of different observation windows $D$ times, MADE removes the contribution from certain hidden units by multiplying binary mask matrices so that each input dimension is reconstructed only from previous dimensions in a <em>given</em> ordering in a <em>single pass</em>.</p>
+<p>In a multilayer fully-connected neural network, say, we have $L$ hidden layers with weight matrices $\mathbf{W}^1, \dots, \mathbf{W}^L$ and an output layer with weight matrix $\mathbf{V}$. The output $\hat{\mathbf{x}}$ has each dimension $\hat{x}_i = p(x_i\vert x_{1:i-1})$.</p>
+<p>Without any mask, the computation through layers looks like the following:</p>
+<p>
+$$
+\begin{aligned}
+\mathbf{h}^0 &amp;= \mathbf{x} \\
+\mathbf{h}^l &amp;= \text{activation}^l(\mathbf{W}^l\mathbf{h}^{l-1} + \mathbf{b}^l) \\
+\hat{\mathbf{x}} &amp;= \sigma(\mathbf{V}\mathbf{h}^L + \mathbf{c})
+\end{aligned}
+$$
+</p>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/MADE.png">
+	<figcaption>Demonstration of how MADE works in a three-layer feed-forward neural network. (Image source: <a href="https://arxiv.org/abs/1502.03509" target="_blank">Germain et al., 2015</a>)</figcaption>
+</figure>
+<p>To zero out some connections between layers, we can simply element-wise multiply every weight matrix by a binary mask matrix. Each hidden node is assigned with a random “connectivity integer” between $1$ and $D-1$; the assigned value for the $k$-th unit in the $l$-th layer is denoted by $m^l_k$. The binary mask matrix is determined by element-wise comparing values of two nodes in two layers.</p>
+<p>
+$$
+\begin{aligned}
+\mathbf{h}^l &amp;= \text{activation}^l((\mathbf{W}^l \color{red}{\odot \mathbf{M}^{\mathbf{W}^l}}) \mathbf{h}^{l-1} + \mathbf{b}^l) \\
+\hat{\mathbf{x}} &amp;= \sigma((\mathbf{V} \color{red}{\odot \mathbf{M}^{\mathbf{V}}}) \mathbf{h}^L + \mathbf{c}) \\
+M^{\mathbf{W}^l}_{k', k} 
+&amp;= \mathbf{1}_{m^l_{k'} \geq m^{l-1}_k} 
+= \begin{cases}
+    1, &amp; \text{if } m^l_{k'} \geq m^{l-1}_k\\
+    0, &amp; \text{otherwise}
+\end{cases} \\
+M^{\mathbf{V}}_{d, k} 
+&amp;= \mathbf{1}_{d \geq m^L_k} 
+= \begin{cases}
+    1, &amp; \text{if } d &gt; m^L_k\\
+    0, &amp; \text{otherwise}
+\end{cases}
+\end{aligned}
+$$
+</p>
+<p>A unit in the current layer can only be connected to other units with equal or smaller numbers in the previous layer and this type of dependency easily propagates through the network up to the output layer. Once the numbers are assigned to all the units and layers, the ordering of input dimensions is fixed and the conditional probability is produced with respect to it.  See a great illustration in To make sure all the hidden units are connected to the input and output layers through some paths, the $m^l_k$ is sampled to be equal or greater than the minimal connectivity integer in the previous layer, $\min_{k’} m_{k’}^{l-1}$.</p>
+<p>MADE training can be further facilitated by:</p>
+<ul>
+<li><em>Order-agnostic training</em>: shuffle the input dimensions, so that MADE is able to model any arbitrary ordering; can create an ensemble of autoregressive models at the runtime.</li>
+<li><em>Connectivity-agnostic training</em>: to avoid a model being tied up to a specific connectivity pattern constraints, resample $m^l_k$ for each training minibatch.</li>
+</ul>
+<h2 id="pixelrnn">PixelRNN</h2>
+<p>PixelRNN (<a href="https://arxiv.org/abs/1601.06759">Oord et al, 2016</a>) is a deep generative model for images. The image is generated one pixel at a time and each new pixel is sampled conditional on the pixels that have been seen before.</p>
+<p>Let’s consider an image of size $n \times n$, $\mathbf{x} = \{x_1, \dots, x_{n^2}\}$, the model starts generating pixels from the top left corner, from left to right and top to bottom (See Fig. 6).</p>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/pixel-rnn-context.png">
+	<figcaption>The context for generating one pixel in PixelRNN. (Image source: <a href="https://arxiv.org/abs/1601.06759" target="_blank">Oord et al, 2016</a>)</figcaption>
+</figure>
+<p>Every pixel $x_i$ is sampled from a probability distribution conditional over the the past context: pixels above it or on the left of it when in the same row. The definition of such context looks pretty arbitrary, because how visual <a href="https://lilianweng.github.io/posts/2018-06-24-attention/">attention</a> is attended to an image is more flexible. Somehow magically a generative model with such a strong assumption works.</p>
+<p>One implementation that could capture the entire context is the <em>Diagonal BiLSTM</em>. First, apply the <strong>skewing</strong> operation by offsetting each row of the input feature map by one position with respect to the previous row, so that computation for each row can be parallelized. Then the LSTM states are computed with respect to the current pixel and the pixels on the left.</p>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/diagonal-biLSTM.png">
+	<figcaption>(a) PixelRNN with diagonal BiLSTM. (b) Skewing operation that offsets each row in the feature map by one with regards to the row above. (Image source: <a href="https://arxiv.org/abs/1601.06759" target="_blank">Oord et al, 2016</a>)</figcaption>
+</figure>
+<p>
+$$
+\begin{aligned}
+\lbrack \mathbf{o}_i, \mathbf{f}_i, \mathbf{i}_i, \mathbf{g}_i \rbrack &amp;= \sigma(\mathbf{K}^{ss} \circledast \mathbf{h}_{i-1} + \mathbf{K}^{is} \circledast \mathbf{x}_i) &amp; \scriptstyle{\text{; }\sigma\scriptstyle{\text{ is tanh for g, but otherwise sigmoid; }}\circledast\scriptstyle{\text{ is convolution operation.}}} \\
+\mathbf{c}_i &amp;= \mathbf{f}_i \odot \mathbf{c}_{i-1} + \mathbf{i}_i \odot \mathbf{g}_i &amp; \scriptstyle{\text{; }}\odot\scriptstyle{\text{ is elementwise product.}}\\
+\mathbf{h}_i &amp;= \mathbf{o}_i \odot \tanh(\mathbf{c}_i)
+\end{aligned}
+$$
+</p>
+<p>where $\circledast$ denotes the convolution operation and $\odot$ is the element-wise multiplication. The input-to-state component $\mathbf{K}^{is}$ is a 1x1 convolution, while the state-to-state recurrent component is computed with a column-wise convolution $\mathbf{K}^{ss}$ with a kernel of size 2x1.</p>
+<p>The diagonal BiLSTM layers are capable of processing an unbounded context field, but expensive to compute due to the sequential dependency between states. A faster implementation uses multiple convolutional layers without pooling to define a bounded context box. The convolution kernel is masked so that the future context is not seen, similar to <a href="#MADE">MADE</a>. This convolution version is called <strong>PixelCNN</strong>.</p>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/pixel-cnn.png">
+	<figcaption>PixelCNN with masked convolution constructed by an elementwise product of a mask tensor and the convolution kernel before applying it. (Image source: http://slazebni.cs.illinois.edu/spring17/lec13_advanced.pdf)</figcaption>
+</figure>
+<h2 id="wavenet">WaveNet</h2>
+<p><strong>WaveNet</strong> (<a href="https://arxiv.org/abs/1609.03499">Van Den Oord, et al. 2016</a>) is very similar to PixelCNN but applied to 1-D audio signals. WaveNet consists of a stack of <em>causal convolution</em> which is a convolution operation designed to respect the ordering: the prediction at a certain timestamp can only consume the data observed in the past, no dependency on the future. In PixelCNN, the causal convolution is implemented by masked convolution kernel. The causal convolution in WaveNet is simply to shift the output by a number of timestamps to the future so that the output is aligned with the last input element.</p>
+<p>One big drawback of convolution layer is a very limited size of receptive field. The output can hardly depend on the input hundreds or thousands of timesteps ago, which can be a crucial requirement for modeling long sequences. WaveNet therefore adopts <em>dilated convolution</em> (<a href="https://github.com/vdumoulin/conv_arithmetic#dilated-convolution-animations">animation</a>), where the kernel is applied to an evenly-distributed subset of samples in a much larger receptive field of the input.</p>
+<figure>
+	<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/wavenet.png">
+	<figcaption>Visualization of WaveNet models with a stack of (top) causal convolution layers and (bottom) dilated convolution layers. (Image source: <a href="https://arxiv.org/abs/1609.03499" target="_blank">Van Den Oord, et al. 2016</a>)</figcaption>
+</figure>
+<p>WaveNet uses the gated activation unit as the non-linear layer, as it is found to work significantly better than ReLU for modeling 1-D audio data. The residual connection is applied after the gated activation.</p>
+<p>
+$$
+\mathbf{z} = \tanh(\mathbf{W}_{f,k}\circledast\mathbf{x})\odot\sigma(\mathbf{W}_{g,k}\circledast\mathbf{x})
+$$
+</p>
+<p>where $\mathbf{W}_{f,k}$ and $\mathbf{W}_{g,k}$ are convolution filter and gate weight matrix of the $k$-th layer, respectively; both are learnable.</p>
+<h2 id="masked-autoregressive-flow">Masked Autoregressive Flow</h2>
+<p><strong>Masked Autoregressive Flow</strong>  (<strong>MAF</strong>; <a href="https://arxiv.org/abs/1705.07057">Papamakarios et al., 2017</a>) is a type of normalizing flows, where the transformation layer is built as an autoregressive neural network. MAF is very similar to <strong>Inverse Autoregressive Flow</strong> (IAF) introduced later. See more discussion on the relationship between MAF and IAF in the next section.</p>
+<p>Given two random variables, $\mathbf{z} \sim \pi(\mathbf{z})$ and $\mathbf{x} \sim p(\mathbf{x})$ and the probability density function $\pi(\mathbf{z})$ is known, MAF aims to learn $p(\mathbf{x})$. MAF generates each $x_i$ conditioned on the past dimensions $\mathbf{x}_{1:i-1}$.</p>
+<p>Precisely the conditional probability is an affine transformation of $\mathbf{z}$, where the scale and shift terms are functions of the observed part of $\mathbf{x}$.</p>
+<ul>
+<li>Data generation, producing a new $\mathbf{x}$:</li>
+</ul>
+<p>$x_i \sim p(x_i\vert\mathbf{x}_{1:i-1}) = z_i \odot \sigma_i(\mathbf{x}_{1:i-1}) + \mu_i(\mathbf{x}_{1:i-1})\text{, where }\mathbf{z} \sim \pi(\mathbf{z})$</p>
+<ul>
+<li>Density estimation, given a known $\mathbf{x}$:</li>
+</ul>
+<p>$p(\mathbf{x}) = \prod_{i=1}^D p(x_i\vert\mathbf{x}_{1:i-1})$</p>
+<p>The generation procedure is sequential, so it is slow by design. While density estimation only needs one pass the network using architecture like <a href="#MADE">MADE</a>. The transformation function is trivial to inverse and the Jacobian determinant is easy to compute too.</p>
+<h2 id="inverse-autoregressive-flow">Inverse Autoregressive Flow</h2>
+<p>Similar to MAF, <strong>Inverse autoregressive flow</strong> (<strong>IAF</strong>; <a href="https://arxiv.org/abs/1606.04934">Kingma et al., 2016</a>) models the conditional probability of the target variable as an autoregressive model too, but with a reversed flow, thus achieving a much efficient sampling process.</p>
+<p>First, let’s reverse the affine transformation in MAF:</p>
+<p>
+$$
+z_i = \frac{x_i - \mu_i(\mathbf{x}_{1:i-1})}{\sigma_i(\mathbf{x}_{1:i-1})} = -\frac{\mu_i(\mathbf{x}_{1:i-1})}{\sigma_i(\mathbf{x}_{1:i-1})} + x_i \odot \frac{1}{\sigma_i(\mathbf{x}_{1:i-1})}
+$$
+</p>
+<p>If let:</p>
+<p>
+$$
+\begin{aligned}
+&amp; \tilde{\mathbf{x}} = \mathbf{z}\text{, }\tilde{p}(.) = \pi(.)\text{, }\tilde{\mathbf{x}} \sim \tilde{p}(\tilde{\mathbf{x}}) \\
+&amp; \tilde{\mathbf{z}} = \mathbf{x} \text{, }\tilde{\pi}(.) = p(.)\text{, }\tilde{\mathbf{z}} \sim \tilde{\pi}(\tilde{\mathbf{z}})\\
+&amp; \tilde{\mu}_i(\tilde{\mathbf{z}}_{1:i-1}) = \tilde{\mu}_i(\mathbf{x}_{1:i-1}) = -\frac{\mu_i(\mathbf{x}_{1:i-1})}{\sigma_i(\mathbf{x}_{1:i-1})} \\
+&amp; \tilde{\sigma}(\tilde{\mathbf{z}}_{1:i-1}) = \tilde{\sigma}(\mathbf{x}_{1:i-1}) = \frac{1}{\sigma_i(\mathbf{x}_{1:i-1})}
+\end{aligned}
+$$
+</p>
+<p>Then we would have,</p>
+<p>
+$$
+\tilde{x}_i \sim p(\tilde{x}_i\vert\tilde{\mathbf{z}}_{1:i}) = \tilde{z}_i \odot \tilde{\sigma}_i(\tilde{\mathbf{z}}_{1:i-1}) + \tilde{\mu}_i(\tilde{\mathbf{z}}_{1:i-1})
+\text{, where }\tilde{\mathbf{z}} \sim \tilde{\pi}(\tilde{\mathbf{z}})
+$$
+</p>
+<p>IAF intends to estimate the probability density function of $\tilde{\mathbf{x}}$ given that $\tilde{\pi}(\tilde{\mathbf{z}})$ is already known. The inverse flow is an autoregressive affine transformation too, same as in MAF, but the scale and shift terms are autoregressive functions of observed variables from the known distribution $\tilde{\pi}(\tilde{\mathbf{z}})$. See the comparison between MAF and IAF in </p><figure>
+<img src="https://lilianweng.github.io/posts/2018-10-13-flow-models/MAF-vs-IAF.png">
+<figcaption>Comparison of MAF and IAF.  The variable with known density is in green while the unknown one is in red.</figcaption>
+</figure>
+<p>Computations of the individual elements $\tilde{x}_i$ do not depend on each other, so they are easily parallelizable (only one pass using MADE). The density estimation for a known $\tilde{\mathbf{x}}$ is not efficient, because we have to recover the value of $\tilde{z}_i$ in a sequential order, $\tilde{z}_i = (\tilde{x}_i - \tilde{\mu}_i(\tilde{\mathbf{z}}_{1:i-1})) / \tilde{\sigma}_i(\tilde{\mathbf{z}}_{1:i-1})$, thus D times in total.</p>
+<table>
+	<thead>
+			<tr>
+					<th></th>
+					<th>Base distribution</th>
+					<th>Target distribution</th>
+					<th>Model</th>
+					<th>Data generation</th>
+					<th>Density estimation</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>MAF</td>
+					<td>$\mathbf{z}\sim\pi(\mathbf{z})$</td>
+					<td>$\mathbf{x}\sim p(\mathbf{x})$</td>
+					<td>$x_i = z_i \odot \sigma_i(\mathbf{x}_{1:i-1}) + \mu_i(\mathbf{x}_{1:i-1})$</td>
+					<td>Sequential; slow</td>
+					<td>One pass; fast</td>
+			</tr>
+			<tr>
+					<td>IAF</td>
+					<td>$\tilde{\mathbf{z}}\sim\tilde{\pi}(\tilde{\mathbf{z}})$</td>
+					<td>$\tilde{\mathbf{x}}\sim\tilde{p}(\tilde{\mathbf{x}})$</td>
+					<td>$\tilde{x}_i  = \tilde{z}_i \odot \tilde{\sigma}_i(\tilde{\mathbf{z}}_{1:i-1}) + \tilde{\mu}_i(\tilde{\mathbf{z}}_{1:i-1})$</td>
+					<td>One pass; fast</td>
+					<td>Sequential; slow</td>
+			</tr>
+			<tr>
+					<td>———-</td>
+					<td>———-</td>
+					<td>———-</td>
+					<td>———-</td>
+					<td>———-</td>
+					<td>———-</td>
+			</tr>
+	</tbody>
+</table>
+<h2 id="vae--flows">VAE + Flows</h2>
+<p>In <a href="https://lilianweng.github.io/posts/2018-08-12-vae/#vae-variational-autoencoder">Variational Autoencoder</a>, if we want to model the posterior $p(\mathbf{z}\vert\mathbf{x})$ as a more complicated distribution rather than simple Gaussian. Intuitively we can use normalizing flow to transform the base Gaussian for better density approximation. The encoder then would predict a set of scale and shift terms $(\mu_i, \sigma_i)$ which are all functions of input $\mathbf{x}$. Read the <a href="https://arxiv.org/abs/1809.05861">paper</a> for more details if interested.</p>
+<hr>
+<p><em>If you notice mistakes and errors in this post, don’t hesitate to contact me at [lilian dot wengweng at gmail dot com] and I would be very happy to correct them right away!</em></p>
+<p>See you in the next post :D</p>
+<hr>
+<p>Cited as:</p>
+<pre><code>@article{weng2018flow,
+  title   = "Flow-based Deep Generative Models",
+  author  = "Weng, Lilian",
+  journal = "lilianweng.github.io",
+  year    = "2018",
+  url     = "https://lilianweng.github.io/posts/2018-10-13-flow-models/"
+}
+</code></pre><h2 id="reference">Reference</h2>
+<p>[1] Danilo Jimenez Rezende, and Shakir Mohamed. <a href="https://arxiv.org/abs/1505.05770">“Variational inference with normalizing flows.”</a> ICML 2015.</p>
+<p>[2] <a href="https://blog.evjang.com/2018/01/nf1.html">Normalizing Flows Tutorial, Part 1: Distributions and Determinants</a> by Eric Jang.</p>
+<p>[3] <a href="https://blog.evjang.com/2018/01/nf2.html">Normalizing Flows Tutorial, Part 2: Modern Normalizing Flows</a> by Eric Jang.</p>
+<p>[4] <a href="http://akosiorek.github.io/ml/2018/04/03/norm_flows.html">Normalizing Flows</a> by Adam Kosiorek.</p>
+<p>[5] Laurent Dinh, Jascha Sohl-Dickstein, and Samy Bengio. <a href="https://arxiv.org/abs/1605.08803">“Density estimation using Real NVP.”</a> ICLR 2017.</p>
+<p>[6] Laurent Dinh, David Krueger, and Yoshua Bengio. <a href="https://arxiv.org/abs/1410.8516">“NICE: Non-linear independent components estimation.”</a> ICLR 2015 Workshop track.</p>
+<p>[7] Diederik P. Kingma, and Prafulla Dhariwal. <a href="https://arxiv.org/abs/1807.03039">“Glow: Generative flow with invertible 1x1 convolutions.”</a> arXiv:1807.03039 (2018).</p>
+<p>[8] Germain, Mathieu, Karol Gregor, Iain Murray, and Hugo Larochelle. <a href="https://arxiv.org/abs/1502.03509">“Made: Masked autoencoder for distribution estimation.”</a> ICML 2015.</p>
+<p>[9] Aaron van den Oord, Nal Kalchbrenner, and Koray Kavukcuoglu. <a href="https://arxiv.org/abs/1601.06759">“Pixel recurrent neural networks.”</a> ICML 2016.</p>
+<p>[10] Diederik P. Kingma, et al. <a href="https://arxiv.org/abs/1606.04934">“Improved variational inference with inverse autoregressive flow.”</a> NIPS. 2016.</p>
+<p>[11] George Papamakarios, Iain Murray, and Theo Pavlakou. <a href="https://arxiv.org/abs/1705.07057">“Masked autoregressive flow for density estimation.”</a> NIPS 2017.</p>
+<p>[12] Jianlin Su, and Guang Wu. <a href="https://arxiv.org/abs/1809.05861">“f-VAEs: Improve VAEs with Conditional Flows.”</a> arXiv:1809.05861 (2018).</p>
+<p>[13] Van Den Oord, Aaron, et al. <a href="https://arxiv.org/abs/1609.03499">“WaveNet: A generative model for raw audio.”</a> SSW. 2016.</p>
+
+
+  </div></div>

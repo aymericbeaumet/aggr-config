@@ -1,0 +1,437 @@
+<div id="readability-page-1" class="page"><article>
+
+
+
+<p>2024-07-20</p>
+
+<figure>
+<img src="https://mariozechner.at/posts/2024-07-20-macos-code-injection-fun/media/fun.png">
+<figcaption>Look, ma, code injection</figcaption>
+</figure>
+
+
+<div>
+<ul><li><a href="#toc_0">CMake setup &amp; entitlements</a></li><li><a href="#toc_1">Attaching to a running process</a></li><li><a href="#toc_2">Suspending and resuming a process</a></li><li><a href="#toc_3">Writing and reading process memory</a></li><li><a href="#toc_4">Injecting code</a></li><li><a href="#toc_5">Caveat emptor</a></li></ul>
+</div>
+
+<p>I love <a href="https://liveplusplus.tech/">Live++</a> by Molecular Matters, aka <a href="https://x.com/molecularmusing">Stefan Reinalter</a>. It's an exceptionally fantastic C/C++ hot-reload/live coding solution for Windows, Xbox, and PlayStation 5. If you do any kind of C/C++ development on these platforms, you absolutely owe it to yourself to get a license.</p>
+<p>I've been using it to work on a Godot module (on Windows), and it's reduced my iteration times to essentially zero for most programming tasks. If I compare the billable hours I saved with Live++ to its price, I can only conclude that Stefan hates capitalism.</p>
+<p>Sadly, I'm a macOS boi (don't @ me), and Live++ doesn't work on macOS.</p>
+<p>I'm on vacation and figured I'll have a look-see into what it takes to inject some code into a running process. Not that this could do anything like Live++ can do. But it's a fun, small project with a scope fitting for a lush evening sitting on a porch next to the Adriatic Sea.</p>
+<p>Given this little C test program:</p>
+<pre><code data-language="c">#include &lt;cstdio&gt;
+#include &lt;unistd.h&gt;
+
+int data = 123;
+
+int foo() {
+    return data;
+}
+
+int main(int argc, char** argv) {
+    while (true) {
+        printf("%d\n", foo());
+        sleep(1);
+    }
+}
+</code></pre><p>We want to write a program that:</p>
+<ul>
+<li>Attaches to a running instance of this test program (like a debugger)</li>
+<li>Changes the value of <code>data</code> to something else, so <code>foo()</code> returns something other than <code>123</code>, and hence <code>printf()</code> also prints a different value to <code>stdout</code>. Essentially reading/writing to the test program process memory.</li>
+<li>Entirely replaces <code>foo()</code> with a new function that isn't part of the original program, but instead is written to the process memory on-the-fly while it's running.</li>
+</ul>
+<p>We'll limit this to macOS, which means we'll be using the <a href="https://developer.apple.com/documentation/kernel/mach">Mach APIs</a> like <code>task_for_pid()</code> and consorts.</p>
+<p>None of this is rocket science. But since I couldn't find a straightforward article on this on the internet, I figured I'll write one. You can check out the full source code on <a href="https://github.com/badlogic/macinject">GitHub</a>. Below, we'll run through the different parts.</p>
+<h2 id="toc_0">CMake setup &amp; entitlements</h2>
+<p>Let's start with a CMake scaffold.</p>
+<pre><code data-language="cmake">cmake_minimum_required(VERSION 3.10)
+
+project(macinject)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.14")
+
+# Test program
+file(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
+add_executable(test ${TEST_SOURCES})
+set_target_properties(test PROPERTIES COMPILE_FLAGS "-O0 -g -fpatchable-function-entry=4,0")
+
+# Injection program
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+add_executable(macinject ${SOURCES})
+
+add_custom_command(TARGET macinject POST_BUILD
+    COMMAND codesign --entitlements "${CMAKE_SOURCE_DIR}/entitlements.plist" -s "Apple Development" $&lt;TARGET_FILE:macinject&gt;
+)
+</code></pre><p>The test program consists of any <code>.cpp</code> file in the <code>test/</code> folder. The compiler flags <code>-O0 -g</code> ensure we produce a debug binary without optimizations. The final compiler flag we'll discuss later.</p>
+<p>The injection program consists of any <code>.cpp</code> file in the <code>src/</code> folder. To modify another process via Mach APIs, our injection program needs <a href="https://developer.apple.com/documentation/bundleresources/entitlements">entitlements</a> so macOS actually allows it to be a bit nasty. Entitlements are embedded in an executable via code signing. The custom command calls into Xcode's <code>codesign</code> tool, telling it to embed the entitlements in the file <code>entitlements.plist</code>, which looks like this:</p>
+<pre><code data-language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;com.apple.security.cs.debugger&lt;/key&gt;
+    &lt;true/&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;
+</code></pre><p>This single entitlement will grant our injection program basically the same abilities as any other debugger.</p>
+<p>Assuming you have installed Xcode and CMake (<code>brew install cmake</code>) on your Mac, you can build the programs like this:</p>
+<pre><code data-language="bash">git clone https://github.com/badlogic/macinject
+cd macinject
+mkdir build &amp;&amp; cd build
+cmake ..
+# Repeat this any time you change the sources
+make
+</code></pre><p>Or you can use the <a href="https://code.visualstudio.com/docs/languages/cpp">VS Code C++ Tools</a> which have CMake support. Open the cloned repository in VS Code, then press <code>CMD + SHIFT + P</code>, find the <code>CMake: Configure</code> command in the palette and execute it. Then run the <code>CMake: Build</code> command from the palette.</p>
+<p>In both cases, you'll find the executables <code>test</code> and <code>macinject</code> in the <code>build/</code> folder.</p>
+<h2 id="toc_1">Attaching to a running process</h2>
+<p>The first thing we need to attach to a running process is its process id (<code>pid</code>). We could mess around with various APIs or tools to figure out the pid of our test program. But let's make our lives simple. I've modified <code>test/test.cpp</code> above as follows:</p>
+<pre><code data-language="cpp">#include &lt;cstdio&gt;
+#include &lt;unistd.h&gt;
+
+int data = 123;
+
+int foo() {
+    return data;
+}
+
+int main(int argc, char** argv) {
+	// Write out the pid, address of foo, and address of
+	// data to a file called `data.txt` in the current working
+	// directory
+    FILE *file = fopen("data.txt", "w");
+    fprintf(file, "%d\n", getpid());
+    fprintf(file, "%p\n", (void*)foo);
+    fprintf(file, "%p\n", &amp;data);
+    fclose(file);
+
+    while (true) {
+        printf("%d\n", foo());
+        sleep(1);
+    }
+}
+</code></pre><p>We simply write out the current pid and in-process addresses of <code>foo()</code> and <code>data</code> to a file called <code>data.txt</code>.</p>
+<p>Our injection program can then just read that file to get the data to attach and modify these specific parts of the test program.</p>
+<p>In the real world, things would obviously be a bit more complex. E.g., instead of manually writing addresses of functions and data locations to a file, we'd want to get those from the symbols table of the executable instead.</p>
+<p>A poor man's way to do this would be to parse the output of <code>nm</code> for the test program executable:</p>
+<pre><code data-language="bash">macinject git:(main) ✗ nm build/test
+0000000100003de8 T __Z3foov
+0000000100008030 d __dyld_private
+0000000100000000 T __mh_execute_header
+0000000100008038 D _data
+                 U _fclose
+                 U _fopen
+                 U _fprintf
+                 U _getpid
+0000000100003e04 T _main
+                 U _printf
+                 U _sleep
+                 U dyld_stub_binder
+</code></pre><p>Both <code>foo()</code> (name mangled as <code>__Z3foov</code>, because this is C++ and not C) and <code>data</code> are in there together with their addresses. However, these addresses aren't the addresses you'll get at runtime due to things like <a href="https://de.wikipedia.org/wiki/Address_Space_Layout_Randomization">Address Space Layout Randomization</a>, which basically moves those addresses around by a random, fixed offset at runtime. It's not hard to compensate for, but annoying.</p>
+<p>By writing the actual in-process addresses to a file, we can save ourselves time not having to parse <code>nm</code> output and get the actual base address of the process. I'm sure ChatGPT can help you figure this out if you want to dive deeper.</p>
+<p>OK, let's add the first bits of code to our injection program in <code>src/main.cpp</code>:</p>
+<pre><code data-language="cpp">#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;mach-o/arch.h&gt;
+#include &lt;mach/mach.h&gt;
+#include &lt;unistd.h&gt;
+
+struct RemoteProcess {
+	pid_t pid;
+	void *fooAddr;
+	void *dataAddr;
+	mach_port_t task;
+};
+
+bool attach(RemoteProcess &amp;proc) {
+	FILE *file = fopen("data.txt", "r");
+	if (!file) {
+		fprintf(stderr, "Failed to open data.txt\n");
+		return false;
+	}
+	fscanf(file, "%d", &amp;proc.pid);
+	fscanf(file, "%p", &amp;proc.fooAddr);
+	fscanf(file, "%p", &amp;proc.dataAddr);
+	fclose(file);
+
+	kern_return_t kr;
+	kr = task_for_pid(mach_task_self(), proc.pid, &amp;proc.task);
+	if (kr != KERN_SUCCESS) {
+		fprintf(stderr, "Failed to get task for pid %d: %s\n", proc.pid, mach_error_string(kr));
+		return false;
+	}
+	printf("Attached to pid %d\n", proc.pid);
+
+	return true;
+}
+</code></pre><p>The <code>attach()</code> function reads the <code>data.txt</code> file the test program spits out on every run from the current working directory and stores the pid, address of <code>foo()</code>, and address of <code>data</code> in a provided <code>RemoteProcess</code> struct.</p>
+<p>Next, we make our first Mach API call to <code>task_for_pid()</code>. It creates what's called a task control port, or simply task port, which subsequently allows us to mess with the process we identified via the <code>pid</code> in the second argument. The task port gets stored in the <code>RemoteProcess::task</code> field for further use.</p>
+<p>The rest is merely some very terrible error checking and logging. A scheme we'll apply to other functions as well, because I'm lazy.</p>
+<h2 id="toc_2">Suspending and resuming a process</h2>
+<p>Before we can mess with the process, we should suspend all its threads. Reading and writing data from and to a remote process like our test program is generally not atomic, so we better suspend the program before we do anything like that.</p>
+<p>Once we are done messing with the program, we want to resume the process again.</p>
+<p>The corresponding Mach APIs to do just that are <code>task_suspend()</code> and <code>task_resume()</code>, which expect the task port of the process we want to suspend or resume. Let's wrap them in two functions with some error checking and logging.</p>
+<pre><code data-language="cpp">bool suspend(RemoteProcess &amp;proc) {
+	kern_return_t kr = task_suspend(proc.task);
+	if (kr != KERN_SUCCESS) {
+		fprintf(stderr, "Failed to suspend task for pid %d: %s\n", proc.pid, mach_error_string(kr));
+		return false;
+	}
+	printf("Task for pid %d suspended\n", proc.pid);
+	return true;
+}
+
+bool resume(RemoteProcess &amp;proc) {
+	kern_return_t kr = task_resume(proc.task);
+	if (kr != KERN_SUCCESS) {
+		fprintf(stderr, "Failed to resume task for pid %d: %s\n", proc.pid, mach_error_string(kr));
+		return false;
+	}
+	printf("Task for pid %d resumed\n", proc.pid);
+	return true;
+}
+</code></pre><h2 id="toc_3">Writing and reading process memory</h2>
+<p>Once we've suspended a process, we can safely read and write from and to its memory. We use the <code>vm_write()</code> and <code>vm_read_overwrite()</code> Mach API calls for that. Pretty self-explanatory.</p>
+<pre><code data-language="cpp">bool writeBytes(RemoteProcess &amp;proc, void *remoteAddress, void *data, size_t numBytes) {
+	kern_return_t kr = vm_write(proc.task, (vm_address_t)remoteAddress, (vm_offset_t)data, numBytes);
+	if (kr != KERN_SUCCESS) {
+		fprintf(stderr, "Failed to write to memory: %s\n", mach_error_string(kr));
+		return false;
+	}
+	printf("Wrote %zu bytes to address %p\n", numBytes, remoteAddress);
+	return true;
+}
+
+bool readBytes(RemoteProcess &amp;proc, void *remoteAddress, void *data, size_t numBytes) {
+	vm_size_t outSize;
+	kern_return_t kr =
+	    vm_read_overwrite(proc.task, (vm_address_t)remoteAddress, numBytes, (vm_address_t)data, &amp;outSize);
+	if (kr != KERN_SUCCESS || outSize != numBytes) {
+		fprintf(stderr, "Failed to read from memory: %s\n", mach_error_string(kr));
+		return false;
+	}
+	printf("Read %zu bytes from address %p\n", numBytes, remoteAddress);
+	return true;
+}
+</code></pre><p>We can now write our first injection program which reads then modifies the value of <code>data</code> in the running test program:</p>
+<pre><code data-language="cpp">int main(int argc, char **argv) {
+	RemoteProcess proc;
+	attach(proc);
+	suspend(proc);
+
+	int oldValue = 0;
+	readBytes(proc, proc.dataAddr, &amp;oldValue, sizeof(oldValue));
+	printf("Old value: %d\n", oldValue);
+
+	int newValue = 456;
+	writeBytes(proc, proc.dataAddr, &amp;newValue, sizeof(newValue));
+	resume(proc);
+}
+</code></pre><p>If we run <code>test</code> followed by <code>macinject</code>, we get:</p>
+<video src="https://mariozechner.at/posts/2024-07-20-macos-code-injection-fun/media/read-write.mp4" controls="" loop="">
+</video>
+
+<p>Look, mom, I'm a hacker now.</p>
+<h2 id="toc_4">Injecting code</h2>
+<p>For our final trick, we'll inject some code. To jog your memory, here's <code>foo()</code> from the test program again:</p>
+<pre><code data-language="cpp">int data = 123;
+
+int foo() {
+    return data;
+}
+</code></pre><p>We want to completely replace this function with different code, say a function that returns <code>857</code>.</p>
+<p>The first problem we need to solve is to get the machine code for such a function. We could hand-write some assembly code, assemble it into machine code, read that in our injection program, and somehow inject it into the test program. That sounds like work. Let's do something else instead.</p>
+<p>We already compile the C/C++ code of our injection program. Let's just add the code we want to inject there (that is in <code>src/main.cpp</code>):</p>
+<pre><code data-language="cpp">int bar() { return 857; }
+void barEnd() {}
+</code></pre><p><code>bar()</code> is self-explanatory, but what's up with <code>barEnd()</code>? Well, we need to know the length of <code>bar()</code>s machine code, so we know how many bytes we need to inject into the test program.</p>
+<p>We can use the fact that the compiler lays out functions one after the other in the compiled executable. By subtracting the address of <code>bar()</code> from <code>barEnd()</code>, we know how big <code>bar()</code> is (conservatively, including any padding necessary for alignment requirements):</p>
+<pre><code data-language="cpp">int barSize = (char *)barEnd - (char *)bar;
+printf("Bar size: %d\n", barSize);
+</code></pre><p>Cool, so we can basically copy <code>bar()</code> from our injection program's process into the test program's process. But where do we copy <code>bar()</code> to?</p>
+<p>We can't just overwrite the bytes of <code>foo()</code>. <code>bar()</code> may be bigger than <code>foo()</code>, so we'd stomp over whatever comes after <code>foo()</code> in the test program process memory.</p>
+<p>Instead, we need to allocate memory in the process we inject into. And you guessed it, the Mach APIs have a function for that too called <code>vm_allocate()</code>. Let's wrap that function with some error checking and logging:</p>
+<pre><code data-language="cpp">bool allocate(RemoteProcess &amp;proc, size_t size, void **remoteAddress) {
+	vm_address_t address;
+	kern_return_t kr = vm_allocate(proc.task, &amp;address, size, VM_FLAGS_ANYWHERE);
+	if (kr != KERN_SUCCESS) {
+		fprintf(stderr, "Failed to allocate memory in remote process: %s\n", mach_error_string(kr));
+		return false;
+	}
+	*remoteAddress = (void *)address;
+	printf("Allocated %zu bytes at address %p in remote process\n", size, (void *)remoteAddress);
+	return true;
+}
+</code></pre><p>The function will allocate <code>size</code> bytes in the remote process and store the address of the chunk we allocate in the remote process in <code>remoteAddress</code>.</p>
+<p>We can now copy over <code>bar()</code> from the injection program process to the test program process:</p>
+<pre><code data-language="cpp">void *remoteBar;
+allocate(proc, barSize, &amp;remoteBar);
+writeBytes(proc, remoteBar, (void *)bar, barSize);
+</code></pre><p>Easy peasy, lemon squeezy. But there are two problems.</p>
+<p>The first problem: the memory region we allocated in the test program process is not executable. By default, the memory we allocated via <code>vm_allocate()</code> is readable and writable, but not executable. Let's change that with another Mach API function called <code>vm_protect()</code>.</p>
+<pre><code data-language="cpp">bool changeProtection(RemoteProcess &amp;proc, void *address, size_t numBytes, vm_prot_t newProtection) {
+	kern_return_t kr = vm_protect(proc.task, (vm_address_t)address, numBytes, false, newProtection);
+	if (kr != KERN_SUCCESS) {
+		fprintf(stderr, "Failed to change memory protection: %s\n", mach_error_string(kr));
+		return false;
+	}
+	printf("Changed protection of address %p, size %zu to %d\n", address, numBytes, newProtection);
+	return true;
+}
+</code></pre><p>Now we can change the protection flags of any memory region starting at <code>address</code> with size <code>numBytes</code> to whatever we want. For example, to make our copy of <code>bar()</code> in the test program process executable, we can do:</p>
+<pre><code data-language="cpp">changeProtection(proc, remoteBar, barSize, VM_PROT_READ | VM_PROT_EXECUTE);
+</code></pre><p>Making it readable and executable. Sweet.</p>
+<p>All that's left is making the test program use our copied over <code>bar()</code> instead of the original <code>foo()</code>. But how can we do that?</p>
+<p>Welcome to trampolines! They are kinda bouncy like their real-world equivalents. The basic idea goes like this:</p>
+<ol>
+<li>We locate the function we want to overwrite, let's call it the old function, with another function (the new function).</li>
+<li>We write the new function to the process we inject into.</li>
+<li>We write a tiny bit of machine code to the beginning of the old function that will immediately jump to the beginning of the new function. This is called the trampoline, as it jumps to the new function.</li>
+</ol>
+<p>The function we want to overwrite is <code>foo()</code>, for which we have the in-process address in <code>RemoteProcess::fooAddr</code>, read from the <code>data.txt</code> file.</p>
+<p>We've also already seen how to write a new function to the process, by allocating memory, copying over the machine code, and making the memory region executable.</p>
+<p>So let's focus on number 3, the trampoline. We are on macOS, so we'll have to do this for both x86_64 and ARM64 (Apple Silicon). Given that everyone is now using Apple Silicon (<strong>cough</strong>), I'll just show the code for that (you can find the untested <a href="https://github.com/badlogic/macinject/blob/main/src/main.cpp#L110-L114">x86_64 trampoline on GitHub</a>).</p>
+<pre><code data-language="arm">ldr x16, #0x8
+br x16
+&lt;64-bit address to jump to&gt;
+</code></pre><p>The first instruction loads the 64-bit address stored after <code>br x16</code> into register <code>x16</code>. The second instruction then performs an unconditional jump to that address. Finally, we need to write out the actual address we want to jump to, that <code>ldr</code> loads. Yup, we are writing data (the address), not code there. We can do anything.</p>
+<p>In total, we need <code>4 + 4 + 8 = 16</code> bytes for this little trampoline. That's a problem because the function we write the trampoline to may be smaller than 16 bytes. Here's what <code>foo()</code> looks like on ARM, as disassembled by LLDB.</p>
+<pre><code data-language="arm">(lldb) di -n foo -b
+test`foo:
+test[0x100003e08] &lt;+0&gt;: 0xb0000028   adrp   x8, 5
+test[0x100003e0c] &lt;+4&gt;: 0xb9403900   ldr    w0, [x8, #0x38]
+test[0x100003e10] &lt;+8&gt;: 0xd65f03c0   ret
+</code></pre><p>That's only 12 bytes. If we write our 16 bytes trampoline there, we'd stomp over whatever comes after <code>foo()</code> (or get a protection fault). That's no bueno.</p>
+<p>Luckily, Clang lets us prepend every function with a number of <code>NOP</code>s, which explains the parameter <code>-fpatchable-function-entry</code> in our CMakeLists.txt above:</p>
+<pre><code data-language="cmake">set_target_properties(test PROPERTIES COMPILE_FLAGS "-O0 -g -fpatchable-function-entry=4,0")
+</code></pre><p>With this, <code>foo()</code>'s machine code now looks like this:</p>
+<pre><code data-language="arm">(lldb) di -n foo -b
+test`foo:
+test[0x100003de8] &lt;+0&gt;:  0xd503201f   nop
+test[0x100003dec] &lt;+4&gt;:  0xd503201f   nop
+test[0x100003df0] &lt;+8&gt;:  0xd503201f   nop
+test[0x100003df4] &lt;+12&gt;: 0xd503201f   nop
+test[0x100003df8] &lt;+16&gt;: 0xb0000028   adrp   x8, 5
+test[0x100003dfc] &lt;+20&gt;: 0xb9403900   ldr    w0, [x8, #0x38]
+test[0x100003e00] &lt;+24&gt;: 0xd65f03c0   ret
+</code></pre><p>The <code>NOP</code>s will literally do nothing but add a bit of execution overhead in each function and space for our trampoline.</p>
+<p>Putting this all together, we can create a function <code>trampoline()</code>:</p>
+<pre><code data-language="cpp">bool trampoline(RemoteProcess &amp;proc, void *oldFunction, void *newFunction) {
+	const NXArchInfo *archInfo = NXGetLocalArchInfo();
+	if (archInfo == nullptr) {
+		fprintf(stderr, "Failed to get local architecture info\n");
+		return false;
+	}
+
+	size_t jumpInstructionSize;
+
+	if (strcmp(archInfo-&gt;name, "x86_64") == 0) {
+		unsigned char jumpInstruction[14];
+		jumpInstruction[0] = 0xFF;                                  // JMP opcode for x86_64
+		jumpInstruction[1] = 0x25;                                  // ModR/M byte for absolute indirect jump
+		*(uint32_t *)(jumpInstruction + 2) = 0;                     // 32-bit offset (unused)
+		*(uint64_t *)(jumpInstruction + 6) = (uint64_t)newFunction; // 64-bit address
+
+		jumpInstructionSize = sizeof(jumpInstruction);
+
+		if (!changeProtection(proc, oldFunction, jumpInstructionSize, VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY)) {
+			fprintf(stderr, "Failed to change memory protection to RWX\n");
+			return false;
+		}
+
+		if (!writeBytes(proc, oldFunction, jumpInstruction, jumpInstructionSize)) {
+			fprintf(stderr, "Failed to write jump instruction\n");
+			return false;
+		}
+
+		if (!changeProtection(proc, oldFunction, jumpInstructionSize, VM_PROT_READ | VM_PROT_COPY)) {
+			fprintf(stderr, "Failed to change memory protection to RX\n");
+			return false;
+		}
+	} else if (strcmp(archInfo-&gt;name, "arm64") == 0 || strcmp(archInfo-&gt;name, "arm64e") == 0) {
+		unsigned char jumpInstruction[16];
+		// LDR X16, #8
+		jumpInstruction[0] = 0x50;
+		jumpInstruction[1] = 0x00;
+		jumpInstruction[2] = 0x00;
+		jumpInstruction[3] = 0x58;
+		// BR X16
+		jumpInstruction[4] = 0x00;
+		jumpInstruction[5] = 0x02;
+		jumpInstruction[6] = 0x1F;
+		jumpInstruction[7] = 0xD6;
+		// Address to jump to
+		*(uint64_t *)(jumpInstruction + 8) = (uint64_t)newFunction;
+
+		jumpInstructionSize = sizeof(jumpInstruction);
+
+		if (!changeProtection(proc, oldFunction, jumpInstructionSize, VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY)) {
+			fprintf(stderr, "Failed to change memory protection to RWX\n");
+			return false;
+		}
+
+		if (!writeBytes(proc, oldFunction, jumpInstruction, jumpInstructionSize)) {
+			fprintf(stderr, "Failed to write jump instruction\n");
+			return false;
+		}
+
+		if (!changeProtection(proc, oldFunction, jumpInstructionSize, VM_PROT_READ | VM_PROT_EXECUTE)) {
+			fprintf(stderr, "Failed to change memory protection to RX\n");
+			return false;
+		}
+	} else {
+		fprintf(stderr, "Unsupported architecture: %s\n", archInfo-&gt;name);
+		return false;
+	}
+
+	printf("Patched function at %p to jump to %p\n", (void *)oldFunction, (void *)newFunction);
+	return true;
+}
+</code></pre><p>Since we cover both x86_64 and ARM, we first need to figure out what architecture we're running on. That's what the call to <code>NXGetLocalArchInfo</code> and the subsequent branches are for.</p>
+<p>Looking at the ARM-specific branch, we first assemble the trampoline. Next, we change the protection flags of the memory region of the function we want to inject the trampoline in (<code>foo()</code> in our case). Note the <code>VM_PROT_COPY</code>, which is required to make this work on newer macOS versions. It likely does some nasty stuff I didn't look into too closely.</p>
+<p>We then write our trampoline to the beginning of the old function and change the protection flags of the function's memory region back to readable/executable. That's it!</p>
+<p>With all our little helper functions in place, we can now complete our injection program (error checking omitted, because fuck it, I'm on vacation):</p>
+<pre><code data-language="cpp">int bar() { return 857; }
+void barEnd() {}
+
+int main(int argc, char **argv) {
+	RemoteProcess proc;
+	attach(proc);
+	suspend(proc);
+
+	int oldValue = 0;
+	readBytes(proc, proc.dataAddr, &amp;oldValue, sizeof(oldValue));
+	printf("Old value: %d\n", oldValue);
+
+	int newValue = 456;
+	writeBytes(proc, proc.dataAddr, &amp;newValue, sizeof(newValue));
+	resume(proc);
+
+	sleep(4);
+
+	suspend(proc);
+	int barSize = (char *)barEnd - (char *)bar;
+	printf("Bar size: %d\n", barSize);
+	void *remoteBar;
+	allocate(proc, barSize, &amp;remoteBar);
+	writeBytes(proc, remoteBar, (void *)bar, barSize);
+	changeProtection(proc, remoteBar, barSize, VM_PROT_READ | VM_PROT_EXECUTE);
+	trampoline(proc, proc.fooAddr, remoteBar);
+
+	resume(proc);
+	return 0;
+}
+</code></pre><p>And here it is in action.</p>
+<video src="https://mariozechner.at/posts/2024-07-20-macos-code-injection-fun/media/action.mp4" controls="" loop="">
+</video>
+
+<p>I first run <code>test</code>, the test program, followed by <code>macinject</code>, the injection program. It will first modify the value in <code>data</code> and wait for 4 seconds. The test program will print the new value <code>456</code>.</p>
+<p>Then it copies over <code>bar()</code> to the test program process and sets up the trampoline, resulting in the test program actually running <code>bar()</code>, thus logging <code>857</code>.</p>
+<h2 id="toc_5">Caveat emptor</h2>
+<p>This is obviously nowhere near production-ready code or anywhere near the complexity needed to do what Live++ does. For example, the above entirely ignores interactions with a debugger or what happens if a thread is suspended in the middle of a trampoline that's currently being overwritten.</p>
+<p>But it gives you a basic idea of what's going on in amazing software like Live++ (and malware, and anti-virus garbage which is essentially malware)! These basic principles also apply to Windows and Linux, where similar system APIs are available.</p>
+<p>Hack the planet!</p>
+<p>
+    This page respects your privacy by not using cookies or similar technologies and by not collecting any personally identifiable information.
+</p>
+
+</article></div>

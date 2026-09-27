@@ -1,0 +1,475 @@
+<div id="readability-page-1" class="page"><div><p>Function calling is the capability to connect LLMs to external tools and to interact with your code and APIs in a structured way. Instead of generating text responses, LLMs understand when to call specific functions and provide the necessary parameters to execute real-world actions.</p>
+<p>Throughout this guide, we'll look at a practical weather-based assistant access to a weather API. Yes, not very creative, but there is a free API we can use and it should be enough to demonstrate the concept understand how you can use function calling to build a more complex assistant.</p>
+<p>This guide covers:</p>
+<ol>
+<li><a href="#how-does-function-calling-work">How does function calling work?</a></li>
+<li><a href="#when-to-use-function-calling">When to use function calling?</a></li>
+<li><a href="#function-calling-with-google-gemini-20-flash">Function Calling with Google Gemini 2.0 Flash</a></li>
+<li><a href="#advanced-function-calling-with-langchain">Advanced: Function Calling with LangChain</a></li>
+<li><a href="#advanced-function-calling-with-openai-compatible-api">Advanced: Function Calling with OpenAI Compatible API</a></li>
+</ol>
+<h2 id="how-does-function-calling-work">How does function calling work?</h2>
+<p>Function calling may imply that the LLM is directly performing some action. This is not the case! When a user prompts an LLM with function calling, the model analyzes the input and determines if and which function would be the most appropriate for the task (can be a single function or multiple functions). Instead of providing a text response, the model generates a structured JSON object that specifies which function to call and the necessary parameters.</p>
+<p><img src="https://www.philschmid.de/static/blog/gemini-function-calling/function-intro.png" alt="Function Intro"></p>
+<p>In practice function calling not only describe the process of generating structured output, but also the process of calling a function and how to handle the output. As you don't want to return the raw output of the function to your user, you want the LLM to generate an appropriate response, based on the conversation history.</p>
+<p><img src="https://www.philschmid.de/static/blog/gemini-function-calling/function-calling.png" alt="Function calling"></p>
+<p>Practical Function Calling follows these steps:</p>
+<ol>
+<li>Your application sends a prompt to the LLM along with function definitions</li>
+<li>The LLM analyzes the prompt and decides whether to respond directly or use defined functions</li>
+<li>If using functions, the LLM generates structured arguments for the function call</li>
+<li>Your application receives the function call details and executes the actual function</li>
+<li>The function results are sent back to the LLM</li>
+<li>The LLM provides a final response incorporating the function results</li>
+</ol>
+<p>This cycle can continue as needed, allowing for complex multi-step interactions between the application and the LLM. It is also possible that the LLM decides that it needs to call multiple functions after each other or in parallel before returning a final response to the user.</p>
+<h2 id="when-to-use-function-calling">When to Use Function Calling?</h2>
+<p>Function calling has emerged as one of the popular methods for building AI agents. It can help build human-AI interfaces that access and query real-time information from external sources like APIs, databases, and knowledge bases while providing a natural language interface (text or audio) to users.</p>
+<p>Function calling enables automation tasks like scheduling appointments, creating invoices, or sending reminders. An example usecase could be a customer service assistant might use function calling to seamlessly handle tasks like checking order status, processing returns, and updating customer information – all while maintaining a natural conversation flow with the user.</p>
+<p>You now longer need to build Applications which required complex forms or multiple steps to collect information from the user. Instead, you can build a natural language interface that allows the user to interact with the application in a conversational way. Or have no user interface at all and let the LLM interact with the world on your behalf.</p>
+<h2 id="function-calling-with-google-gemini-20-flash">Function Calling with Google Gemini 2.0 Flash</h2>
+<p>Google Gemini 2.0 Flash supports function calling through multiple interfaces, <a target="_blank" rel="noopener noreferrer" href="https://spec.openapis.org/oas/v3.0.3#schema">OpenAPI compatible JSON Schema</a> and Python functions defintions with docstrings. If you are using JavaScript/Typescript you currently have to use the JSON Schema interface. The Python SDK <code>google-genai</code> can automatically generate the JSON Schema from the Python function definitions and docstrings. We are going to take a look at both interfaces.</p>
+<p><em>Note: Gemini 2.0 Flash currently doesn't support <code>anyOf</code> type in the JSON Schema.</em></p>
+<p>Lets start with the JSON Schema interface, but before that lets install the <code>google-genai</code> library and make sure we have a Gemini API key. If you don't have one yet you can get one from <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/app/apikey">Google AI Studio</a>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">%pip install "google-genai&gt;=1.0.0" geopy requests</code></pre></div></figure>
+<p>Once you have the SDK and API key, you can create a client and define the model you are going to use the new Gemini 2.0 Flash model, which is available via free tier with 1,500 request per day (at 2025-02-06).</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import os
+from google import genai
+ 
+# create client
+api_key = os.getenv("GEMINI_API_KEY","xxx")
+client = genai.Client(api_key=api_key)
+ 
+# Define the model you are going to use
+model_id =  "gemini-2.0-flash"</code></pre></div></figure>
+<p>Before we begin, lets quickly test if we have access to the model and can generate some text.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">res = client.models.generate_content(
+    model=model_id,
+    contents=["Tell me 1 good fact about Nuremberg."]
+)
+print(res.text)
+# Nuremberg is home to the oldest Christmas market in Germany, the Christkindlesmarkt, which dates back to the mid-16th century.
+ </code></pre></div></figure>
+<h3 id="function-calling-with-json-schema">Function Calling with JSON Schema</h3>
+<p>For using Function Calling with JSON Schema we need to define our functions as JSON Schema. Let's create a simple weather function as an example. The main parts of the JSON Schema are:</p>
+<ul>
+<li><code>name</code>: name of the function, this need to match the name of your function in your code</li>
+<li><code>description</code>: description of what the function does. This is important as this information will be used by the LLM to identify when to use the function</li>
+<li><code>parameters</code>: JSON schema object of type definition for the input arguments of your function. Each parameter has a type, e.g. <code>string</code> and a <code>description</code> which are used by the LLM what to add here.</li>
+<li><code>required</code>: What <code>parameters</code> are required if not all required the LLM might not provide an argument when it thinks its not needed.</li>
+</ul>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">weather_function = {
+    "name": "get_weather_forecast",
+    "description": "Retrieves the weather using Open-Meteo API for a given location (city) and a date (yyyy-mm-dd). Returns a list dictionary with the time and temperature for each hour.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "location": {
+                "type": "string",
+                "description": "The city and state, e.g., San Francisco, CA"
+            },
+            "date": {
+                "type": "string",
+                "description": "the forecasting date for when to get the weather format (yyyy-mm-dd)"
+            }
+        },
+        "required": ["location","date"]
+    }
+}</code></pre></div></figure>
+<p>We can now use this function definition and add it to our LLM call. The LLM will then decide on its own if it should "call" the function or return a normal text response. Lets test this. Function declarations are defined in the <code>config</code> object. We use the Pydantic <code>GenerateContentConfig</code> data structure to define the config.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google.genai.types import GenerateContentConfig
+ 
+# Generation Config
+config = GenerateContentConfig(
+    system_instruction="You are a helpful assistant that use tools to access and retrieve information from a weather API. Today is 2025-03-04.", # to give the LLM context on the current date.
+    tools=[{"function_declarations": [weather_function]}], # define the functions that the LLM can use
+)</code></pre></div></figure>
+<p>First lets try without our tool using "Whats the weather in Berlin this today?" prompt.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">response = client.models.generate_content(
+    model=model_id,
+    contents='Whats the weather in Berlin this today?'
+)
+print(response.text)
+# I can't give you a real-time weather update for Berlin. To get the most accurate and current weather information, I recommend checking a reliable weather source like:
+ 
+# *   **A weather app:** (e.g., WeatherBug, AccuWeather, The Weather Channel)
+# *   **A weather website:** (e.g., Google Weather, [weather.com](http://weather.com))
+# *   **A local news source:** (e.g., a Berlin news website or TV station)
+ 
+# These sources will provide you with up-to-the-minute details on temperature, wind, precipitation, and more.</code></pre></div></figure>
+<p>As expected the output is not helpful, as the LLM does not know how to answer the question. Now lets try with our function.</p>
+<p><em>Note: When the LLM decides to use a tool the <code>.text</code> attribute might be null as the function call is returned in the <code>function_call</code> attribute of each candidate.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">response = client.models.generate_content(
+    model=model_id,
+    config=config,
+    contents='Whats the weather in Berlin today?'
+)
+ 
+# iterate over eacht return part and check if it is a function call or a normal response
+for part in response.candidates[0].content.parts:
+    print(part.function_call)
+# id=None args={'date': '2025-03-04', 'location': 'Berlin, DE'} name='get_weather_forecast'</code></pre></div></figure>
+<p>Great, Gemini correctly identified that it needs to call our function and generated the structured response including the function name and arguments. Now, lets put this into a "agentic" method that will call the Gemini then check if the response is a function call and if so call the function with the arguments and finally generate a final response.</p>
+<p><em>Note: The code below uses the available <code>types</code> data structured from the <code>google-genai</code> library to create the conversation history.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google.genai import types
+from geopy.geocoders import Nominatim
+import requests
+ 
+# Simple function to get the weather forecast for a given location and date
+geolocator = Nominatim(user_agent="weather-app") 
+def get_weather_forecast(location, date):
+    location = geolocator.geocode(location)
+    if location:
+        try:
+            response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={location.latitude}&amp;longitude={location.longitude}&amp;hourly=temperature_2m&amp;start_date={date}&amp;end_date={date}")
+            data = response.json()
+            return {time: temp for time, temp in zip(data["hourly"]["time"], data["hourly"]["temperature_2m"])}
+        except Exception as e:
+            return {"error": str(e)}
+    else:
+        return {"error": "Location not found"}
+ 
+# Function dictionary to map the function name to the function
+functions = {
+    "get_weather_forecast": get_weather_forecast
+}
+ 
+# helper function to call the function
+def call_function(function_name, **kwargs):
+    return functions[function_name](**kwargs)
+ 
+# agentic loop to handle the function call
+def function_call_loop(prompt):
+    # create the conversation
+    contents = [types.Content(role="user", parts=[types.Part(text=prompt)])]
+    # initial request 
+    response = client.models.generate_content(
+        model=model_id,
+        config=config,
+        contents=contents
+    )
+    for part in response.candidates[0].content.parts:
+        # add response to the conversation
+        contents.append(types.Content(role="model", parts=[part]))
+        # check if the response is a function call
+        if part.function_call:
+            print("Tool call detected")
+            function_call = part.function_call
+            # Call the tool with arguments
+            print(f"Calling tool: {function_call.name} with args: {function_call.args}")
+            tool_result = call_function(function_call.name, **function_call.args)
+            # Build the response parts using the function result.
+            function_response_part = types.Part.from_function_response(
+                name=function_call.name,
+                response={"result": tool_result},
+            )
+            contents.append(types.Content(role="user", parts=[function_response_part]))
+            # Send follow-up with tool results, but remove the tools from the config
+            print(f"Calling LLM with tool results")
+            func_gen_response = client.models.generate_content(
+                model=model_id, config=config, contents=contents
+            )
+            # Add the reponse to the conversation
+            contents.append(types.Content(role="model", parts=[func_gen_response]))
+    # return the final response
+    return contents[-1].parts[0].text.strip()
+    
+ 
+function_call_loop("Whats the weather in Berlin today?")
+ 
+# Tool call detected
+# Calling tool: get_weather_forecast with args: {'date': '2025-03-04', 'location': 'Berlin, DE'}
+# Calling LLM with tool results
+# 'OK. Today in Berlin, the temperature will be between 1.7 and 12.2 degrees Celsius.'</code></pre></div></figure>
+<p>Awesome! We successfully called our function and generated a final response using the function result.</p>
+<h3 id="function-calling-using-python-functions">Function Calling using Python functions</h3>
+<p>The Python SDK <code>google-genai</code> can automatically generate the JSON Schema from the Python function definitions and docstrings.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from geopy.geocoders import Nominatim
+import requests
+ 
+geolocator = Nominatim(user_agent="weather-app") 
+ 
+def get_weather_forecast(location: str, date: str) -&gt; str:
+    """
+    Retrieves the weather using Open-Meteo API for a given location (city) and a date (yyyy-mm-dd). Returns a list dictionary with the time and temperature for each hour."
+    
+    Args:
+        location (str): The city and state, e.g., San Francisco, CA
+        date (str): The forecasting date for when to get the weather format (yyyy-mm-dd)
+    Returns:
+        Dict[str, float]: A dictionary with the time as key and the temperature as value
+    """
+    location = geolocator.geocode(location)
+    if location:
+        try:
+            response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={location.latitude}&amp;longitude={location.longitude}&amp;hourly=temperature_2m&amp;start_date={date}&amp;end_date={date}")
+            data = response.json()
+            return {time: temp for time, temp in zip(data["hourly"]["time"], data["hourly"]["temperature_2m"])}
+        except Exception as e:
+            return {"error": str(e)}
+    else:
+        return {"error": "Location not found"}</code></pre></div></figure>
+<p>Similar to the JSON Schema example we add our function to the generation config and we disable the automatic function calling for now, more on that later.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google.genai.types import GenerateContentConfig
+ 
+# Generation Config
+config = GenerateContentConfig(
+    system_instruction="You are a helpful assistant that can help with weather related questions. Today is 2025-03-04.", # to give the LLM context on the current date.
+    tools=[get_weather_forecast], # define the functions that the LLM can use
+    automatic_function_calling={"disable": True} # Disable for now. 
+)</code></pre></div></figure>
+<p>We can now generate a response.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">r = client.models.generate_content(
+    model=model_id,
+    config=config,
+    contents='Whats the weather in Berlin today?'
+)
+# iterate over eacht return part and check if it is a function call or a normal response
+for part in r.candidates[0].content.parts:
+    print(part.function_call)
+ 
+# id=None args={'location': 'Berlin, Germany', 'date': '2025-03-04'} name='get_weather_forecast'</code></pre></div></figure>
+<p>Great! Similar to our JSON Schema example Gemini correctly identified that it needs to call our function. The next step would be to implement the same logic to identify the function to call and handle the output, but the Python SDK supports this out of the box.</p>
+<p>If we enable the <code>automatic_function_calling</code> the SDK will automatically call the function, and sends another request to Gemini with the function result. We can remove the <code>automatic_function_calling</code> as the default behavior when Python functions are used as tools is to automatically call the function.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google.genai.types import GenerateContentConfig
+ 
+# Generation Config
+config = GenerateContentConfig(
+    system_instruction="You are a helpful assistant that use tools to access and retrieve information from a weather API. Today is 2025-03-04.", # to give the LLM context on the current date.
+    tools=[get_weather_forecast], # define the functions that the LLM can use
+    # removed the automatic_function_calling as the default is to call the function
+)
+ 
+r = client.models.generate_content(
+    model=model_id,
+    config=config,
+    contents='Whats the weather in Berlin today?'
+)
+ 
+print(r.text)
+# OK. Today in Berlin, the temperature will be between 1.7 and 12.2 degrees Celsius.</code></pre></div></figure>
+<p>Great. Now, lets try an example which might be closer to a real usecase, where we provide more context to our Assistant about the user to have a more natural conversation.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google.genai.types import GenerateContentConfig
+ 
+# Generation Config
+config = GenerateContentConfig(
+    system_instruction="You are a helpful assistant that use tools to access and retrieve information from a weather API.",
+    tools=[get_weather_forecast], # define the functions that the LLM can use
+    # removed the automatic_function_calling as the default with callable functions is to call the function
+)
+ 
+# Prompt includes more context about the user and the current date
+prompt = f"""
+Today is 2025-03-04. You are chatting with Philipp, you have access to more information about him.
+ 
+User Context:
+- name: Philipp
+- location: Nuremberg
+ 
+User: Can i wear a T-shirt later today?"""
+ 
+r = client.models.generate_content(
+    model=model_id,
+    config=config,
+    contents=prompt
+)
+ 
+print(r.text)
+# The temperature in Nuremberg will range from 0.6 degrees Celsius to 13.2 degrees Celsius today. I would recommend bringing a jacket.</code></pre></div></figure>
+<h2 id="advanced-function-calling-with-langchain">Advanced: Function Calling with LangChain</h2>
+<p><a target="_blank" rel="noopener noreferrer" href="https://python.langchain.com/docs/introduction/">LangChain</a> is a composable framework that simplifies the development of LLM-powered application. LangChain supports Google Gemini 2.0 Flash and the function calling capabilities. <a target="_blank" rel="noopener noreferrer" href="https://langchain-ai.github.io/langgraph/">LangGraph</a> is an orchestration framework for controllable agentic workflows, and many companies use LangChain and LangGraph together to build AI Agents.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">%pip install langchain langchain-google-genai</code></pre></div></figure>
+<p>To use Gemini with LangChain we need to create a <code>ChatGoogleGenerativeAI</code> class, that implements the <code>BaseChatModel</code> interface, which is responsible for the LLM calls and supporting function calling.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import os
+from langchain_google_genai import ChatGoogleGenerativeAI
+ 
+ 
+# Get API key and define model id
+api_key = os.getenv("GEMINI_API_KEY","xxx")
+model_id =  "gemini-2.0-flash"
+ 
+# Create LLM class 
+llm = ChatGoogleGenerativeAI(
+    model=model_id,
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+    google_api_key=api_key,
+)
+ 
+# lets try it
+res = llm.invoke("What is the weather in Berlin today?")
+print(res.content)
+# I do not have access to real-time information, including live weather updates. To find out the weather in Berlin today, I recommend checking a reliable weather app or website such as:
+ 
+# *   **Google Weather:** Just search "weather in Berlin" on Google.
+# *   **AccuWeather:** [https://www.accuweather.com/](https://www.accuweather.com/)
+# *   **The Weather Channel:** [https://weather.com/](https://weather.com/)
+# *   **Local German weather services:** such as Deutscher Wetterdienst (DWD)
+ 
+# These sources will provide you with the most up-to-date and accurate weather information for Berlin.</code></pre></div></figure>
+<p>Great! This looks similar to our initial call without tools enabled. Now lets try to add the function calling capabilities. Similar to the <a target="_blank" rel="noopener noreferrer" href="https://python.langchain.com/docs/concepts/tool_calling/">SDK LangChain supports automatic python function</a> to tool conversion. If you want to use a function as tool you can add a <code>@tool</code> decorator to the function.</p>
+<p><em>Note: We copy the code from out <code>get_weather_forecast</code> function from the Python SDK example.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from geopy.geocoders import Nominatim
+import requests
+from langchain.tools import tool
+ 
+geolocator = Nominatim(user_agent="weather-app") 
+ 
+@tool
+def get_weather_forecast(location: str, date: str) -&gt; str:
+    """Retrieves the weather using Open-Meteo API for a given location (city) and a date (yyyy-mm-dd). Returns a list dictionary with the time and temperature for each hour."
+    
+    Args:
+        location (str): The city and state, e.g., San Francisco, CA
+        date (str): The forecasting date for when to get the weather format (yyyy-mm-dd)
+    Returns:
+        Dict[str, float]: A dictionary with the time as key and the temperature as value
+    """
+    location = geolocator.geocode(location)
+    if location:
+        try:
+            response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={location.latitude}&amp;longitude={location.longitude}&amp;hourly=temperature_2m&amp;start_date={date}&amp;end_date={date}")
+            data = response.json()
+            return {time: temp for time, temp in zip(data["hourly"]["time"], data["hourly"]["temperature_2m"])}
+        except Exception as e:
+            return {"error": str(e)}
+    else:
+        return {"error": "Location not found"}</code></pre></div></figure>
+<p>After we have our tool defined we can <code>bind</code> it to the LLM.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">llm_with_tools = llm.bind_tools([get_weather_forecast])</code></pre></div></figure>
+<p>Now, lets try it out.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">messages = [
+    (
+        "system",
+        "You are a helpful assistant that use tools to access and retrieve information from a weather API. Today is 2025-03-04.",
+    ),
+    ("human", "What is the weather in Berlin today?"),
+]
+ 
+# Call the LLM with the messages and tools
+res = llm_with_tools.invoke(messages)
+ 
+# Check if the LLM returned a function call
+if res.tool_calls:
+    print(res.tool_calls)
+ 
+# [{'name': 'get_weather_forecast', 'args': {'date': '2025-03-04', 'location': 'Berlin, DE'}, 'id': 'c0043a1b-4430-4f7a-a0d6-35bd4ffc6501', 'type': 'tool_call'}]</code></pre></div></figure>
+<p>Great! It worked. Now, we would need to call our function with the arguments again and add the result to the conversation. Similar to the Python SDK example Langchain supports automatic function calling, through the <code>create_tool_calling_agent</code> and <code>AgentExecutor</code>.</p>
+<ul>
+<li>
+<p><code>create_tool_calling_agent</code>: Creates an agent that can:</p>
+<ul>
+<li>Understand when to use available tools based on user input</li>
+<li>Generate structured arguments for tool calls</li>
+<li>Process tool outputs to create natural responses</li>
+</ul>
+</li>
+<li>
+<p><code>AgentExecutor</code>: Handles the execution flow by:</p>
+<ul>
+<li>Managing the conversation between user and agent</li>
+<li>Automatically calling tools when the agent requests them</li>
+<li>Handling any errors during tool execution</li>
+<li>Maintaining conversation context across multiple interactions</li>
+</ul>
+</li>
+</ul>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+ 
+# Initialize the prompt template
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant that use tools to access and retrieve information from a weather API. Today is 2025-03-04."),
+    ("human", "{input}"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),
+    
+])
+ 
+# Create the agent and executor with out llm, tools and prompt
+agent = create_tool_calling_agent(llm_with_tools, [get_weather_forecast],prompt)
+agent_executor = AgentExecutor(agent=agent, tools=[get_weather_forecast], verbose=True)
+ 
+# Run our query 
+res = agent_executor.invoke({"input": "What is the weather in Berlin today?"})
+print(res["output"])
+ 
+# Entering new AgentExecutor chain...
+# Invoking: `get_weather_forecast` with `{'date': '2025-03-04', 'location': 'Berlin, DE'}`
+# {'2025-03-04T00:00': 3.5, '2025-03-04T01:00': 3.4, '2025-03-04T02:00': 3.2, '2025-03-04T03:00': 2.4, '2025-03-04T04:00': 2.4, '2025-03-04T05:00': 2.1, '2025-03-04T06:00': 1.7, '2025-03-04T07:00': 1.9, '2025-03-04T08:00': 3.3, '2025-03-04T09:00': 5.2, '2025-03-04T10:00': 6.9, '2025-03-04T11:00': 8.5, '2025-03-04T12:00': 10.5, '2025-03-04T13:00': 11.4, '2025-03-04T14:00': 11.8, '2025-03-04T15:00': 12.2, '2025-03-04T16:00': 11.6, '2025-03-04T17:00': 10.6, '2025-03-04T18:00': 9.6, '2025-03-04T19:00': 8.6, '2025-03-04T20:00': 7.8, '2025-03-04T21:00': 6.9, '2025-03-04T22:00': 6.3, '2025-03-04T23:00': 5.8}
+# [1m&gt; Finished chain.
+# OK. Today in Berlin, the temperature will be between 1.7 and 12.2 degrees Celsius.</code></pre></div></figure>
+<p>Awesome! It worked.</p>
+<h2 id="advanced-function-calling-with-openai-compatible-api">Advanced: Function Calling with OpenAI Compatible API</h2>
+<p>Google Gemini has an <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/openai">OpenAI compatible API</a>, which allows us to use Gemini models with the OpenAI API and SDKs. The API supports function calling out of the box, meaning we can use the OpenAI features to call our function.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">%pip install openai</code></pre></div></figure>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from openai import OpenAI
+ 
+# Get API key and define model id
+api_key = os.getenv("GEMINI_API_KEY","xxx")
+model_id =  "gemini-2.0-flash"
+ 
+client = OpenAI(
+    api_key=api_key,
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+)</code></pre></div></figure>
+<p>Lets try it out.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">response = client.chat.completions.create(
+  model=model_id,
+  messages=[{"role": "user", "content": "What is the weather in Berlin today?"}],
+)
+ 
+print(response.choices[0].message.content)
+# I do not have real-time access to live weather data. To find out the weather in Berlin today, I recommend checking a reliable weather source such as:
+ 
+# *   **A weather app:** (e.g., WeatherBug, AccuWeather, The Weather Channel)
+# *   **A weather website:** (e.g., Google Weather, a local news site)
+ 
+# These sources will give you the most up-to-date and accurate information.</code></pre></div></figure>
+<p>Great! Now lets our JSON Schema example.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">weather_function =   {
+    "type": "function",
+    "function": {
+    "name": "get_weather_forecast",
+    "description": "Retrieves the weather using Open-Meteo API for a given location (city) and a date (yyyy-mm-dd). Returns a list dictionary with the time and temperature for each hour.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "location": {
+                "type": "string",
+                "description": "The city and state, e.g., San Francisco, CA"
+            },
+            "date": {
+                "type": "string",
+                "description": "the forecasting date for when to get the weather format (yyyy-mm-dd)"
+            }
+        },
+        "required": ["location","date"]
+    }
+}}
+ 
+response = client.chat.completions.create(
+  model=model_id,
+  messages=[
+      {"role": "system", "content": "You are a helpful assistant that use tools to access and retrieve information from a weather API. Today is 2025-03-04."},
+      {"role": "user", "content": "What is the weather in Berlin today?"}],
+  tools=[weather_function],
+  tool_choice="auto"
+)
+ 
+if response.choices[0].message.tool_calls:
+    print(response.choices[0].message.tool_calls[0].function)
+# Function(arguments='{"date":"2025-03-04","location":"Berlin, DE"}', name='get_weather_forecast')</code></pre></div></figure>
+<p>Awesome! We successfully called our function and generated the structured response. If you are using the OpenAI SDK you can now easily test Gemini function calling.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Function calling with Gemini 2.0 Flash provides a powerful way to build AI applications that can interact with external tools and APIs in a structured way. We explored three different approaches to implement function calling:</p>
+<ol>
+<li>Using JSON Schema - A flexible approach that works across programming languages</li>
+<li>Using Python Functions - A simpler approach with automatic schema generation when working in Python</li>
+<li>Using the OpenAI-compatible API - Allowing you to leverage existing OpenAI-based code</li>
+</ol>
+<p>Each approach has its strengths, with the Python SDK offering the most streamlined experience for Python developers, while the JSON Schema and OpenAI-compatible approaches provide more flexibility for other languages and existing codebases.</p>
+<p>Function calling enables us to build powerful AI assistants that can access real-time data, perform actions, handle complex interactions, and provide natural language interfaces to APIs and tools, making it an increasingly important capability for practical AI applications that interact with the real world.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

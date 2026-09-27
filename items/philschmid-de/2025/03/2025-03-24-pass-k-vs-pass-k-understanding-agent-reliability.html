@@ -1,0 +1,45 @@
+<div id="readability-page-1" class="page"><div><p>The biggest challenge for AI agents in production isn't their peak performance, but their reliability. A customer support agent that fails every third request isn't production-ready. Traditional benchmark evaluations often mask these reliability concerns by focusing on optimistic scenarios, like <code>pass@k</code>, which don't capture the reliability.</p>
+<p>We need to look beyond <code>pass@k</code> and think about how can we measure the reliability and robustness of agents. Thats where <code>pass^k</code> comes in.</p>
+<h2 id="what-is-passk">What is Pass@k?</h2>
+<p>Pass@k measures the probability that at least one of k independent solution attempts will succeed. This metric has become standard a standard for evaluating in benchmarks such as Code Generation.</p>
+<p>The formal calculation for Pass@k is:</p>
+<p><span><span><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>Pass@k</mtext><mo>=</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mo fence="true">(</mo><mfrac linethickness="0px"><mrow><mi>n</mi><mo>−</mo><mi>c</mi></mrow><mi>k</mi></mfrac><mo fence="true">)</mo></mrow><mrow><mo fence="true">(</mo><mfrac linethickness="0px"><mi>n</mi><mi>k</mi></mfrac><mo fence="true">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\text{Pass@k} = 1 - \frac{\binom{n-c}{k}}{\binom{n}{k}}</annotation></semantics></math></span></span></p>
+<p>Where:</p>
+<ul>
+<li>n is the total number of attempts</li>
+<li>c is the number of correct solutions</li>
+<li><span><span><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo fence="true">(</mo><mfrac linethickness="0px"><mi>n</mi><mi>k</mi></mfrac><mo fence="true">)</mo></mrow><annotation encoding="application/x-tex">\binom{n}{k}</annotation></semantics></math></span></span> represents the binomial coefficient (n choose k)</li>
+</ul>
+<p>This formula calculates the probability of sampling at least one correct solution when randomly selecting k solutions from n attempts.</p>
+<h2 id="what-is-passk-1">What is Pass^k?</h2>
+<p>Pass^k (pronounced "pass power k") takes a different approach. It estimates the probability that an agent would succeed on all k independent attempts. This is useful for evaluating consistency and reliability in agent performance.</p>
+<p>The formula is elegantly simple:</p>
+<p><span><span><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mtext>Pass</mtext><mi>k</mi></msup><mo>=</mo><msup><mrow><mo fence="true">(</mo><mfrac><mi>c</mi><mi>n</mi></mfrac><mo fence="true">)</mo></mrow><mi>k</mi></msup></mrow><annotation encoding="application/x-tex">\text{Pass}^k = \left(\frac{c}{n}\right)^k</annotation></semantics></math></span></span></p>
+<p>Where c/n represents the raw success rate on a single attempt, raised to the power of k.</p>
+<h2 id="real-world-example-flight-rebooking-agent">Real-World Example: Flight Rebooking Agent</h2>
+<p>Imagine a customer support agent to help travelers rebook flights. A customer submits a request: "I need to change my flight from London to New York on July 15th to July 18th. My booking reference is XYZ123."</p>
+<p>Let's say our agent has a 70% success rate on individual requests (meaning it correctly processes the update 70% of the time). We'll use k=3 (three attempts).</p>
+<p><strong>Using Pass@3:</strong>
+<span><span><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>Pass@3</mtext><mo>=</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mo fence="true">(</mo><mfrac linethickness="0px"><mn>30</mn><mn>3</mn></mfrac><mo fence="true">)</mo></mrow><mrow><mo fence="true">(</mo><mfrac linethickness="0px"><mn>100</mn><mn>3</mn></mfrac><mo fence="true">)</mo></mrow></mfrac><mo>≈</mo><mn>0.97</mn><mtext>&nbsp;or&nbsp;</mtext><mn>97</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">\text{Pass@3} = 1 - \frac{\binom{30}{3}}{\binom{100}{3}} \approx 0.97 \text{ or } 97\%</annotation></semantics></math></span></span></p>
+<p>This looks impressive! It suggests that if we give the agent three chances to rebook a flight, it will almost certainly succeed at least once.</p>
+<p><strong>Using Pass^3:</strong>
+<span><span><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mtext>Pass</mtext><mn>3</mn></msup><mo>=</mo><msup><mrow><mo fence="true">(</mo><mfrac><mn>70</mn><mn>100</mn></mfrac><mo fence="true">)</mo></mrow><mn>3</mn></msup><mo>=</mo><mn>0.343</mn><mtext>&nbsp;or&nbsp;</mtext><mn>34.3</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">\text{Pass}^3 = \left(\frac{70}{100}\right)^3 = 0.343 \text{ or } 34.3\%</annotation></semantics></math></span></span></p>
+<p>This tells a different story. If the agent needs to handle three consecutive rebooking requests, there's only a 34.3% chance it will successfully complete all three. For an airline handling thousands of rebooking requests daily, this level of inconsistency could result in hundreds of frustrated customers.</p>
+<h3 id="results">Results</h3>
+<p>This example shows why <code>pass@k</code> alone isn't sufficient for production evaluation:</p>
+<ol>
+<li>
+<p><strong>Customer Experience</strong>: While <code>pass@k</code> might suggest excellent performance, <code>pass^k</code> reveals potential inconsistencies that directly impact user satisfaction. Our flight rebooking agent might leave more than half of customers needing human intervention when processing multiple requests.</p>
+</li>
+<li>
+<p><strong>Resource Planning</strong>: Understanding <code>pass^k</code> helps operations teams better estimate how many requests will require human escalation, allowing for more accurate staffing and resource allocation.</p>
+</li>
+<li>
+<p><strong>System Design</strong>: Knowing your agent's <code>pass^k</code> score might influence architectural decisions, such as implementing verification steps or human-in-the-loop fallbacks for certain critical operations.</p>
+</li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p>The flight update example highlights the key point, why <code>pass@k</code> can be misleading when building reliable agents. It inflates the perceived performance by focusing on the possibility of success, rather than the probability of consistent success.</p>
+<p>In contrast, <code>pass^k</code> provides a much more realistic and demanding measure. It reflects the user's expectation of consistent, reliable performance. Measuring consistency rather than best-case performance should be the goal for your AI Agents.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

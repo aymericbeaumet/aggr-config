@@ -1,0 +1,62 @@
+---
+title: 'Career Update: Google DeepMind -> Anthropic'
+link: https://nicholas.carlini.com/writing/2025/career-update.html
+source: nicholas-carlini-com
+published: 2025-03-05T00:00:00Z
+updated: 2025-03-05T00:00:00Z
+first_seen: 2026-09-27T19:29:15.293681927Z
+summary: I have decided to leave Google, and will be joining Anthropic to continue my work on machine learning security
+content: extracted
+html: 2025-03-05-career-update-google-deepmind-anthropic.html
+---
+
+I have decided to leave Google DeepMind after seven years, and will be joining Anthropic for a year to continue my research on adversarial machine learning. Below you can find a (significantly shortened) version of the doc I sent to my colleagues to explain why I'm leaving, and a (new for this article) brief discussion about what I will be doing next.
+
+### Why am I leaving?
+
+Joining Google Brain after finishing my PhD in 2018 was a dream job. It was, by far, the best place to go to perform research in an open environment and work on the problems I thought were most important. But that was seven years ago, and a lot has changed since then. But most importantly: Brain merged into DeepMind, and I no longer believe DeepMind (and DeepMind leadership [\[a\]](https://nicholas.carlini.com/writing/2025/career-update.html#footnote1) It's important to note that it is specifically the DeepMind leadership with whom I have my disagreements. My colleagues, and the managers who manage us on a day-to-day basis, are fantastic and have supported me in every way possible. ) supports the type of high-impact security and privacy research I like to do.
+
+If you're not one of my collaborators you might be surprised that I'm saying DeepMind leadership has made it hard for me to do my research. From where you sit, it might look like I've been publishing just fine. But what you can't see is that the only way I have been able to write the papers I have written is because of my willingness to just force my way through, regardless of what the rules say.
+
+(Before I continue further, I do want to take a moment and acknowledge the privilege I have in being able to just decide to leave an otherwise-fantastic job because I find it mildly annoying that leadership doesn't let me do what I think is 100% optimal. (Especially at a time when the job market in other areas, even in tech, has been so challenging.) Being able to dictate the terms of my own employment is obviously a huge privilege, and I'm not going to pretend otherwise. But that said: if you're someone like me who also has this privilege, then I think you have the responsibility to use it.)
+
+Fundamentally, I have two beliefs about publication:
+
+1. The science of security and flaws in machine learning should be open by default. We have a lot yet to learn in this field, and so in order to make the necessary progress in the limited time we have available, we're going to need to be willing to learn from each other and collaborate as much as possible.
+2. Scientific publications should be the method for communicating scientific results. Science papers should be written for scientists, without the puff of a PR release, and without the linguistic hedging of a legal brief. Doing this will require accepting that writing what is true is not always the same as writing what we wish were true.
+
+As a result of leadership not sharing these beliefs, the process of getting papers approved over the past several years has gotten considerably more difficult than when I first joined. And unfortunately it's gotten to the point now where I don't feel that I'm able to effectively do the work I think is most important.
+
+With my Google colleagues, I have expanded on these two points and presented ways in which I think DeepMind leadership could improve its process to better support security and privacy research. But while I think sharing my overall motivation for leaving is appropriate in a public forum such as this, I do not think there is a compelling public interest in writing publicly about the specifics of my internal complaints. And so that is where I will end this particular discussion. I offer in recompense a newly written section discussing what I plan to do next.
+
+### What's next for me?
+
+I'm going to join [Anthropic](https://www.anthropic.com/) for a year, and work on safety and security there. After that, I don't know what I'll do next. I may go to do independent research, or join academia, or even decide to stay at Anthropic. At this point I don't know; the future is changing so fast that I think making any commitment beyond a year is not realistic.
+
+This was not an easy decision for me: I spent several months deciding between three very exciting paths forward. My first option was, as I said, joining Anthropic. I also had an option to start a new security nonprofit; I had several potential funders interested, and had worked out a good chunk of the logistics for this. And finally, I considered (briefly) applying for a faculty position to do research at a university. Ultimately I decided on Anthropic for three reasons:
+
+1. Most importantly, I believe I can have maximum impact in the near-term working at a company actually training large models. My research focuses on trying to understand the security properties of large models, and so being able to influence the design of frontier models (before they're deployed) presents an enormous opportunity for impact.
+2. I'm (differentially) better at doing technical work than advising projects. Academia and nonprofit work require a lot of skills I don't currently feel like I have. A big part of what I feel makes many of my papers compelling is that I am better at implementing something well than I am at advising someone else on how to implement something well, and so continuing at a frontier research lab seems good.
+3. Finally, it is more easily reversible. If I join Anthropic and everything is terrible I can just leave after two months and no one but me is worse off for it. But if I were to instead start a nonprofit go the academic route, I'd want to commit to it for a while, two or three years at least, so as to not waste donor money or people's time.
+
+In the future my calculus may change, but for me, right now, I think Anthropic is the best place for me.
+
+### Anthropic? Another research lab?
+
+Now you might (rightly) say "wait a minute didn't you just tell me you're leaving a a large company because they got in your way and prevented you from doing your research?" And yes, yes I did.
+
+But I'm fairly confident that the people at Anthropic actually care about the kinds of safety concerns I care about, and will let me work on them [\[b\]](https://nicholas.carlini.com/writing/2025/career-update.html#footnote2) I will freely admit that I have received some special treatment in this regard; I do not know if someone else would be able to get the same assurances I have received. . Because ultimately I think it's important to remember that a company doesn't *want* anything; what matters is what the people at the company want, and what the processes make easy or make hard. I've spent well over twenty hours talking to people at every level of Anthropic from the co-founders on the leadership team down to the junior researchers, and got a consistent response that everyone was interested in improving the safety of the field as a whole in the same way that I am.
+
+Specifically, as far as I can tell, they have the same security publication philosophy as me. They believe that training the best models and designing products is important too, but that isn't research, and so it's not published. But they also understand that safety is something that shouldn't be a competitive advantage; everyone needs to be safe, we don't know yet how to be safe, and so it's treated as research and published [\[c\]](https://nicholas.carlini.com/writing/2025/career-update.html#footnote3) To be clear, there are also people whose job is to take what is known to be good practice in the research community, and then implement it to improve the product. Not every person who works on security should be working on publishing security research. Every company has people who need to do this---otherwise why even do the research in the first place? .
+
+Now do I trust them completely? Absolutely not. Never trust a company completely. But at least at this moment, it honestly does look like Anthropic cares about making things go well and has the processes in place to make that happen.
+
+And after a year's up, I'll re-evaluate my priorities. There are real downsides to working at frontier research labs, and depending on how the future goes, may decide to do something else. For example: I'm not someone who believe that we're going to have some kind of full artificial general intelligence in the next 2-3 years. But [I have large error bars and you should too](https://nicholas.carlini.com/writing/2025/forecasting-ai-2025-update.html). So if, in a year, it looks like this is something that's actually possible, then I should probably completely re-evaluate my decision making process.
+
+### Concluding thoughts
+
+The recent advances in machine learning and language modeling are going to be transformative [\[d\]](https://nicholas.carlini.com/writing/2025/career-update.html#footnote4) Exactly how transformative is up for debate. Maybe only like another internet. But also maybe another industrial revolution. Some time next week I hope to write a blog post describing my thoughts on the future of language models. . But in order to realize this potential future in a way that doesn't put everyone's safety and security at risk, we're going to need to make *a lot* of progress---and soon. We need to make so much progress that no one organization will be able to figure everything out by themselves; we need to work together, we need to talk about what we're doing, and we need to start doing this now.
+
+I hope that Google DeepMind will better embrace this in the future. I have fought, and fought hard, to try and get this point across over the last several years. But it's now time for me to move on, and I hope that those who remain will continue to push for improving the field as a whole. Google truly does have some of the most talented people in the world, and I hope that they are able to apply all of this talent to make the world a better place.
+
+For my part, I'm excited to continue working on safety and security at Anthropic. I'm glad that there are companies out there that are not only willing---but apparently even excited---by the opportunity to head-on address the very real security challenges presented by large language models. I have a bunch of fun research projects planned that I'm really excited to work on, and hope to share them as soon as they're ready.

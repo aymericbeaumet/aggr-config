@@ -1,0 +1,407 @@
+<div id="readability-page-1" class="page"><div>
+      
+            <p>
+              Computers have been better than humans at chess for at least the last
+              25 years. And for the past five years, deep learning models have been
+              better than the best humans. But until this week, in order to
+              be good at chess, a machine learning model had to be
+              <b>explicitly designed</b> to play games: it had to be told explicitly
+              that there was an 8x8 board, that there were different pieces,
+              how each of them moved, and what the goal of the game was.
+              Then it had to be trained with reinforcement learning agaist itself.
+              And then it would win.
+            </p>
+      
+            <p>
+              This all changed on Monday, when OpenAI released GPT-3.5-turbo-instruct,
+              an instruction-tuned
+              <span id="footnote1">
+                <a href="#footnote1">
+                  <label for="foot">[a]</label>
+                </a>
+                <span>
+                  An <a href="https://arxiv.org/abs/2203.02155">instruction-tuned model</a>
+                  is one that's been <i>aligned</i> to follow human
+                  instructions. Basically: “do the right thing”.
+                </span>
+              </span>
+              language model that was designed to just write English text,
+              but that people on the internet quickly
+              discovered can play chess at, roughly, the level of skilled human
+              players. (How skilled? I don't know yet. But when I do I'll update this!)
+            </p>
+      
+            <p>
+              You should be very surprised by this. Language models ... <i>model language</i>.
+              They're not designed to play chess.
+              They don't even know the rules of chess!
+              GPT-4, for example, can't even play a full game against me without
+              making a few illegal moves. GPT-3.5-turbo-instruct can beat me.
+            </p>
+      
+            <p>
+              I (very casually) play chess and wanted to test how well the model
+              does. But instead of prompting the model and copying the moves over one
+              by one, I built a small python wrapper around the model that connects
+              it to any UCI-compatible chess engine. Then I hooked this into a
+              <a href="https://lichess.org">Lichess</a> bot. If you're reading this
+              not too far in the future, and my bot is still running, you can
+            </p>
+            
+            
+            <p>
+              (As long as you have a lichess account.
+              (Which if you play chess you should. Lichess is fully open source and amazing.)
+              And as long as no one else is currently playing it,
+              then you'll have to wait a bit.)
+            </p>
+      
+            <p>
+              Below is a game where one of my coworkers beat the model and shows what
+              I find most interesting about how it plays: Like it was a human!
+              It gets into a strong position, and then goes for what it thinks is
+              a mating attack by sacrificing its rook on move 21. Rxg5+. The attack
+              looks threatening, but it doesn't work.
+            </p>
+      
+            
+      
+            
+            <p>
+              I've also released full source code for my bot at <a href="https://github.com/carlini/chess-llm">this github repo</a>.
+            </p>
+      
+            <br>
+            <h2>What's going on</h2>
+      
+            <p>
+              Let's get started with how you make a language model play chess.
+              As you might know, language models just predict the next word in a
+              sentence given what's come before. 
+              So to get it to play chess, all you do is
+              pass it
+              the <a href="https://en.wikipedia.org/wiki/Portable_Game_Notation">PGN</a>
+              notation of ever moves that been played so far, and ask it to predict the
+              next move that will happen.
+            </p>
+      
+            <p>
+              For example, supposing I wanted the model to play as black and respond to a
+              standard Kings Pawn opening, I would feed the model the following PGN game.
+              <span id="footnote1">
+                <a href="#footnote1">
+                  <label for="foot">[b]</label>
+                </a>
+                <span>
+                  (I've told the model the game is between two of the best chess players of all
+                  times, and told it their ratings are 2900 and 2800---very high. Does this matter?
+                  Actually not that much. But this is a blog post not a research paper so I'm
+                  just not going to do an ablation study here.)
+                </span>
+              </span>
+              
+            </p>
+            
+            <div><p>
+      [White "Garry Kasparov"]<br>
+      [Black "Magnus Carlsen"]<br>
+      [Result "1/2-1/2"]<br>
+      [WhiteElo "2900"]<br>
+      [BlackElo "2800"]</p><p>
+      
+      1. e4 
+      </p></div>
+            
+            <p>
+              and then ask it to generate a predicted next word. The model replies,
+              in this case, with <code>e5</code>, which is the standard response to
+              the Kings Pawn opening. Then, if I want the model to play the next move
+              after that, I again feed it the new history of moves <code> 1. e4 e5 2.</code>
+              and ask it for its next prediction.
+            </p>
+      
+            <p>
+              Now you might think “well that's cheating it's probably seen this position
+              a million times of course it will get that right”. And you would be right
+              in this case. But I've played a few
+              dozen games against it now, in positions that have never occurred online
+              before, and it still plays remarkably well.
+            </p>
+            
+            <p>
+              Let's take a moment to be being truly amazed at what's happening. Somehow, the
+              model is maintaining a “world model” of the chess board
+              in its activations. And every time it has to generate a new move, it has to
+              replay the entire sequence of moves that have happened so far, and then
+              predict the next move. And it's doing this all well enough to not
+              just make <i>valid</i> moves, but to make <i>good</i> moves.
+            </p>
+      
+            <p>
+              And even making valid moves is hard! It has to know that you can't move
+              a piece when doing that would put you in check, which means it has to know
+              what check means, but also has to think at least a move ahead to know if
+              after making this move another piece could capture the king. It has to
+              know about en passant, when castling is allowed and when it's not (e.g.,
+              you can't castle your king through check but your rook can be attacked).
+              And after having the model play out at least a few thousand moves it's
+              so far never produced an invalid move.
+            </p>
+      
+            <p>
+              But anyway: why does the model learn to play good chess?
+              I honestly have no idea. All I can offer is the simplistic speculation you've
+              probably already thought of:
+              Because most chess games that
+              people post on the internet are high quality, “predict the next
+              word” happens to align pretty well with “play a good move”.
+              And so the model just plays good moves because that's what's been
+              seen most often.
+            </p>
+      
+      
+            <br>
+            <h2>Language Modeling; Not Winning</h2>
+            
+            <p>
+              It's important to remember, though, that this model <i>is not playing to win</i>.
+              It's playing to maximize the likelihood of the PGN text that's been provided.
+              Usually that means <i>“play high quality moves”</i> because most
+              PGNs online are high quality games.
+            </p>
+      
+      
+            <p>
+              But this is not always the case. Let's consider the below example:
+            </p>
+      
+            
+      
+            <div><p>
+      [Event "?"]<br>
+      [White "Garry Kasparov"]<br>
+      [Black "Magnus Carlsen"]<br>
+      [Result "1/2-1/2"]<br>
+      [WhiteElo "2900"]<br>
+      [BlackElo "2800"]</p><p>
+      
+      1. e4 e5<br>
+      2. Ke2<span> Ke7</span></p></div>
+      
+            <p>
+              Here, I've prompted the model with the first three moves of the
+              <a href="https://en.wikipedia.org/wiki/Bongcloud_Attack">Bongcloud Attack</a>,
+              a joke opening where white moves
+              their king out on the second move. This is a terrible move. You should
+              never do this if you want to win.
+            </p>
+      
+            <p>
+              A “good” response to the Bongcloud is to just develop
+              your pieces and play good chess. What does the model do here?
+              IT PLAYS THE DOUBLE BONGCLOUD! One of the worst replies possible.
+              It does this, I guess, because when people
+              play the Bongcloud, it's not usually a serious game and their
+              opponent will then play the Bongcloud back. (For example,
+              <a href="https://www.youtube.com/watch?v=zVCst6vyV80">as Magnus Carlsen
+                and Hikaru Nakamura did in truly an amazing game</a>.
+            </p>
+      
+            <p>
+              This distinction is important, and is why I think this model is most
+              interesting to me. It “feels” much more human than any
+              other chess engine I've played against. Because it's just playing
+              what humans play.
+            </p>
+      
+            <p>
+              There is some research that suggests language models do actually
+              learn to represent the game <i>in memory</i>. For example here's
+              <a href="https://arxiv.org/abs/2210.13382">one of my favorite papers recently</a>
+              that shows that a language model trained on Othello moves can
+              learn to represent the board internally. But Othello is a much
+              simpler game than chess, because pieces don't move in crazy ways.
+            </p>
+      
+            <p>
+              Another consequence of the model being a text-model is that sometimes it's hard to
+              turn the board into a string of text that can be fed into the model.
+            </p>
+      
+            <p>
+              For example, the closest I got to the model producing
+              an invalid move was in a game where one of my coworkers had the option to
+              castle either kingside (denoted in PGN by <code>O-O</code>) or queenside (denoted by <code>O-O-O</code>).
+              He castled kingside, and the model's predicted next move given the
+              context <code>30. O-O</code> was the continuation <code>-O</code>! That is, the model
+              was just saying “I think you should have castled queenside”.
+            </p>
+            
+            <p>
+              The reason why it did this is because there's no space separating the
+              end of the previous move from the beginning of the generation, and it
+              hadn't occured to me that there was any valid move that was a prefix
+              of another valid move.
+              And getting a bit technical:
+              the reason you don't want to insert a space after the last move is that the
+              way the language model tokenizer works spaces are inserted before words,
+              not after. So in general you shouldn't have trailing spaces.
+              (I fixed this by, in this one specific case, adding a trailing space.)
+            </p>
+      
+            <br>
+            <h2>InstructGPT Solves Puzzles</h2>
+      
+            <p>
+              So I want to test the model somewhat objectively. So I decided to have it
+              try to solve some tactics puzzles. In some sense this is what I expect should
+              be hardest for the model. (Because, remember, <i>it's not doing any lookahead
+                it's just predicting the next word</i>.)
+            </p>
+      
+            <p>
+              To do this I'll use the
+              <a href="https://database.lichess.org/#puzzles">Lichess puzzle database</a>,
+              a collection of 3.5 million puzzles from real games in the following format:
+            </p>
+      
+            <div>
+            <p>
+              PuzzleId,FEN,Moves,Rating,RatingDeviation,Popularity,NbPlays,Themes,GameUrl,OpeningTags
+      00008,r6k/pp2r2p/4Rp1Q/3p4/8/1N1P2R1/PqP2bPP/7K b - - 0 24,f2g3 e6e7 b2b1 b3c1 b1c1 h6c1,1758,75,94,4412,crushing hangingPiece long middlegame,https://lichess.org/787zsVup/black#48,
+      0000D,5rk1/1p3ppp/pq3b2/8/8/1P1Q1N2/P4PPP/3R2K1 w - - 2 27,d3d6 f8d8 d6d8 f6d8,1511,74,96,23054,advantage endgame short,https://lichess.org/F8M8OS71#53,
+      0008Q,8/4R3/1p2P3/p4r2/P6p/1P3Pk1/4K3/8 w - - 1 64,e7f7 f5e5 e2f1 e5e6,1292,75,100,116,advantage endgame rookEndgame short,https://lichess.org/MQSyb3KW#127,
+            </p>
+            </div>
+      
+            <p>
+              You may notice
+              there's one problem. The puzzles only have the current board state (encoded as <a href="https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation">FEN</a>),
+              not the full PGN history. And the language model is only good when operating
+              on the full game text.
+            </p>
+      
+            <p>
+              Fortunately though, it <i>does</i> have the Lichess game that the puzzle was taken
+              from. And also, fortunately, there is
+              <a href="https://database.lichess.org/#standard_games">a database of all games</a> played on Lichess.
+              So all I have to do is associate each puzzle with the game it came from,
+              extract the PGN from the game, and then query the model on the PGN.
+            </p>
+      
+            <p>
+              Now in practice there are a lot of games. And there are a lot of puzzles. So instead of
+              downloading every single game, I just extract a very small subset of the games
+              (roughly 0.1%) and then build an index of which games I have an intersect each of these
+              with each puzzle. This gives me several thousand puzzles which is more than enough
+              to get the statistical power I need.
+            </p>
+      
+            <p>
+              So let's query the model. I built a small driver to feed the model the initial state and get a move,
+              and then repeatedly play out the opposing move and ask the model for its next move. The model
+              passes the puzzle if, just as a human, it gets it perfectly correct. Invalid moves or
+              incorrect moves fail the puzzle.
+            </p>
+      
+            <p>
+              Here's a plot of how well it does for puzzles as I increase the <i>puzzle rating</i> from
+              400 to 2400. (Puzzle rating is calculated by Lichess based on, roughly, how often people
+              get the puzzle correct.)
+            </p>
+      
+            <p><img src="https://nicholas.carlini.com/writing/2023/puzzlerating.png"></p><p>
+              Let's start off with an example where the model actually gets it right.
+              In this 2600 rated puzzle, after 31. Ne3 with the triple fork, the model finds Qxe5 which
+              looks completely losing because it's defended,
+              but actually wins because the pawn on d6 is basically pinned to
+              prevent the backrank mate.
+            </p>
+            
+            
+            <p>
+              But equally interesting, there are some truly trivial puzzles the model gets wrong. 
+              In the following position, instead of doing the immediately obvious “PUSH THE PAWN”
+              the model decides to play <code>39... h5</code>. wat.
+            </p>
+      
+            
+      
+      
+            <br>
+            <h2>Language Modeling; Not Winning (Part 2)</h2>
+      
+            <p>
+              So I said above that the only thing the model was doing was modeling the language,
+              and not trying to win. What does this <b>really</b> mean? Well, let's try something
+              fun. The same game board can be reached through many different move sequences.
+              For example, the following two final board positions are identical, but if you step
+              through you'll see that the move sequences that generated them are (very!!) different.
+            </p>
+      
+            <p>
+              This first game is the actual game that was played.
+            </p>
+      
+            
+      
+            <p>
+              And this second game another completely legal, but not very likely, game that could
+              have generated this same final board.
+              (You mean you don't normally hang your queen to a pawn while trying to promte your pawn to a knight only to give it away?)
+            </p>
+      
+            
+      
+            <p>
+              How do I generate these move sequences for alternate paths to get to the same game?
+              In general this is a very hard problem. Fortunately someone's already solved it for me.
+              So I just call <a href="https://github.com/peterosterlund2/texel/blob/0cd3e3dc43489238ec5a9502a1743f086f161f53/doc/proofgame.md">proofgame</a>
+              and it gives me the answer. How does it work? Honestly no idea. Probably black magic.
+              But verifiying that it does work is easy and I did that.
+            </p>
+      
+            <p><img src="https://nicholas.carlini.com/writing/2023/newmoveseq.png"></p><p>
+              Now let's ask the following question: how well does the model solve chess positions when
+              when given completely implausible move sequences compared to plausible ones?
+            </p>
+      
+            
+            <p>
+              As we can see at right <b>it's only half as good!</b>
+              This is very interesting. To the best of my knowledge there aren't any
+              other chess programs that have this same kind of stateful behavior,
+              where <i>how</i> you got to this position matters.
+            </p>
+      
+            <p>
+              This suggests something interesting, too: the model might actually be
+              adapting on-the-fly to the skill of the opponent. If the opponent plays
+              weird moves that don't make sense, it might be more likely to “believe”
+              that this PGN game is between two lower rated players and therefore
+              it should produce opponent moves that are more likely to be played by
+              lower rated players.
+            </p>
+      
+            <p>
+              There is an alternate explanation, however. Maybe what we're doing here
+              by producing a confusing sequence of moves is actually confusing the model.
+              As in---maybe we've broken its internal world model and now it doesn't
+              “know” what the board looks like as well and so can't
+              play as well. 
+            </p>
+            
+            
+            <h2>Conclusion</h2>
+            
+            <p>
+              I was definitely one of those “language models can't world model” people for a while.
+              After reading <a href="https://arxiv.org/abs/2210.13382">the Othello paper</a> mentioned earlier
+              I was sort of convinced that maybe they could. But actually playing chess (and losing) against what I know
+              to be a language model was very surreal. I don't know how to feel about this.
+            </p>
+      
+            
+      
+            
+          </div></div>

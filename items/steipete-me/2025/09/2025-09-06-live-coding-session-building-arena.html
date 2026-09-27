@@ -1,0 +1,65 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/live-coding-session-building-arena/hero.png" alt="" loading="lazy"><p><strong>tl;dr: I built and shipped a brand-new feature live (in ~1 hour), watch how I approach agentic engineering with codex</strong></p>
+<p>Join me for an unfiltered look at building Arena - a live coding session where you can see my development process in action, unscripted. Thanks to Eleanor Berger for motivating me to do this video and for organizing the live event!</p>
+<p></p>
+<h2 id="what-we-built">What we built</h2>
+<p>🤖 Heads up! This is an AI-Assisted summary.</p>
+<ul>
+<li><strong>Feature:</strong> <em>Arena</em> — a new feature in my upcoming project, to see how well 2–4 users from X match</li>
+<li><strong>Input:</strong> Twitter/X user handles</li>
+<li><strong>Pipeline:</strong> fetch N tweets per user (shares a 1,000-tweet budget), strip to necessary fields, run profile analysis, then <strong>score compatibility</strong> (per pair + whole team)</li>
+<li><strong>UX:</strong> user picker + “Analyze” button, results table, cached runs selectable under the search box</li>
+<li><strong>Infra touches:</strong> DB migration for <code>arena_cache</code>, long-running job in the background, streaming UI, auth-guarded page</li>
+</ul>
+<p>I managed to complete the feature in ~1h, and we got a  <strong>pair score of 89</strong> for me and <a href="https://x.com/intellectronica">@intellectronica</a>.</p>
+<h2 id="stack--setup">Stack &amp; Setup</h2>
+<ul>
+<li>
+<p><strong>Model workflow:</strong> codex (OpenAI/GPT-5) for coding sessions; it eagerly <strong>reads the codebase</strong> and generally “does the right thing” without handheld file lists. I keep a separate Claude-style flow for some web searching, but for repo work codex is the star.</p>
+</li>
+<li>
+<p><strong>Sessions:</strong> start <em>fresh</em> for big features, run <strong>multiple agent windows</strong> in parallel; switch tasks while one is thinking.</p>
+</li>
+<li>
+<p><strong>Branching:</strong> work <strong>directly on <code>main</code></strong> with <strong>atomic commits</strong>. Merge conflicts + worktrees cost speed; small, well-scoped commits keep things safe.</p>
+</li>
+<li>
+<p><strong>Tooling:</strong></p>
+<ul>
+<li><strong>Ghostty</strong> for terminals, split panes with agents</li>
+<li><strong>Better Stack</strong> logging via a tiny <a href="https://github.com/steipete/bslog"><strong><code>bslog</code></strong></a> CLI</li>
+<li>An <strong><code>xl</code></strong> CLI (<code>curl</code> wrapper) for quick X API pulls</li>
+<li>Strict <strong>biome</strong> rules + custom codemods to normalize output</li>
+<li><strong>Background worker</strong> for long jobs (<a href="https://www.inngest.com/">Inngest</a>)</li>
+<li><strong>Cache table</strong> to avoid recompute</li>
+</ul>
+</li>
+<li>
+<p><strong>Docs ingestion:</strong> pull only what’s needed, prefer <strong>markdown</strong> via a crawler over raw HTML to save tokens.</p>
+</li>
+<li>
+<p><strong>Validation:</strong> schema validation on inputs; fail fast and surface helpful messages.</p>
+</li>
+</ul>
+<h2 id="tactics-that-mattered">Tactics that mattered</h2>
+<ul>
+<li><strong>Keep the agent context clean.</strong> Minimize tool noise and only inject docs when needed; markdown &gt; HTML to conserve context.</li>
+<li><strong>Let codex plan on demand.</strong> It proposes next steps that are usually solid; green-light them in sequence.</li>
+<li><strong>Cache long tasks early.</strong> Add a table + background job queue before you polish UI; this saves you from re-running expensive analysis.</li>
+<li><strong>Copy-paste errors verbatim.</strong> Don’t over-explain; just drop logs in and let the agent fix what broke.</li>
+<li><strong>Comments as spec.</strong> Ask for clear intent comments near tricky code; they’re for you and for the agent on the next session.</li>
+<li><strong>Write tests afterwards, not first.</strong> These agents are great at back-filling tests once the shape exists, and that’s usually enough to catch regressions.</li>
+<li><strong>Work on <code>main</code>, commit surgically.</strong> You still get speed with safety. Backups + Git are your safety net.</li>
+<li><strong>Avoid local models for this workload.</strong> Context and stability matter more than shaving milliseconds.</li>
+<li><strong>CLIs beat MCPs.</strong> A 2-hour CLI wrapper (logs, API pulls) pays for itself and keeps context small.</li>
+<li><strong>Small “proof” projects unblock big features.</strong> If streaming or a protocol is hard, build a tiny in-repo example that works, then transplant.</li>
+</ul>
+<h2 id="qa-highlights">Q&amp;A highlights</h2>
+<ul>
+<li><strong>Why Codex over Claude Code?</strong> Codex actually <strong>reads more of the repo</strong> without handholding; requires fewer “look here, then there” hints. Claude still useful for search/web, but for coding Codex felt faster end-to-end.</li>
+<li><strong>Do you branch?</strong> Not for features at this stage. <strong>Main + disciplined commits</strong> is faster and - counterintuitively - safer for rapid iteration.</li>
+<li><strong>Manual approvals for agent actions?</strong> No. That becomes “Windows Vista prompts.” Use Git + backups; review diffs; move fast.</li>
+<li><strong>Repo prompts &amp; MCP servers?</strong> Nice idea, but they bloat context and introduce fragility. <strong>Lean instructions + small CLIs</strong> work better.</li>
+<li><strong>Compaction &amp; long sessions?</strong> Plan features to <strong>fit the context</strong>. If you expect many loops (e.g., test repairs), use the flow that compacts well - or split the task.</li>
+</ul>
+<p>If you want to read more about my agent workflow, check <a href="https://steipete.me/posts/2025/optimal-ai-development-workflow">my AI development post here</a>.</p>
+<p>For more advanced prompting techniques with GPT-5, also check out the <a href="https://cookbook.openai.com/examples/gpt-5/gpt-5_prompting_guide">OpenAI GPT-5 Prompting Guide</a>.</p></article><div data-astro-cid-c5a5jkvp=""><p data-astro-cid-c5a5jkvp="">New posts, shipping stories, and nerdy links straight to your inbox.</p><p data-astro-cid-c5a5jkvp="">2× per month, pure signal, zero fluff.</p></div></div>

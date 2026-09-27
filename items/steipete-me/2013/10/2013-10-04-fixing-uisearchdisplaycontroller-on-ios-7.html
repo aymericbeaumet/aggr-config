@@ -1,0 +1,15 @@
+<div id="readability-page-1" class="page"><article id="article"><p>iOS 7 is great, but it’s still very much a 1.0. I’ve spent a lot of time working around iOS 7-specific bugs in <a href="http://pspdfkit.com">PSPDFKit</a> and will share some of my work here.</p>
+<p>This is how UISearchDisplayController looks on iOS 7:</p>
+<video width="420" height="430" controls="">
+  <source src="https://steipete.me/images/posts/UISearchDisplayController_broken.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+<p>Pretty bad, eh? This is how it should look:</p>
+<video width="428" height="540" controls="">
+  <source src="https://steipete.me/images/posts/UISearchDisplayController_fixed.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+<p>Here’s the code to fix it. It doesn’t use private API (although there is some view hierarchy fighting), and it’s fairly clean. It uses my <a href="https://gist.github.com/steipete/6526860">UIKit legacy detector</a>, so this code won’t do any harm on iOS 5/6:</p>
+
+<p>I imagine one could subclass UISearchDisplayController directly and internally forward the delegate to better package this fix, but I only need it in one place so the UIViewController was a good fit.</p>
+<p>Note that this uses some awful things like <code>dispatch_async(dispatch_get_main_queue()</code>, but it shouldn’t do any harm even if Apple fixes its controller sometime in the future.</p></article><div data-astro-cid-c5a5jkvp=""><p data-astro-cid-c5a5jkvp="">New posts, shipping stories, and nerdy links straight to your inbox.</p><p data-astro-cid-c5a5jkvp="">2× per month, pure signal, zero fluff.</p></div></div>

@@ -1,0 +1,73 @@
+<div id="readability-page-1" class="page"><div itemprop="articleBody">
+    <h3 id="when-an-agent-can-explain-anything-should-we-keep-writing-docs-for-humans">When an agent can explain anything, should we keep writing docs for humans?</h3>
+
+<p><img src="https://www.dbreunig.com/img/resized/textbooks.jpg" alt="" width="1600" height="937" decoding="async"></p>
+
+<p>A few weeks ago <a href="https://x.com/dbreunig/status/2052099660454776981">I posted</a>, “No one wanted to write documentation, but everyone is writing skills.”</p>
+
+<p><a href="https://support.claude.com/en/articles/12512176-what-are-skills">Anthropic describes Skills</a> as, “folders of instructions, scripts, and resources that [an agent] loads dynamically to improve performance on specialized tasks.” At first blush this sounds more complex than it is; in reality skills are stupidly simple. ~95% of the time they’re just Markdown, one file or a few, organized in folders that allow for progressive disclosure.</p>
+
+<p>You know, kinda like docs.</p>
+
+<hr>
+
+<h3 id="why-do-people-write-skills-but-not-docs">Why do people write skills, but not docs?</h3>
+
+<p>So why are people happily <a href="https://www.skills.sh">churning out skills</a> after resisting doc writing for <em>decades</em>? I think there are a few reasons:</p>
+
+<ol>
+  <li><strong>The agent does most of the work.</strong> Most skills are written by pointing an agent at a codebase, reference materials, or a chat session. Sometimes we don’t even read these files! A quick gloss over the summary is <em>fine</em> if it’s just for you.</li>
+  <li><strong>You can iterate as you use it.</strong> The first draft of the skill will almost certainly be rough, but as you use it you can add hot fixes to correct poor instructions. Ask your agent to edit it in place.</li>
+  <li><strong>A skill is immediately valuable.</strong> You might slave over docs to create an artifact that people <em>might</em> read, eventually. Maybe. Skills, on the other hand, deliver value the next session you need them.</li>
+  <li><strong>A skill doesn’t have to be aggressively edited.</strong> At least at first. But when writing docs, editing and making sure your words effectively communicate is often a major blocker. Agents are more forgiving.</li>
+</ol>
+
+<p>To be clear: there are <em>badly</em> written skills that unnecessarily <a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">bloat and poison your context</a>. But on the whole, writing skills is much easier than writing documentation. And better yet: skills double as documentation.</p>
+
+<p>This latter point reminds me of a comment <a href="https://simonwillison.net/2025/May/25/claude-4-system-prompt/">Simon Willison made</a>: “system prompts act as a sort of unofficial manual for how best to use [AI] tools.” Skills, which function as sort of a 3rd party system prompt, share this quality. Crack open a library or product’s skill and you’re often reading documentation that’s <em>better</em> than their website.</p>
+
+<hr>
+
+<h3 id="do-we-need-docs-that-are-just-for-humans">Do we need docs that are just for humans?</h3>
+
+<p>If skills are great docs, is there still a need to write docs specifically for <em>humans</em> to read? If so, <em>what is the job of human-centric docs</em>?</p>
+
+<p>I thought about this question a lot over the last few months, while sketching out <a href="https://dspy.ai/getting-started/program-dont-prompt/">new docs for DSPy</a>. After many conversations, I arrived at the following:</p>
+
+<ol>
+  <li><strong>Build mental models, not a reference.</strong> Humans don’t require exhaustive documentation, they require <em>mental models</em>. Agents can find the details.</li>
+  <li><strong>Teach the art of the possible.</strong> We need to arm them with an understanding of what a tool enables. Help them ask better questions and write better instructions.</li>
+  <li><strong>Explain the why.</strong> Readers who understand a tool’s intent can reason beyond the obvious.</li>
+  <li><strong>Detail the design decisions.</strong> What did the tool deliberately choose <em>not</em> to do or include? Great docs always shared this. It remains valuable.</li>
+  <li><strong>Don’t optimize for completeness.</strong> This will be the hardest for most devs, who are excited to talk about the nuances. But only introduce what you need to build an effective mental model and trust the agent to facilitate the rest.</li>
+</ol>
+
+<p><em>The goal is to prepare your audience to prompt an agent effectively.</em></p>
+
+<hr>
+
+<h3 id="scaffold-docs-a-skill-for-writing-human-centric-docs"><a href="https://github.com/dbreunig/scaffold-docs-skill"><code>scaffold-docs</code></a>: A skill for writing human-centric docs</h3>
+
+<p>As we iterated on the new <a href="https://dspy.ai/getting-started/program-dont-prompt/">DSPy docs</a>, I also iterated on a skill for writing human-centric docs. It’s called <a href="https://github.com/dbreunig/scaffold-docs-skill"><code>scaffold-docs</code></a>, and <a href="https://github.com/dbreunig/scaffold-docs-skill">you can get it here</a>.</p>
+
+<p><code>scaffold-docs</code> is different than most documentation writing skills. To start, it is iterative and collaborative. At multiple points throughout the process, you will be prompted to review a markdown artifact and make edits and tweaks.</p>
+
+<p><code>scaffold-docs</code> is opinionated about organization, and rigidly adheres to a three-tier structure:</p>
+
+<ol>
+  <li><strong>Getting Started:</strong> a narrative tutorial covering a single representative use case</li>
+  <li><strong>Diving Deeper:</strong> one file per topic, organized around intent and design decisions</li>
+  <li><strong>Reference:</strong> per-module API spec, lookup-oriented</li>
+</ol>
+
+<p>Each section is built in passes: structure first, then headers and topic sentences, then full prose (a technique I shamelessly cribbed from <a href="https://mattpalmer.io">Matt Palmer</a>). The agent pauses for your review between passes and does not advance until you approve.</p>
+
+<p><code>scaffold-docs</code> also prescribes style rules. The goal is to be clear, but not dry. Importantly, these rules have also been applied to the skill files themselves. During my initial search of skills, too often I’d find markdown files that didn’t follow the rules they espoused. These examples poison the context.</p>
+
+<p>I encourage everyone to use <code>scaffold-docs</code> for their own projects, or to fork it entirely. It’s good, but not a free ride. Following the completion of the <a href="https://dspy.ai/getting-started/program-dont-prompt/">DSPy docs</a>, I’ve pointed it at several repos I’m familiar with and the output is excellent. You’ll still need to edit and guide the tool with your taste, but I’m happy with where it landed.</p>
+
+<hr>
+
+
+
+  </div></div>

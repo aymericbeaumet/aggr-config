@@ -1,0 +1,347 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/self-hosting-ai-models/hero.png" alt="" loading="lazy"><p>When Anthropic changed Claude Max’s subscription model from a 5-hour usage window to weekly limits, <a href="https://x.com/steipete/status/1949901121998508119">it hit me hard</a>.</p>
+<p><strong>TL;DR:</strong> Claude Code is still king, Qwen 3 Coder + opencode is a strong contender tho. Have high hopes for Gemini cli and Crush.</p>
+<h2 id="claude-code-anonymous">Claude Code Anonymous</h2>
+<p>I’m definitely part of the 1% that has got <a href="https://x.com/steipete/status/1948549916604989706"><strong>a ton</strong></a> of benefit out of their payment model, and I’m not entirely surprised that they’re changing the deal, given the incredible demand for Claude Code. Much like <a href="https://www.reddit.com/r/cursor/comments/1lrc7q8/cursor_pricing_changed_after_12_days/">Cursor’s recent pricing changes</a>, this caused a lot of anger in the community, and it also triggered my curiosity on what other options are out there.</p>
+<p>Just to set the record straight tho: While I often worked 16h-days, I never automated Claude Code and was well within their Terms of Service. My Anthropic bill for July is at <a href="https://x.com/steipete/status/1949908573452193866">~6000$</a>, since I’ve been using their GitHub Review bot, and while some people have been extracting the Max API Token to run on GitHub in the background, I opted to not break the rules and pay up… so Anthropic, we cool?</p>
+<h2 id="evaluating-the-landscape">Evaluating The Landscape</h2>
+<p>So what are the alternatives? I spend some time testing every promising tool I could find. Claude Code is insofar hard to replace, as it’s this genius blend of amazing model &amp; tooling. But the landscape is changing fast! There’s quite a few contenders out there that are worth a look:</p>
+<ul>
+<li>
+<p><a href="https://opencode.ai/">opencode</a>
+In my tests, opencode is the <a href="https://x.com/steipete/status/1951288839814725862">most promising</a> alternative currently. It supports pretty much all providers and gets better every day. It has an optimized prompt for Qwen 3 Coder, and produces good results. I’ll definitely be using this more.</p>
+</li>
+<li>
+<p><a href="https://github.com/charmbracelet/crush">charm crush</a>
+I <em>really</em> want to love this one. It’s gorgeous and fun to use. No surprise, it’s backed by a company that makes fun cli tools and that shows. Crush was released just yesterday and it’s still early. <a href="https://x.com/steipete/status/1951288839814725862">It has problems with the edit tool and sometimes just gets stuck</a>, at least when using it with Qwen 3 Coder. I had to <a href="https://github.com/charmbracelet/crush/pull/414">send a PR</a> to make it work with self hosted inference. There’s a whole team working on it so my hopes are up. If you use Anthropic’s models, I’m sure it performs much better. Personal deal-breaker: The non-working text selection. You can’t click on links either. I use this a lot so it’d really disruptive for my workflow.</p>
+</li>
+<li>
+<p><a href="https://github.com/musistudio/claude-code-router">Claude Code with claude-code-router</a>
+Clever hack that patches Claude Code to use different models. Since CC is optimized for Anthropic’s models, tool use and overall results aren’t as good as with Sonnet or Opus. I didn’t explore this further.</p>
+</li>
+<li>
+<p><a href="https://github.com/cline/cline">Cline</a>
+I used Cline for testing the model, but since it’s a VS Code extension and not a cli, it doesn’t fit my workflow, and generally <a href="https://x.com/steipete/status/1951062013913727332">I haven’t been impressed by it</a>.</p>
+</li>
+<li>
+<p><a href="https://ampcode.com/">amp</a>
+Amp is a very opinionated CLI. It uses Claude Sonnet and has a tool that can invoke OpenAI’s o3. Pricing is forwarded without markup. You can’t use your subscription here, so until now, it wasn’t interesting. It’s hyped, in my tests <a href="https://x.com/steipete/status/1951059420193968581">it didn’t impress me tho</a>. Some people swear by it tho, and it’s certaily more token efficient than Claude Code.</p>
+</li>
+<li>
+<p><a href="https://github.com/google-gemini/gemini-cli">Gemini CLI</a> / <a href="https://github.com/QwenLM/qwen-code">Qwen Code</a>
+I have high hopes for Gemini CLI, and with it, the <a href="https://x.com/steipete/status/1951058436030079159">Qwen Code fork</a>. Gemini is REALLY FAST. I use it to debug tricky issues that need a large context space. Tool calling is still <a href="https://x.com/steipete/status/1942113964231442876">very broken “I’m just a file”</a> and <a href="https://x.com/steipete/status/1951301660950581709">it can be really lazy</a>, however it’s open source and a lot of folks are working on making it better. As for the Quen Code fork, we’ll see if they keep up with the fast-paced development of Gemini or abandon it. I worry it’ll be the latter, at least from looking at the current pace of updates.</p>
+</li>
+</ul>
+<p>There are <a href="https://github.com/RooCodeInc/Roo-Code">so</a> <a href="https://kiro.dev/">many</a> <a href="https://www.augmentcode.com/changelog/auggie-cli">more</a> tools out there in all colors and sizes, and it’s really impressive how important tooling &amp; the right system prompt are (e.g. <a href="https://x.com/steipete/status/1951080437188624564">RooCode drawing diagrams!</a>). IMO that’s Claude Code’s strength: it’s optimized for just one model, and it shows.</p>
+<h2 id="the-infrastructure-journey">The Infrastructure Journey</h2>
+<p>My main goals for this exploration are twofold: I don’t wanna be too dependent on one company &amp; tool (Anthropic), and I want to have a less costy solution for my heavy use.</p>
+<p>A few months ago I bought a Mac Studio with 512GB ram, top of the line, to experiment with models (and because it’s prettyyh). Turns out, back then there just wasn’t anything great out there that could compete with Opus &amp; Gemini. And then came Deepseek, and with that the realization that even the 512GB won’t get me very far.</p>
+<p>Yes, I can run Deepseek Coder V2 at ~25 tok/s or a quantified version of R1 at ~8–15 tok/s, but that’s not fun, and 128k context size is quite a bit of a downgrade compared to Claude’s 200k or Gemini’s 1Mio context. There’s ways to connect multiple Studio’s for more performance and/or less compressed models, but then we’re talking 30k$+ for the setup.</p>
+<p>Hardware is one thing - we also need capable models. These days, chinese labs releases better and more capable models on an almost weekly basis. The release of <a href="https://qwenlm.github.io/blog/qwen3-coder/">Qwen3-Coder-480B</a> got my attention, as it’s the first model that achieves a similar score on SWE-bench as Claude Sonnet 4. Plus, it has a native 256k token context window that can stretch to 1M tokens with YaRN.</p>
+<p>Running this needs some beefy hardware. NVidia’s H200 (Hopper refresh) is currently the best top-of-the-line choice. There’s also B200 (Blackwell), but they are usually even more expensive to rent, and software support is still quite weak.</p>
+<p>I’ve been experimenting with <a href="https://www.primeintellect.ai/">Prime Intellect</a>, <a href="https://vast.ai/">Vast.ai</a> and <a href="https://datacrunch.io/">DataCrunch</a>. Prices for 8xH200 machines range from $5-30/hour, depending on location, availability and if you rent a spot instance or a regular one. Now spot instances are instances that are available temporarily. Whenever data centers need more capacity, they will simply deprovision it and use it again.</p>
+<p>In my tests, if you get a H200 spot instance it’ll likely disappear before you are finished setting it up. They can be incredibly cheap, but it aint fun when you suddenly have to stop working and set up a new rack because of peak demand. We’re talking $6/h for spot instances vs $14/h for a regular 8xH200 rack, at least on DataCrunch, which seems to be one of the cheapest (while still reliable in my tests) options out there. On vast.ai, a similar setup is more like ~$26/h, and double that again if you look at AWS.</p>
+<p>The setup I’m currently running:</p>
+<pre><code data-language="bash">8x H200 (1128GB GPU VRAM)
+176 CPU, 1450GB RAM
+Ubuntu 24.04, CUDA 12.8
+$15/h</code></pre>
+<p>With my rig I could set up the FP8<sup><a href="#user-content-fn-1" id="user-content-fnref-1" data-footnote-ref="" aria-describedby="footnote-label">1</a></sup>-version of Qwen3 Coder 480B with a 400k context. FP8 means smaller float’s, so you lose a few percent accuracy compared to the FP16-version, which is used for the benchmarks. For the Qwen model these losses are insignificant though, and it’s a big performance win, plus squeezing in the FP16 model would leave us with maybe 32k tokens of context.</p>
+<p>Memory is absolutely everything at this scale. The KV cache<sup><a href="#user-content-fn-2" id="user-content-fnref-2" data-footnote-ref="" aria-describedby="footnote-label">2</a></sup> (that’s what stores the conversation context) eats about 4.2MB per token when using FP16 precision. If you want a 1M token context window, you’d need 17-30 H200 GPUs. That’s why I “only” got 400k tokens with 8 GPUs.</p>
+<p>Setup is tricky, but since <a href="https://steipete.me/posts/2025/claude-code-is-my-computer">Claude Code is my computer</a>, it was mostly a bit of prompting and about half an hour waiting until the rig was ready - at least for H200.</p>
+<p>Currently sparse instances of B200 are an incredibly good deal (~$4/h) and they also been extremely stable in my tests. I also understand why: this hardware is so new that you’ll unlikely succeed running models efficiently on it. <a href="https://x.com/steipete/status/1951217528161567193">I spent all day on this and got it partially running</a>, but at no point was it faster than a 8xH200 rig. That will change in a few weeks tho as software catches up.</p>
+<p>Insane if you think about it: The 3 8xB200 rack hardware I rented here is worth about 2 Mio Dollar.</p>
+<h2 id="cost-analysis">Cost Analysis</h2>
+<p>With the technical setup sorted, let’s get to the question everyone’s really asking about: Money.</p>
+<p>Running this setup costs $15/h per hour. That’s ~$360 per day if you run it 24/7, or about $11,000/month. You could recreate the machine every day to save money, but setting this up also takes 30-60 minutes each morning. That would drive cost down to ~$120 a day and ~$2,600 a month (if we just count work days, but who doesn’t work on the weekends?)</p>
+<p>Those numbers probably made you wince. So here’s the honest assessment after burning through all that cash:</p>
+<h2 id="is-it-worth-it">Is It Worth It?</h2>
+<p>Simple answer: No. You can’t stop and easily restart instances, at least not with the hardware provider I tested. Restarted instances will be scheduled, but there’s no guarantee you get a spot in that data center, so it might take days or weeks until your setup reboots.</p>
+<p>What about performance? I naively thought that I’d get better performance with my personal 8xH200 rig, so I ran some tests. And since I couldn’t find a simple benchmark tool, <a href="https://x.com/steipete/status/1951288839814725862">I vibed one in go</a>. Turns out, Alibaba is slightly faster than my best optimized 8xH200 rig. Maybe that changes once someone gets the B200 racks working.</p>
+<p>If you want REAL performance and also a damn good deal, check out <a href="https://www.cerebras.ai/blog/qwen3-coder-480b-is-live-on-cerebras">Cerebra’s new offering</a> that came out today. Cerebras Code Max, 5000 messages per day for $200/month. About 20x faster than Claude 4 Sonnet.</p>
+<p>You can rent the 1 Mio-context version of Qwen 3 Coder on Alibaba for <a href="https://www.alibabacloud.com/help/en/model-studio/models#8e453767fbkka">$1-$6 In / $5-$60 Out per Million tokens</a>, depending how much context you’re using. That’s a lot of tokens you have to burn to make self-hosting cost effective. And yes, a self-hosted runner could be shared, but the economics are still against you, and you quickly run into bottlenecks if more than one person accesses your server concurrently.</p>
+<p>Compare to Anthropic: <a href="https://www.anthropic.com/pricing#api">$15 / $75 for Opus, $3 / $15 for Sonnet</a></p>
+<p>Google’s Gemini 2.5 Pro: <a href="https://ai.google.dev/gemini-api/docs/pricing">$1.25-$2.50 / $10-$15</a></p>
+<p>To give you an idea, on an intense day I need maybe 500 Mio tokens. Calculating the price is difficult tho, since many tokens are cached as you work through a session. The cost for that, when using Opus, would be about $1000; for Sonnet about $200 - that’s similar to running my rig for 8h. Using other models is significantly cheaper.</p>
+<p>Realistically, using Qwen 3 Coder with opencode is now a very usable and cost effective alternative today. And in a month when the subscription nerving takes effect, things will look different again.</p>
+<p>It’s great to know that open-source models are a merely 6-12 month behind the best commercial ones, and that it’s absolutely possible to host them yourself. Commercially tho, paying per token is the economically saner choice.</p>
+<p><strong>Verdict:</strong> Claude Code as terminal + coding, opencode + Qwen on Alibaba (or Cerebas for speeeeeed!) as alternative coding agent for simpler tasks (or when the subscription is used up) and Gemini for debugging.</p>
+<details>
+<summary>🤖 Setup Guide for AI Agents to Self-Hosting Qwen3-Coder-480B on 8xH200</summary>
+<h2 id="complete-setup-instructions-for-self-hosting-qwen3-coder-480b">Complete Setup Instructions for Self-Hosting Qwen3-Coder-480B</h2>
+<p>This guide provides step-by-step instructions for AI agents to set up Qwen3-Coder-480B on Vast.ai with maximum context window.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Vast.ai account with billing configured</li>
+<li>SSH client installed</li>
+<li>2-3 hours for initial setup</li>
+</ul>
+<h3 id="step-1-create-vastai-instance">Step 1: Create Vast.ai Instance</h3>
+<ol>
+<li>
+<p>Go to <a href="https://vast.ai">Vast.ai</a></p>
+</li>
+<li>
+<p>Search for instances with:</p>
+<ul>
+<li>8x H200 GPUs (minimum 4x H200)</li>
+<li>vLLM template pre-installed</li>
+<li>1TB+ disk space</li>
+<li>Good DLPerf score (&gt;80)</li>
+</ul>
+</li>
+<li>
+<p>Select instance and configure:</p>
+<pre><code data-language="plaintext">Docker Image: Leave default vLLM image
+Jupyter: Optional (uses port 8080)
+SSH: Required
+Direct SSH: Recommended</code></pre>
+</li>
+<li>
+<p>Deploy instance and note:</p>
+<ul>
+<li>SSH port and IP</li>
+<li>Instance ID</li>
+<li>Cost per hour</li>
+</ul>
+</li>
+</ol>
+<h3 id="step-2-ssh-configuration">Step 2: SSH Configuration</h3>
+<p>Add to <code>~/.ssh/config</code>:</p>
+<pre><code data-language="bash">Host vastai-qwen
+  HostName [YOUR_IP]
+  Port [YOUR_PORT]
+  User root
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null</code></pre>
+<p>Create SSH tunnel:</p>
+<pre><code data-language="bash">ssh -f -N -L 8000:localhost:8000 vastai-qwen</code></pre>
+<h3 id="step-3-deploy-vllm-with-qwen3-480b">Step 3: Deploy vLLM with Qwen3-480B</h3>
+<p>SSH into instance:</p>
+<pre><code data-language="bash">ssh vastai-qwen</code></pre>
+<p>Check GPU status:</p>
+<pre><code data-language="bash">nvidia-smi</code></pre>
+<p>Create deployment script:</p>
+<pre><code data-language="bash">cat &gt; deploy-qwen3.sh &lt;&lt; 'EOF'
+#!/bin/bash
+
+# Kill any existing vLLM processes
+pkill -f vllm.entrypoints.openai.api_server || true
+
+# Start vLLM with optimal settings
+/venv/main/bin/python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8 \
+  --served-model-name qwen3-coder \
+  --tensor-parallel-size 8[^3] \
+  --enable-expert-parallel \
+  --gpu-memory-utilization 0.95 \
+  --max-model-len 400000 \
+  --rope-scaling '{"rope_type":"yarn","factor":1.53,"original_max_position_embeddings":262144}' \
+  --download-dir /workspace/models \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --trust-remote-code \
+  --dtype float16 \
+  --enable-prefix-caching \
+  --enable-chunked-prefill \
+  --max-num-batched-tokens 32768 \
+  &gt; vllm.log 2&gt;&amp;1 &amp;
+
+echo "vLLM deployment started. Check vllm.log for progress."
+EOF
+
+chmod +x deploy-qwen3.sh
+./deploy-qwen3.sh</code></pre>
+<h3 id="step-4-monitor-model-download">Step 4: Monitor Model Download</h3>
+<p>Model download takes 1-2 hours for 480GB:</p>
+<pre><code data-language="bash"># Watch download progress
+tail -f vllm.log | grep -E "Downloading|Loading|Progress"
+
+# Check disk usage
+watch -n 5 'df -h /workspace'</code></pre>
+<h3 id="step-5-disable-vastai-authentication">Step 5: Disable Vast.ai Authentication</h3>
+<p>Vast.ai uses Caddy proxy with auth. Disable it:</p>
+<pre><code data-language="bash"># Stop Caddy to remove authentication
+supervisorctl stop caddy
+
+# Verify direct access works
+curl http://localhost:8000/v1/models</code></pre>
+<h3 id="step-6-configure-ai-coding-clients">Step 6: Configure AI Coding Clients</h3>
+<h4 id="for-cline-vs-code-extension">For Cline (VS Code Extension):</h4>
+<ol>
+<li>Install Cline extension in VS Code</li>
+<li>Open Cline settings</li>
+<li>Configure:
+<pre><code data-language="plaintext">API Provider: OpenAI Compatible
+Base URL: http://localhost:8000/v1
+API Key: not-needed
+Model: qwen3-coder</code></pre>
+</li>
+</ol>
+<h4 id="for-cursor">For Cursor:</h4>
+<ol>
+<li>Open Cursor settings</li>
+<li>Add custom model:
+<pre><code data-language="json">{
+  "openai_api_key": "not-needed",
+  "openai_api_base": "http://localhost:8000/v1",
+  "model": "qwen3-coder"
+}</code></pre>
+</li>
+</ol>
+<h4 id="for-command-line-qwen-cli">For Command Line (qwen CLI):</h4>
+<p>Create config at <code>~/.config/qwen/config.json</code>:</p>
+<pre><code data-language="json">{
+  "providers": {
+    "qwen3-local": {
+      "type": "openai",
+      "base_url": "http://localhost:8000/v1",
+      "api_key": "not-needed",
+      "models": [{
+        "id": "qwen3-coder",
+        "name": "Qwen3-Coder-480B (400k context)",
+        "context_window": 400000,
+        "max_tokens": 16384
+      }]
+    }
+  },
+  "default_provider": "qwen3-local",
+  "default_model": "qwen3-coder"
+}</code></pre>
+<h3 id="step-7-test-the-deployment">Step 7: Test the Deployment</h3>
+<p>Test with curl:</p>
+<pre><code data-language="bash">curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen3-coder",
+    "messages": [{"role": "user", "content": "Write a Python hello world"}],
+    "max_tokens": 100
+  }'</code></pre>
+<p>Test context window:</p>
+<pre><code data-language="bash"># Create large context test
+python3 &lt;&lt; 'EOF'
+import requests
+import json
+
+# Create a message with ~100k tokens (roughly 400k characters)
+large_context = "The quick brown fox jumps over the lazy dog. " * 10000
+messages = [
+    {"role": "system", "content": large_context},
+    {"role": "user", "content": "Summarize the above in one sentence."}
+]
+
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={"model": "qwen3-coder", "messages": messages, "max_tokens": 50}
+)
+
+print(json.dumps(response.json(), indent=2))
+EOF</code></pre>
+<h3 id="step-8-performance-optimization">Step 8: Performance Optimization</h3>
+<p>Monitor GPU utilization:</p>
+<pre><code data-language="bash"># Real-time GPU monitoring
+watch -n 1 nvidia-smi
+
+# Check vLLM metrics
+curl http://localhost:8000/metrics</code></pre>
+<p>Optimize for your use case:</p>
+<ul>
+<li><strong>For speed</strong>: Reduce max_model_len to 100k-200k</li>
+<li><strong>For context</strong>: Keep at 400k but expect slower responses</li>
+<li><strong>For cost</strong>: Use 4x H200 instead of 8x (limited to 190k context)</li>
+</ul>
+<h3 id="step-9-troubleshooting">Step 9: Troubleshooting</h3>
+<p>Common issues and solutions:</p>
+<h4 id="model-wont-load">Model won’t load</h4>
+<pre><code data-language="bash"># Check available memory
+nvidia-smi
+# Solution: Reduce --gpu-memory-utilization to 0.90</code></pre>
+<h4 id="authentication-errors">Authentication errors</h4>
+<pre><code data-language="bash"># Ensure Caddy is stopped
+supervisorctl status
+supervisorctl stop caddy</code></pre>
+<h4 id="context-too-large-errors">Context too large errors</h4>
+<pre><code data-language="bash"># Reduce max_model_len in deployment script
+# 4x H200: max 190000
+# 8x H200: max 400000</code></pre>
+<h4 id="slow-responses">Slow responses</h4>
+<pre><code data-language="bash"># Check batch settings
+# Reduce --max-num-batched-tokens to 16384
+# Enable streaming in client</code></pre>
+<h3 id="step-10-cost-monitoring">Step 10: Cost Monitoring</h3>
+<p>Track usage and costs:</p>
+<pre><code data-language="bash"># Create usage tracker
+cat &gt; track_usage.py &lt;&lt; 'EOF'
+#!/usr/bin/env python3
+import time
+import datetime
+
+start_time = datetime.datetime.now()
+hourly_rate = 12.40  # Adjust based on your instance
+
+while True:
+    elapsed = datetime.datetime.now() - start_time
+    hours = elapsed.total_seconds() / 3600
+    cost = hours * hourly_rate
+    
+    print(f"\rRunning for: {elapsed} | Cost: ${cost:.2f}", end="")
+    time.sleep(60)
+EOF
+
+chmod +x track_usage.py
+./track_usage.py</code></pre>
+<h3 id="advanced-context-window-tuning">Advanced: Context Window Tuning</h3>
+<p>For different context windows, adjust these parameters:</p>
+<h4 id="100k-context-fastest">100k context (fastest):</h4>
+<pre><code data-language="bash">--max-model-len 100000 \
+--rope-scaling '{"rope_type":"yarn","factor":1.0,"original_max_position_embeddings":262144}'</code></pre>
+<h4 id="256k-context-native">256k context (native):</h4>
+<pre><code data-language="bash">--max-model-len 262144 \
+--rope-scaling '{"rope_type":"yarn","factor":1.0,"original_max_position_embeddings":262144}'</code></pre>
+<h4 id="400k-context-current">400k context (current):</h4>
+<pre><code data-language="bash">--max-model-len 400000 \
+--rope-scaling '{"rope_type":"yarn","factor":1.53,"original_max_position_embeddings":262144}'</code></pre>
+<h4 id="760k-context-maximum-requires-16-h200s">760k context (maximum, requires 16+ H200s):</h4>
+<pre><code data-language="bash">--max-model-len 760000 \
+--rope-scaling '{"rope_type":"yarn","factor":2.9,"original_max_position_embeddings":262144}'</code></pre>
+<h3 id="maintenance">Maintenance</h3>
+<p>Regular maintenance tasks:</p>
+<pre><code data-language="bash"># Check logs for errors
+tail -n 100 vllm.log | grep ERROR
+
+# Monitor disk space
+df -h /workspace
+
+# Restart vLLM if needed
+pkill -f vllm.entrypoints.openai.api_server
+./deploy-qwen3.sh
+
+# Clean old model files
+find /workspace/models -type f -mtime +7 -delete</code></pre>
+<h3 id="security-notes">Security Notes</h3>
+<ol>
+<li><strong>SSH Tunnel</strong>: Always use SSH tunnel, never expose port 8000 directly</li>
+<li><strong>API Key</strong>: Even though “not-needed”, don’t leave blank</li>
+<li><strong>Firewall</strong>: Ensure only SSH port is open on Vast.ai</li>
+<li><strong>Monitoring</strong>: Check access logs regularly</li>
+</ol>
+<h3 id="cost-saving-tips">Cost-Saving Tips</h3>
+<ol>
+<li><strong>Pause when not using</strong>: Vast.ai charges by the minute</li>
+<li><strong>Use 4x H200</strong>: Sufficient for 190k context at half the cost</li>
+<li><strong>Spot instances</strong>: 90% cheaper but risk of termination</li>
+<li><strong>Optimize context</strong>: Most tasks don’t need 400k tokens</li>
+</ol>
+<p>This completes the detailed setup guide for AI agents. The entire process should take 2-3 hours including model download time.</p>
+</details>
+<hr>
+<h2 id="btw-im-organizing-the-first-claude-code-anonymous-meetup-in-london-on-august-18-for-people-who-build-dm-me-if-youre-interested"><strong>Btw:</strong> I’m organizing the first Claude Code Anonymous meetup in London on August 18. For people who build. DM me if you’re interested!</h2>
+<section data-footnotes=""><h2 id="footnote-label">Footnotes</h2>
+<ol>
+<li id="user-content-fn-1">
+<p><strong>FP8/FP16</strong> - Floating-point precision formats. FP16 uses 16 bits per number (higher accuracy), FP8 uses 8 bits (lower memory usage, slightly less accurate). <a href="#user-content-fnref-1" data-footnote-backref="" aria-label="Back to reference 1">↩</a></p>
+</li>
+<li id="user-content-fn-2">
+<p><strong>KV Cache</strong> - Key-Value cache stores the model’s “memory” of previous tokens in the conversation, enabling efficient context handling without recomputing everything. <a href="#user-content-fnref-2" data-footnote-backref="" aria-label="Back to reference 2">↩</a></p>
+</li>
+</ol>
+</section></article></div>

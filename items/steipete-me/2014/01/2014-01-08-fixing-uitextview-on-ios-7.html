@@ -1,0 +1,18 @@
+<div id="readability-page-1" class="page"><article id="article"><p><code>UITextView</code> on iOS 7 is <a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UITextView_Class/Reference/UITextView.html#//apple_ref/occ/instp/UITextView/linkTextAttributes">a lot more powerful</a>, since Apple switched over from using <a href="http://www.cocoanetics.com/2012/12/uitextview-caught-with-trousers-down/">WebKit</a> to <a href="https://developer.apple.com/library/ios/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/CustomTextProcessing/CustomTextProcessing.html">TextKit</a> for rendering. It’s also very much a 1.0, and has some <a href="http://inessential.com/2014/01/07/uitextview_scroll-to-typing_bug">rather terrible</a> <a href="https://devforums.apple.com/message/918284#918284">bugs</a>. In fact, they go so far that people started writing <a href="https://github.com/jaredsinclair/JTSTextView">replacements for the whole scrolling logic</a>.</p>
+<p>Of course, people reported these issues in <a href="http://pspdfkit.com">PSPDFKit</a> as well, so I had to find a workaround. I’m using <code>contentInset</code> when the keyboard (iPhone) or another view (iPhone/iPad) goes up, which is pretty much completely ignored by <code>UITextView</code> in iOS 7. This is frustrating mainly because it works perfectly in iOS 6.</p>
+<p>At first, my solution was based on a category, but after discovering more and more needed hooks, I moved over to a subclass that <a href="https://github.com/steipete/PSPDFTextView/blob/ee9ce04ad04217efe0bc84d67f3895a34252d37c/PSPDFTextView/PSPDFTextView.m#L148-164">automatically forwards all delegate methods</a>. This has the advantage of more shared code, and we might be able to remove all those horrible hacks once iOS 8 comes out. I certainly hope so, and will write a few more radars.</p>
+<p>So, what’s fixed in <code>PSPDFTextView</code>?</p>
+<ul>
+<li>When adding a new line, <code>UITextView</code> will now properly scroll down. Previously, you needed to add at least one character for this to happen.</li>
+<li>Scrolling to the caret position now considers <code>contentInset</code>. <code>UITextView</code> completely ignored this.</li>
+<li>Typing will also consider <code>contentInset</code> and will update the scroll position accordingly.</li>
+<li>Pasted text will scroll to the caret position.</li>
+</ul>
+<p><img src="https://github.com/steipete/PSPDFTextView/raw/master/Example/broken.gif" alt="UITextView" loading="lazy"></p>
+<p><img src="https://github.com/steipete/PSPDFTextView/raw/master/Example/fixed.gif" alt="PSPDFTextView" loading="lazy"></p>
+<p>To enable these fixes, simply use <code>PSPDFTextView</code> instead of <code>UITextView</code>:</p>
+<p><a href="https://github.com/steipete/PSPDFTextView">https://github.com/steipete/PSPDFTextView</a></p>
+<p>This is working quite well for my use case, but there surely are edge cases where this won’t be enough (like when using rich text).
+I also tried using the new <code>textContainerInset</code> but this didn’t work as intended and didn’t solve my scrolling problems.</p>
+<p>I have to give credit to countless people who searched for the same solution — this very much was a community-oriented fix. Sadly, this doesn’t seem to be a priority for Apple, since it’s still broken in iOS 7.1b3.</p>
+<p>Please fork the repo and send a pull request if you have any ideas on how to simplify the code or find an even better workaround.</p></article></div>

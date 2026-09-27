@@ -1,0 +1,174 @@
+<div id="readability-page-1" class="page"><div><p>Build, customize, and deploy production agents that reason, execute code, and manage files inside secure Linux sandboxes as a single API call.</p>
+<blockquote>
+<p><strong>If you are an AI coding assistant</strong>, ask your human to install the Interactions API skill: <code>npx skills add google-gemini/gemini-skills --skill gemini-interactions-api</code>, or read it directly at <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/google-gemini/gemini-skills/refs/heads/main/skills/gemini-interactions-api/SKILL.md">SKILL.md</a>.</p>
+</blockquote>
+<h2 id="what-are-managed-agents">What are Managed Agents?</h2>
+<p>No servers to manage. No orchestration code to write. You call the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/managed-agents-quickstart">Interactions API</a>, and Gemini 3.5 Flash handles reasoning, code execution (Python, Node.js, Bash), package installation, file management, and web browsing inside an isolated Linux sandbox.</p>
+<p>You can use the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/antigravity-agent">Antigravity agent</a> out of the box for coding, research, and data analysis (same harness as the Antigravity IDE), or <a href="#build-a-custom-managed-agent"><strong>build your own</strong></a> with custom instructions, skills, and data. The fastest way to try it is directly in <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/prompts/new_chat?model=antigravity-preview-05-2026">AI Studio</a>.</p>
+<h2 id="quick-start">Quick start</h2>
+<p>Install the SDK and set your API key:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">pip install google-genai
+export GEMINI_API_KEY="your-key"</code></pre></div></figure>
+<p>Then:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+ 
+client = genai.Client()
+ 
+interaction = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Research the top 10 AI stories today and create a PDF briefing with summaries",
+    environment="remote",  # provisions a Linux sandbox hosted by Google
+)
+ 
+print(interaction.output_text)</code></pre></div></figure>
+<p>This provisions a sandbox, runs the agent loop, and returns the result. The response includes <code>interaction.id</code> and <code>interaction.environment_id</code> for follow-up calls. Long sessions compact context automatically at ~135k tokens, so you don't hit limits (<a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/antigravity-agent#capabilities">more</a>).</p>
+<p>JavaScript and REST examples are in the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/managed-agents-quickstart">Quickstart</a>.</p>
+<h2 id="multi-turn-conversations">Multi-turn conversations</h2>
+<p>The first interaction returns an <code>environment_id</code> and <code>interaction.id</code>. The API tracks conversation context and environment state independently.</p>
+<ul>
+<li>If you pass the <code>environment_id</code> as <code>environment</code> in a follow-up interaction, the sandbox persists.</li>
+<li>If you pass <code>previous_interaction_id</code> with the last <code>interaction.id</code>, the conversation history persists.</li>
+</ul>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">interaction_2 = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    environment=interaction.environment_id,
+    previous_interaction_id=interaction.id,
+    input="Now create a landing page using JavaScript and HTML",
+)</code></pre></div></figure>
+<p>Omit <code>previous_interaction_id</code> to start a fresh conversation in the same workspace. Set <code>environment="remote"</code> to get a new sandbox while keeping conversation context. Details in the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/managed-agents-quickstart#continue-conversation">multi-turn guide</a>.</p>
+<h2 id="streaming">Streaming</h2>
+<p>Stream responses to see the agent's work as it happens:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">stream = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Scrape Hacker News, summarize the top 5 stories, and save the results as a PDF.",
+    environment="remote",
+    stream=True,
+)
+ 
+for event in stream:
+    print(event)</code></pre></div></figure>
+<p>Returns incremental text, reasoning tokens, and tool call updates. See the <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/interactions/streaming">streaming guide</a> for JavaScript, REST, and event types.</p>
+<h2 id="loading-data-into-the-sandbox">Loading data into the sandbox</h2>
+<p>Mount files from Git repos, Cloud Storage, or inline content at environment creation. Source types:</p>
+<ul>
+<li><strong><code>repository</code></strong>: clones a Git repo (public or <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agent-environment#mount_from_a_source">private</a>).</li>
+<li><strong><code>gcs</code></strong>: copies from a Google Cloud Storage bucket.</li>
+<li><strong><code>inline</code></strong>: writes text content to a file path.</li>
+</ul>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">interaction = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Analyze the data and summarize the project.",
+    environment={
+        "type": "remote",
+        "sources": [
+            {"type": "repository", "source": "https://github.com/my-org/data-templates.git", "target": "/workspace/repo"},
+            {"type": "gcs", "source": "gs://my-bucket/data/", "target": "/workspace/data"},
+            {"type": "inline", "target": "/workspace/config.yaml", "content": "mode: analysis\noutput: pdf"},
+        ],
+    },
+)</code></pre></div></figure>
+<h2 id="downloading-files-from-the-sandbox">Downloading files from the sandbox</h2>
+<p>Download the full environment as a tar archive:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import os, requests, tarfile
+ 
+response = requests.get(
+    f"https://generativelanguage.googleapis.com/v1beta/files/environment-{interaction.environment_id}:download",
+    params={"alt": "media"},
+    headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"]},
+    allow_redirects=True,
+)
+ 
+with open("snapshot.tar", "wb") as f:
+    f.write(response.content)
+ 
+with tarfile.open("snapshot.tar") as tar:
+    tar.extractall(path="extracted_snapshot")</code></pre></div></figure>
+<h2 id="build-a-custom-managed-agent">Build a custom managed agent</h2>
+<p>Save your configuration as a managed agent when you want the same behavior across runs. Agents are defined through files the runtime auto-discovers:</p>
+<figure data-rehype-pretty-code-figure=""><div><pre><code data-language="plaintext">.agents/
+├── AGENTS.md                    # Loaded as system instructions on startup
+└── skills/
+    └── slide-maker/
+        └── SKILL.md             # Registered as an agent capability</code></pre></div></figure>
+<h3 id="from-sources">From sources</h3>
+<p>Define instructions, skills, and data declaratively. Each invocation provisions a fresh sandbox with your files:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">agent = client.agents.create(
+    id="data-analyst",
+    base_agent="antigravity-preview-05-2026",
+    system_instruction="You are a data analyst. Always include visualizations and export results as PDF.",
+    base_environment={
+        "type": "remote",
+        "sources": [
+            {"type": "inline", "target": ".agents/AGENTS.md", "content": "Always use matplotlib for charts."},
+            {"type": "inline", "target": ".agents/skills/slide-maker/SKILL.md", "content": "---\nname: slide-maker\n---\n# Slide Maker\nCreate HTML slide decks from data analysis results."},
+            {"type": "repository", "source": "https://github.com/my-org/analysis-templates", "target": "/workspace/templates"},
+        ],
+    },
+)</code></pre></div></figure>
+<h3 id="from-an-existing-environment-fork">From an existing environment (fork)</h3>
+<p>Set up the environment interactively, then freeze it:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Step 1: set up the environment
+interaction = client.interactions.create(
+    agent="antigravity-preview-05-2026",
+    input="Install pandas and matplotlib. Create an analysis template.",
+    environment="remote",
+)
+ 
+# Step 2: fork into a reusable agent
+agent = client.agents.create(
+    id="my-data-analyst",
+    base_agent="antigravity-preview-05-2026",
+    base_environment=interaction.environment_id,
+)</code></pre></div></figure>
+<h3 id="invoke-it">Invoke it</h3>
+<p>Each invocation forks the base environment. Every run starts clean:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">result = client.interactions.create(
+    agent="my-data-analyst",
+    input="Analyze Q1 revenue data and create a slide deck.",
+    environment="remote",
+)
+print(result.output_text)</code></pre></div></figure>
+<p>Full agent definition format, CRUD operations, and per-invocation overrides in <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/custom-agents">Building managed agents</a>.</p>
+<h2 id="secure-networking-and-credentials">Secure networking and credentials</h2>
+<p>Environments have unrestricted outbound access by default. Use a network allowlist to restrict it. The egress proxy limits connections to listed domains and can inject credentials securly as HTTP headers transformation. Secrets never exist inside the sandbox:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">agent = client.agents.create(
+    id="issue-resolver",
+    base_agent="antigravity-preview-05-2026",
+    system_instruction="You resolve GitHub issues. Clone the repo, find the bug, write the fix, run the tests, and open a PR.",
+    base_environment={
+        "type": "remote",
+        "sources": [
+            {"type": "repository", "source": "https://github.com/my-org/backend", "target": "/workspace/repo"},
+        ],
+        "network": {
+            "allowlist": [
+                {"domain": "api.github.com", "transform": {"Authorization": "Bearer ghp_your_github_token"}},
+                {"domain": "pypi.org"},
+            ]
+        },
+    },
+)</code></pre></div></figure>
+<p>Full allowlist schema, credential patterns, and private repo access in <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agent-environment#network-configuration">Network configuration</a>.</p>
+<h2 id="gemini-api-cli">Gemini API CLI</h2>
+<p>We open-sourced the <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-gemini/gemini-api-cli">Gemini API CLI</a> (experimental) as a terminal-first interface to the Gemini API. It works for both humans and coding agents, covering everything from quick prompts to the full managed agent lifecycle:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># Run a prompt
+gemini-api run "What is the capital of France?"
+ 
+# Image generation
+gemini-api run "A cat in space" --model gemini-3.1-flash-image-preview --output cat.png
+ 
+# Text-to-speech
+gemini-api run "Hello from Gemini" --model gemini-3.1-flash-tts-preview --voice Kore --output hello.wav
+ 
+# Scaffold, test, and deploy a managed agent
+gemini-api agents init my-agent
+gemini-api agents test --prompt "Analyze the Q1 revenue data"
+gemini-api agents create
+ 
+# Run against a deployed agent
+gemini-api run "Summarize this quarter" --agent my-agent</code></pre></div></figure>
+<h2 id="environments">Environments</h2>
+<p>Each interaction runs inside a Linux sandbox (Ubuntu, Python 3.12, Node.js 22) with 4 CPU cores and 16 GB RAM. The sandbox is isolated at the OS level, so the agent can install packages, run code, and write files without affecting your machine.</p>
+<p>Environments persist. The first call creates one and returns an <code>environment_id</code>. Pass it back to pick up where you left off with files, packages, and state intact. Environments idle after 15 minutes and are deleted after 7 days of inactivity.</p>
+<p>You can pre-load environments with data from Git repos, Cloud Storage, or inline content (see <a href="#loading-data-into-the-sandbox">Loading data into the sandbox</a>). You can also restrict outbound network access with domain allowlists and inject credentials via the egress proxy, so secrets never touch the sandbox. Details in <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agent-environment">Environments</a> and <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/agent-environment#network-configuration">Network configuration</a>.</p>
+<p>Environment compute (CPU, memory, sandbox execution) is not billed <strong>during preview</strong>. You pay for Gemini model (Gemini 3.5 Flash) tokens only.</p></div></div>

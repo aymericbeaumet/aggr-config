@@ -1,0 +1,45 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2020/swift-trunk/swift-trunk.png" alt="" loading="lazy"><p>I recently started the adventure of building PSPDFKit with the <a href="https://swift.org/download/">Swift trunk development snapshot</a>. I did this both in order to verify a fix for the <a href="https://steipete.com/posts/couldnt-irgen-expression/">SR-12933 LLDB debugging issue</a> and to be better prepared for the Xcode 12 release at WWDC.</p>
+<p>I’m documenting my adventure with the June 10 Swift trunk toolchain — may it help Google warriors, as some of the errors didn’t yield any useful results. Let’s skip the download-install-select-in-Xcode part and go straight to the issues.</p>
+<h2 id="libclang_rtprofile_iossima-not-found">libclang_rt.profile_iossim.a Not Found</h2>
+<p>You might see the following error early on:</p>
+<pre><code data-language="plaintext">File not found: /Library/Developer/Toolchains/swift-DEVELOPMENT-SNAPSHOT-2020-06-09-a.xctoolchain/usr/lib/clang/10.0.0/lib/darwin/libclang_rt.profile_iossim.a</code></pre>
+<p>Then you might run into a variant of <a href="https://bugs.swift.org/browse/SR-12001">SR-12001</a> and need to copy some files into the toolchain that are not shipped with it by default:</p>
+<pre><code data-language="plaintext">sudo cp `xcode-select -p`/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin/libclang_rt.*.a /Library/Developer/Toolchains/swift-DEVELOPMENT-SNAPSHOT-2020-06-09-a.xctoolchain/usr/lib/clang/10.0.0/lib/darwin</code></pre>
+<h2 id="undefined-symbol-_isosversionatleast">Undefined Symbol: _isOSVersionAtLeast</h2>
+<p><img src="https://steipete.me/assets/img/2020/swift-trunk/isOSVersion.png" alt="" loading="lazy"></p>
+<p>Initially I missed a few files (I only copied <code>libclang_rt.profile_iossim.a</code>) and then got yet a different error: <code>Undefined symbols for architecture arm64: "___isOSVersionAtLeast"</code>.</p>
+<p>Run the above <code>cp</code> command to fix.</p>
+<h2 id="uncaught-exception-of-type-tbbcaptured_exception">Uncaught Exception of Type tbb::captured_exception</h2>
+<p>Next up, the linker crashed:</p>
+<pre><code data-language="plaintext">BB Warning: Exact exception propagation is requested by application but the linked library is built without support for it
+
+libc++abi.dylib: terminating with uncaught exception of type tbb::captured_exception: Unidentified exception</code></pre>
+<p>This turned out to be <a href="https://steipete.me/posts/zld-a-faster-linker/">zld</a> — removing the <code>xcconfig</code> setting solved this. This will be fixed eventually, as Apple’s ld is open source and zld is just a faster fork. I <a href="https://forums.swift.org/t/swift-toolchain-fails-to-compile-with-tbb-unidentified-exception/37434">documented this in the Swift Forum</a> for others to find.</p>
+<h2 id="archive-member-with-length-is-not-mach-o-or-llvm-bitcode">Archive Member with Length Is Not Mach-O or LLVM Bitcode</h2>
+<p>This one took me a while! We are using different configurations in PSPDFKit, so some lower-level parts compile with our release configuration and some compile with debug (you still want a fast PDF render experience when working on the UI).</p>
+<p><img src="https://steipete.me/assets/img/2020/swift-trunk/not-macho.png" alt="" loading="lazy"></p>
+<p>This seems to be a bug; there’s no reason this should fail, as it’s perfectly OK to compile different objects with different optimizer settings. Changing this to be the same settings everywhere did work around the issue.</p>
+<h2 id="missing-apinotes">Missing APINotes</h2>
+<p>Apple uses <a href="https://pspdfkit.com/blog/2018/first-class-swift-api-for-objective-c-frameworks/">API notes</a> to make the mapping from Objective-C to Swift easier. They are currently to a degree tightly coupled with Clang itself, and as the <a href="https://pspdfkit.com/blog/2020/supporting-pointer-interactions/"><code>UIPointerInteraction</code></a> API is very new, these notes haven’t been upstreamed yet — so we get a different, non-optimized API in Swift when compiling with trunk.</p>
+<p><img src="https://steipete.me/assets/img/2020/swift-trunk/gesture.png" alt="" loading="lazy"></p>
+<p>To conditionally disable Swift code, I used an <code>#ifdef</code> and set the following in our <code>xcconfig</code> file:</p>
+<pre><code data-language="plaintext">OTHER_SWIFT_FLAGS = -D SWIFT_TRUNK_TOOLCHAIN_WORKAROUND</code></pre>
+<p>This still disables the code and isn’t a real fix, but I assume Apple will eventually update trunk to include these API notes.</p>
+<h2 id="libltodylib-could-not-be-loaded">libLTO.dylib Could Not Be Loaded</h2>
+<p>If you get an <code>libLTO.dylib could not be loaded</code> error, you might have a setup where Link Time Optimization is enabled in at least one of your projects. I fixed this by making sure LTO is off everywhere:</p>
+<pre><code data-language="plaintext">LLVM_LTO = NO</code></pre>
+<h2 id="xcode-and-xcode-build-system-crash">Xcode and Xcode Build System Crash</h2>
+<p>To be honest, I’m just adding this for the sake of completeness. This happens at random times and isn’t really related to Swift trunk. A restart fixes it.</p>
+<p><img src="https://steipete.me/assets/img/2020/swift-trunk/xcodecrash.png" alt="" loading="lazy"></p>
+<p>Build system crashes are especially fun because Xcode doesn’t crash, but you still have to quit and restart it manually. One could make the argument that it would be more convenient if Xcode would simply crash as well.</p>
+<p><img src="https://steipete.me/assets/img/2020/swift-trunk/buildsystem.png" alt="" loading="lazy"></p>
+<h2 id="swift-compiler-crash-impossible-sildeclref">Swift Compiler Crash: Impossible SILDeclRef</h2>
+<p>Compiling for iOS now worked, but Catalyst crashed with the following error: <code>impossible SILDeclRef loc UNREACHABLE executed at /Users/buildnode/jenkins/workspace/oss-swift-package-osx/swift/lib/SIL/IR/SILDeclRef.cpp:155!</code>.</p>
+<p><img src="https://steipete.me/assets/img/2020/swift-trunk/swift-catalyst-crash.png" alt="" loading="lazy"></p>
+<p>Turns out this is already known and happens any time you run this compiler with a <code>Swift.swiftinterface</code> from the SDK. It will be <a href="https://twitter.com/slava_pestov/status/1271150466404155399">fixed in a few days</a>.</p>
+<h2 id="catalyst-warning">Catalyst Warning</h2>
+<p>We expose some internal Swift classes to Objective-C that are only available in newer versions of the OS. Pointer library methods have been added to Catalyst, and we declare this availability for both iOS and Catalyst, but the trunk version doesn’t know about the <code>maccatalyst</code> platform.</p>
+<p><img src="https://steipete.me/assets/img/2020/swift-trunk/catalyst-objc.png" alt="" loading="lazy"></p>
+<p>The only way to get rid of this error seems to be to remove the define, but since this is only a warning, I skipped that.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Using the <a href="https://swift.org/download/">Swift trunk toolchain</a> is a rocky road, and I can only recommend this if you feel adventurous or really want to help Apple verify a bug fix. However, I appreciate that Apple provides prebuilt packages, and I’m sure the issues above will be ironed out eventually.</p></article></div>

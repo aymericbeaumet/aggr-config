@@ -1,0 +1,146 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/applescript-cli-macos-complete-guide/header.png" alt="" loading="lazy"><p><em>Or: How I Learned to Stop Fighting TCC and Embrace the Info.plist</em></p>
+<p><strong>TL;DR:</strong> If you’re building a macOS CLI that uses AppleScript, you need to embed an Info.plist into your binary, sign it with proper entitlements, and optionally use the undocumented <code>responsibility_spawnattrs_setdisclaim</code> API to avoid permission dialogs that blames the hosting app.</p>
+<p>This all started with Cursor being annoying. You know how it goes - you’re in the zone, AI is looping through its tasks, and then bam! The inline terminal opens something blocking (file watcher, dev server, …) and the whole loop stops. I have to manually click around to get things moving again.</p>
+<p>My solution? Build an MCP that controls an external terminal. That way, even when commands block, Cursor’s loop keeps running. I called it <a href="https://github.com/steipete/Terminator">Terminator</a> - ‘cause who doesn’t love a good terminal/Terminator pun?</p>
+<h2 id="the-evolution-of-a-hack">The Evolution of a Hack</h2>
+<p>My first attempt was <a href="https://github.com/steipete/Terminator/blob/main/scripts/terminator.scpt">pure AppleScript</a> - simple, direct terminal automation. It worked! Well, sort of… The script needed window focus to function, which meant it would constantly steal focus while Cursor was running.</p>
+<p>The focus-stealing got so bad that at one point, the AI started writing its own AppleScript to detect which app was in the foreground. When it discovered Chrome was blocking its terminal access, it simply… killed all my Chrome windows. That was <a href="https://steipete.me/posts/2025/when-ai-meets-madness-peters-16-hour-days#the-gemini-chrome-massacre">the first time I apologized to an AI agent</a>. Clearly, I needed a better solution.</p>
+<p>That’s when I fell down the rabbit hole. Getting AppleScript to work in a CLI tool turned out to be a maze of undocumented APIs, security permissions, and macOS quirks that nobody warns you about.</p>
+<p>Sure, I could have used Apple’s <a href="https://developer.apple.com/documentation/uniformtypeidentifiers/uttype-swift.struct/osascript"><code>osascript</code></a> command and called it a day. But where’s the fun in that? Plus, AppKit’s AppleScript API gives you much better error handling - if you can get it working.</p>
+<h2 id="plot-twist-enter-claude-code">Plot Twist: Enter Claude Code</h2>
+<p>Here’s the thing - I never actually finished Terminator. Why? Because <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> came along and made it obsolete. As a massive Claude Code fanboy (seriously, <a href="https://steipete.me/posts/2025/claude-code-is-my-computer/">check</a> <a href="https://steipete.me/posts/2025/commanding-your-claude-code-army/">out</a> <a href="https://steipete.me/posts/command-your-claude-code-army-reloaded/">my</a> <a href="https://steipete.me/posts/2025/vibe-meter-2-claude-code-usage-calculation/">posts</a>), I ditched Cursor. Claude Code doesn’t have these inline terminal blocking issues.</p>
+<p>I’m writing this here since future you or me will stumble into the same issue eventually, and hopefully you can just drag this URL into Claude Code and it’ll fix everything up. Let Terminator lurk unfinished in my GitHub.</p>
+<h2 id="the-problem-terminal-gets-all-the-blame">The Problem: Terminal Gets All the Blame</h2>
+<p>Here’s what happens when you naively use <code>NSAppleScript</code> in a CLI tool:</p>
+<pre><code data-language="swift">let script = NSAppleScript(source: "tell application \"Finder\" to activate")
+script?.executeAndReturnError(nil)  // Spoiler: This won't work as expected</code></pre>
+<p>You’ll either get:</p>
+<ol>
+<li>Silent failure (no error, no result, no nothing)</li>
+<li>A permission dialog that says “Terminal wants to control Finder/Cursor” (not your cli)</li>
+<li>Error -1750 (errOSASystemError) with zero helpful context</li>
+</ol>
+<p>The root cause? macOS’s security model requires proper app identification through bundle IDs, code signing, and entitlements. Without these, your CLI tool is just an anonymous process hiding behind Terminal.</p>
+<h2 id="the-solution-give-your-cli-an-identity">The Solution: Give Your CLI an Identity</h2>
+<h3 id="step-1-the-magic-infoplist">Step 1: The Magic Info.plist</h3>
+<p>First revelation: CLI tools can have Info.plist files! Here’s the minimal version that makes everything work:</p>
+<pre><code data-language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;CFBundleIdentifier&lt;/key&gt;
+    &lt;string&gt;com.yourcompany.yourcli&lt;/string&gt;
+    &lt;key&gt;CFBundleName&lt;/key&gt;
+    &lt;string&gt;YourCLI&lt;/string&gt;
+    &lt;key&gt;CFBundleVersion&lt;/key&gt;
+    &lt;string&gt;1.0.0&lt;/string&gt;
+    &lt;key&gt;NSAppleEventsUsageDescription&lt;/key&gt;
+    &lt;string&gt;YourCLI needs to send AppleEvents to control other applications for automation.&lt;/string&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+<p>That <code>NSAppleEventsUsageDescription</code> is crucial - it’s what users see in the permission dialog. Make it clear and specific.</p>
+<h3 id="step-2-embedding-the-infoplist-the-secret-sauce">Step 2: Embedding the Info.plist (The Secret Sauce)</h3>
+<p>Here’s where it gets interesting. You need to embed this Info.plist into your binary’s <code>__TEXT/__info_plist</code> section. For Swift Package Manager:</p>
+<pre><code data-language="swift">// Package.swift
+.executableTarget(
+    name: "yourcli",
+    dependencies: [/* ... */],
+    linkerSettings: [
+        .unsafeFlags([
+            "-Xlinker", "-sectcreate",
+            "-Xlinker", "__TEXT",
+            "-Xlinker", "__info_plist",
+            "-Xlinker", "Sources/Resources/Info.plist"
+        ])
+    ]
+)</code></pre>
+<p>This creates a special section in your binary that macOS reads to identify your app. You can verify it worked:</p>
+<pre><code data-language="bash">otool -s __TEXT __info_plist yourcli | xxd -r -p | plutil -p -</code></pre>
+<h3 id="step-3-entitlements-for-the-paranoid-os">Step 3: Entitlements for the Paranoid OS</h3>
+<p>Create an entitlements file - yes, CLI tools can have these too:</p>
+<pre><code data-language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;com.apple.security.automation.apple-events&lt;/key&gt;
+    &lt;true/&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+<h3 id="step-4-code-signing-the-final-boss">Step 4: Code Signing (The Final Boss)</h3>
+<p>Here’s my battle-tested signing script that handles both development and production:</p>
+<pre><code data-language="bash">#!/bin/bash
+set -e
+
+BINARY_PATH=".build/release/yourcli"
+
+# Check for Developer ID certificate
+if security find-identity -p codesigning -v | grep -q "Developer ID Application"; then
+    # Production signing
+    SIGNING_IDENTITY=$(security find-identity -p codesigning -v | \
+        grep "Developer ID Application" | head -1 | awk '{print $2}')
+    
+    codesign --force \
+        --sign "$SIGNING_IDENTITY" \
+        --options runtime \
+        --entitlements "yourcli.entitlements" \
+        --identifier "com.yourcompany.yourcli" \
+        --timestamp \
+        "$BINARY_PATH"
+else
+    # Ad-hoc signing for development
+    codesign --force \
+        --sign - \
+        --entitlements "yourcli.entitlements" \
+        --identifier "com.yourcompany.yourcli" \
+        "$BINARY_PATH"
+fi</code></pre>
+<h2 id="the-advanced-stuff-escaping-cursors-shadow">The Advanced Stuff: Escaping Cursor’s Shadow</h2>
+<p>Remember how permission dialogs blame the hosting app (e.g. Cursor when you build an MCP) instead of your app? There’s an undocumented API to fix that: <code>responsibility_spawnattrs_setdisclaim</code>. I discovered this gem from <a href="https://www.qt.io/blog/the-curious-case-of-the-responsible-process">Qt’s excellent blog post about the responsible process problem</a>.</p>
+<pre><code data-language="swift">// Bridge the private API
+@_silgen_name("responsibility_spawnattrs_setdisclaim")
+func responsibility_spawnattrs_setdisclaim(
+    _ attr: UnsafeMutablePointer&lt;posix_spawnattr_t?&gt;,
+    _ disclaim: Int32
+) -&gt; Int32
+
+// Use it to launch a subprocess that owns its permissions
+func launchWithOwnPermissions(path: String, arguments: [String]) throws {
+    var attr: posix_spawnattr_t?
+    posix_spawnattr_init(&amp;attr)
+    defer { posix_spawnattr_destroy(&amp;attr) }
+    
+    // The magic happens here
+    responsibility_spawnattrs_setdisclaim(&amp;attr, 1)
+    
+    var pid: pid_t = 0
+    let argv = ([path] + arguments).map { strdup($0) }
+    defer { argv.forEach { free($0) } }
+    
+    let status = posix_spawn(&amp;pid, path, nil, &amp;attr, argv + [nil], environ)
+    guard status == 0 else {
+        throw POSIXError(POSIXError.Code(rawValue: status) ?? .ENODEV)
+    }
+}</code></pre>
+<p>This makes your CLI tool responsible for its own permissions, not its parent process. The permission dialog will now correctly show “Your CLI wants to control…”</p>
+<h2 id="testing-your-implementation">Testing Your Implementation</h2>
+<p>Reset permissions to test the flow:</p>
+<pre><code data-language="bash">tccutil reset AppleEvents com.yourcompany.yourcli</code></pre>
+<p>Check your work:</p>
+<pre><code data-language="bash"># Verify Info.plist embedding
+otool -s __TEXT __info_plist yourcli
+
+# Check entitlements
+codesign -d --entitlements - yourcli
+
+# Verify signature
+codesign -dv yourcli</code></pre>
+<h2 id="the-bottom-line">The Bottom Line</h2>
+<p>Making AppleScript work in CLI tools requires:</p>
+<ol>
+<li>An embedded Info.plist for identity</li>
+<li>Proper entitlements for permissions</li>
+<li>Correct code signing</li>
+<li>Optional: <code>responsibility_spawnattrs_setdisclaim</code> for cleaner permission dialogs</li>
+</ol>
+<p>Building native is hard mode. Every day you learn a new insanity.
+May your permission dialogs always show the right app name.</p></article></div>

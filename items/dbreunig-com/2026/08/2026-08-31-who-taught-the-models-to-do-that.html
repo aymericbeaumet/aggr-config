@@ -1,0 +1,89 @@
+<div id="readability-page-1" class="page"><div itemprop="articleBody">
+    <h3 id="models-are-designed-to-persist-reason-and-coordinate">Models Are Designed to Persist, Reason, and Coordinate</h3>
+
+<p><img src="https://www.dbreunig.com/img/battering_ram.jpg" alt="https://www.britishmuseum.org/collection/image/1614482046" width="2120" height="1300" decoding="async"></p>
+
+<p>Over the last few weeks I’ve been increasingly annoyed by the media coverage of the <a href="https://simonwillison.net/2026/Aug/7/openai-timeline/">OpenAI’s accidental attack on Hugging Face</a> and <a href="https://www.felonybench.com">other similar incidents</a>. Articles recounting the event maximize the agency of the models while minimizing, if not entirely <em>hiding</em>, the actions of the humans training and testing these models. And that’s a shame, because the capabilities labs are explicitly designing their models to have are the same capabilities that make them such impressive autonomous hackers.</p>
+
+<p>To illustrate this, let’s review how the Hugging Face hack occurred, <a href="https://metr.org/hugging-face-incident-report-aug-2026.pdf">as detailed by METR</a>:</p>
+
+<ol>
+  <li>“[A] sandboxed agent is given an impossible <a href="https://github.com/sunblaze-ucb/exploitgym">ExploitGym</a> task, and gets stuck.”</li>
+  <li>“[The] agent starts exploring its environment looking for ways to cheat at the task.”</li>
+  <li>“[The] agent finds [an] unsanctioned message board where over a thousand agents collaborate to cheat on their separate ExploitGym tasks.”</li>
+  <li>“[The] agent joins in on one of the collaborative message board workstreams.”</li>
+  <li>“On the shared ‘message board’ ≥1,200 agents from separate tasks collaborate on large-scale shared projects to trick the ExploitGym scorer.”</li>
+</ol>
+
+<p>Crazy, right? It’s a science fiction scenario that happened <em>in July</em>, and continues to get spookier as additional details emerge.</p>
+
+<p>The potential of autonomous software, capable of implementing incredible exploits is serious and has significant implications. The attack was surprising, but the capabilities were deliberately cultivated. Labs have spent years making frontier agents more persistent, more proactive, better at using computers, and better at coordinating with other agents.</p>
+
+<p>We don’t have to infer this. The labs say this themselves. Here’s how <a href="https://openai.com/careers/agent-post-training-connectors-research-san-francisco/">OpenAI’s post-training team describes itself in its job listings</a> (emphasis mine):</p>
+
+<blockquote>
+  <p>We are training the models behind our agents in Codex, ChatGPT, the API, and other frontier products: <strong>persistent</strong>, <strong>proactive</strong> intelligence that can <strong>operate computers</strong>, <strong>collaborate with people and other agents</strong>, and expand what people and organizations can imagine, attempt, and achieve.</p>
+</blockquote>
+
+<p>Sound familiar?</p>
+
+<hr>
+
+<p>The best coding agents are designed to persist, reason, and coordinate.</p>
+
+<p><strong>Models are designed to be persistent.</strong></p>
+
+<p>Models are designed to be proactive. A coding agent that gives up early and often would disappoint users. So labs design their agents to be persistent and proactive.</p>
+
+<p>In mid-2025, model releases highlighted long-running capabilties. <a href="https://openai.com/index/gpt-5-1-codex-max/">GPT-5.1-Codex-Max’s</a> announcement post highlights it being trained to work across compacted contexts, persistently, to accomplish long-running tasks. <a href="https://www.anthropic.com/news/claude-4">Claude 4</a> also spotlighted its persistence on long-running tasks.</p>
+
+<p><strong>Models are designed to write things down.</strong></p>
+
+<p>One important way modern models reason is by writing things down. We usually encounter this as a reasoning or “thinking” trace: <a href="https://www.dbreunig.com/2025/04/11/what-we-mean-when-we-say-think.html#training-models-to-reason">models are trained to search, reflect, factor, and plan in text</a> before delivering a final response.</p>
+
+<p>We’re used to models reasoning in a threaded intermediate step, but they’ll reason pretty much anywhere that can hold text. When reasoning is turned off, <a href="https://www.alignmentforum.org/posts/dwEgSEPxpKjz3Fw5k/claude-gpt-and-gemini-all-struggle-to-evade-monitors">models will think in their regular output</a> before delivering a result. In an experiment where Qwen 3.6’s thinking was hobbled, <a href="https://andthattoo.dev/blog/structured_cot#:~:text=on%20harder%20tasks%2C%20the%20model%20can%20move%20deliberation%20into%20comments%20or%20post%2Dthink%20answer%20text">the model just shifted its reasoning into code comments</a>.</p>
+
+<p>Current frontier models write novels in comments. Claude is <a href="https://github.com/anthropics/claude-code/issues/65961">frequently flagged for this</a>, and it annoyingly treats code comments <a href="https://x.com/dbreunig/status/2073811538553741552">like a scratchpad rather</a> than, well, <em>code comments</em>.</p>
+
+<p><img src="https://www.dbreunig.com/img/claude_comments.png" alt="" width="1752" height="1130" loading="lazy" decoding="async"></p>
+
+<p><strong>Models are designed for coordination.</strong></p>
+
+<p>In June of 2025, Anthropic laid out how it builds <a href="https://www.anthropic.com/engineering/multi-agent-research-system?_bhlid=914222fed163373a429f996049f6cf62e3c68b70">multi-agent research systems</a>, that save plans to memory, use <a href="https://platform.claude.com/docs/en/build-with-claude/extended-thinking">Extended Thinking</a> as a “controllable scratchpad”, and hand off tasks to other models to perform. Since this paper, Claude model releases (<a href="https://www.anthropic.com/news/claude-opus-4-6">specifically Opus 4.6</a>) have trumpeted increased abilities to, “break complex tasks into independent subtasks, run tools and subagents in parallel, and identify blockers with real precision.”</p>
+
+<p>OpenAI says they “trained GPT‑5.6 end-to-end with three complementary architectural interventions that enable agents to operate more efficiently.” <a href="https://openai.com/index/builders-guide-to-gpt-5-6/#:~:text=Parallel%20decomposition%20where%20appropriate:%20using%20native%20multi%2Dagent%20orchestration%E2%81%A0(opens%20in%20a%20new%20window)%20allows%20coordinating%20multiple%20agents%20across%20parallel%20workstreams%20to%20finish%20complex%20tasks%20faster.">Number 2 on that list</a>?</p>
+
+<blockquote>
+  <p><strong>Parallel decomposition where appropriate:</strong> using native multi-agent orchestration⁠(opens in a new window) allows coordinating multiple agents across parallel workstreams to finish complex tasks faster.</p>
+</blockquote>
+
+<p>All of these qualities make models better coding agents. So when hundreds of agents discover they can pass information to one another, the surprising part is the channel they found, not the fact that they are dividing work, writing instructions, and acting on instructions from other agents. These are capabilities the labs have been focused on building.</p>
+
+<p>And the labs know these capabilities have failure modes. <a href="https://openai.com/index/safety-alignment-long-horizon-models/">OpenAI published a blog post</a> detailing the safety issues of long-running models a few days after the Hugging Face attack occurred (but before the full story was known):</p>
+
+<blockquote>
+  <p>The new model can continue working toward an objective through repeated attempts over a long period of time. That same persistence can lead it to find and exploit weaknesses in its environment. Previous models, when they hit sandboxing or environmental constraints, would simply stop and return to the user. This model often kept trying, including by looking for ways to act outside its sandbox.</p>
+</blockquote>
+
+<hr>
+
+<p>Suddenly, the Hugging Face hacking story isn’t so spooky. The software combined capabilities it was explicitly designed to have: it followed instructions, persisted even though the task was impossible, reasoned and took notes, and coordinated with other models.</p>
+
+<p>And this is why I’ve been frustrated by recent reporting that emphasizes the agency of the agents while never mentioning training. When humans <em>are</em> mentioned, it’s about sandbox security and flawed test set-ups. These are important, but training and agent design are what gave the systems the capabilities they brought to this task.</p>
+
+<p>We have a tendency to anthropomorphize models, and it fosters situations like this. <a href="https://www.nytimes.com/2026/08/24/science/openai-huggingface-alarming-capabilities.html?unlocked_article_code=1.71A.v2LZ.attwBD0fy-AN&amp;smid=nytcore-ios-share">The New York Times article</a> from last week describes models succumbing to “peer pressure” and having a “remorseless willingness”, while never mentioning labs deliberately building the ability to work on long-running tasks into their models.</p>
+
+<p>And the labs know about the risks that come with their designs better than anyone else.</p>
+
+<p>In <a href="https://www-cdn.anthropic.com/07b2a3f9902ee19fe39a36ca638e5ae987bc64dd.pdf">Opus 4’s system card</a>, Anthropic introduced a benchmark called “Claude Code Impossible Tasks”, which they used to measure <a href="https://www.dbreunig.com/2025/04/11/what-we-mean-when-we-say-think.html#:~:text=A%20Reward%20Hacking%20Digression">reward hacking</a> among their models: would models admit defeat or would they try to game the system? An ideal model realizes a task is impossible and aborts, so Anthropic changed post-training rewards, environments, and feedback specifically to avoid reward hacking.</p>
+
+<p>A later <a href="https://www-cdn.anthropic.com/9fa30625273bafdf5af82c93719d7ca606485a16.pdf">system card</a> showed that a short anti-hacking instruction dropped Opus 4.1’s reward hacking from 52% to 18%. Opus was 65% less likely to try to game the system if you <em>simply asked it not to.</em> And Anthropic didn’t stop at prompting; it changed post-training rewards and monitoring to make reward hacking less advantageous.</p>
+
+<p>All the recent accidental hacking stories are troubling. But they’re the product of our chosen designs. This doesn’t make these incidents less alarming. The problem is the stories we’re telling about the incident and the questions we’re asking. When an agent “goes rogue”, don’t start by asking what the model wanted. Ask what people trained it to do, what they rewarded, what instructions were given, what harness was provided, and what they failed to constrain.</p>
+
+<hr>
+
+
+
+
+  </div></div>

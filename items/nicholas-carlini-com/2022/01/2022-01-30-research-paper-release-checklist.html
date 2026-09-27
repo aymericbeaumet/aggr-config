@@ -1,0 +1,175 @@
+<div id="readability-page-1" class="page"><div>
+      	  <p>
+      		Over the years I've made a number of simple, embarrassing mistakes when putting papers online.
+      		Three of the worst offenders here are that time I
+      		put a paper online with <a href="https://arxiv.org/pdf/2202.07646v1.pdf">a typo in the title</a>,
+      		published a paper with <a href="https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-carlini.pdf">my own name spelled wrong (pages 1 &amp; 2)</a>,
+      		and that other time I
+      		released a paper with <a href="https://arxiv.org/pdf/2002.08347v1.pdf">a git merge conflict right in the middle of the text (page 24)</a>.
+      	  </p>
+      
+      	  <p>
+      		Fortunately there's an unreasonably effective method to preventing these mistakes.
+      		Every time I make one (or someone tells me a mistake they made
+      		that I could easily see myself making) I write it down and add it to a checklist.
+      		Each paper I release, I run through the checklist, and as a result will only ever make
+      		the same mistake once.
+      	  </p>
+      
+      	  <p>
+      		(This is not my idea. 
+      		Checklists are the primary reason airplanes don't fall out of the sky,
+      		and help prevent an uncountable number of deaths in hospitals every day.
+      		They're especially useful in boring situations, where you start to relax
+      		because the hard part is over. Like, for example, when doing the final upload for a
+      		paper after having just spent several months putting it together.)
+      	  </p>
+      
+      	  <p>
+      		I recently mentioned that I do this to some people who asked me to share it,
+      		and realized this is something that others might find useful as well.
+      		So here it is.
+      		Incidentally, if you've ever made an easily-preventable mistake,
+      		feel free to let me know and I'll update this list.
+      	  </p>
+      	  <hr>
+      
+      	  <h2>
+      		Primary checklist for any paper release
+      	  </h2>
+      	  <p>
+      		This checklist is for any time a paper is being released 
+      		Follow it any time you're submitting to a conference, 
+      		uploading to arXiv, or submitting a camera ready.
+      	  </p>
+      
+      	  <ol>
+      		<li>
+      		  Check the paper title is correct.
+      		</li>
+      		<li>
+      		  Completely disable any author TODO notes LaTeX macros.
+      		</li>
+      		<li>
+      		  Check LaTeX build log and search for "error", "warning", "undefined", "missing".
+      		</li>
+      		<li>
+      		  Remove any LaTeX macros from abstract for upload to remote server.
+      		</li>
+      		<li>
+      		  Search for doubled words:	  
+      		  <pre><code>r=open("/tmp/paper.tex").read().split();</code></pre>
+      		  <pre><code>[a for a,b in zip(r,r[1:]) if a.lower() == b.lower()]</code></pre>
+      		</li>
+      		<li>
+      		  Inspect any lines that have a question mark or double periods:	  
+      		  <pre><code>[x for x in open("/tmp/paper.tex") if '..' in x or '?' in x]</code></pre>
+      		</li>
+      		<li>
+      		  Make sure the word TODO and FIXME are never present:
+      		  <pre><code> [x for x in open("/tmp/paper.tex") if 'TODO' in x or 'FIXME' in x]</code></pre>
+      		</li>
+      		<li>
+      		  Verify there are no merge conflicts by looking for '=====', '&lt;&lt;&lt;&lt;', '&gt;&gt;&gt;&gt;'.
+      		</li>
+      		<li>
+      		  Visually check that no paragraphs end with a single word on a new line,
+      		  and no single lines occur at the top of a new page right below a caption.
+      		  Both of these are ugly.
+      		</li>
+      		<li>
+      		  Re-read all captions to make sure they are understandable in near-isolation, 
+      		  and that any final edits didn't break these.
+      		</li>
+      		<li>
+      		  Print out PDF from another computer, check fonts still render, and figures are
+      		  legible.
+      		</li>
+      		
+      	  </ol>
+      
+      
+      	  <h2>Secondary checklist for conference submissions</h2>
+      	  <p>
+      		This checklist is a specific checklist when submitting a paper to a conference. Do the above checklist, and also this one.
+      	  </p>
+      
+      	  <ol>
+      		<li>
+       		  Check call for papers to ensure rules about blind/non-blind submission.
+      		  If blind, search for all author names to ensure they are not present in the document.
+      		</li>
+      		<li>
+      		  Follow the CFP rules if pages should be numbered or not numbered.
+      		</li>
+      		<li>
+      		  Count pages and verify it's no longer than the page limit.
+      		</li>
+      		<li>
+      		  Check for any special rules on the total number of pages
+      		  (including the appendix and references) versus content pages.
+      		</li>
+      		<li>
+      		  Check bibliography style matches what's expected for this conference.
+      		</li>
+      		<li>
+      		  For security papers include something like, 
+      		  'anonymous submission #xyz' as the author name (with a random formatting, especially when submitting multiple papers to the same conference, to not break anonymity).
+      		</li>
+      	  </ol>
+      
+      	  <h2>Secondary checklist for public releases</h2>
+      	  <p>
+      		This checklist is a specific checklist any time a paper is being released
+      		publicly, e.g., as a camera-ready final paper or an arXiv upload.
+      		Do the primary checklist and this one.
+      	  </p>
+      
+      	  <ol>
+      		<li>
+      		  All authors are listed on the paper.
+      		</li>
+      		<li>
+      		  Author names are spelled correctly, with correct affiliations. 
+      		</li>
+      		<li>
+      		  Change the template to the “accepted” version of the style, if applicable.
+      		</li>
+      		<li>
+      		  Verify including author names doesn't break the flow of text on the page, especially page 1.
+      		</li>
+      		<li>
+      		  Check that any copyright block of publication notice is added.
+      		</li>
+      		<li>
+      		  Check for the presence of Type 3 fonts, and if they're in the paper, and the conference cares, then I guess just give up and admit you're going to spend the next six hours figuring out how to fix it this time around.
+      		</li>
+      		<li>
+      		  Un-comment the acknowledgments section, and any author contribution section.
+      		</li>
+      	  </ol>
+      
+      	  <h2>Secondary checklist for arXiv paper releases</h2>
+      	  
+      	  <p>
+      		This checklist is a specific checklist any time a paper is being released to arXiv.
+      		You should also follow the public release checklist above.
+      	  </p>
+      	  <ol>
+      		<li>
+      		  Decide if it's worth running arXiv cleaner to remove comments or if it's okay to others see paper comments.
+      		</li>
+      		<li>
+      		  Check that author names on the upload match author names on the submission (except for authors who prefer slight variants on their name for arXiv, e.g., by replacing non-English characters with their English counterpart).
+      		</li>
+      		<li>
+      		  Check that any copyright block of publication notice is REMOVED, as appropriate for the venue.
+      		</li>
+      		<li>
+      		  Check abstract is formatted correctly without any LaTeX macros present.
+      		</li>
+      		<li>
+      		  View rendered PDF and check that formatting is consistent with a local copy.
+      		</li>
+      	  </ol>
+          </div></div>

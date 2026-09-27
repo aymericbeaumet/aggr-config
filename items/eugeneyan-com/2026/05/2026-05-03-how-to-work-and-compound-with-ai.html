@@ -1,0 +1,159 @@
+<div id="readability-page-1" class="page"><div>
+            <blockquote>
+  <p>Translations: <a href="https://damoang.net/ai/3302" target="_blank">Korean</a> by DG Hong</p>
+</blockquote>
+
+<p>How can we work effectively with AI? What’s the workflow, how does it scale, and how do we improve our systems over time? And ideally, it should compound. Every finished artifact—code, docs, analysis, decisions—becomes context for the next session. And each correction updates a config that reduces future errors. While I’m still learning, I’ve repeated my answers often enough that I’m writing it here so the next time I’m asked I can share a link instead.</p>
+
+<p>If you use AI regularly, you likely already apply many of these practices. Nonetheless, I believe the underlying principles apply broadly: provide good context, encode your taste as config, make verification easy, delegate bigger tasks, and close the loop. If a practice does not fit, adapt the principle and invent your own. Also notice, as you read, that none of this is specific to AI. It’s simply how you onboard and work with any new collaborator.</p>
+
+<p>• • •</p>
+
+<h2 id="context-as-infrastructure">Context as infrastructure</h2>
+
+<p><strong>Help models nagivate your context.</strong> For example, all my code lives in <code>~/src</code> and all my knowledge work lives in <code>~/vault</code> (organized into <code>projects/</code>, <code>notes/</code>, <code>kb/</code> and so on). When our work is organized, it makes it easier for the model to retrieve context using <code>grep</code> or <code>glob</code>. And by having a clean directory tree, it’s more straightforward to navigate the directory, and find and lean on prior code, project docs, analysis, etc. to improve the work being done.</p>
+
+<p><strong>Connect models to your organization’s context.</strong> Models can benefit from organizational knowledge which likely lives in Slack, Drive, Mail, etc. Most have <a href="https://modelcontextprotocol.io/docs/getting-started/intro" target="_blank">MCPs</a> for Claude Code, Cowork, Claude.ai. On top of these, I also maintain a <code>INDEX.md</code> per project. It’s an annotated index of the relevant docs and channels, and each entry includes the URL, owner, and a brief paragraph explaining what’s inside and when to read it. The annotation helps a lot. A bare list of URLs forces the model to open every link to figure out what’s relevant, wasting time and context. By annotating upfront, we do the heavy lifting once and store it in the index.</p>
+
+<p><strong>Onboard each new session like a new hire.</strong> With each new session, the model starts with a blank slate. Thus, it helps to treat the per-project <code>CLAUDE.md</code> like the onboarding doc we’d hand to a new teammate on day one. Claude scanned my per-project <code>CLAUDE.md</code> files and highlighted that they included glossaries for acronyms, project code names, and teammates with the same first name. I also have a suggested reading order in the <code>CLAUDE.md</code>, like telling the model to skim <code>INDEX.md</code> first, then <code>TODOS.md</code>, and finally specific topic notes.</p>
+
+<p><strong>Build your memory layer.</strong> By default, models don’t remember what happened in the last session, so anything worth persisting should be written to disk. I split my memory layer into two buckets. <code>~/vault</code> holds facts such as project state, artifacts, and domain knowledge; <code>~/.claude</code> (along with its <code>CLAUDE.md</code>, <code>skills/</code>, <code>guides/</code>) contains my preferences, workflows, and personal taste. The former provides context while the latter provides configuration.</p>
+
+<h2 id="taste-as-configuration">Taste as configuration</h2>
+
+<p><strong>Start with <code>~/.claude/CLAUDE.md</code>.</strong> Claude reads this at the start of every session. I think of it as a behavioral contract. My <code>CLAUDE.md</code> contains preferences like how direct to be, when to push back, how to handle mistakes, what to teach me, etc. Here’s a trimmed version:</p>
+
+<div><pre><code data-language="xml">&lt;behavior&gt;
+- Be direct and push back when you disagree; if my approach has problems, say so.
+- When unsure about something, say you're unsure rather than guessing confidently.
+- When something fails, investigate the root cause before retrying.
+- Keep diffs scoped to the task: no drive-by reformats or unrelated refactors.
+...
+&lt;/behavior&gt;
+
+&lt;teaching&gt;
+I'm always picking up new systems and domains. When a key term surfaces that I 
+likely haven't internalized, explain it in 1-2 sentences and then move on. Format:
+
+&gt; 💡 followed by 1 - 2 sentence explanation
+...
+&lt;/teaching&gt;
+</code></pre></div>
+
+<p><strong>Scope it by directory: global, then repo, then project.</strong> Put preferences that apply everywhere (e.g., behavior, long-term goals, teaching) in <code>~/.claude/CLAUDE.md</code>. Put conventions for a specific a repo (e.g., linting, naming, pull requests) in the repo’s root. Put project-specific context (i.e., directory layout, domain knowledge) in the project directory. When you start Claude Code in a subdirectory, it walks up the tree and loads each <code>CLAUDE.md</code>. And when the model navigates into a subdirectory mid-session, the model picks up that directory’s <code>CLAUDE.md</code> too. More in the <a href="https://code.claude.com/docs/en/memory#how-claude-md-files-load">docs</a>.</p>
+
+<p><strong>When CLAUDE.md gets too long, split it out.</strong> A long <code>CLAUDE.md</code> can become a context tax. It loads everything every session even if the session doesn’t need it. To fix this, refactor chunks into guides that load lazily. Don’t <code>@import</code> them (because that just inlines them). Instead, tell your <code>CLAUDE.md</code> to read them when relevant. This way, a session that’s building evals skips the guide on writing docs. Here’s an example guide section:</p>
+
+<div><pre><code data-language="xml">&lt;guides&gt;
+- Docs, 1-pagers, any writing: ~/.claude/guides/writing.md
+- Eval building and reports: ~/.claude/guides/evals.md
+- Dashboards: ~/.claude/guides/dashboards.md
+...
+&lt;/guides&gt;
+</code></pre></div>
+
+<p><strong>If you do something ≥ once a week, make it a skill.</strong> A skill is a markdown file with a name, trigger, and procedure that the model loads on demand. Think of skills as workflows written in markdown. They can include logic. For example, my <code>/polish</code> skill looks at the artifact diff. If it produces a metric, it runs the associated eval. If it renders in a browser, it checks the output via Claude in Chrome. If neither, it runs the code and reads the output or error. Skills encode both the steps and the judgment of which steps apply. A few I have include:</p>
+
+<ul>
+  <li><code>/polish</code>: checks for bugs, simplifies the code, verify the output (via evals, Claude in Chrome, or something else), iterate until no critical feedback, draft the PR</li>
+  <li><code>/write</code>: interviews me for the outline, spawn research subagents, writes the draft, gives feedback via adversarial critic, iterate until no critical feedback</li>
+  <li><code>/daily</code>: reads my calendar, slack, PRs, yesterday’s log, etc and writes today’s priorities</li>
+</ul>
+
+<p>I tend to keep <code>SKILL.md</code> small and focused on the workflow and routing. The knowledge, like templates and scripts, are separate files that the model reads and runs only when needed, just like lazy-loaded guides.</p>
+
+<p><strong>Bootstrap skills by doing the task once and then asking the model to make it a skill.</strong> This is how I build most skills. First, I do the task once, interactively, in a normal session. Then, I ask the model to turn what we just did into a skill. Next, I run the skill on the same or similar task. Inevitably, I’ll need to correct the output, which I do in the same session so feedback is logged in the session transcript. Finally, I ask the model to update the skill based on the corrections and feedback. You can also seed a skill with exapmles of the desired output. Ask the model to extract the patterns, like how you organize your code, or the structure and tone of your docs.</p>
+
+<p><strong>Refine skills via the transcript, not the file directly.</strong>  The first version of the skill rarely works perfect because it overfits the original session. This is normal. When you run it and need to update the output, correct it within the session. Try not to open and edit <code>SKILL.md</code> directly. Providing feedback in the session gives the model before-and-after pairs which accumulate in the transcript—here’s what we did, here’s what I wanted, and why. Once the output is right, ask the model to merge the feedback into the skill. After a few rounds, the skill converges and you barely have to edit the final output.</p>
+
+<p><strong>Nonetheless, not every task needs this context.</strong> For brainstorming, exploration, and rough drafts, I enjoy using simple mode (<code>CLAUDE_CODE_SIMPLE=1 claude</code>). Here, <code>CLAUDE.md</code> still loads but the agentic harness—hooks, skills, tool-heavy loops—doesn’t. This gets me closer to the model, which is what I want when I’m thinking out loud rather than shipping.</p>
+
+<h2 id="verification-for-autonomy">Verification for autonomy</h2>
+
+<p><strong>Shift verification left; catch errors at write time.</strong> I think of verification as a ladder. The bottom is cheap and deterministic; the top is expensive and requires judgement. We want to address issues at the lowest possible rung. Near the bottom are post-edit hooks that run <code>ruff format</code>, <code>ruff check --fix</code> on files the model just updated. This happens deterministically and doesn’t cost tokens. Higher on the ladder are tests, evals, LLM reviews, etc.</p>
+
+<p><strong>Make it easy for the model to verify the work.</strong> Give the model feedback loops to improve its output. If the system produces a metric, let the model run the eval and optimize it. If the output renders in a browser, let the model inspect it via Claude in Chrome. If neither, let the model run it and read the error. For example, when building Docker images, I let the model build, read the error, edit the Dockerfile, and rebuild. If I’m tuning a harness, the model runs evals, reads the transcripts, and fixes failures. When building a dashboard, the model checks in Chrome that tooltips render, labels don’t overlap, and the narrative matches the numbers.</p>
+
+<p><strong>For long-running tasks, have models watch models.</strong> Long sessions can drift as errors build up. One fix is to run a secondary session with fresh context to read the original spec and the recent turns of the primary session. My minimal setup uses two tmux panes, one for the primary dev, one for the pair programmer. Initial instructions and follow-up prompts are appended to a shared file. Periodically, the pair programmer spins up, checks the spec against the primary’s recent transcript, and if something’s off, provides feedback to course correct.</p>
+
+<p>We can do this in various ways. For example, the pair programmer can watch for execution drift—is the model doing the task right? This is local and tactical, like ignoring an error, reporting a bad metric, or diverging from the spec. There’s also direction drift—is the model doing the right task? These are bigger picture and strategic, and occur when the model misinterprets the original intent and spends hours building the wrong thing. Check for execution drift often and direction drift occasionally.</p>
+
+<h2 id="scaling-via-delegation">Scaling via delegation</h2>
+
+<p><strong>Delegate increasingly bigger chunks of work.</strong> Sometimes, we pair-program with models: short tasks, fast feedback, staying in the loop. This well works for fast iterations, exploratory analysis, and prototyping. But with increasingly stronger models, we should aim to delegate bigger tasks. Explain your intent, constraints, and success criteria upfront, then let the model work. You can’t delegate what you can’t verify, so this requires first defining success criteria and metrics. The shift is from giving instructions, one at a time, to fleshing out plans and letting the model execute them end to end:</p>
+
+<blockquote>
+  <p>“Given these eval suites, build isolated containers per suite and smoke-test that each builds. Then, do the full run, log the eval metrics and transcripts, and use subagents to read the transcripts and confirm the evals ran correctly. Run each eval n times for confidence intervals. Finally, generate the report, verify it follows the report guide, and slack me the results and report URL.”</p>
+</blockquote>
+
+<p><strong>Run sessions in parallel and find the bottleneck.</strong> Delegating bigger tasks means we can run more at once. Claude says I typically run three to six sessions simultaneously. The bottleneck has shifted from doing the work to writing clear specs and reviewing outputs fast enough to keep the pipeline moving—the middle is hollowing out. If parallel sessions share a repo, use git worktrees so each session gets its own checkout and don’t overwrite each other’s changes.</p>
+
+<p><strong>Make sessions easy to observe.</strong> When running multiple sessions, I need to know their state and which one needs attention. On my mac, a stop hook plays a sound when a session finishes (example below). My tmux window titles use a status emoji (⏳ working; 🟢 complete) and a short Haiku-generated label so I know what each pane is doing. The Claude Code status line shows context usage and the current mode. Together, the stop-hook sound signals a finished task, the tmux titles shows which one, and the status line provides the details.</p>
+
+<div><pre><code data-language="plaintext"># Example stop hook alert
+"Stop": [
+    {
+    "hooks": [
+        {
+        "type": "command",
+        "command": "if command -v afplay &gt;/dev/null 2&gt;&amp;1; then afplay -v 1.0 /System/Library/Sounds/Glass.aiff; else tput bel; fi"
+        }
+    ]
+}
+</code></pre></div>
+
+<p><strong>You can check in even if AFK.</strong> <code>/remote-control</code> in Claude Code makes this easy. While commuting or waiting in line, I open the code tab in the Claude app to see what’s running and what’s blocked, and if needed, unblock a stalled session with additional context or new instructions. This keeps sessions moving instead of sitting idle for hours. Only do this if there’s something urgent though, not when you’re trying to be present or touch grass.</p>
+
+<h2 id="closing-the-loop">Closing the loop</h2>
+
+<p><strong>Keep the context rich by working in the open.</strong> When we do our work in shared docs, repos, and channels, it makes it easier for everyone—including models—to retrieve and benefit from the context. What we share today becomes part of the org context tomorrow. Try this simple test: could a new teammate replicate your work from last week using only the shared context? If yes, you’re contributing well to the org context; if not, that precious context is stuck in your head. I automate this somewhat via instructions in my <code>CLAUDE.md</code> to post short updates in a worklog channel whenever I finish a substantial task, with links to the artifact PR or doc.</p>
+
+<p><strong>Mine your transcripts for config updates.</strong> Have the model read past session transcripts to find gaps. When I scanned ~2,500 of my past user turns, a sizable percentage contained phrases like <em>“can you also…“</em>, <em>“did you check…“</em>, <em>“still wrong”</em>, etc. These suggest that the model should have done something unprompted, and I should update the <code>CLAUDE.md</code> or skill, or that a verification step is missing or broken. Hit counts show how often a correction happens and the transcripts show exactly what failed. This is why I make corrections within the session, so I can use the transcript as input for my next <code>CLAUDE.md</code> or skills update.</p>
+
+<p><strong>Refactor and prune periodically.</strong> As configs grow, they can overlap or conflict with each other. As a result, if the model ignores a rule, it can be because another rule contradicts it. Fix this by refactoring periodically. Each rule or preference should live in exactly one place (though critical instructions can be repeated in the main <code>CLAUDE.md</code>). I also check for stray directory-level <code>settings.json</code> and consolidate them back into <code>~/.claude</code>.</p>
+
+<p>• • •</p>
+
+<p>While the specific setup will likely change as models get better, I think the principles will remain relevant: provide good context, encode your taste, make verification cheap, delegate more, and close the loop. What we’re doing is training a collaborator, one feedback at a time. And if you think about it, these principles apply to how we work with a human team too.</p>
+
+<p>To get started, have your model read this <a href="https://eugeneyan.com/assets/SETUP.txt" target="_blank">SETUP.txt</a> and help you apply it. Also, I’d love to learn what practices or principles you’ve found valuable—please comment below or <a href="https://x.com/eugeneyan" target="_blank">reach out!</a></p>
+
+<p>p.s. This isn’t <em>just</em> about personal tooling. It’s also how you’d design agent harnesses, set team norms, and build org infrastructure. Try reading it again with those layers in mind.</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (May 2026). How to Work and Compound with AI. eugeneyan.com.
+        https://eugeneyan.com/writing/working-with-ai/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2026default,
+  title   = {How to Work and Compound with AI},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2026},
+  month   = {May},
+  url     = {https://eugeneyan.com/writing/working-with-ai/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

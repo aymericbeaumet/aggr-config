@@ -1,0 +1,280 @@
+<div id="readability-page-1" class="page"><div><p>The <a target="_blank" rel="noopener noreferrer" href="https://modelcontextprotocol.io/introduction">Model Context Protocol</a> (MCP) is an open standard <a target="_blank" rel="noopener noreferrer" href="https://www.anthropic.com/news/model-context-protocol">introduced by Anthropic</a> with the goal to standardize how AI applications (chatbots, IDE assistants, or custom agents) connect with external tools, data sources, and systems.</p>
+<p><img src="https://www.philschmid.de/static/blog/mcp-introduction/api.png" alt="api"></p>
+<p>Think of it like USB for AI integrations. Before standards like USB, connecting peripherals required a mess of different ports and custom drivers. Similarly, integrating AI applications with external tools and systems is/was an "M×N problem".<br>
+If you have M different AI applications (Chat, RAG 1, custom agents, etc.) and N different tools/systems (GitHub, Slack, Asana, databases, etc.), you might need to build M×N different integrations. This leads to duplicated effort across teams, inconsistent implementations.</p>
+<p>MCP aims to simplify this by providing a common API and transforming this into an "M+N problem". Tool creators build N MCP servers (one for each system), while application developers build M MCP clients (one for each AI application). MCP defines a client-server architecture where:</p>
+<ul>
+<li><strong>Hosts:</strong> Applications the user interacts with (e.g., Claude Desktop, an IDE like Cursor, a custom agent).</li>
+<li><strong>Clients:</strong> Live within the Host application and manage the connection to one specific MCP server. Maintain a 1:1 to connection.</li>
+<li><strong>Servers:</strong> External programs that expose Tools, Resources and Prompts via standard API to the AI model via the client.</li>
+</ul>
+<p>The current components of MCP servers include:</p>
+<ol>
+<li><strong>Tools  (Model-controlled):</strong> These are functions (tools) that LLMs can call to perform specific actions, e.g. weather API, basically function calling</li>
+<li><strong>Resources  (Application-controlled):</strong> These are data sources that LLMs can access, similar to GET endpoints in a REST API. Resources provide data without performing significant computation, no side effects. Part of the context/request</li>
+<li><strong>Prompts (User-controlled):</strong> These are pre-defined templates to use tools or resources in the most optimal way. Selected before running inference</li>
+</ol>
+<p><img src="https://www.philschmid.de/static/blog/mcp-introduction/overview.png" alt="overview"></p>
+<h2 id="how-does-mcp-work">How does MCP work?</h2>
+<p>MCP operates on the client-server model described earlier. Here’s a simplified flow:</p>
+<p><img src="https://www.philschmid.de/static/blog/mcp-introduction/architecture.png" alt="architecture"></p>
+<ol>
+<li><strong>Initialization:</strong> When a Host application starts it creates N MCP Clients, which exchange information about capabilities and protocol versions via a handshake.</li>
+<li><strong>Discovery:</strong> Clients requests what capabilities (Tools, Resources, Prompts) the server offers. The Server responds with a list and descriptions.</li>
+<li><strong>Context Provision:</strong> The Host application can now make resources and prompts available to the user or parses the tools into a LLM compatible format, e.g. JSON Function calling</li>
+<li><strong>Invocation:</strong> If the LLM determines it needs to use a Tool (e.g., based on the user's request like "What are the open issues in the 'X' repo?"), the Host directs the Client to send an invocation request to the appropriate Server.</li>
+<li><strong>Execution:</strong> The Server receives the request (e.g., fetch_github_issues with repo 'X'), executes the underlying logic (calls the GitHub API), and gets the result.</li>
+<li><strong>Response:</strong> The Server sends the result back to the Client.</li>
+<li><strong>Completion:</strong> The Client relays the result to the Host, which incorporates it into the LLM's context, allowing the LLM to generate a final response for the user based on the fresh, external information.</li>
+</ol>
+<h3 id="mcp-servers">MCP servers</h3>
+<p>MCP Servers are the bridge/API between the MCP world and the specific functionality of an external system (an API, a database, local files, etc.). They are essentially wrappers that expose these external capabilities according to the MCP specification.</p>
+<p>Servers  can be built in various languages (Python, TypeScript, Java, Rust, etc.) as long as they can communicate over the supported transports. Servers communicate with clients primarily via two methods:</p>
+<ul>
+<li><strong>stdio (Standard Input/Output):</strong> Used when Client and Server run on the same machines. This is simple and effective for local integrations (e.g., accessing local files or running a local script).</li>
+<li><strong>HTTP via SSE (Server-Sent Events):</strong> The Client connects to the Server via HTTP. After an initial setup, the Server can push messages (events) to the Client over a persistent connection using the SSE standard.</li>
+</ul>
+<p>Example of how to build an MCP server with Python and <a target="_blank" rel="noopener noreferrer" href="https://github.com/jlowin/fastmcp/tree/main">FastMCP</a>:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">from fastmcp import FastMCP
+ 
+# Create an MCP server
+mcp = FastMCP("Demo")
+ 
+# Add a tool, will be converted into JSON spec for function calling
+@mcp.tool()
+def add(a: int, b: int) -&gt; int:
+    """Add two numbers"""
+    return a + b
+ 
+# Add a data resource, e.g. displayed on new chats
+@mcp.resource("greeting://{name}")
+def get_greeting(name: str) -&gt; str:
+    """Get a personalized greeting"""
+    return f"Hello, {name}!"
+ 
+# Specific prompt templates for better use
+@mcp.prompt()
+def review_code(code: str) -&gt; str:
+    return f"Please review this code:\n\n{code}"</code></pre></div></figure>
+<p>List of pre-build and community build MCP servers:</p>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/punkpeye/awesome-mcp-servers">https://github.com/punkpeye/awesome-mcp-servers</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/modelcontextprotocol/servers">https://github.com/modelcontextprotocol/servers</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://mcp.composio.dev/">https://mcp.composio.dev/</a></li>
+</ul>
+<h3 id="mcp-clients">MCP Clients</h3>
+<p>MCP Clients are part of Host applications (the IDE, chatbot, etc.) that manage the communication with a specific MCP Server.</p>
+<ul>
+<li><strong>Role:</strong> Handle connection management, capability discovery, request forwarding, and response handling according to the MCP spec.</li>
+<li><strong>Examples of Hosts/Clients:</strong>
+<ul>
+<li>UI Apps: Claude Desktop, Microsoft Copilot Studio, LibreChat, Claude Code</li>
+<li>IDEs: Cursor, Windsurf, Continue, Zed, Cline</li>
+<li>Custom Agents (Python/TypeScript):
+<ul>
+<li>Firebase Genkit</li>
+<li>LangGraph</li>
+<li>OpenAI agents sdk</li>
+<li>….</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Example of how to build an MCP client with Python and mcp.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">from mcp import ClientSession, StdioServerParameters, types
+from mcp.client.stdio import stdio_client
+ 
+# Commands for running/connecting to MCP Server
+server_params = StdioServerParameters(
+    command="python",  # Executable
+    args=["example_server.py"],  # Optional command line arguments
+    env=None,  # Optional environment variables
+)
+ 
+async with stdio_client(server_params) as (read, write):
+    async with ClientSession(
+        read, write, sampling_callback=handle_sampling_message
+    ) as session:
+        # Initialize the connection
+        await session.initialize()
+ 
+        # List available prompts
+        prompts = await session.list_prompts()
+ 
+        # Get a prompt
+        prompt = await session.get_prompt(
+            "example-prompt", arguments={"arg1": "value"}
+        )
+ 
+        # List available resources
+        resources = await session.list_resources()
+ 
+        # List available tools
+        tools = await session.list_tools()
+ 
+        # Read a resource
+        content, mime_type = await session.read_resource("file://some/path")
+ 
+        # Call a tool
+        result = await session.call_tool("tool-name", arguments={"arg1": "value"})
+ </code></pre></div></figure>
+<h2 id="why-is-there-so-much-hype-did-mcp-win">Why is there so much hype? Did MCP win?</h2>
+<p>While Anthropic announced MCP in late 2024, its momentum significantly accelerated in early 2025. This isn't just random hype; several factors converged:</p>
+<ul>
+<li><strong>"AI-Native"</strong> while older standards like OpenAPI, GraphQL, or SOAP exist for API interaction, MCP was designed specifically for the needs of modern AI agents. MCP refines patterns seen in agent development:
+<ul>
+<li>Tools (Model-controlled): Actions the AI decides to take.</li>
+<li>Resources (Application-controlled): Context provided to the AI.</li>
+<li>Prompts (User-controlled): Specific user-invoked interactions.</li>
+</ul>
+</li>
+<li><strong>"Open Standard" with a Big Backer:</strong> Any "open standard” should have a spec, and <a target="_blank" rel="noopener noreferrer" href="https://spec.modelcontextprotocol.io/specification/2024-11-05/">MCP has a VERY good spec</a>. The spec alone defeats a lot of contenders, who do not provide such detailed specs.</li>
+<li><strong>Built on Proven Foundations:</strong> Instead of re-inventing everything from scratch, Anthropic adapted from Language Server Protocol (LSP), e.g. <a target="_blank" rel="noopener noreferrer" href="https://www.jsonrpc.org/">JSON-RPC 2.0</a></li>
+<li><strong>Strong Initial Ecosystem &amp; Dogfooding:</strong> MCP didn't launch as just a spec. Anthropic "dogfooded" it extensively and released it with a comprehensive initial set:
+<ul>
+<li>Client: Claude Desktop.</li>
+<li>Servers: Numerous reference implementations (filesystem, git, Slack, etc.).</li>
+<li>Tooling: MCP Inspector for testing, great documentation</li>
+<li>SDKs: Python and TypeScript libraries, now Java, Kotlin C#</li>
+</ul>
+</li>
+<li><strong>Network Effects:</strong> The open nature fostered a community. Tools like Cursor and Windsurf integrated MCP. Companies like Composio provided pre-built servers for hundreds of integrations. OpenAI announced support for MCP. Developers built thousands of community MCP servers (GitHub, Slack, databases, Docker, etc.).</li>
+</ul>
+<h2 id="practical-example-with-gemini-and-python-usdk">Practical Example with Gemini and Python uSDK</h2>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="py">from typing import List
+from google import genai
+from google.genai import types
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+import os
+ 
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+model = "gemini-2.0-flash"
+ 
+# Create server parameters for stdio connection
+server_params = StdioServerParameters(
+    command="npx",  # Executable
+    args=[
+        "-y",
+        "@openbnb/mcp-server-airbnb",
+    ],  # Optional command line arguments
+    env=None,  # Optional environment variables
+)
+ 
+async def agent_loop(prompt: str, client: genai.Client, session: ClientSession):
+    contents = [types.Content(role="user", parts=[types.Part(text=prompt)])]
+    # Initialize the connection
+    await session.initialize()
+    
+    # --- 1. Get Tools from Session and convert to Gemini Tool objects ---
+    mcp_tools = await session.list_tools()
+    tools = types.Tool(function_declarations=[
+        {
+            "name": tool.name,
+            "description": tool.description,
+            "parameters": tool.inputSchema,
+        }
+        for tool in mcp_tools.tools
+    ])
+    
+    # --- 2. Initial Request with user prompt and function declarations ---
+    response = await client.aio.models.generate_content(
+        model=model,  # Or your preferred model supporting function calling
+        contents=contents,
+        config=types.GenerateContentConfig(
+            temperature=0,
+            tools=[tools],
+        ),  # Example other config
+    )
+    
+    # --- 3. Append initial response to contents ---
+    contents.append(response.candidates[0].content)
+ 
+    # --- 4. Tool Calling Loop ---            
+    turn_count = 0
+    max_tool_turns = 5
+    while response.function_calls and turn_count &lt; max_tool_turns:
+        turn_count += 1
+        tool_response_parts: List[types.Part] = []
+ 
+        # --- 4.1 Process all function calls in order and return in this turn ---
+        for fc_part in response.function_calls:
+            tool_name = fc_part.name
+            args = fc_part.args or {}  # Ensure args is a dict
+            print(f"Attempting to call MCP tool: '{tool_name}' with args: {args}")
+ 
+            tool_response: dict
+            try:
+                # Call the session's tool executor
+                tool_result = await session.call_tool(tool_name, args)
+                print(f"MCP tool '{tool_name}' executed successfully.")
+                if tool_result.isError:
+                    tool_response = {"error": tool_result.content[0].text}
+                else:
+                    tool_response = {"result": tool_result.content[0].text}
+            except Exception as e:
+                tool_response = {"error":  f"Tool execution failed: {type(e).__name__}: {e}"}
+            
+            # Prepare FunctionResponse Part
+            tool_response_parts.append(
+                types.Part.from_function_response(
+                    name=tool_name, response=tool_response
+                )
+            )
+ 
+        # --- 4.2 Add the tool response(s) to history ---
+        contents.append(types.Content(role="user", parts=tool_response_parts))
+        print(f"Added {len(tool_response_parts)} tool response parts to history.")
+ 
+        # --- 4.3 Make the next call to the model with updated history ---
+        print("Making subsequent API call with tool responses...")
+        response = await client.aio.models.generate_content(
+            model=model,
+            contents=contents,  # Send updated history
+            config=types.GenerateContentConfig(
+                temperature=1.0,
+                tools=[tools],
+            ),  # Keep sending same config
+        )
+        contents.append(response.candidates[0].content)
+ 
+    if turn_count &gt;= max_tool_turns and response.function_calls:
+        print(f"Maximum tool turns ({max_tool_turns}) reached. Exiting loop.")
+ 
+    print("MCP tool calling loop finished. Returning final response.")
+    # --- 5. Return Final Response ---
+    return response
+        
+async def run():
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(
+            read,
+            write,
+        ) as session:
+            # Test prompt
+            prompt = "I want to book an apartment in Paris for 2 nights. 03/28 - 03/30"
+            print(f"Running agent loop with prompt: {prompt}")
+            # Run agent loop
+            res = await agent_loop(prompt, client, session)
+            return res
+res = await run()
+print(res.text)</code></pre></div></figure>
+<h2 id="what-about-security-updates-authentication">What about Security, Updates, Authentication?</h2>
+<p>MCP is a living protocol. The specification is actively maintained on GitHub, last update from 03/26 improves security, scalability, and usability.</p>
+<ul>
+<li><strong>Authentication &amp; Security (OAuth 2.1):</strong> The protocol now mandates the OAuth 2.1 framework for authenticating remote HTTP servers</li>
+<li><strong>Improved Transport &amp; Efficiency:</strong> The previous HTTP+SSE transport will be replaced with a more flexible Streamable HTTP transport and support for JSON-RPC batching.</li>
+<li><strong>Richer Context &amp; Control:</strong> New tool annotations provide more metadata about a tool's behavior (e.g., read-only vs. destructive)</li>
+</ul>
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>This overview was compiled with the help of deep and manual research, drawing inspiration and information from several excellent resources, including:</p>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/blog/Kseniase/mcp">What Is MCP, and Why Is Everyone – Suddenly!– Talking About It?</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://python.useinstructor.com/blog/2025/03/27/understanding-model-context-protocol-mcp/#conclusion">What is MCP</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=HyzlYwjoXOQ">I gave Claude root access to my server... Model Context Protocol explained</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.latent.space/p/why-mcp-won">Why MCP Won</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=kQmXtrmQ5Zg">Building Agents with Model Context Protocol - Full Workshop with Mahesh Murag of Anthropic</a></li>
+</ul>
+<hr>
+<p>If you have any questions, feedback, or ideas, please dm me on <a target="_blank" rel="noopener noreferrer" href="https://x.com/_philschmid">X</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>. I am excited to hear about how you are experimenting and pushing the boundaries of AI agents.</p></div></div>

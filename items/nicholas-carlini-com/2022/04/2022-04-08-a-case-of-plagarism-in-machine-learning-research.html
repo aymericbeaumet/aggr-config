@@ -1,0 +1,261 @@
+<div id="readability-page-1" class="page"><div>
+      	  <p>
+      		I recently came to be aware of a case of plagiarism in the machine
+      		learning research space.  The paper <a href="https://arxiv.org/abs/2203.14101">A Roadmap for Big Model</a>
+      		plagiarized several paragraphs from one of my recent papers
+      		<a href="https://arxiv.org/abs/2107.06499">Deduplicating Training Data Makes Language Models Better</a>.
+      		(There is some irony
+      		in the fact that the Big Models paper copies from a paper about data copying.
+      		This irony was not lost on us.)
+      		This is unfortunate, but to my dismay, our paper was not the only paper
+      		copied from: the Big Models paper copied from at least a dozen other
+      		papers.
+      	  </p>
+      
+      	  <p>
+      		In the grand scheme of things, this particular form of copying isn’t the
+      		worst thing ever. It’s not like a paper has directly copied the method
+      		of a prior result and claimed it as its own. But even putting aside the
+      		fact that claiming someone else's writing as one's own is wrong, the
+      		value in survey papers is in how they re-frame the field. A survey paper
+      		that just copies directly from the prior paper hasn't contributed
+      		anything new to the field that couldn't be obtained from a list of
+      		references.
+      	  </p>
+      
+      	  <p><i>
+      	  <p>
+      		[<b>Update 4/12</b>: This article has received a lot more attention than
+      		I expected. (Context: every hour more people visit this page than viewed my entire
+      		website last week.) So a plea: let's not turn this into a witch hunt.
+      		I've seen some people say things like this should result in immediate
+      		dismissal of all those involved / people should be banned from arXiv /
+      		etc. I don't pretend to know the situation that resulted in this paper
+      		having copied from so many sources.
+      		Without knowing what happened behind the scenes, I'd like to refrain
+      		passing judgement.
+      		Maybe some junior authors meant well
+      		and thought that a citation was enough to then copy text. Maybe there was
+      		pressure from above that made some students feel like their only choice
+      		to deliver on time was to cut corners.
+      		For the part of the senior authors, they may have read over the text and
+      		thought that it looked perfectly reasonable and only made a few tweaks to
+      		the text here and there without being aware of where it came from.
+      		The point is we don't know. With 100 authors on this paper anything could
+      		have happened.
+      	  </p>
+      
+      	  <p>
+      		My hope with this post was just to draw some attention to something that
+      		I've seen happen not infrequently. 
+      		For example, roughly 1% of published-and-accepted
+      		papers have a <i>higher</i> data-copying-fraction than this paper.
+      		I should have given this context when I wrote this post initially.
+      		So, again, please let's not come down to harshly on this paper in particular.
+      		This is a problem I've noticed with the field in general, this case was just
+      		the tipping point for me because it was a paper of mine where this happened.
+      		Hopefully we can treat this as a learning experience to improve the field as a whole.
+      		With that out of the way, back to your regularly scheduled programming...]
+      	  </p>
+      	  </i></p><p>
+      		See below for a few of the more egregious examples of this, with text
+      		from the Big Models paper on the left and the corresponding text from
+      		the original paper on the right. Copied text is highlighted in <span>green</span>.
+      	  </p>
+      
+      
+      	  
+      
+      	  <br>
+      	  <table>
+      		<tbody><tr>
+      		  <td>
+      			<b>Text from the “Big Models” Paper</b>
+      		  </td>
+      		  <td>
+      			<b>Text from the Original Paper</b>
+      		  </td>
+      		</tr>
+      
+      		<tr>
+      		  <td>
+      			<span>			</span><span>The</span> <span>risks of data memorization, for example</span>,<span> the ability to extract sensitive data such as valid phone numbers and IRC usernames, are highlighted by Carlini et al. </span>[41]<span>. While their paper </span>ident<span>i</span>fie<span>s 604 samples that GPT-2 emitted from its training set, we show that over 1</span> <span>of the data most models emit is memorized training data.</span> <span> In computer vision, memorization of training data has been studied from various angles for both discriminative and generative models
+      			  Deduplicating training data does not hurt perplexity: models trained on deduplicated datasets have no worse perplexity compared to baseline models trained on the original datasets. In some cases</span>,<span> deduplication reduces perplexity by up to 10%. Further, because recent LMs are typically limited to training for just a few epochs </span>[47,<span> </span>47]<span>, </span>the<span> </span>mod<span>el</span>s<span> </span>c<span>a</span>n reach<span> higher </span>accurac<span>y </span>f<span>a</span>s<span>t</span>er by trai<span>n</span>ing on<span> higher</span>-qualit<span>y </span>d<span>a</span>ta<span>.
+      			  The simplest technique to find duplicate examples would be to perform exact string matching between all example pairs, but as we will show, this is insufficient. We introduce two complementary methods for performing deduplication. First, using a suffix array </span>[4<span>9</span>]<span>, we remove duplicate substrings from the dataset</span>s<span> if they occur verbatim in more than one example. Second, we use MinHash </span>[48]<span> </span>,<span> an efficient algorithm for estimating the n-gram similarity between all pairs of examples in a corpus, to remove entire examples from the dataset if they have high n-gram overlap with any other example.
+      			</span> <span>causes researchers to over-estimate model accuracy</span> <span>a</span>nd<span> biases model selection towards models and hyperparameters that intentionally overfit
+      		  </span></td>
+      		  <td>
+      			<a href="https://arxiv.org/abs/2107.06499">[Original]</a>:
+      			The privacy risks of data memorization, for example the ability to extract sensitive data such as valid phone numbers and IRC usernames, are highlighted by Carlini et al. (2020). While their paper finds 604 samples that GPT-2 emitted from its training set, we show that over 1% of the data most models emit is memorized training data. In computer vision, memorization of training data has been studied from various angles for both discriminative and generative models
+      			Deduplicating training data does not hurt perplexity: models trained on deduplicated datasets have no worse perplexity compared to baseline models trained on the original datasets. In some cases deduplication reduces perplexity by up to 10%. Further, because recent LMs are typically limited to training for just a few epochs (Radford et al., 2019; Raffel et al., 2020), by training on higher quality data the models can reach higher accuracy faster.
+      			The simplest technique to find duplicate examples would be to perform exact string matching between all example pairs, but as we will show, this is insufficient. We introduce two complementary methods for performing deduplication. First, using a suffix array (Manber and Myers, 1993), we remove duplicate substrings from the dataset if they occur verbatim in more than one example. Second, we use MinHash (Broder, 1997), an efficient algorithm for estimating the n-gram similarity between all pairs of examples in a corpus, to remove entire examples from the dataset if they have high n-gram overlap with any other example.
+      			causes researchers to over-estimate model accuracy, but also biases model selection towards models and hyperparameters that intentionally overfit
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			<span>			</span><span>propose the notion of a World Scope (WS) as a lens through which to audit progress in NLP. </span>Th<span>e</span>y<span> de</span>f<span>i</span>n<span>e five WSs, and</span> they<span> note that</span> the<span> most </span>popula<span>r</span> pre-training<span> in NLP operates in the </span>WS2<span> (Internet</span>)
+      		  </td>
+      		  <td>
+      			<a href="https://arxiv.org/abs/2004.10151">[Original]</a>:
+      			propose the notion of a World Scope (WS) as a lens through which to audit progress in NLP. We describe five WSs, and note that most trending work in NLP operates in the second (Internet-scale data).
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			<span>			</span><span>In addition to BERT</span>,<span> where masked words are predicted from the non-masked words in the language modality, LXMERT</span> propose<span>s cross-modality model architecture</span> that<span> could predict masked words from the vis</span>ual<span> modality as well</span> <span>so as to resolve ambiguity.
+      			  For example</span>,<span> it is hard to determine the masked word </span>c<span>arrot</span> <span>from its language </span>Wh<span>o</span> is eati<span>n</span>g <span>t</span>h<span>e</span> carro<span>t</span>?,<span> but the word choice is clear if the visual information is </span>ava<span>i</span>lable<span>
+      		  </span></td>
+      		  <td>
+      			<a href="https://arxiv.org/pdf/1908.07490.pdf">[Original]</a>:
+      			In addition to BERT where masked words are predicted from the non-masked words in the language modality, LXMERT, with its cross-modality model architecture, could predict masked words from the vision modality as well, so as to resolve ambiguity.
+      			For example, as shown in Fig. 2, it is hard to determine the masked word ‘carrot’ from its language context but the word choice is clear if the visual information is considered
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			<span>a number of information</span>-<span>seeking questions such as </span>w<span>hat is the definition of ...</span> as<span> t</span>he<span> </span>prompts,<span> [...]</span> show<span> that th</span>is<span> self-talk </span>m<span>e</span>thod<span> substantially improves the performance of zero-shot </span>bi<span>g</span> <span>model baselines on four out of six commonsense benchmarks,
+      			  and competes with models that obtain knowledge from external </span>knowledge base<span>s.
+      		  </span></td>
+      		  <td>
+      			<a href="https://arxiv.org/abs/2004.05483">[Original]</a>:
+      			a number of information seeking questions such as "what is the definition of ..." to discover [...] that the self-talk procedure substantially improves the performance of zero-shot language model baselines on four out of six commonsense benchmarks,
+      			and competes with models that obtain knowledge from external KBs.
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			<span>even if the social bias is eliminated at the word level,</span> <span>the sentence-level bias can still </span>exist due<span> </span>to<span> the </span>im<span>balanced combination of words [..]</span> <span>replacing sensitive words in the original sentence with words in a similar semantic but different bias directions.
+      		  </span></td>
+      		  <td>
+      			<a href="https://arxiv.org/pdf/2103.06413.pdf">[Original]</a>:
+      			even if the social bias is eliminated at the word level,the sentence-level bias can still be caused by the unbalanced combination of words [..] by replacing sensitive words in the original sentence with words in a similar semantic but different bias directions.
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			It <span>propose</span>s<span> two methods to learn cross-lingual lan</span>g<span>uage models (XLMs): one unsupervised that only relies on monolingual data, and one supervised that leverages parallel data with a new cross-lingual language model objective. [...]
+      			  Both the CLM and MLM objectives are unsupervised and only require monolingual data. </span>For<span> i</span>mp<span>ro</span>vi<span>n</span>g<span> </span>c<span>r</span>o<span>s</span>s-l<span>i</span>ngu<span>a</span>l pr<span>e</span>-train<span>ing</span>, they<span> </span>introduc<span>e </span>a<span> </span>new tra<span>n</span>slation <span>l</span>a<span>ngua</span>ge model<span>in</span>g (TLM)<span> </span>objective.
+      			Th<span>e</span>y<span> consider cross-lingual language model pre</span>-<span>training with either CLM, MLM, or MLM</span> is<span> used in combination with TLM.
+      		  </span></td>
+      		  <td>
+      			<a href="https://arxiv.org/pdf/1901.07291.pdf">[Original]</a>:
+      			We propose two methods to learn cross-lingual lan- guage models (XLMs): one unsupervised that only relies on monolingual data, and one supervised that leverages parallel data with a new cross-lingual language model objective. [...]
+      			Both the CLM and MLM objectives are unsupervised and only require monolingual data. We introduce a new translation language modeling (TLM) objective for improving cross-lingual pretraining.
+      			In this work, we consider cross-lingual language model pretraining with either CLM, MLM, or MLM used in combination with TLM.
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			<span>to large-scale mono</span>-<span>lingual corpora across many languages. The input texts are noised by masking phrases and permuting sentences, and a single Transformer model is learned to recover the texts.
+      		  </span></td>
+      		  <td>
+      			<a href="https://arxiv.org/pdf/2001.08210v2.pdf">[Original]</a>:
+      			to large-scale monolingual corpora across many languages. The input texts are noised by masking phrases and permuting sentences, and a single Transformer model is learned to recover the texts.
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			<span>Such models not only have lower inference latency, but they also do not suffer from the problem of errors that propagate from one component to the next
+      		  </span></td>
+      		  <td>
+      			<a href="https://aclanthology.org/2020.emnlp-main.644.pdf">[Original]</a>:
+      			Such models not only have lower inference latency, but they also do not suffer from the problem of errors that propagate from one component to the next
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			<span>			h</span>as<span> presented a study of adapters for multilingual ST and shown that language-specific adapters can enable a fully trained multilingual ST model to be further specialized in each language pair</span>.<span>
+      		  </span></td>
+      		  <td>
+      			<a href="https://arxiv.org/pdf/2106.01463.pdf">[Original]</a>:
+      			have presented a study of adapters for multilingual ST and shown that language-specific adapters can enable a fully trained multilingual ST model to be further specialized in each language pair
+      
+      		  </td>
+      		</tr>
+      		<tr>
+      		  <td>
+      			<span>147M conversation-like exchanges extracted from Reddit comment chains over a period spanning from 2005 through 2017</span>.<span> DialoGPT [...]
+      			  The GPT-2 transformer model adopts the generic transformer language model </span>[<span>2</span>5]<span> and leverages a stack of masked multi-head self-attention layers to train on massive web-text data. [...]
+      			</span>Dial<span>o</span>GPT<span> inher</span>ed<span> a 12-to-48 layer transformer with layer normalization, a initialization scheme that accounts for model depth that we modified, and byte pair encodings </span>[1<span>2</span>3<span>6</span>]<span> for the tokenizer</span>
+      			<span>MMI employs a pre-trained backward model to pre</span>d<span>ict source sentences from given responses</span> <span>[...]
+      			</span>a <span>strong preference can be observed for DialoGPT over PersonalityChat</span> [1432]<span>
+      		  </span></td>
+      		  <td>
+      			<a href="https://arxiv.org/pdf/1911.00536.pdf">[Original]</a>:
+      			147M conversation-like exchanges extracted from Reddit comment chains over a period spanning from 2005 through 2017, DialoGPT [...]
+      			The GPT-2 transformer model adopts the generic transformer language model (Vaswani et al., 2017) and leverages a stack of masked multi-head self-attention layers to train on massive web-text data. [...]
+      			Our model inherits from GPT-2 (Radford et al., 2018), a 12-to-48 layer transformer with layer normalization, a initialization scheme that accounts for model depth that we modified, and byte pair encodings (Sennrich et al., 2016) for the tokenizer.
+      			MMI employs a pre-trained backward model to pre- dict source sentences from given responses. [...]
+      			strong preference can be observed for DialoGPT over PersonalityChat. 
+      
+      		  </td>
+      		</tr>
+      	  </tbody></table>
+      
+      	  <br>
+      	  <h2>
+      		How did we find these examples?
+      	  </h2>
+      	  
+      	  <p>
+      		One of my coauthors was reading the Big
+      		Models paper and noticed that some of the text seemed oddly familiar, and after
+      		quickly looking things over we found that in fact a bunch of the text was
+      		directly copied from our paper.
+      	  </p>
+      
+      	  <p>
+      		Given that this happened to us, we then set out to see if there were other
+      		examples too. As part of a prior project, I had collected a dataset of PDFs for
+      		(almost) every accepted paper at top machine learning venues
+      		(ICML/ICLR/NeurIPS/AAAI/ACL/etc). So all I did to find the above copied text was
+      		to take these PDFs, extract out all of the text and dump it into a single .txt
+      		file, and then run our  <a href="https://github.com/google-research/deduplicate-text-datasets">dataset deduplication tools</a> (that we developed for the
+      		paper that was copied from!) to find all repeated sequences that were contained
+      		both in the Big Models paper along with some other prior publication. To rule
+      		out false positives, I only considered sequences of
+      		</p><ol>
+      		  <li>
+      			at least 10 words (after whitespace normalization),
+      		  </li>
+      		  <li>
+      			that are contained sequentially in the Big Models paper,
+      		  </li>
+      		  <li>
+      			and also present in a prior paper,
+      		  </li>
+      		  <li>
+      			but are not present in more than one prior paper.
+      		  </li>
+      		</ol><p>
+      		This ensures that I won’t flag any common phrases as
+      		copied (e.g., copyright blocks, citations to prior paper titles or author names,
+      		etc).
+      	  </p>
+      
+      	  <p>
+      		And then from there, it was just a matter of quickly manually reviewing a few of
+      		the most egregious cases (shown above). There were other examples of
+      		self-plagiarism where the paper that was copied from shared an author with the
+      		new paper that I have omitted–while this isn’t an ideal practice, it’s less
+      		concerning.
+      	  </p>
+      
+      	  <p>
+      		Because of this filtering process, and because my dataset of papers is not
+      		exhaustive over all prior publications (notably, it only contains accepted
+      		papers, not arXiv preprints), it is possible there is more copying going on here
+      		than I have identified. However even what we have found so far is already more
+      		than should happen, and I am saddened that this is happening at all.
+      	  </p>
+      	  
+          </div></div>

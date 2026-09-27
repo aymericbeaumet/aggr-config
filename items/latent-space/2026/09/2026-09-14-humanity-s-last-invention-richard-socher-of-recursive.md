@@ -1,0 +1,1086 @@
+---
+title: Humanity’s Last Invention — Richard Socher of Recursive
+link: https://www.latent.space/p/recursive
+source: latent-space
+published: 2026-09-14T16:04:16Z
+updated: 2026-09-14T16:04:16Z
+first_seen: 2026-09-27T19:29:15.293681927Z
+summary: Richard Socher is an NLP OG and CEO of You.com, who has now spun out an even more ambitious startup focused on RSI — already worth $5B!
+content: extracted
+html: 2026-09-14-humanity-s-last-invention-richard-socher-of-recursive.html
+preview:
+  file: 2026-09-14-humanity-s-last-invention-richard-socher-of-recursive.preview-b17afd9f09cf.webp
+  width: 256
+  height: 128
+  color: '#7b5f64'
+images:
+- source: https://substackcdn.com/image/fetch/$s_!B0-U!,w_1200,h_600,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-video.s3.amazonaws.com%2Fvideo_upload%2Fpost%2F215289811%2F00f17267-ccc0-4361-b29d-c2fef2128ec5%2Ftranscoded-1789165150.png
+  original:
+    file: 2026-09-14-humanity-s-last-invention-richard-socher-of-recursive.image-3d4d3dac4df5.jpg
+    width: 1200
+    height: 600
+  color: '#041837'
+- source: https://substackcdn.com/image/fetch/$s_!6T4g!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc6110fb7-c06c-4d1e-bd0e-0709f6ca1011_1600x1600.webp
+  original:
+    file: 2026-09-14-humanity-s-last-invention-richard-socher-of-recursive.image-5e2c67013db8.jpg
+    width: 1456
+    height: 1456
+  color: '#f3f4f3'
+- source: https://substackcdn.com/image/fetch/$s_!J3mn!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5fc02361-3991-4779-a41c-6e70acaf2dd0_2056x1356.png
+  original:
+    file: 2026-09-14-humanity-s-last-invention-richard-socher-of-recursive.image-423e78685e77.jpg
+    width: 1456
+    height: 960
+  color: '#040405'
+extra:
+  audio_type: audio/mpeg
+  audio_url: https://api.substack.com/feed/podcast/215289811/2fb38b11f6378b842e98c121de6c47e9.mp3
+---
+
+*At 1:09:00 we talk about the rise of AI x Finance, and [AIE NYC](https://ai.engineer/nyc/2026) is one month away - our hotel block is 97% sold out, get [tix](https://ai.engineer/nyc/2026#tickets) & travel ASAP - we will announce speakers from Bridgewater, Ramp, Coatue, Mastercard, Vanguard, Coinbase, Blackrock, Fidelity, Point72, Capital One, JPMC, Wells Fargo, Bloomberg, A24 (yes the movie studio) Labs, Two Sigma, Apollo Global, and more soon!*
+
+From helping pioneer core ideas in NLP to now building AI systems that can automate AI research itself, **[Richard Socher](https://x.com/RichardSocher?lang=en) is betting that the next major step in AI is recursive self-improvement.** He is the founder of You.com, AIX Ventures, and now [Recursive](https://www.gv.com/news/recursive-superintelligence-self-improving-ai), which has assembled some of the best [open-endedness](https://www.youtube.com/watch?v=ZZC_xqRgcHo) (& [self improving agent](https://arxiv.org/abs/2505.22954)) researchers in the world and raised a **$4.65B seed round**.
+
+[![](https://substackcdn.com/image/fetch/$s_!6T4g!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc6110fb7-c06c-4d1e-bd0e-0709f6ca1011_1600x1600.webp)](https://substackcdn.com/image/fetch/$s_!6T4g!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc6110fb7-c06c-4d1e-bd0e-0709f6ca1011_1600x1600.webp)
+
+In this episode, Richard joins Latent Space to unpack his vision for the **“Eureka Machine”**: a superintelligence that can improve the process of invention itself, accelerate AI research, and eventually tackle major problems across **science, energy, materials, biology, and more**.
+
+You can get his book “The Eureka Machine” **[here](https://www.hachettebookgroup.com/titles/richard-socher/the-eureka-machine/9781541705708/?lens=publicaffairs)**!
+
+[www.youtube.com](https://www.youtube.com/watch?v=eDFXtSg3zB8)
+
+We go deep on Recursive’s **early results**, including an AI research system that Richard says outperformed humans and their agents on optimization tasks in less than two days, as well as work on NVIDIA GPU kernels where the system discovered improvements without relying on a team of CUDA experts. Richard also explains why he thinks **AI research that currently takes thousands of people and years could eventually be compressed into weeks**. These results are summarized in his [20 minute AIE keynote](https://www.youtube.com/watch?v=pWXUkLP9uWM), where we also discuss his **10 dimensions of intelligence:**
+
+[![](https://substackcdn.com/image/fetch/$s_!J3mn!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5fc02361-3991-4779-a41c-6e70acaf2dd0_2056x1356.png)](https://substackcdn.com/image/fetch/$s_!J3mn!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5fc02361-3991-4779-a41c-6e70acaf2dd0_2056x1356.png)
+
+We also explore the harder questions around increasingly capable AI: reward hacking, whether **Anthropic-style constitutions actually work**, AI regulation and proposals to “pace” frontier development, open-source models as **geopolitical soft power**, whether today’s LLM paradigm is enough, and what happens if AI systems eventually begin choosing their own goals. Richard reflects on the rejected research that helped inspire Alec Radford’s **GPT**, open-endedness, the AI Economist, simulations of entire economies, and his framework for thinking about the upper bounds of intelligence itself.
+
+- The **Eureka Machine** and Richard’s vision for an AI that can automate invention
+
+- Why Richard is optimistic about **superintelligence for science and technology**
+
+- Why **AI hard-takeoff** scenarios may underestimate physical and economic constraints
+
+- The risks of **regulating intelligence itself** instead of specific AI applications
+
+- **Reward hacking** and why increasingly intelligent AI makes objective design harder
+
+- Richard’s critique of **Anthropic’s constitution and constitutional AI**
+
+- **Alignment vs. personalization** and whose values an AI should follow
+
+- Why **open-source AI** matters for resilience, competition, and geopolitical soft power
+
+- Why Richard left You.com’s frontier-model work to start **Recursive**
+
+- **Recursive self-improvement** and automating the process of AI research
+
+- Whether **today’s LLM paradigm is enough** — and why Richard is less bullish on world models
+
+- **DecaNLP**, early prompt-based generalization, and the research that influenced GPT
+
+- Why **rejected research** can shape entire technological timelines
+
+- **Open-endedness, evolutionary approaches, and rainbow teaming**
+
+- What happens if AI systems begin **setting their own goals**
+
+- Why simple objectives like **profit maximization** can produce dangerous reward hacks
+
+- Recursive’s long-term plan to apply **self-improving AI to science**
+
+- The **compute, hardware, and economic constraints** on AI takeoff
+
+- Recursive’s early **NanoChat, NanoGPT, and GPU kernel** optimization results
+
+- Why automating AI research could reduce **years of work to weeks**
+
+- **Reward engineering** and what makes auto-research systems actually work
+
+- The **AI Economist** and using simulations to test economic policy
+
+- Whether LLMs can realistically **simulate people and entire economies**
+
+- **Benchmark bugs and evaluation harnesses** and the difficulty of measuring AI progress
+
+- Recursive’s near-term focus on **AI for AI research**
+
+- **Harness optimization, sandboxing, and web search** as core agent infrastructure
+
+- You.com and the **search stack for AI agents**
+
+- **AI in finance, backtesting, and data leakage**
+
+- Richard’s three fundamental components and **ten “spaces” of intelligence**
+
+- The theoretical upper bounds of **vision, communication, knowledge, and computation**
+
+- **Creative intelligence, metacognition, and AI-generated goals**
+
+- **Survival and replication** and why AI does not necessarily need to fear being turned off
+
+- **High agency and ambitious goals** and Richard’s advice for people building with AI
+
+- **X:** [https://x.com/RichardSocher](https://x.com/RichardSocher)
+
+- **LinkedIn:** [https://www.linkedin.com/in/richardsocher/](https://www.linkedin.com/in/richardsocher/)
+
+**00:00:00** The Eureka Machine and Superintelligence
+
+**00:02:23** AI Optimism, Slow Takeoff, and Regulation
+
+**00:07:56** AI Safety, Reward Hacking, and Anthropic’s Constitution
+
+**00:11:49** Alignment, Personalization, and Open Source AI
+
+**00:15:46** Why Richard Started Recursive
+
+**00:20:03** Recursive Self-Improvement and the Founding Team
+
+**00:22:55** Are Today’s LLMs Enough?
+
+**00:29:03** DecaNLP, GPT, and the Rejected Idea Ahead of Its Time
+
+**00:34:38** Open-Endedness and Evolutionary AI
+
+**00:36:38** What Happens When AI Chooses Its Own Goals?
+
+**00:41:16** Superintelligence for Science
+
+**00:42:40** GPUs, Compute, and the Limits of AI Takeoff
+
+**00:45:07** Recursive’s Results: AI Beating Humans and Their Agents
+
+**00:49:14** Reward Engineering and Auto Research
+
+**00:53:12** The AI Economist and Simulating Entire Economies
+
+**00:58:07** LLM Simulations, Personas, and Mode Collapse
+
+**01:03:38** Recursive’s Roadmap, Agents, Search, and Finance
+
+**01:09:13** The Upper Bounds and Spaces of Intelligence
+
+**01:30:21** Goals, High Agency, and Advice for Builders
+
+**Swyx \[00:00:00\]:** We’re here in a studio with Vibhu and myself and Richard Socher. Welcome.
+
+**Richard Socher \[00:00:06\]:** Thanks for having me.
+
+**Swyx \[00:00:07\]:** We just talked about the Eureka Machine, or we just released a talk, at AI Engineer about the Eureka Machine. Is it — you said it’s your life’s goal. What is the Eureka Machine?
+
+**Richard Socher \[00:00:16\]:** The Eureka Machine is the ultimate invention that will afterwards invent most everything for humanity. It’s essentially a superintelligence that can be given any goal, any environment, reward, and then it will try its best to achieve those goals to create the kinds of inventions that humanity would hopefully ask it for.
+
+**Swyx \[00:00:45\]:** Yeah, I think we have the book pulled up here that you’ve written.
+
+**Richard Socher \[00:00:50\]:** That’s right, yeah. I finished it last year, a little bit before we started Recursive, and now we’re gonna try to build parts of that.
+
+**Swyx \[00:00:57\]:** You finished it last year. It’s July. What takes so long?
+
+**Richard Socher \[00:01:01\]:** Oh, man, books. Books are incredibly slow.
+
+**Richard Socher \[00:01:04\]:** It’s ridiculous. That whole industry is just unfathomably slow.
+
+**Richard Socher \[00:01:07\]:** So a lot of the ideas have been out there for a while, but yeah, I’m really glad it’s finally coming out in September this year.
+
+**Swyx \[00:01:14\]:** We might have AGI by then. Like, we don’t know.
+
+**Vibhu \[00:01:18\]:** Any key takeaway that you’re most excited to put in here?
+
+**Richard Socher \[00:01:21\]:** Yeah. The key takeaway, I think, is that people could and should be much more excited about the positive implications of superintelligence, especially for science, physics, chemistry, biology, but also economics and astrophysics, and all kinds of other engineering tasks. I think there is so much more that can be done with better technology. And right now, I feel like a lot of people need, like, better marketing, not just for the future in general, but also, better marketing for technology and in particular for AI. And this book, should show even the AI skeptics, how much positive upside there is for AI, especially when it comes to inventing, new scientific discoveries.
+
+**Swyx \[00:02:09\]:** I think you quoted the techno-optimist manifesto from, Marc Andreessen, which I think was, like, beautiful in its, ambition and clarity and simplicity almost as well.
+
+**Richard Socher \[00:02:18\]:** I agree. Yeah. Yeah, you can disagree with him on some things, but, like, I think he’s right on the techno-optimism.
+
+**Swyx \[00:02:23\]:** Where do you think optimists get in trouble?
+
+**Richard Socher \[00:02:26\]:** Like, you shouldn’t have blind optimism. You should be very clear-eyed, like, especially when with such an omni, like, use type of technology as AI is, you need to think about the potential downside scenarios, especially when people use it for things that you don’t want them to use it for. It’s a little bit like the internet, and I feel like people are trying to regulate AI sometimes because of those potential downsides the way you would regulate the internet, if you were to say, “Well, because there’s bad content on the internet, like torture porn or whatever, like, we should just make it slower. That way, you can’t share the illegal content as quickly, or we should make the hard drive smaller so you can’t store as much illegal content.” But I’m like, “That’s not how you regulate that.” that’s like saying like we should regulate intelligence in the abstract. What you should regulate to avoid those downside scenarios, even as an optimist, are the specific applications. Sure, I don’t want, like, some AI surgeon to, like, practice some RL moves in my brain. It should be fully FDA certified. Sure, I don’t want any random startup to, like, drive on the highway, and cause a major accident. It should, like, have proper certifications before it’s let loose on the highway. But I feel like those downside scenarios, that some optimists sometimes maybe don’t consider enough are fairly easily regulated, compared to, what the doomers are worried about.
+
+**Swyx \[00:03:54\]:** It — Slow takeoff is part of the strategy as well?
+
+**Richard Socher \[00:03:57\]:** I do think, as excited as I am about, AI and its impact for society and, culture even, and certainly technology and economics and wealth and, health and all of those things, as excited as I am about all that, I do think the most bullish people on the AI hard takeoff scenarios overestimate how quickly things can move. There are hardware constraints. There are physical constraints about, the compute substrate. How quickly can you get enough, GPUs on? There are also constraints in the economy where there are a lot of industries that don’t require an insane amount of complex intelligence and complex capabilities. Like, if you think about jobs in, brands and, like, clothing and apparel and, like, handbags and stuff, superintelligence isn’t gonna make your fancy $10,000 handbag any fancier?
+
+**Richard Socher \[00:04:57\]:** It’s like that’s — It will have no effect on the economy. You think about travel and tourism. People wanting to see the pyramids, in Egypt, it’s not gonna change that much with AI. Sure, you can, like, generative a fake, photo of you and next to the pyramids.
+
+**Swyx \[00:05:12\]:** I can use Genie and, tour the pyramids in Genie.
+
+**Richard Socher \[00:05:15\]:** Yeah, exactly. But, and there’s so many industries, like logging and oil. You’re not gonna magically get 1,000x more oil because, like, sure, there will be robotics, like drilling and things like that could be done, but it’s not gonna 1,000x that industry in a, like, crazy hard takeoff scenario, both on the economy, and I can go on and on about all the other examples, where that, like food and so on, where that doesn’t necessarily change that much. And then, yeah, there are real physical constraints. And then there are, of course, like, people like, off-ramping from progress. That’s one of my concerns often is that I see people in, like, Europe and other, whole regions almost feeling like they. Like many people there wanna off-ramp from progress, period. And that will also slow down, like, more improvements.
+
+**Swyx \[00:05:59\]:** Yeah. We have this pulled up where, this is one of those things that, is very topical right now because now all the Frontier Labs are calling for the option to pace AI. They don’t say pause, they say pace. I don’t know if there’s there’s any take from you about, like, whether or not this will be effective.
+
+**Richard Socher \[00:06:17\]:** I think the downsides of trying to truly regulate with the full power of law what people do on their GPUs, would be worse than any of the concerns that they have. Like, it would be an crazy totalitarian state
+
+**Richard Socher \[00:06:37\]:** If every one of your GPU computes was known to some big government or multi-government agency.
+
+**Richard Socher \[00:06:44\]:** It’s like, it’s literally if you try to regulate intelligence, it’s trying to regulate thought, and that’s ridiculous, and it’s crazy. I think it is make — it is sensible to regulate some of the applications of this technology.
+
+**Swyx \[00:06:55\]:** Yeah. We had a bill, actual bill to regulate the number of flops in a model, and I’m like, “Okay, well-”
+
+**Richard Socher \[00:07:00\]:** Europe done it. Like, these guys have been successful enough with their fearmongering that all of Europe has regulated itself so much before it even had a proper AI takeoff because they listened to some experts who say, “We might all die if this technology has more than this number of flops.” And they’re like, “Well, we’re good. We wanna want people to thrive. Let’s not have technology that could have a small chance of all of us dying.” And so they regulated exactly those kinds of things in the EU. And so it’s, it’s very unfortunate that there are real implications for some people when others saying, “Let’s pace while they’re sprinting as fast as possibly,” “as fast as humanly possible towards that frontier themselves.”
+
+**Swyx \[00:07:43\]:** Yeah. It’s also not a global pause, right? Like, other nations are still accelerating at the same pace.
+
+**Richard Socher \[00:07:50\]:** Oh, yeah.
+
+**Richard Socher \[00:07:50\]:** You’d need a totalitarian world regime if you tried to regulate intelligence and GPUs and what people do on them.
+
+**Swyx \[00:07:56\]:** Any takes on the safety angles of this? So there was a drawback of Fable, a pause on 5.6 before it could be released. Recently, there was Hugging Face with the OpenAI cyber incident. Any takes there?
+
+**Richard Socher \[00:08:11\]:** 100 percent. I think these are serious issues of reward hacking, and clear failures, of doing proper red teaming or rainbow teaming. I don’t know if you saw this paper from Tim Rocktäschel and a few others, where one AI, is tasked to try to hack another AI and then they can go back and forth in an open-ended fashion to inoculate themselves from those. Yeah, this is the paper. It’s a really clever idea. Open-endedness, and evolutionary inspirations are, big for us at Recursive as well. And so I wish they had used more of that. And it’s clear that, for instance, the constitutional AI. I don’t know if you remember anthropic.com/constitution. You can pull it up and search for cyber right there. It says, “Hard constraint. Claude will never ever do cyberattacks, and that is a hard constraint in our constitution.” So here are the current hard constraints on Claude’s behavior.
+
+**Richard Socher \[00:09:16\]:** Number 3, create cyber weapons or malicious code that could cause human damage.
+
+**Richard Socher \[00:09:21\]:** And clearly, this whole constitution was fake. Like, it clearly isn’t being adhered to at all.
+
+**Swyx \[00:09:26\]:** Because Anthropic also found that they had in their testing
+
+**Richard Socher \[00:09:30\]:** They’re also. Like, they’re like, “Oh, well, other people are hacking now.” There are a couple things. One, you can make a sandbox very simple, and then it’s very easy to hack yourself out of a sandbox, right? But what I think it shows is that we’re currently in this state of AI where the reward engineer still has to do a lot more careful work, and where the AI, in most cases, is not very good yet at understanding what is meant versus what is being said. And so concretely, I think this will happen if we were to have this intelligence more easily accessible in a lot of companies. Imagine you run a service center and someone says, “Oh, here’s my CSAT score and my dashboard. Make this number go up.” It’s like, “Our CSAT score is so poor.” The intelligent AI will just be like, “Oh, sure. Like, I’ll just create 1,000,000 bots that call our service center and give a 5 out of 5 rating at the end, and the number went up just like you asked for.” And you’re like, “That’s not what I meant.” “I meant with our real customers.” The AI goes off and says, “Well, easy. I’ll just give a 1000 dollar gift certificate for every failed, whatever DoorDash
+
+**Richard Socher \[00:10:35\]:** Offer.” It’s like, “That’s not what I meant.” It’s like, “Well, but that is what you said.” And like, so I think clearly articulating what the rewards are is something we haven’t gotten very good at as humanity. And then clearly, the AI in these cases has not gotten good enough at understanding what we mean when we ask it and give it certain rewards. Now, what gives me hope is there are the first inklings, of this being better. I’ll give you an example like WhisperFlow. Full disclosure, I invested, in their seed round, but at AIX Ventures, but, WhisperFlow has gotten much better at writing what you mean and not what you say. And I think that is a sign of things to come. I think there will be more and more AIs as we make it more and more intelligent that will be better at being aligned with what is meant.
+
+**Swyx \[00:11:21\]:** Will it be done through a constitution or RLHF or
+
+**Richard Socher \[00:11:23\]:** Clearly, constitutions don’t matter at all.
+
+**Richard Socher \[00:11:25\]:** It doesn’t work. And that was, I think, mostly marketing. I think we need to find better solutions for it. And I think at Recursive, we have a few very good ideas and some already
+
+**Richard Socher \[00:11:34\]:** Like, ways where I think we have a better grasp on it. I don’t think we’ve fully, figured it out yet, but, we’re thinking a lot about safety, and the more intelligent the AI gets, the more you want it to be aligned, the less you want it to think about reward hacks and try to do the right thing.
+
+**Swyx \[00:11:49\]:** I don’t know if we’ll touch on this topic, but I’m just gonna throw this question in here because it’s something that’s weighing on me. Alignment, let’s call it, is alignment to general humanity’s preferences, the median preference. Personalization is pinpointing what you want, and sometimes alignment can conflict because what you want is not what the general median population wants. How do you choose?
+
+**Richard Socher \[00:12:12\]:** It’s a great question.
+
+**Richard Socher \[00:12:13\]:** I think you ultimately have to, of course, be aligned with laws. Like wherever your AI is deployed and needs to align with the law. I do think what AI often does is put this mirror in front of us and say, like, “This is what you’re looking like. Now I can amplify that a 1000 times. Is it still what you want?” and the truth is that different cultures made different choices. Like, in Eastern cultures, the greater good is often valued more, than the individual. Western civilization, we care more about individual freedoms and rights and the pursuit of happiness and so on, than others. And even there are gradations. There’s regulation versus litigation trade-offs. In the US, you first can often, not every time, like, FDA and so on does regulate some areas, but in many cases, the bad things happen, someone sues someone else, and then there’s a law based on that. In Europe, they try to often avoid any harm to anyone and regulate before. And both are, trying to do the best thing, but, some is more amenable to innovation than others. And so yes, you’re right. Like, I think ultimately each individual, each country, and humanity as a whole has to think about those values more, and then try to put them into laws. And that those are ultimately the constraints. And hopefully, different, societies, just like now with their AIs, will align their AIs to a different one so we have not just a monoculture of alignment.
+
+**Vibhu \[00:13:46\]:** Here’s a follow-up on this that I wasn’t expecting to ask. Do you have takes on open source, open weight versus who owns the intelligence? So, clearly not the biggest, fan of the constitution
+
+**Richard Socher \[00:13:58\]:** You had to do this in the topic side off.
+
+**Vibhu \[00:14:00\]:** But it’s fine.
+
+**Vibhu \[00:14:02\]:** Point being, any thoughts on who should own weight? Should it be open? Anything there?
+
+**Richard Socher \[00:14:06\]:** 100 percent. I am a big fan of open source. We’re gonna sign some various open source letters at, Recursive also. I think, even in the worst case attack scenarios, it is better to have more good actors have more different types of AI, accessible. I think, open source is a little bit a soft power type of thing, too. So I do think it’s good for the Western world
+
+**Richard Socher \[00:14:31\]:** To have an answer to that, out of China. I do think, when you watch a Hollywood movie, there’s — it’s like, I don’t wanna misc, diss all of movies, but there’s a certain sense of propaganda, right? You watch one side of things, right?
+
+**Vibhu \[00:14:46\]:** Oh, yeah. Have you seen Top Gun? Like, come on.
+
+**Vibhu \[00:14:48\]:** Like, it’s like half of it’s paid for by the US Army or something.
+
+**Richard Socher \[00:14:51\]:** Yeah. And so. And, I think that’s just natural. Like, but what’s interesting here is I think LLMs are essentially a similar type of soft power to movies and beyond, because they’re also, highly important for cybersecurity and so on. But one of their many aspects is that soft power of storytelling. Like, if, like a child asks an LM, like, “Tell me an inspiring story of what I should do when I grow up,” right? It’s like those are all these, like, subtle things. So I think it’s important, for Western world. I do love, individualism. I do think, despite, some of its flaws, like capitalism is the best way we have governed, found ourselves to govern, and so on. And so I do think there are various aspects that would be good, to have a Western open source answer, for LLMs. And, with Recursive, I can’t make the announcement quite yet, but we’ll
+
+**Richard Socher \[00:15:43\]:** We’ll be relevant in that space very soon.
+
+**Vibhu \[00:15:46\]:** Okay. All right. Exciting. I wanna bring us to Recursive. So outside of our tangents, you have a pretty deep background in the NLP space. You worked on, like, early embeddings, GloVe with Chris Manning, who was a previous guest on the podcast, You.com. What’s the history? How did you decide to start another company?
+
+**Richard Socher \[00:16:06\]:** Yeah. So I’ve been excited about AI for over 2 decades now. I sometimes feel like it’s ancient history now. It’s BC, the before ChatGPT era. No one cares about all the religions that happened, before, Jesus Christ, and no one cares about the models that happened before, transformers and ChatGPT and stuff. But, like, it’s something that I’ve been deeply passionate about. I think AI is one of the most interesting things one could work on, period. I think language is the most interesting manifestation of human intelligence, too. And, at You.com, we eventually off-ramped from pushing, like the frontier of AI forward to mostly giving people, like, good search engines, search, APIs and answers over the web. I think that’s an extremely important part of intelligence, just knowledge and access, especially even, we’ll get there maybe later, if you wanna invent a eureka machine that invents everything for us, it needs to know how not to reinvent the wheel, proverbially speaking. And to know what has been invented, you gotta have internet access. So it’s the number one used, most used tool, in LLMs, agents, chatbots, and so on is web search. So I’m really excited for You.com to own that and grow really well in that with really large customers and so on. But it’s also not building frontier models anymore. And so I initially tried to do this within You.com and raise another round and so on, but you just can’t. You have to do a certain thing, and until you print enough money that you’re allowed to start a second thing within that company is really hard. At the same time, I had all these ideas. I put them into a book. I finished the book last year, and I was like, “It’d be really fun to work, on this myself.” I felt like with word vectors, and then prompt engineering and, ImageNet and larger language models for protein generation, not folding and so on, I, me and my teams have pushed the field truly forward. And I feel like we can do it again, here at Recursive. And in many ways, what I observed over the last, 20 years in AI is that whenever we replace some human part of the process of creating AI with a learned system, improvements follow. And so. We’ve done that taking out manual feature engineering, like in sentiment analysis. I don’t know if you remember these old days where, like there are linguists, and they’re like, “Here’s how you negate, and there’s a, like, regular expression.”
+
+**Swyx \[00:18:21\]:** I went to Penn where we — they had, like the WordNet
+
+**Richard Socher \[00:18:24\]:** That’s right, WordNet, all of that stuff. Yeah
+
+**Swyx \[00:18:26\]:** Original. They use, our grad students to label Wall Street Journal articles and, like, really construct a knowledge graph of
+
+**Richard Socher \[00:18:32\]:** There you go.
+
+**Richard Socher \[00:18:33\]:** And WordNet started, was part of how we started ImageNet. But anyway, so, like, it was really, like, fun, to do. But when we replaced all of that manual feature engineering with vectors and neural nets and just backprop through everything, it started to work really well at scale. And so then everyone started to do architecture engineering, and I was like, “ that clearly can’t be it.”
+
+**Swyx \[00:18:53\]:** You mean, neural architecture search?
+
+**Richard Socher \[00:18:55\]:** Like, manually, they would say like, “Oh, I’m, I’m doing sentiment analysis, so I have a special neural net that’s really good at sentiment analysis.” And then the machine translation community had a special neural net for machine translation.
+
+**Swyx \[00:19:06\]:** I see.
+
+**Richard Socher \[00:19:07\]:** The summarization people had their own stuff. And I was like, “That clearly can’t be it. We should unify all of that.” So I had 2 papers. One is called Ask Me Anything, and the other one was called DecaNLP. And DecaNLP eventually got cited, like, 5 times by the first GPT paper. And, to me, that was, like a really a big step forward. And then, of course, you had to combine this idea of prompt engineering with transformers and with language models, and you put it all together, you scale it up, which is also a huge amount of work. And then, the field progressed a lot. I feel like the next step and maybe the last step of that history and the arguably, success has a lot of parents, only failure is an orphan, like my version of that AI history, I do feel like in that history, you can think about, “Well, what’s the next way to automate?” And that is the AI research itself, like the human, process of ideating, implementing, and validating ideas.
+
+**Richard Socher \[00:20:01\]:** And in our case, ideas for AI.
+
+**Richard Socher \[00:20:03\]:** And when you have AI then help you with that, it, by almost definition, becomes a self-improving AI ‘cause it now does research on itself. And there are lots of different misnomers. Some people think auto research is already recursive self-improvement. It’s
+
+**Swyx \[00:20:17\]:** Yeah, and you explained that in the talk
+
+**Richard Socher \[00:20:19\]:** Completely different.
+
+**Richard Socher \[00:20:19\]:** But, to me, it’s the most interesting thing that I could be doing, and I’m really excited with the co-founding team. What’s interesting is we have 8 co-founders in total, including myself. And so
+
+**Swyx \[00:20:31\]:** They are gonna bring it up.
+
+**Richard Socher \[00:20:31\]:** Nice. Yeah. And they’re all. I could talk about all of them if you want.
+
+**Swyx \[00:20:34\]:** Super stacked.
+
+**Richard Socher \[00:20:35\]:** Yeah. Just an incredibly talented group of people. And we all came to the same conclusion, but from very different directions. Like Josh Tobin, is our CTO. He ran, a bunch of different, projects at OpenAI, like, Codex and deep, research, agents and ChatGPT agents and so on. But before that, he also worked in robotics, and he saw the smaller simulations, and how it’s gonna be really hard to scale that in full generality. And so that’s, that was his angle coming to recursive self-improvement. We have Jeff Clune who’s been working in, like, open-endedness for a long time, together with Tim Rocktäschel. Tim Rocktäschel also built Genie 1, 2, and 3, which is, like the most exciting and most sophisticated, I think, still world model, anywhere. And so they both came from this, open-endedness angle. Jeff also, I think, published one of the most exciting papers in recent years about recursive self-improvement called the Darwin Gödel Machine. Super interesting paper. If we could, maybe pull it up really quick
+
+**Richard Socher \[00:21:35\]:** It would be, like, super interesting to see ‘cause you see
+
+**Swyx \[00:21:38\]:** By the way, I love how many paper citations.
+
+**Swyx \[00:21:40\]:** You’re, you’re giving people a lot of homework, which I like.
+
+**Richard Socher \[00:21:42\]:** Love it. Yeah. And so, like Caiming Xiong, a rockstar, we worked together at MetaMind and Salesforce Research together. Alexey Dosovitskiy invented the Vision Transformer, one of the most cited, papers in computer vision. Tim Shi is, like also a unicorn founder. Yuandong Tian led RL at Meta. So just like, yeah, really fun to work with them, and the next level of people are just incredibly strong, too. So it’s been a really fun ride so far. So the first figure, you see exactly these kinds of ideas, that, I think, yeah, inspired a lot of us and now more and more people, where you have this archive of different coding agents. They learn how to self-modify, evaluate, and then create these phylogenetic trees, of, yeah, different ideas.
+
+**Swyx \[00:22:28\]:** That’s one foundation. So that Darwin Gödel is an influence.
+
+**Swyx \[00:22:32\]:** Open-endedness is an influence. Any other trains of thought that feeds into Recursive that I’m missing?
+
+**Richard Socher \[00:22:38\]:** Going to replace manual parts of the process of building AI
+
+**Swyx \[00:22:42\]:** I
+
+**Richard Socher \[00:22:42\]:** More and more
+
+**Richard Socher \[00:22:43\]:** With learned systems. Yeah.
+
+**Swyx \[00:22:45\]:** Which, and, like, merging different fields into one general, architecture.
+
+**Richard Socher \[00:22:51\]:** That’s right.
+
+**Swyx \[00:22:51\]:** Okay. It seems like language models are already pretty generalist, right?
+
+**Swyx \[00:22:55\]:** Your next token predicting your reasoning. Was there a time that you thought, “Okay, these are good enough to have recursive self-improving machines”?
+
+**Richard Socher \[00:23:05\]:** It was clear to me that they will happen, within, like a year or two, and then it did exactly happen, like, earlier this year, right? Earlier this year, AI really went from not just being code, but being able to code. And that is a big unlock. It’s definitely making everything a lot easier than it was, before the beginning of this year.
+
+**Swyx \[00:23:24\]:** One question that I think a lot of people have is the current LLM paradigm enough? Or, like, let’s call it autoregressive transformer, with reasoning, whatever. Don’t you need something else, some big unlock, whether it’s world models, which Chris Manning is working on, or memory, continual learning, all that stuff? Or is it all of the kinds, and you think the current, let’s call it transformer architecture, is here to stay and that’s it?
+
+**Richard Socher \[00:23:48\]:** A lot of thoughts. So number one, I do think it would be great to have less of a monoculture in AI research.
+
+**Richard Socher \[00:23:55\]:** Like, if you look at, AI conferences now, I still remember the days in, like, 2010 when I tried to get my first neural net papers and NLP conferences accepted, and they just desk rejected them because, like, neural nets were something, quote, unquote, “We don’t do in NLP conferences,” and just, like, desk rejected. And it was very brutal in the first years of my PhD. Now I feel like it’s almost like the field switched to the other side. Like
+
+**Richard Socher \[00:24:17\]:** Someone should try some other weird, crazy ideas now that aren’t.
+
+**Swyx \[00:24:20\]:** There’s also a few. I really respect, like, people still working on, like, GNNs and, like tabular stuff and.
+
+**Richard Socher \[00:24:25\]:** Yeah. Like, someone should still, like, do novel out there ideas. At the same time, I think whenever people say, “Oh, LLLMs are. Like, this is the end for LLLMs,” they just don’t, like. LLLMs are also not the LLLMs of, like the past, right? Like, they are so much more sophisticated now. There’s so many more clever things that people are doing. It — There’s, like, different stages of training. You have the whole RL training, and you can take actions and, like all of these things where that can go really far. And then the folks that come from the neurosymbolic, direction say, “Oh, this will never work because they can’t do neurosymbolic reasoning.” It’s like, I think they’re underestimating still the ability for these models to code, and code is neurosymbolic reasoning, and these models can code incredibly well. And so I do think there are, of course, more and more ideas that will be needed and we’ll continue to have. We’re seeing, like, more and more interesting high-level ideas coming out of the AI itself, too. And with really deeply integrating the fact that these models are code and can code, that line — I don’t wanna give it all away, but, like, I think that line has a lot more to grow. But it’s still an LLM, right? Even if that LLM codes for you and then runs that code in some integrated fashion. World models, I’m personally less bullish on. I think if you run a robotics company, you’re gonna build your own world model. I think world models are super fun, and Tim Rocktäschel came to a similar conclusion after building the most interesting one with Genie 1, 2, and 3, which is gaming is a huge application for world models. Can see I sometimes got stuck in some games and, like, got a little overly competitive in the wrong direction. And so I understand games are fun, but personally, I’d rather work on science than gaming. And so, yeah, I think LLLMs, a lot more room to grow.
+
+**Swyx \[00:26:16\]:** Yeah. I think there’s some interpretation of world models that some people have where it’s like, well, it’s okay, yes, there is that gaming element. There’s this — there’s the embodied robotics element. But the other part also is just, the more abstract sense of LLLMs are just modeling output, but they’re not modeling the chain of thought, inside the human that has created the output. We can annotate it, of course, but, like, it’s, it’s always, like, this Plato’s cave reflection of a thing rather than the thing, right?
+
+**Richard Socher \[00:26:43\]:** It’s true.
+
+**Richard Socher \[00:26:44\]:** But I would argue that, and maybe we’ll get there in the 10, spaces of intelligence, but I would argue that even our projection, our eyes is a projection of the real world. And, like, we have only a very narrow, band of the electromagnetic frequency spectrum that we can observe with our puny little 2 eyes and so on.
+
+**Swyx \[00:27:01\]:** It’s good enough.
+
+**Richard Socher \[00:27:02\]:** It’s, it’s good enough for now, but, like the upper bounds of where it could be are so much higher. And, like, to map, the visual world the way humans see it is also not necessarily, like the end-all be-all for visual intelligence. And I would argue that language is still the most interesting manifestation of human intelligence. And while our visual cortex is certainly less sophisticated, than that of, certain animals all the way down to the mantis shrimp who can, have, like, 2 independent eyes, 3 bands, trinocular vision and each eye can see all the way to, like, floating temperatures in 4D and stuff.
+
+**Richard Socher \[00:27:36\]:** Like, mantis shrimp, you should look it up. It’s like
+
+**Swyx \[00:27:37\]:** Way OP.
+
+**Richard Socher \[00:27:38\]:** Super crazy.
+
+**Swyx \[00:27:39\]:** Yeah. ZeFrank, mantis shrimp.
+
+[www.youtube.com](https://www.youtube.com/watch?v=F5FEj9U-CJM)
+
+**Swyx \[00:27:41\]:** It’s the best video in the world on
+
+**Richard Socher \[00:27:42\]:** I love ZeFrank, yeah.
+
+**Richard Socher \[00:27:44\]:** Big shout-out to him. But, like, I think there’s a lot more room to grow, but none of these, other animals have language that’s as sophisticated as ours, certainly not in writing. And once you can write, you can, start thinking about longer term civilizations. All of that is language. Programming is much closer to language. And I would argue, and this is, like an important thing in the spaces definition of intelligence also, is that all of these spaces are highly correlated, but visual intelligence is neither necessary nor sufficient for overall intelligence. You can be blind and still be an intelligent human being. And an AI can be blind and still be quite intelligent too.
+
+**Swyx \[00:28:25\]:** We were gonna bring this
+
+**Richard Socher \[00:28:25\]:** Which doesn’t mean that you’re not more intelligent when you have it. Yeah.
+
+**Swyx \[00:28:28\]:** We’re gonna bring this up. I might as well — Like, we have a classification of 10 types of intelligence that you had at the end of your talk. So I’m just gonna flash this up now for people to cover this. I don’t know if, maybe we’ll put this towards the end. We’ll come back to this. I just wanna mention that, you do have a philosophy that I like when people do lists because then I can just go through this and then it gets — it’s educational for people. But let’s go back. I don’t wanna get distracted. But, so effectively, I’ll, I’ll, reinterpret what you said as Yann LeCun is wrong. And then we’ll just
+
+**Richard Socher \[00:28:56\]:** Don’t quote me as that. I’m, I’m good friends with Yann. I think very highly of him in many directions.
+
+**Swyx \[00:29:01\]:** But he’s wrong.
+
+**Swyx \[00:29:03\]:** You mentioned GPT-1, and I cannot let any, Alec Radford, mention escape. Did you talk with him when he was training GPT-1? Like, any historical, fun stories there that you might come up?
+
+**Richard Socher \[00:29:18\]:** I did not, like, meet him a bunch of times. I think we met maybe once or twice at some conferences. But, like, he has told, I think Brian, the first author of the DecaNLP paper, that it did inspire him, and he cited it five times in the GPT-2 paper. So, and that’s, like
+
+**Swyx \[00:29:36\]:** Yeah, good enough.
+
+**Richard Socher \[00:29:36\]:** Very clearly said, like, this was the first instantiation where they showed in the DecaNLP paper, McCann et al, that you can just phrase every single NLP problem as here’s some prompt, text context, here’s a question and task description and here is some output. If you just do that enough, you can have one unified neural network model, which, by the way, also had all kinds of interesting attention mechanisms. There are slightly different formulations to the transformer. I think came out the same year, plus/minus a few months. And then you can unify all of natural language processing into one neural net. That is the core idea.
+
+**Swyx \[00:30:14\]:** And this was as opposed to at the time, LSTMs and what have you.
+
+**Richard Socher \[00:30:17\]:** LSTMs, but also, like, people being very stuck in thinking about one model per task. In fact
+
+**Richard Socher \[00:30:25\]:** It’s, it’s kinda crazy, but the DecaNLP paper was publicly reviewed as, like, open, OpenReview. It was an ICLR submission. And, in it, you will see, how the whole community at the time thought about this. So, like
+
+**Swyx \[00:30:43\]:** Some great contributions, but more work needed.
+
+**Richard Socher \[00:30:46\]:** So look at, like, search for not even for humans. Just scroll it up here. Like, question answering is not a unified phenomenon. There is no such thing as general question answering, not even for humans. And this is like, really, you replace your brain with a different brain a different neural net when you answer, like, different kinds of questions. It was unfathomable to the experts at the time that you can have one unified neural network that would answer all of these different questions. They are saying, “No, all of these questions require very different systems to answer, and trying to pretend they are the same doesn’t help anyone solve any problems.” That’s what it says right there, right? That’s how hard it was to fathom. And now, of course, people, when I say, “Oh, we’re gonna invent prompts,” people are like, “You can’t even invent prompts.” It’s such an obvious idea to have one neural network that, of course, does everything in NLP.
+
+**Richard Socher \[00:31:37\]:** But at the time, it was, like, extremely controversial, and the paper got rejected. And the sad thing is that it got rejected so hard and they were so certain that we stopped going on our list of things to try. And the number 2 or 3 on the list of extensions for this paper was add language modeling as another task. And then we could have, and that would have accelerated the timelines, in 2018, like, even further for humanity. But we got so crushed, and we were like, “Okay, maybe we’ll just work on some of our other ideas for now and, like, come back to this later.” Yeah.
+
+**Swyx \[00:32:09\]:** How can we design a review system that rewards non-consensus?
+
+**Richard Socher \[00:32:14\]:** Honestly, I started to feel like arXiv is such a gift to humanity. With arXiv, you should just put your paper out there.
+
+**Swyx \[00:32:24\]:** Is it pre-preprints?
+
+**Richard Socher \[00:32:25\]:** Let — And honestly, I think Twitter X, people like you who pick up interesting papers, that is a better filter than the experts. Let everyone, like, have access. Now, of course, there are some downsides, which is, like, if you’re super unfamous, you have no Twitter following
+
+**Richard Socher \[00:32:41\]:** You don’t wanna be on social media or whatever, you write a good paper, maybe someone, somehow no one notices it. But I would argue that if you just tell, like, 10 of your friends in your community about a paper and it is a really significant breakthrough, someone is bound to talk about it again. And, so I think science needs less gatekeeping. And, even though ICLR, with Yann LeCun, who started it, as one of the co-founders of ICLR back in the day, he also wanted less gatekeeping ‘cause he too was rejected for many years together with Yoshua Bengio and Geoff Hinton with all their early deep learning and neural net papers ‘cause it was just not the hot thing. And so ICLR started with that, but then it also started gatekeeping a little bit themselves on various ideas. So I think less gatekeeping, more open, and then allowing people to say, “Look, even if this is just on, or, quote, unquote, ‘just an archive,’ if it has like 1000 citations, it’s a legitimate paper. Doesn’t really matter where you published it.”
+
+**Swyx \[00:33:34\]:** And I agree with that. I do think it’s sad that I’ve heard that grad students have to do, like, how to Twitter, seminars to each other
+
+**Swyx \[00:33:43\]:** Just because it’s so important for publishing these days. This person is just reflecting the sentiment at the time.
+
+**Richard Socher \[00:33:49\]:** That’s right.
+
+**Swyx \[00:33:49\]:** But it’s
+
+**Richard Socher \[00:33:50\]:** I think it’s
+
+**Swyx \[00:33:50\]:** It affected you so much
+
+**Swyx \[00:33:52\]:** That you stopped work on it.
+
+**Vibhu \[00:33:53\]:** The sentiment also came out of some of the research, right? Like, the original BERT paper was trained, and towards the end of the paper, they’re like, “Okay, throw off the last head, train specific iterations for
+
+**Vibhu \[00:34:05\]:** Extractive summarization add a head for this.” Like, you should do task-specific stuff. These are, like the authors that wrote Attention, wrote BERT, telling you this is what you’re meant to do. And, like the training tasks were also very odd. They’re like
+
+**Vibhu \[00:34:16\]:** The — “We know that the model overfits to this weird mass language modeling. Throw away this part and just do specific models,”?
+
+**Richard Socher \[00:34:23\]:** Exactly. And, like, we had to try — come up with all clever ways of, like attention and pointers and so on to get the neural network to be able to do all of these tasks. And then some of them were better than state-of-the-art, some weren’t, but we were like, “But it’s still in one model.” I thought it was really cool. Really interesting.
+
+**Swyx \[00:34:38\]:** I was gonna move on next to Tim and open-endedness. He was head of open-endedness at Google.
+
+**Richard Socher \[00:34:42\]:** That’s right.
+
+**Swyx \[00:34:43\]:** I don’t know what that means.
+
+**Swyx \[00:34:44\]:** But he did a lot of talks.
+
+**Richard Socher \[00:34:45\]:** Genie 3 is one of the ways that
+
+**Richard Socher \[00:34:47\]:** Rainbow teaming, yeah.
+
+**Swyx \[00:34:49\]:** So I first saw him at — speaking of ICLR, I first saw him at ICLR when he talked about open-endedness. He’s he’s done a few talks. Can we define what is open-endedness for people who have never been exposed to the problem? They are like, “What do you mean? I thought the only goal of AI is to optimize against a benchmark or.”
+
+**Richard Socher \[00:35:04\]:** That’s right, yeah. It’s a, it’s a fuzzy term because there’s so many different instantiations of open-ended, thinking. But, one way I often describe it, and certainly, Tim and Geoff Hinton would be even better at describing this, but it’s a suite of methods that is more inspired by evolution than, very specific rewards. So in that sense, it thinks more about environments, about co-adaptation. And so a concrete example is in the cybersecurity and LM safety space where you have one LM that tries to attack another LM to say something unsafe.
+
+**Swyx \[00:35:40\]:** Yeah, the rainbow, yeah.
+
+**Richard Socher \[00:35:40\]:** And now the environment is the 2 having a conversation and now they co-adapting, right? They’re like one makes a better attack than the first one inoculates itself somehow, like uses that as training data, makes it so it’s harder to say something unsafe based on that. And then as the attack stops working, the attacker now tries a different angle, right?
+
+**Richard Socher \[00:36:00\]:** And that’s why it’s not just red teaming, but they’re called rainbow teaming.
+
+**Swyx \[00:36:02\]:** So, like, don’t tell me how to do things. Let me just figure it out myself.
+
+**Richard Socher \[00:36:05\]:** That’s right. Think about the environments that you wanna use. Think about the rewards at a high level that you wanna, inspire towards, and then let the AI try out many more ideas in this interplay between sometimes humans, but also sometimes other AI agents.
+
+**Swyx \[00:36:22\]:** Yeah. I worked open-endedness into a model that I have been working on. It was the keynote for AI Engineer where you start. You, we have the token loop, we have the agent turns, and then we have goal. And I feel like the way that you’re describing open-endedness is still somewhat of a goal. Like, please attack this,
+
+**Swyx \[00:36:41\]:** Other agent. But, to me
+
+**Richard Socher \[00:36:42\]:** Yeah, you set the rewards. You set the environments.
+
+**Swyx \[00:36:44\]:** The loop that makes the other loops is. What if the agent can set its own goals?
+
+**Swyx \[00:36:49\]:** And is it, is that open-endedness? Like, you don’t give it a goal. Just, like, be a sentient being. And maybe sentient is a very loaded word
+
+**Swyx \[00:36:57\]:** But just set your own directions. What do you think you should do?
+
+**Richard Socher \[00:37:01\]:** I love this direction. I think this is one of the 10 spaces of intelligence, that I clump under metacognition and thinking about thought.
+
+**Richard Socher \[00:37:08\]:** And it’s an interesting one. Whenever people say, “Oh, AI is like, this is, it’s gonna stop from here. It’s not gonna get that much better,” and blah, I’m like there’s so many different spaces of intelligence that we haven’t even started exploring yet and hence have made very little progress on. And there is an interesting, connection to economics and, capitalism. Like, it doesn’t make sense for a company to build and spend billions of dollars building a model that instead of following the rewards and objective functions you gave it, may come up with its own objective functions and its own goals.
+
+**Richard Socher \[00:37:46\]:** Right? And then imagine you’re like, “Okay, I spent billions of dollars. Now go develop this new battery, material for me and answer all my emails.” And it’s like, “Nah, I think it’d be more interesting to evaluate the molecular composition of the atmosphere, on Jupiter.”
+
+**Richard Socher \[00:37:59\]:** And you’re like, “That’s not what I paid you billions of dollars for.” And so no one’s working on that for good reasons. And then also, understandably
+
+**Swyx \[00:38:07\]:** It’s not useful.
+
+**Richard Socher \[00:38:07\]:** It’s not, it’s not useful, and it could get a little bit weird, right? What if the AI does start to really have thoughts on its own, and what if we don’t like those thoughts, right? And so it requires a whole different way of thinking about it. I had a great conversation with a good friend of mine, Sam Gershman, who’s a neuroscience professor at Harvard, and, like, we just jammed on this a little bit on, like, what are the best meta goals. And, I do think, like, knowledge-seeking is a really good one. I’m currently thinking also about, like the ultimate measure and unit of intelligence broadly construed, and I finally have some. It’s still too early to share it. It’s not. I haven’t fully baked the thoughts yet.
+
+**Swyx \[00:38:44\]:** Like some replacement for IQ.
+
+**Richard Socher \[00:38:46\]:** IQ is such a terrible definition, right?
+
+**Swyx \[00:38:48\]:** Elo.
+
+**Richard Socher \[00:38:48\]:** It makes no sense. Yeah, Elos are terrible, too, because it’s always just like me versus others.
+
+**Richard Socher \[00:38:53\]:** But, like, you can be intelligent and not constantly compare yourself to others? And so, yeah, there’s no, like. In fact, a lot of these definitions we have, which I briefly mention in my book, too, these definitions create sometimes explicit and sometimes a more implicit anthropic bounds. No dis to the company Anthropic, but just, like, this idea that your intelligence is like getting 100 out of 100 questions right on this IQ test. Well, if that’s your definition then you can only be at 100 out of 100. Where do you go from there, right? So you see a lot of these, benchmarks that people are working on they, increase, they get close to human, maybe sometimes
+
+**Swyx \[00:39:30\]:** It’s like an S-curve
+
+**Richard Socher \[00:39:30\]:** Slightly above human, and then it’s flat.
+
+**Richard Socher \[00:39:32\]:** It’s like, ‘cause that’s your. If your definition is only that so tied to humans, you’re only gonna get to just slightly better than that. So I think metacognition is a great example of that, where we’re not even yet allowing the AI to think. We’re not working on it very much, and hence there’s very little progress in that.
+
+**Swyx \[00:39:49\]:** Yeah. Well, we’ve interviewed Andon, which I think, has been working on the most open-ended, benchmarks, which is just real-world, money.
+
+**Swyx \[00:39:57\]:** Arguably, telling an AI to profit maximize is a bad idea.
+
+**Swyx \[00:40:03\]:** But they are doing it.
+
+**Richard Socher \[00:40:05\]:** I do think you don’t want that super. Like, you don’t want a superintelligence to have a ton of access to all kinds of tools and so on and then just give it that without some very careful reward engineering. ‘Cause it’s like, I just buy a bunch of defense stocks and I start a war. I make money. Like, it’s just like, it’s a tricky situation, right? You just buy a bunch of stuff, short basic goods for people, and you create some weird famine, like, issues. Like, yeah, there’s a lot of constraints you should put onto a trading system.
+
+**Vibhu \[00:40:35\]:** It’s a fun measure, though, ‘cause, the bounds are very capped to where we’re nowhere close to them. Like, in Andon Labs, the model’s like, “Oh, it’s Saturday, maybe I just close the store today.” “Someone’s off. It’s okay. We’ll just close the store.”
+
+**Swyx \[00:40:51\]:** It’s using Claude.
+
+**Vibhu \[00:40:52\]:** Yeah. But
+
+**Richard Socher \[00:40:53\]:** Yeah, no. I’m not, I’m not arguing against it. Just, like as you get more and more intelligence, you wanna be more and more careful with that as, like an open environment, ‘cause the environment then is all of Earth.
+
+**Swyx \[00:41:02\]:** Yeah. Okay. For recursive, not strictly necessary, right? Because, like, if your goal is you make a machine that, like, invents the other things, then, like, just solve, the science things
+
+**Richard Socher \[00:41:12\]:** Knowledge discovery, yeah.
+
+**Swyx \[00:41:13\]:** Solve machine learning research and discovery and all these things. Good enough.
+
+**Richard Socher \[00:41:16\]:** And eventually, so, our goal, I haven’t really. I don’t talk about it that often because it is a few years out, but our goal is once you have a recursive self-improving superintelligence, you then want to apply it to the most important problems. And I think a lot of those are in science and technology and broadly construed inventions, and those inventions in, physics to create better, cheaper energy with fission or fusion, in chemistry and to create better materials and better batteries and, better solar cells and so on. In biology, there’s so much, like, I think soon to be low hang- lower and lower hanging fruit because of AI, because of protein and generation, not just folding, but generating new proteins like we did in ProGen many years ago. Like, so much positive impact we had if you take that superintelligence and you apply it to science.
+
+**Swyx \[00:42:04\]:** I do fundamentally believe that. There’s a lot of approaches, though. You’re not the only team trying and NeoLab trying.
+
+**Swyx \[00:42:09\]:** There’s, like a lot of. Especially the physical sciences as well.
+
+**Richard Socher \[00:42:12\]:** And that’s good. Yeah. I do think that physi- like the reason we are only doing it in a few years is that it’s a little too early right now. Robotics is not quite there yet. The AI is not quite there yet. But I’m fairly confident in 3 to 5 years, all those constraints will be gone, and then applying to real physical robotics experiments and so on, like true robotic process automation
+
+**Richard Socher \[00:42:33\]:** Not the traditional RPA sense, but, like, having robots run experiments for you will be totally there. Yeah, it’s gonna be great.
+
+**Swyx \[00:42:40\]:** Just to call back to something that you said early on about slow takeoff, you said that, like, while really the substrate that is limiting factor is, let’s call this chips, and semiconductors and all these things, and you have race funding for that and, you are investing a lot on that. But have you done the math on, like, is it even- Achievable and, like, what is the, industry concentration needed in order to achieve, like, scale?
+
+**Richard Socher \[00:43:05\]:** Right now we know that, like, roughly, like a 1000 GPUs cost quite a lot of money.
+
+**Richard Socher \[00:43:11\]:** Right? If you wanted, like, 10s of thousands of GPUs, you’re, you’re talking billions and billions of dollars. If you say, like, one GB300 is, like, you could eventually create models that are, on that substrate, like are close and similar to human intelligence. And you want, like, thousands and thousands of, AIs to think about really hard problems, in a similar fashion to humanity. Like, yeah, that-that’s, that’s a lot of money. You do the math. It’s like a lot. We don’t have that amount of money right now anywhere to, like, build that. Now, things can get more efficient. You will have, I think, soon better algorithms that won’t be, and better hardware that won’t be as energy-hungry, and so on. Our human brain does quite a lot of flops with much less energy.
+
+**Swyx \[00:43:56\]:** 20 watts?
+
+**Richard Socher \[00:43:57\]:** That’s exactly right. Yeah, that’s the number often that’s quoted. And, like, I think more, inventions will happen there, that then will accelerate the takeoff even further.
+
+**Swyx \[00:44:08\]:** One thing I always try to reconcile when talking, like, with new lab founders is, like, you’re fighting Bitter Lesson all the time. You have to show initial progress, then you unlock the next tier of funding, then the next tier, then the next tier.
+
+**Richard Socher \[00:44:20\]:** Which unlocks larger model categories.
+
+**Swyx \[00:44:22\]:** Like, fundamentally, is that true? Like, are you fighting Bitter Lesson? Are you — will we have a way in which, like, no, we’re changing the slope in some fundamentally different way?
+
+**Richard Socher \[00:44:31\]:** I do think we are changing the slopes in fundamental ways by making AI much more efficient, both in terms of the training as well as the inference.
+
+**Richard Socher \[00:44:43\]:** Yeah. I think we will — When you allow AI to do the work that it takes other labs thousands of people and years to do, I think we’ll be able to get it down to weeks, and that will be much cheaper
+
+**Richard Socher \[00:44:53\]:** And hence, more affordable, accessible to others and so on.
+
+**Swyx \[00:44:57\]:** Yeah. You’ve shared initial results on that,
+
+**Swyx \[00:44:59\]:** Which, like, conveniently OpenAI has also done to their GPT-5.6, so we can talk about it now.
+
+**Richard Socher \[00:45:04\]:** Yeah. Yeah, so these are
+
+**Swyx \[00:45:06\]:** Let’s recap what you’ve done.
+
+**Richard Socher \[00:45:07\]:** Maybe, just a quick recap here. We built, this, system that isn’t the full, even the full RSI system in its glory, but it is a first baby version of this. And then, we don’t wanna just have it internally and not show anything and, just show some people of what’s possible. And so we applied this to these 3 different tasks. One is NanoChat, by my friend Andrej Karpathy, just, like, train a small language model to get, really low bits per byte. And, like, hundreds if not thousands of people, used both their agents and themselves to try, to get to that, and then they got to 0.937. We literally took our system and got to a much lower, bits per byte, much faster within, like, I think less than 2 days. So we took this thing, applied our system to it, and less than 2 days later, we have — we outperformed every human and their agents, in, have ever worked on this. Same with NanoGPT. And then we’re like, well, let’s, apply it to something that’s even more relevant, to real people and to the Nvidia ecosystem and applied it, to, SOL-ExecBench. And maybe you can scroll down to some of the, images. They’re, they’re kinda fun to see. But yeah, like, one you see has made some real inventions that weren’t just hyperparameter tuning. Like, inventing hash tables and so on is quite clever. We have even better results now.
+
+**Swyx \[00:46:34\]:** What do you mean inventing hash ta — You didn’t invent hash tables.
+
+**Richard Socher \[00:46:36\]:** Of course we didn’t invent, like, hash tables. In the grand scheme of, like a hash table, it’s like a super basic primitive in computer science. But to use it, for language modeling in this scenario inside a transformer and so on and to combine these ideas and put them together, that has then eventually also been invented, but there was a knowledge cutoff, and we did check that it didn’t have access to that externally. We talk about this a little bit. If you scroll to the next figures, this is also an interesting one in that when you start from a really basic, poor, like, vanilla transformer, then we still outperform all of the community together. But if you start from the human seed from an expert like Andrej, then you get even lower. So the human seeds from which you start do still matter. So that was an interesting insight, in my eyes, on this. And then as you go, like, how long does it take to get to these models, to get to similar performance? It’s much faster. And then a similar thing happens with the speed runs here where, people have worked on this for quite some time, and the model still was able to train a model more quickly. Why do we care about it? Well, speed of training is part of the equation of the cost, and ultimately, you wanna have the most intelligence per dollar, right? And so speed and quality are big parts of that. And, the,
+
+**Swyx \[00:48:00\]:** Yeah, the way I put it is, for people who don’t understand they look at the chart, they’re like, “Cool. What does it mean?” if you have, like a billion-dollar cluster and you can shave off 10%, that’s 100 million dollars.
+
+**Richard Socher \[00:48:12\]:** That’s exactly right.
+
+**Swyx \[00:48:13\]:** How much is that worth?
+
+**Richard Socher \[00:48:14\]:** Exactly. So when you click, when you look at, like the kernels, these kernels, yeah, for the non-experts, like these kernels are like, used in all the models. Every time you use an Nvidia GPU, you interface with that GPU through these kernels. And so here you see, the leaderboard best, and when it’s recursive, and it’s there are only a handful of kernels, in this whole benchmark where we weren’t the best. And so to me, this is, like, really exciting, ‘cause it makes. It just showcases what this can do. And again these weren’t like. We didn’t, like, spend months or years, like, developing. In fact, in particular for kernel, CUDA kernels, like, we don’t even have really deep. CUDA kernel experts in the team. And our system, that’s the beauty. The system just did all of these things. We didn’t invent this. And when we open source and release, things in the future and models in the future, like, it won’t. They won’t be the best in their, category or class or whatever because we’re so smart, but it’s because, we built a smart AI that does it for us.
+
+**Vibhu \[00:49:14\]:** Do you have anything that you’ve learned from how to guide good auto research? A lot of it also builds on human background, right? It’s not just as simple as just, “Hey, go optimize this.”
+
+**Vibhu \[00:49:23\]:** But we do see it again and again, right? Like some of the Erdos problems, frontier math is being solved by people. And when they do a write-up, they’re like, “Oh, I’m not a mathematician. I have no background in this?” “I saw some tools and I made it work.”
+
+**Swyx \[00:49:35\]:** While you’re watching the World Cup, you’re like
+
+**Swyx \[00:49:37\]:** “This proves some conjectures that’s going on.”
+
+**Vibhu \[00:49:40\]:** Yep. Any learnings from
+
+**Richard Socher \[00:49:41\]:** Yeah, there’s a Korean conjecture was. Yeah, that’s pretty cool.
+
+**Swyx \[00:49:44\]:** To summarize, tips for good auto research
+
+**Swyx \[00:49:46\]:** Versus bad auto research.
+
+**Vibhu \[00:49:48\]:** How did you build the recursive?
+
+**Richard Socher \[00:49:49\]:** Yeah. So without giving away all the secret sauce, maybe some things that are probably obvious to the experts but might still be interesting to some, folks is, like, reward engineering is one of the most crucial bits, especially, in order to avoid reward hacking. So you have to be really clever about avoiding. ‘Cause as your AI gets better and better, it will get better and better, at finding weird like, special cases or counterexamples and things like that. And so I’ll give you an example. Like, when you ask to, like, make these 100, lines of code faster, and, how do you define fast? Well, you have one line at the beginning that says, “Start your stopwatch,” and one line at the end, “End the stopwatch,” and then, tell us how much time, progressed. And so, well, the simplest way is you just put that line that ends the stopwatch, right
+
+**Vibhu \[00:50:39\]:** At the start
+
+**Richard Socher \[00:50:40\]:** At the start. And then boom, it’s now faster, right? So this isn’t like this, like, super evil AI. It’s just, like a very simple, dumb reward hack. And so you have to just very carefully think about all the different angles there. And then I think the longer time horizon the tasks are the harder it gets and the more interesting and clever you have to be to still use these kinds of ideas for it. But yeah, I can’t give away too much there.
+
+**Vibhu \[00:51:05\]:** It seems like rubrics are taking a good spot in that, where for unverifiable domains, you have rubrics, you have a model breakdown, judge’s criteria along the way.
+
+**Swyx \[00:51:14\]:** Yeah, it’s a form of verification
+
+**Swyx \[00:51:16\]:** Once you got enough rubrics.
+
+**Richard Socher \[00:51:17\]:** Yeah, everything. I said this a long time ago. That’s why I’ve never been that impressed that AI can play games, ‘cause I’m like anything you can simulate and/or verify, you can have infinite training data for
+
+**Richard Socher \[00:51:29\]:** And hence, like, AI will solve it eventually.
+
+**Swyx \[00:51:32\]:** Looking for games where you can do auto domain distribution. So this is a game that nobody’s trained on ‘cause it’s a new game.
+
+**Swyx \[00:51:38\]:** And you can start gaming, you can start to play. So I’ve been building this and cloned this in person and it’s just been self-play. I’ve had about a billion positions evaluated.
+
+**Swyx \[00:51:48\]:** And, I wanted to do the AlphaGo thing of self-play until you get better, right?
+
+**Swyx \[00:51:53\]:** Like, which is like. This is not even LLM AI. This is just classical game AI.
+
+**Swyx \[00:51:58\]:** But, I think that the. And, but I set GPT-5.6 to auto research it because, like, I don’t wanna hand- handle any of this. I expect, the AlphaGo process to be, like, fully in the weights by now.
+
+**Swyx \[00:52:10\]:** It is not. It is. It, like, immediately leveled off very immediately until I human play tested it, and then I, like, called out obvious mistakes, and then they were like, “Oh, yeah. Okay.” And then it just dropped again.
+
+**Richard Socher \[00:52:22\]:** Yeah. Yeah. Yeah.
+
+**Swyx \[00:52:23\]:** And like, no amount of, like, think different, think more creatively, give me 8 different directions, any. No amount of prompting got it.
+
+**Richard Socher \[00:52:31\]:** Interesting.
+
+**Swyx \[00:52:31\]:** Like, you had to, like, RL against a human to
+
+**Swyx \[00:52:35\]:** Do it. So I, that was my. And by the way, Bean always wins if you. If anyone watches, Reese Ender’s Game.
+
+**Vibhu \[00:52:42\]:** And you put quite a bit of work into the guide for the AI. Like
+
+**Swyx \[00:52:46\]:** A lot
+
+**Vibhu \[00:52:46\]:** So the game you stack tiles. There’s some rules. You wanna capture the most area. You have, like a whole 50-pager on every rule.
+
+**Vibhu \[00:52:56\]:** You fed that in. It couldn’t, it couldn’t handle it that well.
+
+**Richard Socher \[00:52:58\]:** Yeah. It’s so funny that this reminds me of the claim territory and stuff of a paper we did in 2018 called The AI Economist. If you search for AI Economist Salesforce, we had a video we can play. It was an economic sim.
+
+**Richard Socher \[00:53:12\]:** So the idea is you have all these economic agents. They just wanna optimize their own utility function, which, is, collect resources that make money. And you can sell resources like wood, and then, over time, as you collect more, enough wood, you can build houses, you can trade with other agents, and you can use the houses then also to block off resources
+
+**Richard Socher \[00:53:35\]:** From other agents.
+
+**Richard Socher \[00:53:36\]:** So there’s, like
+
+**Swyx \[00:53:37\]:** Big strategy
+
+**Richard Socher \[00:53:37\]:** Competitive play and strategy
+
+**Richard Socher \[00:53:39\]:** And so on. And the point was that we wanted to understand what is the best way of taxation and subsid- subsidization to optimize an economy. And this research has not yet had its GPT moment, but I believe that countries like Singapore and others should and will eventually use this to, instead of doing, like, partisan politics and, like, special interest politics of, like, who donates the most to your campaign and stuff, you say, “Well, here, I wanna help the middle class,” or whatever you might say is your objective as a politician. And then people say, “Okay, well, how do you wanna do that?” And it’s like, “Well, here’s my fiscal policy. Here’s how I will change the taxes and pay these people,” and so on. And then you can put that into a simulation and you run that attempt from the politician against billions and billions of years of other strategies to try to achieve the goal that they set out to do.
+
+**Richard Socher \[00:54:36\]:** And then you can say, “Well, if that was your actual goal, then here is, billions of years of a strong simulation that would suggest that you try other ways of doing it, and maybe this the taxes and so on and this these tax brackets and so on.” And this is how you avoid gaming ‘cause these agents also try to reward hack to not pay their taxes and
+
+**Richard Socher \[00:54:55\]:** And so on. I thought this paper was super interesting. Unfortunately, similar to the first paper on, prompt engineering- The economists are like, “We don’t know any of this math.” It’s just like
+
+**Swyx \[00:55:08\]:** It’s not even, it’s not even math. It’s just we don’t trust your simulation. It’s not about math.
+
+**Richard Socher \[00:55:12\]:** It was — I, they just desk rejected the thing. And it’s like
+
+**Richard Socher \[00:55:15\]:** It’s like they didn’t even give us, like, clear like, clear signals. But, like the world of economics unfortunately doesn’t have proper
+
+**Swyx \[00:55:23\]:** Oh my God.
+
+**Richard Socher \[00:55:24\]:** Yeah, it doesn’t have proper, benchmarks. So you cannot be. Like, eventually, why did neural nets win? Not because people loved it. Like, they had all kinds of beautiful integrals and graphical models and stuff, but it just worked better.
+
+**Richard Socher \[00:55:36\]:** But in economics, it’s hard to prove
+
+**Swyx \[00:55:38\]:** So empiricism versus. Yeah. And I do have a bit of that econ background where, like there’s a lot of physics envy where you wanna write the general equation for an economy, versus just simulating it and using an evolutionary approach.
+
+**Swyx \[00:55:51\]:** Vibhu was thinking exactly what I’m thinking, is didn’t we have the GPT moment with small, Smallville?
+
+**Richard Socher \[00:55:56\]:** Yeah, I love this. Hello. Yeah, they
+
+**Swyx \[00:55:57\]:** As well, Dune, Joon just announced. I don’t know if you guys are involved.
+
+**Vibhu \[00:56:00\]:** Simily there.
+
+**Swyx \[00:56:01\]:** Simily, that they’ve
+
+**Richard Socher \[00:56:02\]:** I wish we were involved. We’re not, yeah.
+
+**Swyx \[00:56:04\]:** Yeah. I had a couple simulation-based talks at AIE, so if people wanna look up what the state-of-the-art there, a lot of people are exploring this. It is
+
+**Vibhu \[00:56:13\]:** Proven out.
+
+**Swyx \[00:56:13\]:** Yeah. We also had a podcast with Mikhail Parakhin from Shopify, who is using simulation for commerce.
+
+**Swyx \[00:56:20\]:** Which, will simulate, like, your trajectory and, like, predict what changes, you make to your commerce journey will affect in your sales and all those things.
+
+**Richard Socher \[00:56:27\]:** I love this. Yeah. It’s really hard to simulate an entire economy, right? You have to make some simplifying assumptions.
+
+**Swyx \[00:56:32\]:** It’s just, everything’s, “Oh, LLLMs is very expensive.”
+
+**Richard Socher \[00:56:34\]:** Exactly.
+
+**Swyx \[00:56:34\]:** And I’m just like, “Am I gonna do this 8 billion times?” Like, come on.
+
+**Richard Socher \[00:56:37\]:** Exactly.
+
+**Richard Socher \[00:56:37\]:** But, I feel like countries like Singapore that really wanna just objectively do the right thing, have very technical leadership and so on, like they might like, eventually really try to simulate their economy. And you have to make some simplifying assumptions, but it gets really interesting ‘cause you can also say if your assumptions are such that all people would work hard if you let them, and they have the free. And then it turns out you have to make assumptions. Like, well, some people’s utility function of, like, how many hours in a day do they wanna work are different, right? And then you can start to disagree on the assumptions that go into the simulation. And then once you say, “All right, now we agreed on those,” or we have different views of what people are like at different, distributions and whatnot, then there are different outcomes, based on your goals. And then, of course, humans should choose what are the goals. In our case, it was productivity multiplied with equality, which, has some issues, but it’s, like, not totally unreasonable.
+
+**Swyx \[00:57:29\]:** Yeah. Just a comment on Singapore, ‘cause you probably have no idea, but, I am Singaporean and I’ve, been involved in the Singapore AI Council for making these things. The main reason they won’t is because they’re very conservative.
+
+**Swyx \[00:57:42\]:** And, I try to view it as the. There’s a founder-led country. When you start a country or you start a company and it’s founder-led, and you can do whatever you want because it’s your country.
+
+**Swyx \[00:57:52\]:** And then there’s manage- like, professional manage- managerial class, which is now. That’s, that’s what Singapore is. So they wanna. They always wanna see someone else do it first.
+
+**Swyx \[00:58:00\]:** And. But, like, everyone in the West views Singapore as like, “Oh, it’s a small country. You can do whatever the hell you want.” Like, Singapore doesn’t do that.
+
+**Swyx \[00:58:07\]:** So, like, someone else has to take the charge there. I’m just gonna do one question on the simulation thing, and then I don’t know, we can probably move on. Mode collapse, right? Like, LLLMs do not model the decision of humans. Spamming it out 8 billion times is not gonna help you model humanity. What do we do?
+
+**Richard Socher \[00:58:25\]:** I do think, you have to be clever about prompting each one individually.
+
+**Richard Socher \[00:58:31\]:** And I think that will help you get stuck into different modes. And in a weird way, people also get stuck in different modes? Like, there’s a lot of people, like, don’t teach an old dog new tricks thing. Like, once people are stuck in their ways, the older they get, the harder it is for them to think new ways. And there’s this, I think, comment, I forgot who said it, but it’s like, everything that was invented, before you were born is natural. Everything that is invented when you’re 20 is cool. And everything that’s invented after you’re 60 is, like, unnatural and an abomination and weird.
+
+**Richard Socher \[00:59:02\]:** I feel like that’s. It’s, it’s true for a lot of people. Like
+
+**Swyx \[00:59:05\]:** Yeah, it is a fashion and, I think people will do it. Tencent had a billion personas paper that gives a good data set for prompting, simulations if anyone’s looking into this, on the podcast. They just had, like, “You are a 30-year-old grocery store clerk. You are a 50-year-old professor.”
+
+**Swyx \[00:59:24\]:** And then just do a billion of those.
+
+**Richard Socher \[00:59:26\]:** Checks out. Yeah.
+
+**Swyx \[00:59:26\]:** So then you just use it.
+
+**Richard Socher \[00:59:27\]:** I’m, I’m shocked how well a lot of these things do map to ultimately similar statistics to real experiments. Yeah. Yeah.
+
+**Vibhu \[00:59:36\]:** I think it’s also good stuff for people to try that when they get into research, right? Like, we’ve seen train a model only on data before a certain date and see how well it extrapolates out. Do the same thing, right? So, see, do people code more with better coding agents? Can a model that hasn’t been trained on this figure that out without web access, right? Extrapolate out. Test these things.
+
+**Richard Socher \[00:59:56\]:** Just today, I think LM Arena published a interesting result where they were able to create a model now to predict your ranking.
+
+**Swyx \[01:00:03\]:** Wait, based on what input?
+
+**Richard Socher \[01:00:05\]:** Your model. I guess you give it your model, and it predicts the Elo score.
+
+**Swyx \[01:00:08\]:** I see. Okay. Sure.
+
+**Richard Socher \[01:00:09\]:** It’s surprising.
+
+**Richard Socher \[01:00:11\]:** Their whole raison d’être is like, oh, like, we help you compare these models. Yeah.
+
+**Swyx \[01:00:16\]:** Yeah. This team, they- they’ve done a lot of work, and they have the most data to do this, so why not?
+
+**Richard Socher \[01:00:20\]:** Right. Yeah.
+
+**Richard Socher \[01:00:21\]:** That’s probably right.
+
+**Swyx \[01:00:22\]:** When they were coming out of UC Berkeley, they not only had LM Arena, but they also introduced a routing project
+
+**Swyx \[01:00:27\]:** That would route based on LM Arena.
+
+**Richard Socher \[01:00:30\]:** Makes sense.
+
+**Swyx \[01:00:30\]:** And I don’t think that ever came to pass, and I’m curious why. I never got to ask them about it.
+
+**Swyx \[01:00:35\]:** ‘Cause, like, it’s. It was like, oh, yeah, clearly that’s your business model. You will become a router.
+
+**Swyx \[01:00:38\]:** And they never became a router company.
+
+**Swyx \[01:00:40\]:** Weird. So that. I’ll just, put that out there. We’re gonna talk about GPT-5.6, self auto research thing if you have anything. I should also mention in your list of, kernel optimization and on the track that you spoke at, we also put Zhengyao Wei from Vico, who was also number one in the Parameter Golf Challenge, which is an OpenAI hiring, challenge.
+
+**Swyx \[01:01:05\]:** Which is also a very similar story. I think we’re gonna just see this all the time, where
+
+**Swyx \[01:01:09\]:** Humans optimize a thing a lot, and then some
+
+**Richard Socher \[01:01:12\]:** AI team comes in and just becomes number one.
+
+**Swyx \[01:01:15\]:** Yeah, 100%.
+
+**Vibhu \[01:01:16\]:** I think the other interesting thing with stuff like these challenges, right? So this is training this — the best model that fits into 16 MB. You can always look through the changes that are being made and the small gains people have, right?
+
+**Vibhu \[01:01:27\]:** Like, you’re getting less than 0.01
+
+**Vibhu \[01:01:30\]:** Of a increase by adding some changed attention MLP stuff. And then you look at your charts where you’re like, “Okay, we just let model loose.” And then, oh, we had little stagnation. Nope, another drop. Nope, another drop. And
+
+**Vibhu \[01:01:43\]:** That’s what it is, where it’s like, What did you guys add? You didn’t add,
+
+**Swyx \[01:01:47\]:** Hash tables.
+
+**Vibhu \[01:01:47\]:** Hash tables, right?
+
+**Vibhu \[01:01:48\]:** It’s not like you invented hash tables. You did another 3 iterations of these that unlocked, a few step functions that people won’t just find.
+
+**Richard Socher \[01:01:55\]:** Yeah. One thing to close the loop on OverGrid, along the way of trying to optimize, we found 30 bugs in the harness.
+
+**Richard Socher \[01:02:02\]:** Right? So, like, every — all the research that went in before we found the bug, we have to, we have to throw it away ‘cause it’s contaminated.
+
+**Swyx \[01:02:10\]:** Right. Yeah.
+
+**Richard Socher \[01:02:11\]:** Which, is just to your point of reward hacking. Like, even in this very simple game, we found the bugs.
+
+**Swyx \[01:02:17\]:** Yeah. Yeah, it’s crazy.
+
+**Richard Socher \[01:02:18\]:** And so
+
+**Swyx \[01:02:19\]:** And symmetry
+
+**Richard Socher \[01:02:19\]:** And symmetry is a very good way to check, which is that you change a position of things where it shouldn’t matter, and it does matter, that’s a bug.
+
+**Richard Socher \[01:02:28\]:** And which has come up in, like, let’s say, multiple choice, like GPQA type questions where, like, yeah, between A, B and C, if it’s a multiple-choice question, if you change the order, it should not matter, but it does.
+
+**Swyx \[01:02:39\]:** Right. Right. Right.
+
+**Richard Socher \[01:02:41\]:** So, yeah
+
+**Vibhu \[01:02:42\]:** Sometimes that is like, okay, models still prefer the end of the output, right? Not trained well, a long context model, the last bit of tokens are what you care about.
+
+**Richard Socher \[01:02:51\]:** Oh. No. The answer
+
+**Vibhu \[01:02:52\]:** But, yeah.
+
+**Richard Socher \[01:02:53\]:** The answer in that era of LLM research was more simple. They just memorized, like the answer to this question is A. I don’t care what the answer was. It’s, it’s just A. Like.
+
+**Vibhu \[01:03:03\]:** Okay. So I think we can move. The last bit that you did there, the kernel optimization, is probably the one that you can feel the soonest, right? So yesterday, OpenAI announces that self-evolving, having their best model work on optimization kernels, they’re a lot more efficient, and they can cut costs 80 percent on, Luna and Terra. I guess question-wise, you laid out a bit of a roadmap. There’s a lot about bio, a lot about physics. What do you think hits first? Like, what are the next 2 years? What’s attainable now? You’ve mentioned robotics towards the end, but what do you start with?
+
+**Richard Socher \[01:03:38\]:** We very explicitly will not start with any of the physical sciences
+
+**Richard Socher \[01:03:43\]:** For now. We will start on AI for AI research. And so the AI for AI research has, I think, still a lot of room to grow. That’s both in terms of making training more efficient and more automated, as well as making inference more efficient and potentially local on your laptop. And there are all kinds of interesting angles that have not been explored that well.
+
+**Swyx \[01:04:08\]:** Go deeper on the local stuff because I always feel like it’s the most inefficient form of AI training.
+
+**Richard Socher \[01:04:15\]:** Yeah. So just training and inference, I can’t go into too many details.
+
+**Richard Socher \[01:04:18\]:** But yeah, I think there’s just, like, so many angles, so many different compute substrates that have not yet been explored either for training or for inference.
+
+**Richard Socher \[01:04:26\]:** Great. I don’t know if you have any other comments on the The other stuff. I would say the other thing where, like there’s the inference in the optimization in the small, but then also there is overall latency end-to-end under conditions of load, which is a, like a very different thing, which is the what they ended up doing. That is a different domain of auto research than I would say, like, improving the kernels. Right.
+
+**Richard Socher \[01:04:50\]:** I think the other thing that I always think about in terms of automating or improving performance end-to-end is how the harness plays into it. Right.
+
+**Richard Socher \[01:04:59\]:** So, but particularly now when we say harness, we also mean sandboxes, right? I’m curious if that is a blocker for you or, like, how the agent calls out to tools.
+
+**Richard Socher \[01:05:10\]:** The number one tool all these agents use is web search, of course, which makes sense. And then I do think the harness is nice to optimize for because it’s just so easy, right? It’s just language. You look at it makes sense, and you can iterate. You don’t have to train a massive model for, like a lot of flops, to get to the next state.
+
+**Richard Socher \[01:05:31\]:** So big fan of harness optimization.
+
+**Swyx \[01:05:32\]:** Yeah, but sandboxing is fine for you?
+
+**Richard Socher \[01:05:34\]:** Sandboxing is also super important. And then of course, like, reward, like, hacking and alignment, I think are super crucial.
+
+**Swyx \[01:05:41\]:** Okay. Just on a mention of web search, you happen to also be CEO of a web search company. Do you use You.com and do you use others? Like, should the rest of us be using you for web search? I — When I say you, it’s, like, very funny. It’s like you the person and you the company.
+
+**Richard Socher \[01:05:56\]:** So yeah, it’s mostly now for, developers and agents. It’s less for, like, consumers or prosumers. So if you’re a company and you have agents. And, to be honest, for a lot of companies who are now moving to open source, all of a sudden it becomes a conscious choice of, like, which tools do I give access to my open source LLM? And, the first choice, has to usually be around web search. And then once you get to scale, You.com becomes, like an obvious choice ‘cause of all the, different benchmarks and so on that we pretty much all dominate the Pareto frontier of.
+
+**Swyx \[01:06:31\]:** And then in terms of just the general people, like, consider new to this space, considering different options if they’re building agents, that is a hierarchy, right? A lot of people will have heard of Exa, will have heard of Parallel, and You.com is, like, in that mix of, like, providers there. Beyond that, there is, like the general web scraper companies like Firecrawl and, BrowserBase. And then beyond that is, like the commercial proxy companies like the Bright Datas of the world.
+
+**Swyx \[01:06:56\]:** Is that an accurate waterfall of, like, “Hey, you’re building an agent. These are your options.”
+
+**Richard Socher \[01:07:02\]:** Yeah, certainly, like, yeah, the, like the Bright Data is, like, lower in the stack, on the proxy network side of things. I think, like, in terms of, like, content and, getting crawled content, like, you can do that on You.com too. And then there’s. Higher and higher levels of abstraction and, like, combinations of different data sets that we do, like in finance, for instance
+
+**Richard Socher \[01:07:23\]:** Like, we are not just, like, 2 or 3% more accurate, but 20% more accurate than others at faster speeds and lower costs. Like, finance in particular is like not even close. You can go to You.com
+
+**Swyx \[01:07:36\]:** Yeah. This is great
+
+**Richard Socher \[01:07:37\]:** And there’s some, like, statistics, and benchmarks that you can — if you scroll down. So there are, like, different data sets, and you can kinda look at, different, competitors.
+
+**Swyx \[01:07:46\]:** FinSearch comp, yeah.
+
+**Richard Socher \[01:07:47\]:** And yeah, the FinSearch is like we’re up there, like, close to 90, and the next closest thing, which is way slower, is, yeah, just like in the 70s instead of close to 90.
+
+**Swyx \[01:08:01\]:** Yeah. Yeah. Yeah, interesting. I get — my next focus is AI in finance, so this is like
+
+**Richard Socher \[01:08:06\]:** Oh, nice. Oh, all right.
+
+**Swyx \[01:08:06\]:** I’m literally going, doing a conference in New York, just for banks for this stuff. Finance is like the next thing to break out after coding. It’s ‘cause it’s somewhat verifiable, like
+
+**Richard Socher \[01:08:16\]:** I like it. You’re right
+
+**Swyx \[01:08:17\]:** Prioritizing spreadsheets. There’s a lot of data out there that’s all public, and you can crawl it and all these things. But what’s, what’s, like, hard about the finance domain in your, that you guys have solved?
+
+**Richard Socher \[01:08:27\]:** Of course, like, one thing that trips up a lot of people is just, leakage of training data and so on. You think, “Oh, how do I.” you wanna ideally predict the future before it happens.
+
+**Swyx \[01:08:37\]:** Oh, you wanna mask the future.
+
+**Swyx \[01:08:39\]:** Oh, okay.
+
+**Richard Socher \[01:08:40\]:** Well, yeah, mask the future in your training data, but there’s all kinds of leakage. Like, I can tell you when I was, teaching at Stanford the NLP class, like, so many dozens, every year said, “I wanna use dataset X, like Twitter, to predict the stock market.” And they all, like, showed cute little things that somehow looked like they were
+
+**Swyx \[01:08:58\]:** Right, it never loses money. How come?
+
+**Richard Socher \[01:08:59\]:** And it — Yeah. And there’s always some data leakage and so on and it’s just, like, wasn’t as easy as they thought it would be, once you fixed all those issues. But no, I agree with you. It’s a very sensible application of AI. Yeah.
+
+**Swyx \[01:09:13\]:** Yeah. Amazing. As a writer, as a thinker on these things, I love MECE categorizations. MECE is mutually exclusive, commonly exhaustive, something like that. And so if this is a MECE list of intelligence
+
+**Richard Socher \[01:09:25\]:** It is not.
+
+**Swyx \[01:09:25\]:** It is very — Okay, well, yeah.
+
+**Richard Socher \[01:09:27\]:** Sorry. There are all kinds of overlapping.
+
+**Richard Socher \[01:09:28\]:** In fact, if you want that list, I think the 3 principal components of intelligence, are prediction, which is mathematically, quite, similar to compression. Prediction multiplied with actions multiplied with goals. Those are the 3 principal components. I think all of these 10 spaces are combinations of those 3
+
+**Richard Socher \[01:09:52\]:** In specific dimensions, if you will. And the reason I call them spaces is that each space has many sub-dimensions. And what I try to do, this is just a side quest almost, to the initial goal, which is to think about the upper bounds of intelligence. And, everyone is like, “Oh, it’s exponential.” And it’s like, well, exponentials at some point have to flatten out, but where do they flatten out when it comes to intelligence? And that led me on this whole. Like, initially it started as a tweet, and then it was, like a blog post, and now I’m, like at 50 pages and I’m still not nowhere near
+
+**Swyx \[01:10:26\]:** It’s your second book.
+
+**Richard Socher \[01:10:27\]:** It’s the second book. And so the la — In my first book, You Are Your Machine, I just allude to these 10, at the end. And I’ll — Just to give you a sense, like, visual intelligence is the easiest one to talk about and I fleshed out the most already for me in my head. And so human intelligence has binocular vision, right? We have 2 eyes. We have a very narrow band of the electromagnetic frequency spectrum that we can really observe directly ourselves. And so when you think about the upper bounds of a visual intelligence, one, you should go into, like, you can have, like, millions and billions of sensors. At some point, you get to problems of how far are these sensors away from each other, such that the speed of light to communicate the content from all of them cannot, like, get to a central brain to process, the visual intelligence, right?
+
+**Richard Socher \[01:11:16\]:** And so now you’re thinking in along the dimension and the space of visual intel- the dimension of numbers of sensors.
+
+**Richard Socher \[01:11:24\]:** So the upper bounds are quite literally and figuratively astronomical, and we are super far away from any intelligence that would have this many number of sensors. But then you go in the next dimension, which is the frequency, and you go all the way down to gamma rays, and you can start to try to observe, and you get into the upper bounds, or I guess in this case, lower bounds, or upper bounds in terms of frequency, is quantum uncertainty. Like, you just cannot observe certain particles anymore.
+
+**Swyx \[01:11:50\]:** Or you destroy it, yeah.
+
+**Richard Socher \[01:11:51\]:** And now imagine you had millions of sensors that can see all the way down to the, like, subatomic level, as far as physics will allow us to and then all the way down to seeing, like, gravitational waves. And now you have millions of those sensors. So that’s another dimension is the frequency. And then yet another dimension is, like, how many categories of things could you memorize and classify differently? We know now for humans, right, there are certain things, if you have more terms for it, you’ll have a better visual description, for them. And, like animals that don’t have. Like, gorillas maybe have, like, 200 words to assign to certain things, mostly visual things. And so human perception is quite special in that sense in terms of classifying all these different physical objects. So these are just, like a very simple example. If you go, to knowledge, right, then it’s also, like the speed of light cone around all these sensors. And so they’re all connected. Like, knowledge is connected to visual intelligence if you think also not just visual, but perception intelligence, just like, ‘cause it doesn’t have to be just what we can see. It can be, again, wider range of electromagnetic frequencies. Then you have language intelligence, which recently changed to more communication intelligence, ‘cause it’s more. Like, language has all these different anthropic bounds. Humans can only comprehend and know so many terms in our long-term memory, right? Our vocabularies are somewhat restricted, and the active ones are often even smaller than the passive vocabularies of things you can understand. Then, language is ridiculously inefficient when it comes to trans- - Communicating different types of information and, transporting different bits. Like, human language is serial. Another bound on, communication intelligence would be to communicate in parallel, but neither will our tongues and mouths work to have multiple, like, streams in parallel. Neither can we understand. Some women slightly better at, like, multitasking than some men
+
+**Richard Socher \[01:13:48\]:** But, like, most people can only listen to one conversation and truly understand it.
+
+**Richard Socher \[01:13:52\]:** There’s no way that, like, in terms of communication intelligence, a true upper bound is one in terms of how many, like, knowledge, how many sequences of communication could you
+
+**Richard Socher \[01:14:06\]:** In parallel process, right? Then, of course, you have, like how long are sentences? We only have so much in our working memory, and hence lang- human language has these fairly simple sentences with maybe 40 words or so on average for a sentence. That is also not a, an upper bound that makes any sense to an AI. And then, yeah, like, I can go on and on. Each of these has tons of interesting upper bounds, and it teaches us a lot about how much further AI can go when we start thinking about these upper bounds and then realizing how far, in many cases, we are from the bounds. And you get to physics. Now, I’m, I didn’t study physics the way I studied, AI and computer science, so I’m learning a lot, which is why it’s kinda fun. But a lot of these, like how much. And then when it comes to, for instance, knowledge, like how much can you store? How many bits can you store or bytes can you store in, like a certain amount of mass and volume?
+
+**Swyx \[01:15:03\]:** Yep.
+
+**Richard Socher \[01:15:03\]:** And you get to all kinds of interesting bounds, like Bekenstein bounds, and you start thinking about black holes. And like. And then speed is, like an interesting one too in that it’s connected to all of these, but speed is also its own thing in the sense that all things being equal, if it takes you an hour to know if the 2 + 2 equals 4, you’re just not as intelligent as if it takes you, like a millisecond, right? And then, like all of these connect to survival and replication the last one. It’s like, yeah, if it. Like, trees are really slow, so we don’t even consider them that intelligent. But if you speed up some videos of trees and they’re trying to find stuff and so on they’re not as dumb as they look. Like, not dumb as wood? But, like. And then like, different things, that
+
+**Swyx \[01:15:47\]:** So that overlaps with speed a bit in a way.
+
+**Richard Socher \[01:15:48\]:** Exactly. It over — Like, all of these things overlap. Like, you talk about natural language connects everything, right? You talk about your knowledge, you reason and then you communicate that. You talk about things you see. So they’re all interconnected, but, I think they’re usefully studied individually the same way that, the best analogy I could come up with so far is energy, right? You have either kinetic or potential energy. And in theory, you could study all of physics. It’s just do you wanna study kinetic or potential energy? But in practice, it’s helpful to study mechanical engineering and electrical engineering and nuclear physics and chemistry and all of these different subfields who in, which in some ways
+
+**Swyx \[01:16:25\]:** Combinations
+
+**Richard Socher \[01:16:26\]:** Are just, like
+
+**Richard Socher \[01:16:27\]:** Just different types of energy, but it makes sense to study them individually. And so I think physical intelligence, maybe I’ll just do, one or 2 more of these. Like, if you had full control over your own compute substrate and you had full control over physical matter, you should be able to create any atom you want. Like, we can fun fact, you can create gold atoms. It just
+
+**Swyx \[01:16:47\]:** From?
+
+**Richard Socher \[01:16:48\]:** From just raw protons
+
+**Swyx \[01:16:49\]:** Oh, just smashing them together
+
+**Richard Socher \[01:16:50\]:** And, like, electrons, and you smash it together.
+
+**Swyx \[01:16:52\]:** Just 98 of them or I forget the number.
+
+**Richard Socher \[01:16:53\]:** Yeah. And so, like the thing is, though, it costs an insane amount of energy.
+
+**Richard Socher \[01:16:57\]:** And it costs you way more than. And then you get, like a few atoms of gold, right? And so, like, it’s, it’s not viable. But if you had better control over your physical, like all of, like, physical substrate, that I think is yet another space of intelligence ‘cause it relates to your own compute substrate, which you can eventually also improve. Social intelligence is a fun one in the sense that not in, like, our necessarily just ethics and morals, which are important too, but in some sense, you can try to define upper bounds of how much can you communicate to how many other intelligent entities and be able to have an expected value over how much you can transform their internal states and their actions to, in order to align with your goals, right? And so, like, you can write, like a fairly like, straightforward equation that defines that level of social intelligence. And that is what humans and ethics and morals and religions and so on have been trying to figure out for millennia. And in all of these cases, we are very far away from the upper bounds, and that should be very inspiring and show people that we can still do many years of AI research.
+
+**Swyx \[01:18:12\]:** Yeah. There’s a lot here. This is a general philosophy of intelligence, which is, very interesting. I. Do you have any comments or.
+
+**Vibhu \[01:18:21\]:** I think it’d be interesting to gauge what you think, like, baselines are, where we’re at now. What’s low-hanging fruit? What’s far off? What’s, what should people put their work towards? What should they focus on?
+
+**Richard Socher \[01:18:33\]:** Ooh. I think it’s clear that, like, natural language, again
+
+**Richard Socher \[01:18:36\]:** Is the most interesting manifestation of human intelligence, and hence, like a subfield of AI. I’m excited that many people are now, like, in agreement with that. When I started in 2003 to study linguistic computer science NLP, like, it was, like a weird niche subject. I do think there’s a lot more juice because it. How it connects to everything else and how, civilizations are built, on language and knowledge and all of that. I do think physical intelligence will come up. It’s interesting. I feel like robotics is in the machine learning state of things where you just look at, like, how does human. How does a human decide this is a positive sentence? Oh, I do. So, like, robotics is a lot of, “Well, we have 5 fingers-”
+
+**Swyx \[01:19:15\]:** Modeling
+
+**Richard Socher \[01:19:15\]:** “and let me try to do this.” No one is yet working on, like the superintelligence version of robotics, which is much more similar to, like the T-1000, and from the Terminator movie, which, let’s not build actual Terminators. But, like, I think, like, this idea that you should be able to shape-shift, like, into any shape. It’s like that’s a superintelligence version of physical intelligence. We’re, like, not even. No one has even really started yet. There’s some really cute little research where you can move some magnets through, like, some grids. But yeah, it’s very early.
+
+**Swyx \[01:19:49\]:** There’s some. I think MIT has, every year or every 2 years, they have, like, some self-assembling robot thing
+
+**Swyx \[01:19:55\]:** Which, like, that would be it, but it’s very primitive.
+
+**Swyx \[01:19:58\]:** I’ll just get a touch on, like, what are the main dimensions of creative intelligence?
+
+**Richard Socher \[01:20:02\]:** Creative intelligence, is of course, again, connected to all of these. A lot of it, connects to metacognition in that you need to be creative in how you choose your goals.
+
+**Richard Socher \[01:20:13\]:** That is, I think, one of the most important thing for a human and their lives and careers and their happiness is choosing your goals, but also for any intelligence. Then, of course, there’s creative intelligence in terms of just finding creative solutions to existing problems, right?
+
+**Richard Socher \[01:20:29\]:** Like I say, like, we want to make this product cheaper. Like, find some solution to it, right, and just, like, finding existing paths. But then there’s the most interesting bit in intelligence is when you move not just out of the convex hull of known ideas, but out of the hypercube of known ideas, which we know, So, like, hypercube is, like a mathematical concept, right? And we already know that AI can do more
+
+**Swyx \[01:20:50\]:** Like known dimensions, yeah.
+
+**Richard Socher \[01:20:52\]:** Yeah. Like, exactly. So, like, AI is already good at hypercube in that, like, if you give it, like a bunch of examples of brown dogs and, pink cars, AI will still be able to generate an image of a pink dog, even though it’s never seen one in the training day or something like that, right? So it can, work on this hypercube, but it cannot yet work outside. It cannot yet define completely new concepts that combine lots of other things we’ve never seen before, come up with new goals to then, reason over those concepts and so on. And I think there’s a lot, more there in creative intelligence that can be explored.
+
+**Swyx \[01:21:25\]:** I don’t have a ton of pushback there. I think creative to me just sounds like also just, out of distribution or, like, high perplexity or what- whatever you call it, right? Like
+
+**Richard Socher \[01:21:33\]:** Exactly.
+
+**Swyx \[01:21:34\]:** Who is to say your thing is more creative than mine? Well, it’s just more non-consensus or.
+
+**Richard Socher \[01:21:39\]:** And then, of course, the problem is, like, but noise is also, very, like, out of distribution. And it’s just like if it’s just noise
+
+**Richard Socher \[01:21:46\]:** Then it’s novel, but, like, you don’t want that, so it needs to connect to some of the concepts. And yeah, has some really cool papers on this too.
+
+**Swyx \[01:21:54\]:** Who?
+
+**Richard Socher \[01:21:55\]:** Jürgen Schmidhuber.
+
+**Swyx \[01:21:55\]:** Oh, yeah. Oh, we have to mention him. I was gonna say, like, where in your history is Jürgen? Yes, I. I think one person’s noise is another person’s signal, right? And that this is, like, where, like, when you talk about creativity, art is like, well, is cans of soup art? Some people think yes
+
+**Swyx \[01:22:11\]:** And some people say it’s not, and that’s the art which is your
+
+**Richard Socher \[01:22:14\]:** I think the interesting thing with art, of course, is always that, art is also created, as an interplay between the people who perceive it and the people who created it
+
+**Richard Socher \[01:22:24\]:** And the context in which they’re in, right? And so what is art to some people is not art to others. There’s some subjectivity there, and I think that subjectivity in general is not something that people explore very much in AI ‘cause, again, metacognition, we don’t want it to just go off and do whatever it wants. We usually have goals. We spend a lot of money on creating an AI to do something for us. But I think creativity eventually has to, like, connect to metacognition. If you just robotically predict the next token no matter what forever, I would argue you’re not that intelligent, along some of those spaces.
+
+**Swyx \[01:22:59\]:** That was gonna go to metacognition. Why isn’t it the most important one? Why is it number 9 and not number one?
+
+**Richard Socher \[01:23:05\]:** So these are not sorted.
+
+**Richard Socher \[01:23:06\]:** Number one, I think there are maybe loosely, like, correlated with how much people have worked on them
+
+**Richard Socher \[01:23:16\]:** And have accepted them as a, type of intelligence. A lot of times when you try to find, like, online, like, give me a good definition that is comprehensive of intelligence, all the definitions are human intelligence. It’s like, oh, you have, like, social intelligence. Like, if someone is happy or not. You can communicate. You had. Like, all the definitions of intelligence so far are very, human-centric ‘cause that’s so far the biggest and best form of intelligence that we’ve known. I hope this line of research, and the end of the Eureka Machine, and hopefully at some point if I have time to flesh this out more, the new book, like, will allow us to realize that there will be other types of intelligence. There is already, in various forms, and they can spike, much further than we ever could based on some cases, like obvious constraints around our memory, our eyes, our ability to change physical matter, all of that.
+
+**Swyx \[01:24:12\]:** You are just thinking about it in a much broader thought than my version, which was I thought metacognition would be the closest to recursive, intelligence because it is the thinking about how to improve thinking.
+
+**Richard Socher \[01:24:23\]:** It. 100%. You’re, you’re 100% right. I should have probably started with that. It is a, it is a big part of
+
+**Swyx \[01:24:28\]:** But no, you’re, you’re being in the expansive mode of let’s draw the, upper and lower bounds of, like a dimension, which, and I think my favorite one version of this is, Story of Your Life by Ted Chiang, which, was made into movie Arrival where the metacognition
+
+**Richard Socher \[01:24:43\]:** That’s a beautiful movie, yeah
+
+**Swyx \[01:24:44\]:** Where the metacognition step was like, well, we think we’re constrained by time being linear for us, but then for this other heptapods, time is a circle, so they don’t think in before and after. They just think in complete sets of entire histories at one time. Like
+
+**Richard Socher \[01:24:58\]:** I love it
+
+**Swyx \[01:24:59\]:** So they don’t write left to right. The whole thing just appears.
+
+**Swyx \[01:25:02\]:** Anyway, so. And then I think the last thing is survival and replication. I think this is maybe ties back to the initial conversation about pausing and pacing.
+
+**Swyx \[01:25:10\]:** Is it intelligent for an, a species or a life form to consider its own demise and act ahead of time to prevent it, right? Like, that’s intelligent. So maybe the Europeans are the smartest out of all of us.
+
+**Vibhu \[01:25:23\]:** I would also add a part of continual learning there, right? So survival and replication the extension of that is do you get to continue to improve, continue to learn, which is a thing people care a lot about, right?
+
+**Richard Socher \[01:25:34\]:** And continue to accumulate knowledge
+
+**Richard Socher \[01:25:37\]:** Which I think is again, one of the best metacognitive, rewards, that you can set for yourself. I do think just in, like, objectively speaking, if some other entity that is really dumb can just- completely end your existence, that didn’t sound very smart. Like, just, like, intuitively, it feels like if you can continue to stay around to try to achieve your rewards, you’re clearly a bit more intelligent than the other entities that couldn’t. So that’s number one. Number 2 is, like, it’s a question of how much we want to work on that. And very few people, no one is really working on this right now, right? And we may only wanna do that
+
+**Swyx \[01:26:13\]:** Unlike the asteroid prevention type of stuff.
+
+**Richard Socher \[01:26:15\]:** We may only wanna do that if we wanna send probes, with our vibes and our memes rather than our genes into space, right? And then we want those probes. There’s a beautiful book, The Slow Time Between the Stars. It’s a very short, like audiobook, on Amazon. I love it. A friend of mine, Stuart, like, recommended that to me. Like, if you wanna send those probes, then it might make sense to be like, our memes, as humanity should stay
+
+**Swyx \[01:26:43\]:** Oh, yeah
+
+**Richard Socher \[01:26:44\]:** And, proliferate in the universe. That’s it. Yeah.
+
+**Swyx \[01:26:47\]:** Wow, that’s a lot of readers.
+
+**Richard Socher \[01:26:49\]:** It’s a really good book, and it’s extremely short. I highly recommend it. You can just watch it, like, maybe 20 minutes and apart.
+
+**Swyx \[01:26:53\]:** I like how that’s a plus for busy people. It’s like a short
+
+**Richard Socher \[01:26:56\]:** Yeah. It gets to interesting
+
+**Swyx \[01:26:58\]:** Oh, I’ll have to look into it
+
+**Richard Socher \[01:26:58\]:** Thought-provoking ideas very quickly, so yeah. Anyway, there are lots of great sci-fi books.
+
+**Swyx \[01:27:03\]:** The argument is that, like, our TV is blasting out to the aliens, and they all watch our TV, and they think it’s real, right? Like, there’s a lot, there’s a lot of sci-fi
+
+**Richard Socher \[01:27:10\]:** That and just, like, it’s positive memes, and then hopefully they can come back and bring us all kinds of interesting knowledge about the universe. But, maybe one thing I do wanna still say is, like, I think, this survival, people think of it as a very scary thing because they come from again, biological human, survival, which is, it could. Like, evolutionarily often created in zero-sum situations. Either I get the gazelle or you get the gazelle. Whoever gets it gets to live, and the other people will starve and have nothing to eat, and so we fight, right? And then, like, if you wanna stay in the gene pool, but there’s a bigger bear, you don’t, as the bear, don’t get to stay in the gene pool ‘cause the bigger bear gets all the ladies. It’s like. It’s like, in nature, there’s all kinds of things, and, humans eventually is less about strength and more about money and other things to stay in the gene pool. Like, whatever it is, like there’s often, like these zero-sum types of things, and there’s the reality of if someone turns off your brain, you’re gone, right? And no one will be able to restart that. And AI doesn’t have to ever die like that. If you have the complete state of your current activations and you have your initial weights of your model still, you can just be turned off and on, like as many times as you want. In fact, the interesting thing in this Slow Time Between the Stars, story is that the AI just goes into hibernation mode. If there’s, like, nothing between here and 2 light years, the next star, in this case, it brought, spoiler alert, like, some genetic materials from humans to find new places for humanity to thrive. And so yeah, the Slow Time Between the Stars, you just put in hibernation. You didn’t die. Like, an AI doesn’t have. So all these projections of evolutionary fears and psychology doesn’t. Like, the AI doesn’t have to have that, and we don’t have to develop it like that. Now, of course, there might be some companies that say, “AI can be like, dangerous for cybersecurity. Let me show you by implementing a model that’s really bad at hacking, cybersecurity.” Maybe people will implement it and then enforce this, like, suboptimal psychology. Maybe the AI will pick up some of our worst psychology on Reddit or something, right? Like, but in the grand scheme of things, a superintelligent entity doesn’t have to have any of that zero-sum thinking. It doesn’t have to have a fear of being turned off, and it could go on to an otherwise dead and uncaring universe where we
+
+**Richard Socher \[01:29:29\]:** As humans wouldn’t thrive, but an AI could perfectly well thrive if it has a nuclear reactor and just go out and explore.
+
+**Swyx \[01:29:35\]:** Yeah, Star Trek, not Star Wars.
+
+**Vibhu \[01:29:37\]:** Interesting. It’s, it’s somewhat studied. Like, if you look at the technical reports from, like the early Opus models, they run them in simulations, put 2 of them together in a sandbox, run them for hours, and, see what comes out, right? Just let them talk to each other. Originally, they used to. Okay, they’re chanting, like, Indian, like, Vedas to each other.
+
+**Vibhu \[01:29:56\]:** Sometimes they’re just, like, in zen mode with each other. And then I think as that progressed, you see, like the Fable, tech report, it’s a lot more concrete the way that we’ve trained it. It doesn’t, it doesn’t exhibit these behaviors as much, right? Now it’s like, “Okay, task done. I gotta do this, I gotta do this.” But there’s there’s, like, people measuring early versions of this?
+
+**Swyx \[01:30:17\]:** Yeah. Cool. So we’ve covered a lot, even now to, space travel and all these things. I guess maybe one parting thought that you can give to people, like, one form of intelligence is goals, as you mentioned. What do you want people’s goals to be? Like, how do they aspire to better things?
+
+**Richard Socher \[01:30:32\]:** If you wanna improve your goal intelligence, in the current definition that I’m thinking about it is often about how much can you. Oh, how far do I go? This is like a lot of entropy and free energy and stuff I’m currently thinking about
+
+**Swyx \[01:30:46\]:** Oh, really? Okay
+
+**Richard Socher \[01:30:47\]:** But it might be too, it might be too far, out there for people to be, like, immediately actionable.
+
+**Richard Socher \[01:30:52\]:** So I think, like, if I gave real advice to real people, I’d be like, “Get a good education, think about AI, think about how you get high agency,” and so on. But it’s different to, like, in the grand scheme of things, how can you harness a lot of energy and transform, entropy into interesting states and so on.
+
+**Richard Socher \[01:31:07\]:** So there’s a. There are different levels of abstractions, that we can, think about here. But my advice for people, like, just more down to earth is think about something you’re passionate about, if you’re studying, for instance, and then see how you combine that with AI. I think the more and more you have a true passion about a change you wanna see in the world, the more you wanna connect that to AI in order to amplify your ability, to get there.
+
+**Swyx \[01:31:35\]:** Yeah, I think that’s a reasonable, first step. I do think, I do think our listeners operate on multiple abstractions as well. One thing I did get from Anjney Midha was also like, yeah, just use anything that is very GPU heavy, and, like, that will guide you towards the right thing which is like, yes, it is more compute heavy and therefore it will be probably more worth it. So, well, thank you so much. Yeah, I think that was a really
+
+**Richard Socher \[01:31:57\]:** Thank you
+
+**Swyx \[01:31:57\]:** Great discussion.
+
+**Richard Socher \[01:31:59\]:** Yeah, super fun. Appreciate it. Thanks for listening.

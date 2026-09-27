@@ -1,0 +1,296 @@
+---
+title: The Flat Curve Society
+link: https://steve-yegge.medium.com/the-flat-curve-society-36c8b01eb33b?source=rss-c1ec701babb7------2
+source: steve-yegge-medium-com
+published: 2026-06-19T03:31:56Z
+updated: 2026-06-19T03:31:56Z
+first_seen: 2026-09-27T19:29:15.293681927Z
+authors:
+- Steve Yegge
+labels:
+- ai-literacy
+- ai-safety
+- ai-training
+- model-safety
+content: feed
+html: 2026-06-19-the-flat-curve-society.html
+preview:
+  file: 2026-06-19-the-flat-curve-society.preview-5c6db505c567.webp
+  width: 256
+  height: 143
+  color: '#b49066'
+images:
+- source: https://cdn-images-1.medium.com/max/1024/1*41EEUrrzzmBVn8-UZ9oGjA.jpeg
+  original:
+    file: 2026-06-19-the-flat-curve-society.image-1856d15c74c9.jpg
+    width: 1024
+    height: 572
+  color: '#96653a'
+- source: https://cdn-images-1.medium.com/max/1024/1*APBipdbgLcUuG9Y1WIoo3Q.jpeg
+  original:
+    file: 2026-06-19-the-flat-curve-society.image-c26ccca421b9.jpg
+    width: 1024
+    height: 765
+  color: '#a59687'
+- source: https://cdn-images-1.medium.com/max/1024/1*mFhM2Q7wYa-s0NOmRyNavw.jpeg
+  original:
+    file: 2026-06-19-the-flat-curve-society.image-8b5f826e3d4c.jpg
+    width: 1024
+    height: 765
+  color: '#885636'
+- source: https://cdn-images-1.medium.com/max/1024/1*SF1BasFag8DKAfmOsuzaig.jpeg
+  original:
+    file: 2026-06-19-the-flat-curve-society.image-5d8eb3b2abf6.jpg
+    width: 1024
+    height: 765
+  color: '#d9c5b6'
+- source: https://cdn-images-1.medium.com/max/1024/1*7FvNDJkCUQ_Af7umgoN-BA.jpeg
+  original:
+    file: 2026-06-19-the-flat-curve-society.image-df5112b69257.jpg
+    width: 1024
+    height: 765
+  color: '#e6b777'
+- source: https://cdn-images-1.medium.com/max/1024/1*e3RNtiUi6e-koK0oYV0vHQ.jpeg
+  original:
+    file: 2026-06-19-the-flat-curve-society.image-84b4c429b32b.jpg
+    width: 1024
+    height: 572
+  color: '#b7c28a'
+- source: https://cdn-images-1.medium.com/max/1024/1*l3vx3p6UiFCzQ43cDmE_JA.jpeg
+  original:
+    file: 2026-06-19-the-flat-curve-society.image-56d48e903747.jpg
+    width: 1024
+    height: 572
+  color: '#9995a6'
+---
+
+![](https://cdn-images-1.medium.com/max/1024/1*41EEUrrzzmBVn8-UZ9oGjA.jpeg)\
+The Flat Curve Society
+
+Hi-ho, we’ve reached the moment, in this movie we’re all watching together on X, where model intelligence has become dangerous. Dario predicted years ago that it would happen this year. With Fable being (briefly) shut off by the USG, it’s the first highly visible sign that we’ve crossed into treacherous waters.
+
+Which is too bad, really. I was hoping that we’d get a couple more generations of model upgrades, powerful enough to convince all remaining skeptics, before we got to one that was a security problem. But the Mythos class (Fable being the sloppily-guardrailed version they released last week) has everyone spooked.
+
+Now that we know models are getting dangerous, we can do some extrapolating.
+
+The AI race isn’t going to slow down, and AI will continue to grow exponentially in capability. Unfortunately, most of you aren’t going to see it progress anymore.
+
+I am now in the camp who believe that we are only at most two or three model generations away from AI finally being controlled like nuclear weapons. Only a few will have access to superintelligence above the classes of models we’re seeing this year. As far as I can tell, most Fortune 500 companies will either not have access at all, or it will be tightly controlled for only a small subset of the company. And it will be supervised.
+
+I think those with access to powerful frontier models will sell intelligence like a vending machine: You send them a software spec or a problem to solve, and their models implement it for you, on their servers, with your dollars. And since most companies aren’t going to want to send their code and problems to the model vendors, I think the world will learn to live with the models we do have access to.
+
+![](https://cdn-images-1.medium.com/max/1024/1*APBipdbgLcUuG9Y1WIoo3Q.jpeg)\
+Superintelligence Under Lock and Key
+
+Every government will restrict access, acting on its own. Nuclear weapons are scarce because it’s hard to get enriched uranium. AI is going the same way, with the chokepoint being the supply chain — something governments can actually clamp down on. China will lock superintelligence inside its own borders as hard as the USG will. And if China ends up taking the frontier lead, it just changes where the power is concentrated, but not the overall shape of the world we’re going to be operating in.
+
+**A World of Mediocre Models**
+
+Many of us hoped OSS models would keep us on the exponential curve. They trail the frontier by roughly seven months. But they stay on that curve by training on compute which increasingly takes international-relations-level dealmaking to secure. Maybe distillation or some clever peer-to-peer training scheme keeps them in the race. But to push past Fable class they’d have to do it while the whole hardware-and-software supply chain gets locked down the way the nuclear chain was. And the frontier labs themselves are going to decline to help train the next dangerous open model.
+
+If OSS hits Fable class next year anyway, that’s great for the world. But open models are not going to blow past Fable class, not with a huge compute wall and government lockdowns looming.
+
+So again, today’s models are roughly as good as we’re going to get.
+
+As disappointing as I find that in some ways, I find it still has a lot of upside to be happy about. Because today’s models, particularly Fable-class, are plenty good enough. They will still utterly transform coding and knowledge work. It’s just not going to be a walk in the park. It will take a big, multi-year effort to pivot.
+
+I’m going to assume for the rest of this post that we will all get Fable back, and that we may even get one higher class of model before further advancements become inaccessible to all but a very few.
+
+Many of you have been expecting the hockey-stick AI advancement curve to level out soon, refusing to believe that it’s truly on an exponential curve that could lead to it being so much smarter than humans. You predicted AI would not be able to replace human engineers.
+
+In a way, you turned out to be right. A very practical way.
+
+In reality, behind the scenes, the curve is NOT flattening at all; the exponential growth will continue, and you will be able to see outwardly observable signs of it, e.g. in data center growth.
+
+But the curve will appear to flatten out for you, through two separate phenomena.
+
+The first reason is the one we already mentioned: they’re going to keep the smartest (and thus dangerous) models out of our hands. So most of us never get a chance to try them out. And those models certainly won’t be replacing engineers, if we can’t use them.
+
+The other reason’s kind of interesting, and it took me a while to see that it’s really the same reason wearing a different hat.
+
+**A World of Mediocre Users**
+
+Some people are already reporting they can’t tell the difference between Opus 4.8 and Fable 5. I’ve been calling this the “discernment horizon”: every human has a ceiling on model intelligence past which all the models start to feel about the same.
+
+But there are actually two ceilings, both instructive lenses on what’s happening.
+
+The first I’ll call the demand horizon. It’s set by the hardest problem you bring. If all you have handy are easy problems, they don’t give a smarter model any room to pull ahead — the outputs look the same because the problem never stretched either one. The demand horizon is where you can’t tell two models apart because you don’t have a hard enough problem.
+
+I call my hard problems “back-pocket evals,” and I collect them. Whenever I give a project to a model, and it can’t do the project, I add it to my pocket-eval list. Then every time a new model drops, it’s like Christmas. I try it out on all my pocket evals and see which ones it can now solve.
+
+![](https://cdn-images-1.medium.com/max/1024/1*mFhM2Q7wYa-s0NOmRyNavw.jpeg)\
+Pocket Evals
+
+Concrete example: No Opus-class model has been able to write the React client for my game; it’s just way too complicated and fiddly. Fable was absolutely smashing it. Easy way for me to see the difference vs. Opus. But I also have other problems that will prove too hard for Fable. I will collect them eagerly as it chomps through my work. All you need is ambition, and you can create your own pocket eval collection.
+
+So my demand horizon is super high, and will last at least three or four more model generations, if I can manage to get access to that level of intelligence, which seems unlikely. I don’t have my hopes up. But at least I will be able to *tell* if it’s actually that smart, using my evals.
+
+The demand horizon is benign enough, even kind of flattering: it just means your work isn’t hard enough right now. But bring an unusually hard problem one day, and your horizon widens on the spot, as you watch the cheaper model fumble some task the expensive one nails. Like my React client.
+
+There is a darker horizon, which I think of as the discernment horizon proper. This one is set not by the hardest problem you can pose, but by the hardest answer you can judge. Past this scary line, you can’t tell whether the model is right, because checking the work is itself beyond you.
+
+I’ve been chewing on this problem since my Drunken Rants days, when I’d write about how hard it is to interview someone smarter than you. How do you know they’re not a charlatan, if they’re professing expertise in an area you know nothing about? You can’t, really.
+
+Everyone has a discernment horizon, even Dario. Past some level of capability there is no human alive who can verify the model output.
+
+![](https://cdn-images-1.medium.com/max/1024/1*SF1BasFag8DKAfmOsuzaig.jpeg)\
+The Discernment Horizon
+
+This takes us full circle to *why* they are starting to lock down the models. You can’t hand out an intelligence engine that nobody can supervise. It’s pointless to own because you won’t know if it’s helping you or walking you off a cliff. Superhuman *means* unverifiable.
+
+So the safety people see a potential weapon, and the rest of us see a tool that we can’t effectively supervise. In both cases, you don’t need or want the more powerful model. You want the safer one, even if it’s less capable.
+
+Companies also have both of these horizons. For plenty of companies, Fable is already past the demand horizon — every problem they’ve got, it handles, and a smarter model would change nothing they could measure. For the harder shops the binding limit is discernment: the AI produces work that nobody can grade. A terrible outcome, assuming you don’t want to surrender your business to AI entirely.
+
+As a result of all this, the curve is flattening for most of us. I think commodity intelligence will soon stop growing exponentially, or at least, it will appear that way, and we’ll all operate as if it’s true.
+
+I had never spent much time considering the possibility that the intelligence curve would flatten out. But now that it seems to be happening, let’s look at some of the clear and obvious implications for the industry.
+
+**SaaS is Back, Baby**
+
+It’s clearly going to be too expensive to rebuild all the SaaS at the top of the pyramid. Yes, there will be models that can do it, but access and cost will both be prohibitive.
+
+SaaS actually came rocketing back over the past month all on its own, after spending much of the past year on the ropes, pummeled from all directions by threats of in-house rewrites and fears of Claude taking it all.
+
+Then companies learned about token efficiency the hard way, with huge firms blowing their yearly budgets in months. A few months ago, everyone was planning to tell their CFO they could cancel a bunch of SaaS subscriptions and bring their dependencies in-house. No longer. Now the buy-vs-build decision is tilted heavily towards buy. If you despise your current SaaS enough, then sure, you may be motivated to rewrite it with AI. But buying SaaS has predictable costs that are usually already in the budget, whereas vibe-coding replacements could be an expensive gamble.
+
+If we see a plateau in accessible model capabilities, then the other dreams we had about AI in SaaS fade too: not just replacing it, but transforming it with agentic behaviors and monitoring. Today’s models aren’t good enough to replace a person yet (jailbreakable, confusable, etc.), so you can’t just swap an agent in for an SRE or a trained customer service rep. And the models that *could* reliably replace humans may be too dangerous to *give* to most people.
+
+So SaaS looks like it might be fine, even without agentic behaviors. It just needs to save you the money of building and maintaining it in-house.
+
+SaaS still has its problems: users subsidizing the 80% of the features they don’t use, dollars extracted from local economies to enrich Silicon Valley, enshittification creeping up the pyramid. But it remains fundamentally about crystallization of knowledge. Groups of people build stuff that’s tricky, stuff you wouldn’t want to do yourself, and rent it to you. The AI models powerful enough to replace most of that “easily” will either be unavailable or prohibitively expensive.
+
+It feels to me like the SaaS model is here to stay.
+
+**AI Literacy 101**
+
+Today’s models, while quite capable, are still very difficult to work with. Even Fable likely struggles with large monoliths and other complex legacy code arrangements. It’s hard to get a consistently high quality bar. And of course efficiency is a monstrous issue.
+
+I’d been hoping for models that are smart enough that you don’t need much training to work with them. But with today’s models, you cannot expect people to be born AI-literate. They need help in order to use today’s coding agents and harnesses.
+
+In the next section I will provide a fairly precise and measurable definition of AI literacy. I did not invent it, but I believe it is good enough for your planning, and mine.
+
+First, though, why does it matter whether your employees are AI literate? The answer is a bit complicated, but it boils down to two factors. One is that your company will have to pivot to using AI. And the other is that all your employees are feeling anxious about AI. This tension is actively playing out at all companies around the globe.
+
+Pivoting to AI will change everyone’s job at least a little, and probably change the shape of your company a lot. Which just feeds the anxiety, in a loop.
+
+If you are pushing on change in your company without first having addressed AI literacy, in a quantitative but also deeply empathetic way, then you are fueling anxiety, resentment, and pushback. Your org will resist change.
+
+AI adoption is the key culture challenge of 2026–2027. If you can manage to get your (hostile) employees past the hurdle, and genuinely get them excited about how they can use AI to accelerate themselves, then magic happens. They will automatically begin reshaping your business processes together towards using supervised agentic flows.
+
+I’ve seen this happening all over, but concretely, Gene and I saw it at Arkana Labs in April under the guidance of their VP Eng, Owen Parker. Arkana offers world-class overnight kidney-disease diagnosis, and they have utterly unique business processes. But those processes can all be sped up here and there with AI. Given how obsessed Arkana is, culturally, with fast and accurate turnaround, the employees themselves are getting excited about the opportunities, and pushing hard on what might be possible with agents.
+
+Having seen enough of this I maintain that once most people “get” AI, you just need to guide them, and they’ll start broadly doing the right things for your team.
+
+Conversely, as long as your teammates remain non-AI-savvy, they will resist AI. Which means that until you can get your org over the hump, you’re facing resistance, anxiety, and potentially even morale issues.
+
+So how do we fix it? How do we get people to “get” AI?
+
+It turns out, Netflix has handed us the answer. Thank you, Netflix!
+
+**AI Literacy: Beginner Cohorts**
+
+![](https://cdn-images-1.medium.com/max/1024/1*7FvNDJkCUQ_Af7umgoN-BA.jpeg)\
+Vibe Coding Workshops
+
+I watched a mind-blowing presentation in April from Ezra Savard, who ran a training study/experiment at Netflix from December through March. He gave the presentation at Gene Kim’s AI Summit in San Jose. The study’s goal was to train Netflix engineers on agentic coding, and measure the impact.
+
+Ezra’s presentation was all properly rigorous and disclaimed (e.g. for minor selection bias), but they felt pretty strongly about the results being directionally correct, so I’ll skip all that.
+
+Note that I’ll be framing this as “AI literacy” but that’s my term, not Ezra’s, and he never mentions literacy in his talk. He talks about the journey from being non-users, to users, to power users. But AI is becoming a foundational skill for modern knowledge work, so I will make the case in this post that we are talking about a new form of literacy.
+
+Ezra’s first big discovery to share is that they found three cohorts, which I’m calling the beginner levels of AI literacy. Ezra characterized the cohorts in terms of their average token spend on a “qualified” day using AI, meaning a day where they are using it heavily. They needed at least 3 days a week to be in the cohort.
+
+Here are the three beginner cohorts they found, defined by spend:
+
+- **0M tokens/day**: devs who aren’t using coding agents for their regular work
+- **4M tokens/day**: using a single agent synchronously throughout the workday
+- **12M-15M tokens/day**: letting 2 to 4 agents work without watching
+
+So: No agent, then single-agent, then multi-agent. I think this is a solid working definition of baseline AI literacy. If your entire org isn’t at *least* at single-agent literacy, then they will be fighting you on bringing in more AI, even if it’s just passive resistance.
+
+Ezra shared that some power-user graduates of his course were legitimately spending much higher amounts, over 50M/day.
+
+But he also cautioned that beyond the 15M/day mark, token spend is no longer a valuable measure, since people are by then clever enough to invent reasons to burn tokens. *(After that, you switch to measuring outcomes, as I’ll discuss below.)*
+
+However, and this is the wonderful part, up *to* that point (15M tokens/day), measuring your employees’ token spend at a coarse level can provide powerful insight into where your organization stands on AI literacy, and how much training lies ahead of you.
+
+Fortunately, Ezra has good news for you there: People can jump cohorts in 5 hours. That’s how long it takes people, in the right training setting, to graduate from AI illiteracy to AI savviness. And they stay there. It’s like flipping a switch. 96% of the trainees remained in the second cohort for six weeks after the course without showing signs of slowing down.
+
+What’s the right training setup, you ask? Ezra’s team spent considerable effort honing the formula. The training must be done a team at a time, with 5 to 10 people, including their manager. The manager \_must\_ opt the team in, during regular work hours, as “blessed” company time. The trainees must bring their actual work, and the instructor(s) will help them learn how to do it with agents.
+
+They found that if they cut corners anywhere — shorter classes, larger audiences, individual opt-in classes — they didn’t get the same results. It didn’t “stick.”
+
+As for the third cohort: once a manager has a team full of single-agent users, they can opt their team into the multi-agent course. This is another 5 hours, and teaches them the additional skills needed to wrangle multiple asynchronous agents, while maintaining a high quality bar. This course saw the same strong adoption, with the vast majority jumping into multi-agent work and staying there.
+
+So it takes roughly 5 hours of focused training per employee to get them to basic literacy. And after a few weeks of practice, another 5 hours to get them to become power users.
+
+And as for impact, Ezra reported some surprising findings, such as there being a large difference in the amount of code produced by agentic coders. But when they dug in, they found it was entirely attributable to the additional test code they were writing. Overall, they found that the course had a large positive impact on productivity for those who attended.
+
+If you want to start having conversations with your company about pivoting to AI, then I strongly recommend you begin with an AI literacy audit, followed by training everyone up at least into the single-agent cohort.
+
+**Advanced Cohorts**
+
+Getting people over the FUD hump, and teaching them to spend tokens to accelerate their own work, solves your first culture problem. And it will help you tremendously in your conversations about how to bring in AI, without getting so much pushback.
+
+Netflix gave us an optimized solution to the FUD hump. You train up some “Line Cook” instructors who teach the intro course. Ezra told me and Gene that they had started with our book, which was kinda cool. But the exact curriculum barely matters; you can teach it however you like. And then you get everyone through it, 5 hours and ten people at a time.
+
+Once you’ve taught everyone how to spend tokens, your second culture problem emerges, which is teaching people how NOT to spend tokens. Token efficiency is a fairly advanced topic. There are many, many ways that models can steer you wrong, and the most efficient agentic coders focus on maximizing their outcomes for a given token budget.
+
+At this point I should share a joke made by Pierre Racz, the brilliant Founder/CEO of Genetec, one of the world’s largest physical-security monitoring companies. He prefers to write his code by hand, and when I described how these measurements work, he observed wryly, “Well then it’s not that I’m not using AI, I’m just *extremely* token-efficient.”
+
+And it’s a funny joke, but there’s an underlying lesson there too, which is that if you can trivially do a task by hand, then do it by hand! Over time, you can save a bunch of tokens just by being thoughtful. Type !git push instead of asking the agent to do it, and your habit probably saves you 100k tokens on average, each time you push.
+
+You know the meme with the bell curve and the troglodyte at the bottom and the Jedi at the top, and they’re doing the same thing? Well here the beginner-thing that the Jedi masters is low token spend.
+
+![](https://cdn-images-1.medium.com/max/1024/1*e3RNtiUi6e-koK0oYV0vHQ.jpeg)\
+The journey from beginner to master
+
+Token spend only signals literacy on the way up. It’s a skill you build. But then it flips, and the thing you need to start measuring is token waste. Minimizing that is another set of skills.
+
+You will find that your beginner cohorts are absolute token pigs, and that’s OK. Encourage them to explore and learn. They need to master the skill of spending before they can focus on savings.
+
+You will find that people don’t automatically know how to conserve tokens. They will be 200k tokens deep into a conversation and ask the AI what time it is. Argh! Or maybe whether a specific file exists in their home directory. This is a skill that needs training, too.
+
+So at some point you will probably want to have a third training course, this one on efficiency techniques and good token hygiene.
+
+Then, give your newly AI-savvy people budgets. Make them earn budget increases with real outcomes. However you do it, measuring outcomes is going to become critically important, so you can differentiate your effective builders from your vanity builders.
+
+We’ve talked about the beginner literacy cohorts (spend-based), and the advanced cohorts (efficiency, waste management). At the top of the AI literacy curve, your thinking becomes more strategic. You worry about saving large numbers of tokens while achieving your desired outcomes.
+
+The first example everyone hits is buy vs build. Will you let your engineers try to rewrite random SaaS, or will you just re-up and go with the known spend? You have to start being strategic with agentic project allocation.
+
+Another interesting challenge you face: How will you route every task to the dumbest model that can handle it? You will need to be able to tag work with intelligence tiers, and build a router. That router is the discernment horizon encoded as infrastructure. Most work sits below the line and goes to the cheap model, and the occasional task that pokes above it gets escalated to the expensive tier.
+
+At the highest levels, AI literacy turns into the art of achieving great outcomes with the least spend.
+
+**A Craft Needs a Plateau**
+
+We are seeing a plateau in intelligence. It is artificial: the exponential increase continues behind the scenes, gated away from you. And at some point you won’t be able to tell it’s getting better, even if you could see it. The intelligence curve is as real as the Earth is round, but just as flat from where you stand. Welcome to the Flat Curve Society.
+
+The Mythos graduating class will become the accepted trade-off between capability and risk for the general public. And we will see incremental updates that patch edge-case behavior, but nothing like the jumps we have enjoyed for the past several years.
+
+The plateau is not a bad thing. A plateau lets us set up a camp and start building. We’ve been on unstable ground. Think how hard it has been lately to be a startup founder, with everything you build being obsoleted with each model release. That’s finally slowing down now, and it will give us firm footing.
+
+We have an engineering problem ahead of us. As good as Opus and Fable are, they have their limits. We all need to learn the art of task decomposition and breaking up software monoliths, to keep them within those limits. We will still need engineers, and engineering. We’ll have super smart helpers, but it will still be pretty similar to the landscape today.
+
+I kind of like the plateau that’s coming. Stability feels like a precondition for the new craft of building software with these super smart helpers. It is a craft that only gets harder, and more valuable, the weaker your models are. Sonnet-class and Opus-class will stay relevant for years, because they save money and stay broadly available even after the frontier moves on. The models that would obsolete today’s hard-won techniques of the craft are evidently too dangerous to give to us anyway.
+
+The world is currently tinkering with setting up 24x7 autonomous agents, and it looks like the difficulties we face there today will remain with us tomorrow. There is a large engineering effort underway to build the control plane(s) that allows today’s models to run today’s large businesses. That, too, is a craft, or at least, it’s part of the tools of the trade.
+
+**Train Your Flat-Curvers**
+
+The key takeaway here (beyond not committing seppuku just yet if you’re a SaaS vendor) is that we have a *massive* AI training and literacy problem ahead of us. But it’s solvable. It will just take time and effort.
+
+The models we have today, and the ones coming this year, will not one-shot your entire Fortune 100 code base. They are capable of amazing things, but they will still require grown-up human supervision.
+
+This means you’ll need engineers. All the cool things that we’ve talked about — with impromptu 2-pizza teams forming, 2- to 3-person teams being a sweet spot, and roles starting to blur together (or at least talk to each other more) — will likely continue. But everyone will need training and time and patience and careful budget management.
+
+AI Literacy does not come for free. The only thing you get for free is AI Anxiety. But it’s fairly easy to teach people to spend tokens. Teaching them to save tokens? Well, that’s the new meta. Good luck. Make sure they can do it Pierre’s way first.
+
+That’s all I had for today’s post. Hope you enjoyed it. See you at the AI Engineer Conference in San Francisco at the end of the month!
+
+![](https://cdn-images-1.medium.com/max/1024/1*l3vx3p6UiFCzQ43cDmE_JA.jpeg)\
+Campground Craft
+
+![](https://medium.com/_/stat?event=post.clientViewed&referrerSource=full_rss&postId=36c8b01eb33b)

@@ -1,0 +1,72 @@
+<div id="readability-page-1" class="page"><div><p><a target="_blank" rel="noopener noreferrer" href="https://ui.endpoints.huggingface.co/">Hugging Face Inference Endpoints</a> offers an easy and secure way to deploy Machine Learning models for use in production. Inference Endpoints empower developers and data scientists to create AI applications without managing infrastructure: simplifying the deployment process to a few clicks, including handling large volumes of requests with autoscaling, reducing infrastructure costs with scale-to-zero, and offering advanced security.</p>
+<p>In this blog post, we will show you how to deploy open LLMS with <a target="_blank" rel="noopener noreferrer" href="https://github.com/vllm-project/vllm">vLLM</a> on Hugging Face Inference Endpoints. VLLM is one of the most popular open-source projects for deploying large language models. It is built for high-throughput and memory-efficient deployments of LLMs. In this blog post we will show you how to deploy Llama 3 on Hugging Face Inference Endpoints using vLLM.</p>
+<h2 id="create-inference-endpoints">Create Inference Endpoints</h2>
+<p>Inference Endpoints allows you to customize the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/inference-endpoints/guides/custom_container">container image</a> used for deployment. We created a vLLM container supporting loading models from <code>/repository</code> since Inference Endpoints mounts the model artifacts to <code>/repository</code>. We also allowed to configure the model max sequence length using the <code>MAX_MODEL_LEN</code> environment variable.</p>
+<p>We can deploy the model in just <a target="_blank" rel="noopener noreferrer" href="https://ui.endpoints.huggingface.co/new">a few clicks from the UI</a>, or take advantage of the <code>huggingface_hub</code> Python library to programmatically create and manage Inference Endpoints. If you are using the UI, you have to select <code>custom</code> container type in the advanced configuration and add <code>philschmi/vllm-hf-inference-endpoints</code> as the container image. The UI is a great way to get started, but we currently do not support customizing the environment variables from the UI. We will show you how to do this using the <code>huggingface_hub</code> Python library.</p>
+<p><img src="https://www.philschmid.de/static/blog/vllm-inference-endpoints/custom-container.jpg" alt="custom container"></p>
+<p>We are going to use the <code>huggingface_hub</code> library to programmatically create and manage Inference Endpoints. First, we need to install the library:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">pip install huggingface_hub[cli]</code></pre></div></figure>
+<p>Then we needd to make sure we are logged in and have access to Llama 3 model.</p>
+<p><em>Note: Llama 3 is a gated model, please visit the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct">Model Card</a> and accept the license terms and acceptable use policy before submitting this form.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">huggingface-cli login --token YOUR_API_TOKEN</code></pre></div></figure>
+<p>Now we can create the Inference Endpoint using the <code>create_inference_endpoint</code> function. We will deploy <code>meta-llama/Meta-Llama-3-8B-Instruct</code> on a single A10G instance with a <code>MAX_MODEL_LEN</code> to 8192 to avoid out of memory errors.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from huggingface_hub import create_inference_endpoint
+ 
+endpoint = create_inference_endpoint(
+    "vllm-meta-llama-3-8b-instruct",
+    repository="meta-llama/Meta-Llama-3-8B-Instruct",
+    framework="pytorch",
+    task="custom",
+    accelerator="gpu",
+    vendor="aws",
+    region="us-east-1",
+    type="protected",
+    instance_type="g5.2xlarge",
+    instance_size="medium",
+    custom_image={
+        "health_route": "/health",
+        "env": { "MAX_MODEL_LEN": "8192" },
+        "url": "philschmi/vllm-hf-inference-endpoints",
+    },
+)
+ 
+endpoint.wait()
+print(endpoint.status)</code></pre></div></figure>
+<p>Running this code will create an Inference Endpoint with the specified configuration. The <code>wait</code> method will block until the Inference Endpoint is ready. You can check the status of the Inference Endpoint by printing the <code>status</code> attribute. You can also check the status of the Inference Endpoint in the <a target="_blank" rel="noopener noreferrer" href="https://ui.endpoints.huggingface.co/">Hugging Face Inference Endpoints UI</a>.</p>
+<p><img src="https://www.philschmid.de/static/blog/vllm-inference-endpoints/endpoint-status.jpg" alt="UI status"></p>
+<p><em>Note: The UI widgets are currently not working for custom container images (sending a request to "/" and not "v1/completion7/chat"). You will receive a 404 if you try it. We are working on fixing/adding this. In the meantime you need to curl or use the OpenAI SDK to interact with the model.</em></p>
+<h2 id="test-endpoint-using-openai-sdk">Test Endpoint using OpenAI SDK</h2>
+<p>We deployed vLLM using the OpenAI completion API. We can test the Inference Endpoint using the OpenAI SDK. First, we need to install the OpenAI SDK:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">pip install openai</code></pre></div></figure>
+<p>Then we can test the Inference Endpoint using the OpenAI SDK:</p>
+<p><em>Note: We have to use <code>/repository</code> as the model since thats where Inference Endpoints mounts the model.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from huggingface_hub import HfFolder
+from openai import OpenAI
+ 
+ENDPOINT_URL = endpoint.url + "/v1/" # if endpoint object is not available check the UI 
+API_KEY = HfFolder.get_token()
+ 
+# initialize the client but point it to TGI
+client = OpenAI(base_url=ENDPOINT_URL, api_key=API_KEY)
+ 
+chat_completion = client.chat.completions.create(
+    model="/repository", # needs to be /repository since there are the model artifacts stored
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Why is open-source software important?"},
+    ],
+    stream=True,
+    max_tokens=500
+)
+ 
+# iterate and print stream
+for message in chat_completion:
+    if message.choices[0].delta.content:
+        print(message.choices[0].delta.content, end="")</code></pre></div></figure>
+<p>Nice work! You have successfully deployed Llama 3 on Hugging Face Inference Endpoints using vLLM. You can now use the OpenAI SDK to interact with the model. You can also use the Hugging Face Inference Endpoints UI to monitor the model's performance and scale it up or down as needed.</p>
+<p>You can delete the Inference Endpoint using the <code>delete</code> method:</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">endpoint.delete()</code></pre></div></figure>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this blog post, we showed you how to deploy open LLMS with vLLM on Hugging Face Inference Endpoints using the custom container image. We used the <code>huggingface_hub</code> Python library to programmatically create and manage Inference Endpoints. We also showed you how to test the Inference Endpoint using the OpenAI SDK. We hope this blog post helps you deploy your LLMs on Hugging Face Inference Endpoints.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>

@@ -1,0 +1,149 @@
+<div id="readability-page-1" class="page"><div>
+            <p>Writing data labeling/annotation guidelines is hard. For the handful of times I’ve had to do it, I didn’t know where to start or how to improve. You would think that we’re <em>just</em> writing instructions for a task but nooo, turns out there’s a lot more thinking involved.</p>
+
+<p>I know future me will have to write annotation guidelines again. Thus, present me would like to share a few things he’s learned. I’ll frame it around questions that I think a good guideline should answer (the principles of <a href="https://eugeneyan.com/writing/writing-docs-why-what-how/" target="_blank">Why, What, How</a> are applicable). We’ll also see examples from guidelines by <a href="https://guidelines.raterhub.com/searchqualityevaluatorguidelines.pdf" target="_blank">Google</a> and <a href="https://knowledgebase.oneforma.com/wp-content/uploads/2019/09/LIMQ-Guidelines-11.2018.pdf" target="_blank">Bing Search</a>. Addressing these questions should help us write good guidelines that ensure consistent and accurate data labels.</p>
+
+<ul>
+  <li><a href="#why-is-the-task-important">Why is the task important?</a></li>
+  <li><a href="#what-is-the-task">What is the task?</a></li>
+  <li><a href="#what-do-the-terms-in-the-task-mean">What do the terms in the task mean?</a></li>
+  <li><a href="#how-should-annotators-decide">How should annotators decide?</a></li>
+  <li><a href="#how-should-the-task-be-performed">How should the task be performed?</a></li>
+</ul>
+
+<h2 id="why-is-the-task-important">Why is the task important?</h2>
+
+<p><strong>A good guideline should explain <em>why</em> the task is important.</strong> This will motivate annotators to put in the effort it deserves. Whether the task is labeling images, annotating sentiment in text, or rating search relevance, tell them why it matters. Explain how the task’s outputs will be used to improve your product or machine learning models. Include screenshots of the UX and explain how the task helps power it.</p>
+
+<p>The examples below are from the <strong>first pages of Google’s and Bing’s guidelines</strong>. They explain the task and how its output will be used to improve search results.</p>
+
+<p><img src="https://eugeneyan.com/assets/google-why.webp" loading="lazy" title="Google's explanation on the Why" alt="Google's explanation on the Why"></p>
+<p>Google's explanation on the Why</p>
+<p><img src="https://eugeneyan.com/assets/bing-why.webp" loading="lazy" title="Bing's explanation on the Why" alt="Bing's explanation on the Why"></p>
+<p>Bing's explanation on the Why</p>
+
+<h2 id="what-is-the-task">What is the task?</h2>
+
+<p><strong>Next, explain the task so annotators understand exactly what they need to do.</strong> This may involve helping annotators put themselves in the shoes of users, and possibly breaking the task into smaller pieces.</p>
+
+<p>Google’s guide has an entire section devoted to <strong>understanding the needs of a user</strong>. It discusses how people use search to perform simple and complex tasks, as well as the various user intents.</p>
+
+<p><img src="https://eugeneyan.com/assets/google-user-needs.webp" loading="lazy" title="Though it may be obvious, it's helpful to spell out the needs of a search user" alt="Though it may be obvious, it's helpful to spell out the needs of a search user"></p>
+<p>Though it may be obvious, it's helpful to spell out the needs of a search user</p>
+<p><img src="https://eugeneyan.com/assets/google-user-intent.webp" loading="lazy" title="People using search have various intents such as to know, do, find a website, or visit in person" alt="People using search have various intents such as to know, do, find a website, or visit in person"></p>
+<p>People using search have various intents such as to know, do, find a website, or visit in person</p>
+
+<p>Both guidelines also <strong>explain the labeling options</strong> early in the respective sections.</p>
+
+<p><img src="https://eugeneyan.com/assets/google-page-quality.webp" loading="lazy" title="Explaining the labeling options for page quality" alt="Explaining the labeling options for page quality"></p>
+<p>Explaining the labeling options for page quality</p>
+<p><img src="https://eugeneyan.com/assets/google-needs-met.webp" loading="lazy" title="Explaining the labeling options for needs met" alt="Explaining the labeling options for needs met"></p>
+<p>Explaining the labeling options for needs met</p>
+<p><img src="https://eugeneyan.com/assets/bing-location-quality.webp" loading="lazy" title="Explaining the labeling options for location quality" alt="Explaining the labeling options for location quality"></p>
+<p>Explaining the labeling options for location quality</p>
+
+<h2 id="what-do-the-terms-in-the-task-mean">What do the terms in the task mean?</h2>
+
+<p><strong>A good guideline should have clear definitions of the terms used.</strong> One key challenge when writing annotation guidelines is ensuring that everyone is using the same terminology. This is especially important in technical fields with domain-specific vocabulary, or when developing new user experiences and coining new terms. This goes a long way towards improving the consistency and accuracy of labeled data.</p>
+
+<p>For the seemingly basic task of rating search relevance, Google’s guidelines includes definitions for “query”, “locale”, and even “results”.</p>
+
+<p><img src="https://eugeneyan.com/assets/google-definitions.webp" loading="lazy" title="Defining the various terms that show up in a search relevance task" alt="Defining the various terms that show up in a search relevance task">
+<img src="https://eugeneyan.com/assets/google-definitions-2.webp" loading="lazy" title="Defining the various terms that show up in a search relevance task" alt="Defining the various terms that show up in a search relevance task"></p>
+<p>Defining the various terms that show up in a search relevance task</p>
+
+<p>Similarly, Bing defines the fields that show up in Bing search results.
+<img src="https://eugeneyan.com/assets/bing-definitions.webp" loading="lazy" title="Image" alt="Image"></p>
+<p>Defining the various fields in a Bing local page</p>
+
+<h2 id="how-should-annotators-decide">How should annotators decide?</h2>
+
+<p>Here’s the meat of the guidelines: <strong>Explaining how to decide on the labels</strong>. It may include broader considerations and context around the task, step-by-step instructions, and challenging examples and explanations.</p>
+
+<p>As part of their guidelines on rating page quality, Google includes several aspects of a page that a reviewer should consider, such as page purpose, website type and reputation, and ads on the page.</p>
+
+<p><img src="https://eugeneyan.com/assets/google-pq-considerations.webp" loading="lazy" title="Various factors to consider when defining page quality" alt="Various factors to consider when defining page quality">
+<img src="https://eugeneyan.com/assets/google-pq-considerations2.webp" loading="lazy" title="Various factors to consider when defining page quality" alt="Various factors to consider when defining page quality"></p>
+<p>Various factors to consider when defining page quality</p>
+
+<p>To help annotators understand what they’re rating (i.e., search queries), Google includes several examples of queries and their intents. They also distinguish between “know”, “do”, and “website” queries.</p>
+
+<p><img src="https://eugeneyan.com/assets/google-know.webp" loading="lazy" title="Explain the various types of queries a user could make" alt="Explain the various types of queries a user could make">
+<img src="https://eugeneyan.com/assets/google-do.webp" loading="lazy" title="Explain the various types of queries a user could make" alt="Explain the various types of queries a user could make"></p>
+<p>Explain the various types of queries a user could make</p>
+
+<p>Bing includes a decision tree for rating match quality, and a step-by-step for rating location quality. Having annotators follow the same decision-making process can lead to more consistent and accurate results, and higher inter-rater agreement.</p>
+
+<p><img src="https://eugeneyan.com/assets/bing-match-quality.webp" loading="lazy" title="A decision tree to assess match quality based on query intent and semantic scope" alt="A decision tree to assess match quality based on query intent and semantic scope"></p>
+<p>A decision tree to assess match quality based on query intent and semantic scope</p>
+<p><img src="https://eugeneyan.com/assets/bing-location-quality-steps.webp" loading="lazy" title="A step-by-step to rate location quality given a query intent" alt="A step-by-step to rate location quality given a query intent"></p>
+<p>A step-by-step to rate location quality given a query intent</p>
+
+<p>To help annotators decide better and increase precision, we can provide examples of tasks with their associated output and explanations. This helps to calibrate annotators so we get higher inter-rater reliability. Google’s guidelines have a ton of these examples.</p>
+
+<p><img src="https://eugeneyan.com/assets/google-fully-meets.webp" loading="lazy" title="Various needs met ratings and their explanations" alt="Various needs met ratings and their explanations">
+<img src="https://eugeneyan.com/assets/google-highly-meets.webp" loading="lazy" title="Various needs met ratings and their explanations" alt="Various needs met ratings and their explanations">
+<img src="https://eugeneyan.com/assets/google-moderately-meets.webp" loading="lazy" title="Various needs met ratings and their explanations" alt="Various needs met ratings and their explanations">
+<img src="https://eugeneyan.com/assets/google-slightly-meets.webp" loading="lazy" title="Various needs met ratings and their explanations" alt="Various needs met ratings and their explanations">
+<img src="https://eugeneyan.com/assets/google-fails-to-meet.webp" loading="lazy" title="Various needs met ratings and their explanations" alt="Various needs met ratings and their explanations"></p>
+<p>Various needs met ratings and their explanations</p>
+
+<h3 id="how-should-the-task-be-performed">How should the task be performed?</h3>
+
+<p>Don’t forget to <strong>include instructions on how to access and use the annotation tools and platforms, as well as the logistics of the task.</strong></p>
+
+<p>For example, the guide for page quality rating asks annotators <strong>not to spend too much time on each rating</strong>, how to decide between two ratings, and how to decide when the criteria doesn’t cover it (they should use their judgment).</p>
+
+<p><img src="https://eugeneyan.com/assets/google-how-to-perform-task.webp" loading="lazy" title="How much time to spend on each task and how to break ties" alt="How much time to spend on each task and how to break ties"></p>
+<p>How much time to spend on each task and how to break ties</p>
+
+<p>It’s also important to clarify what annotators should do if they can’t perform the task. Rather than forcing them to make a possibly incorrect judgment, we can provide an “Unsure” label or let them release the task.</p>
+
+<p><img src="https://eugeneyan.com/assets/google-unsure.webp" loading="lazy" title="What annotators should do if they have difficulty with a task" alt="What annotators should do if they have difficulty with a task"></p>
+<p>What annotators should do if they have difficulty with a task</p>
+
+<p>• • •</p>
+
+<p>Improving the quality of labels collected is not only about writing good labeling guidelines. We can also simplify the task to use binary responses instead of a numeric scale or multiple choice options. This can increase precision and throughput.</p>
+
+<p>In addition, try to make labeling criteria as objective as possible. For example, “Is this adult content?” can be made more objective by rephrasing it as “Is this nudity?” Nonetheless, it’s okay if the task is somewhat subjective—that’s why we have human reviewers. As a comparison, Google’s guidelines ask annotators to “use your judgment” 19 times!</p>
+
+<p>To evaluate your task and labeling guidelines, consider measuring how often reviewers agree with each other (i.e., <a href="https://en.wikipedia.org/wiki/Inter-rater_reliability" target="_blank">inter-rater reliability</a>). <a href="https://en.wikipedia.org/wiki/Inter-rater_reliability#Kappa_statistics" target="_blank">Cohen’s kappa</a> is a commonly used metric. If Cohen’s kappa stays consistent or increases as you iterate on your task definition and labeling guidelines, you’re on the right track.</p>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Mar 2023). How to Write Data Labeling/Annotation Guidelines. eugeneyan.com.
+        https://eugeneyan.com/writing/labeling-guidelines/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2023labeling,
+  title   = {How to Write Data Labeling/Annotation Guidelines},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2023},
+  month   = {Mar},
+  url     = {https://eugeneyan.com/writing/labeling-guidelines/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

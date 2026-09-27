@@ -1,0 +1,68 @@
+<div id="readability-page-1" class="page"><article id="article"><img src="https://steipete.me/assets/img/2025/demark/banner.png" alt="" loading="lazy"><p>I recently found myself needing a component that converts messy, potentially malformed HTML to clean Markdown in Swift. After searching around, I couldn’t find anything that really fit my needs, so I decided to write my own. The result is <a href="https://github.com/steipete/Demark">Demark</a> – my first Swift package that’s now available on the <a href="https://swiftpackageindex.com/steipete/Demark">Swift Package Index</a>.</p>
+<h2 id="the-problem">The Problem</h2>
+<p>HTML to Markdown conversion sounds straightforward, but it’s surprisingly complex when you need to handle:</p>
+<ul>
+<li>Malformed or messy HTML</li>
+<li>JavaScript-rendered content</li>
+<li>Complex nested structures</li>
+<li>Various HTML edge cases</li>
+</ul>
+<p>I needed something reliable that could handle real-world HTML, not just clean, well-formed markup.</p>
+<h2 id="the-solution-standing-on-the-shoulders-of-giants">The Solution: Standing on the Shoulders of Giants</h2>
+<p>Instead of writing a full-blown HTML parser from scratch, I took a different approach. Why reinvent the wheel when there are already excellent JavaScript libraries that solve this problem really well?</p>
+<p>Demark leverages two proven JavaScript libraries:</p>
+<ul>
+<li><strong><a href="https://github.com/mixmark-io/turndown">Turndown.js</a></strong> for the most accurate conversions</li>
+<li><strong><a href="https://github.com/stonehank/html-to-md">html-to-md</a></strong> for faster, lightweight processing</li>
+</ul>
+<p>The magic happens by running these libraries inside a WKWebView, giving me access to a full browser environment with proper DOM parsing capabilities.</p>
+<h2 id="two-conversion-engines">Two Conversion Engines</h2>
+<p>Demark offers flexibility with two different engines:</p>
+<p><strong><a href="https://github.com/mixmark-io/turndown">Turndown.js</a> (Default)</strong> - When you need accuracy:</p>
+<ul>
+<li>Full DOM-based parsing</li>
+<li>Handles complex HTML and JavaScript-rendered content</li>
+<li>Comprehensive configuration options</li>
+<li>~100ms for first conversion (then much faster)</li>
+</ul>
+<p><strong><a href="https://github.com/stonehank/html-to-md">html-to-md</a></strong> - When you need speed:</p>
+<ul>
+<li>Lightweight JavaScript-based conversion</li>
+<li>Much faster performance (~5-10ms per conversion)</li>
+<li>Perfect for batch processing simple HTML</li>
+</ul>
+<h2 id="vibe-coding-with-ai">Vibe Coding with AI</h2>
+<p>Here’s the thing – I probably would never have released this without AI assistance. But with AI, the whole process became so much easier. What would have taken me days of tedious work – setting up the package structure, writing documentation, handling edge cases, making it Swift Package Index ready – took me just a few hours.</p>
+<p>AI helped me:</p>
+<ul>
+<li>Structure the Swift package properly</li>
+<li>Write comprehensive documentation</li>
+<li>Handle all the WebKit integration details</li>
+<li>Create a clean, modern Swift API with async/await</li>
+<li>Set up proper error handling</li>
+</ul>
+<h2 id="simple-to-use">Simple to Use</h2>
+<p>Despite the complexity under the hood, Demark is dead simple to use. The Swift package that turns down HTML and turns up Markdown – it’s a markup markdown!</p>
+<pre><code data-language="swift">import Demark
+
+@MainActor 
+func convertHTML() async throws {
+    let demark = Demark()
+    let html = "&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;This is &lt;strong&gt;bold&lt;/strong&gt; text.&lt;/p&gt;"
+    let markdown = try await demark.convertToMarkdown(html)
+    print(markdown)
+    // Output: # Hello World
+    //
+    // This is **bold** text.
+}</code></pre>
+<h2 id="my-first-swift-package">My First Swift Package</h2>
+<p>Demark works across all Apple platforms: iOS, macOS, watchOS, tvOS, and visionOS.</p>
+<p>I’m quite happy about this milestone. After years of iOS development, publishing my first Swift package feels like a natural next step in my open source journey. The fact that it’s now in the <a href="https://swiftpackageindex.com/steipete/Demark">Swift Package Index</a> makes it easily discoverable and installable for other developers.</p>
+<p>The experience taught me that sometimes the best solution isn’t writing everything from scratch – it’s about cleverly combining existing, battle-tested solutions in a new way.</p>
+<h2 id="try-it-out">Try It Out</h2>
+<p>If you need HTML to Markdown conversion in your Swift projects, give <a href="https://github.com/steipete/Demark">Demark</a> a try. You can add it to your project via Swift Package Manager:</p>
+<pre><code data-language="swift">dependencies: [
+    .package(url: "https://github.com/steipete/Demark.git", from: "1.0.0")
+]</code></pre>
+<p>The repository includes an example app with a dual-pane interface where you can test conversions in real-time. Perfect for seeing exactly how your HTML will be transformed.</p>
+<p>Here’s to many more Swift packages! 🚀</p></article></div>

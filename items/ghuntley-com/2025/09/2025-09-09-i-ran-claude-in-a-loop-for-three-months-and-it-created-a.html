@@ -1,0 +1,135 @@
+<div id="readability-page-1" class="page"><div>
+            <p>It's a strange feeling knowing that you can create anything, and I'm starting to wonder if there's a seventh stage to the "<a href="https://ghuntley.com/ngmi/" rel="noreferrer">people stages of AI adoption by software developers</a>" </p><figure><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/2025/03/image-17.png" alt="" loading="lazy" width="2000" height="803" srcset="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/size/w600/2025/03/image-17.png 600w, https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/size/w1000/2025/03/image-17.png 1000w, https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/size/w1600/2025/03/image-17.png 1600w, https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/2025/03/image-17.png 2400w" sizes="(min-width: 720px) 720px"></figure><p>whereby that seventh stage is essentially this scene in the matrix...</p><figure></figure><p>It's where you deeply understand that '<a href="https://ghuntley.com/dothings/">you can now do anything</a>' and just start doing it because it's possible and fun, and doing so is faster than explaining yourself. Outcomes speak louder than words. </p><p>There's a falsehood that AI results in SWE's skill atrophy, and there's no learning potential. </p><blockquote>If you’re using AI only to “do” and not “learn”, you are missing out<br>- <a href="https://x.com/davidfowl/status/1910930253608001565?ref=ghuntley.com">David Fowler</a></blockquote><p>I've never written a compiler, yet I've always wanted to do one, so I've been working on one for the last three months by running Claude in a while true loop (aka "<a href="https://ghuntley.com/ralph" rel="noreferrer">Ralph Wiggum</a>") with a simple prompt:</p><blockquote>Hey, can you make me a programming language like Golang but all the lexical keywords are swapped so they're Gen Z slang?</blockquote><p>Why? I really don't know. But it exists. And it produces compiled programs. During this period, Claude was able to implement anything that Claude desired. </p><p>The programming language is called "cursed".  It's cursed in its lexical structure, it's cursed in how it was built, it's cursed that this is possible, it's cursed in how cheap this was, and it's cursed through how many times I've sworn at Claude.</p><figure><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/2025/09/image-1.png" alt="" loading="lazy" width="2000" height="1144" srcset="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/size/w600/2025/09/image-1.png 600w, https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/size/w1000/2025/09/image-1.png 1000w, https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/size/w1600/2025/09/image-1.png 1600w, https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/size/w2400/2025/09/image-1.png 2400w"><figcaption><span>https://cursed-lang.org/ </span></figcaption></figure><p>For the last three months, Claude has been running in this loop with a single goal:</p><blockquote>"Produce me a Gen-Z compiler, and you can implement anything you like."</blockquote><p>It's now available at:</p><ul><li><a href="https://cursed-lang.org/?ref=ghuntley.com" rel="noreferrer">https://cursed-lang.org/</a> </li><li><a href="https://github.com/ghuntley/cursed?ref=ghuntley.com">https://github.com/ghuntley/cursed</a></li></ul><figure><a href="https://cursed-lang.org/?ref=ghuntley.com"><div><p>the 💀 cursed programming language: programming, but make it gen z</p><p><img src="https://static.ghost.org/v5.0.0/images/link-icon.svg" alt=""><span>💀 cursed</span></p></div></a><figcaption><p><span>the website</span></p></figcaption></figure><figure><a href="https://github.com/ghuntley/cursed?ref=ghuntley.com"><div><p>GitHub - ghuntley/cursed: the 💀 cursed programming language: programming, but make it gen z</p><p>the 💀 cursed programming language: programming, but make it gen z - ghuntley/cursed</p><p><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/icon/pinned-octocat-093da3e6fa40-28.svg" alt=""><span>GitHub</span><span>ghuntley</span></p></div><p><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/thumbnail/cursed-2" alt=""></p></a><figcaption><p><span>the source code</span></p></figcaption></figure><h2 id="whats-included">whats included?</h2><p>Anything that Claude thought was appropriate to add. Currently...</p><ul><li>The compiler has two modes: interpreted mode and compiled mode. It's able to produce binaries on Mac OS, Linux, and Windows via LLVM.</li><li>There are some half-completed VSCode, Emacs, and Vim editor extensions, and a Treesitter grammar.</li><li>A whole bunch of really wild and incomplete standard library packages.</li></ul><h2 id="lexical-structure">lexical structure</h2><p><strong>Control Flow:</strong><br><code>ready</code>&nbsp;→ if<br><code>otherwise</code>&nbsp;→ else<br><code>bestie</code>&nbsp;→ for<br><code>periodt</code>&nbsp;→ while<br><code>vibe_check</code>&nbsp;→ switch<br><code>mood</code>&nbsp;→ case<br><code>basic</code>&nbsp;→ default</p><p><strong>Declaration:</strong><br><code>vibe</code>&nbsp;→ package<br><code>yeet</code>&nbsp;→ import<br><code>slay</code>&nbsp;→ func<br><code>sus</code>&nbsp;→ var<br><code>facts</code>&nbsp;→ const<br><code>be_like</code>&nbsp;→ type<br><code>squad</code>&nbsp;→ struct</p><p><strong>Flow Control:</strong><br><code>damn</code>&nbsp;→ return<br><code>ghosted</code>&nbsp;→ break<br><code>simp</code>&nbsp;→ continue<br><code>later</code>&nbsp;→ defer<br><code>stan</code>&nbsp;→ go<br><code>flex</code>&nbsp;→ range</p><p><strong>Values &amp; Types:</strong><br><code>based</code>&nbsp;→ true<br><code>cringe</code>&nbsp;→ false<br><code>nah</code>&nbsp;→ nil<br><code>normie</code>&nbsp;→ int<br><code>tea</code>&nbsp;→ string<br><code>drip</code>&nbsp;→ float<br><code>lit</code>&nbsp;→ bool<br><code>ඞT</code>&nbsp;(Amogus) → pointer to type T</p><p><strong>Comments:</strong><br><code>fr fr</code>&nbsp;→ line comment<br><code>no cap...on god</code>&nbsp;→ block comment</p><h2 id="example-program">example program</h2><p>Here is leetcode 104 - maximum depth for a binary tree:</p><pre><code>vibe main
+yeet "vibez"
+yeet "mathz"
+
+// LeetCode #104: Maximum Depth of Binary Tree 🌲
+// Find the maximum depth (height) of a binary tree using ඞ pointers
+// Time: O(n), Space: O(h) where h is height
+
+struct TreeNode {
+    sus val normie
+    sus left ඞTreeNode   
+    sus right ඞTreeNode  
+}
+
+slay max_depth(root ඞTreeNode) normie {
+    ready (root == null) {
+        damn 0  // Base case: empty tree has depth 0
+    }
+    
+    sus left_depth normie = max_depth(root.left)
+    sus right_depth normie = max_depth(root.right)
+    
+    // Return 1 + max of left and right subtree depths
+    damn 1 + mathz.max(left_depth, right_depth)
+}
+
+slay max_depth_iterative(root ඞTreeNode) normie {
+    // BFS approach using queue - this hits different! 🚀
+    ready (root == null) {
+        damn 0
+    }
+    
+    sus queue ඞTreeNode[] = []ඞTreeNode{}
+    sus levels normie[] = []normie{}
+    
+    append(queue, root)
+    append(levels, 1)
+    
+    sus max_level normie = 0
+    
+    bestie (len(queue) &gt; 0) {
+        sus node ඞTreeNode = queue[0]
+        sus level normie = levels[0]
+        
+        // Remove from front of queue
+        collections.remove_first(queue)
+        collections.remove_first(levels)
+        
+        max_level = mathz.max(max_level, level)
+        
+        ready (node.left != null) {
+            append(queue, node.left)
+            append(levels, level + 1)
+        }
+        
+        ready (node.right != null) {
+            append(queue, node.right)
+            append(levels, level + 1)
+        }
+    }
+    
+    damn max_level
+}
+
+slay create_test_tree() ඞTreeNode {
+    // Create tree: [3,9,20,null,null,15,7]
+    //       3
+    //      / \
+    //     9   20
+    //        /  \
+    //       15   7
+    
+    sus root ඞTreeNode = &amp;TreeNode{val: 3, left: null, right: null}
+    root.left = &amp;TreeNode{val: 9, left: null, right: null}
+    root.right = &amp;TreeNode{val: 20, left: null, right: null}
+    root.right.left = &amp;TreeNode{val: 15, left: null, right: null}
+    root.right.right = &amp;TreeNode{val: 7, left: null, right: null}
+    
+    damn root
+}
+
+slay create_skewed_tree() ඞTreeNode {
+    // Create skewed tree for testing edge cases
+    //   1
+    //    \
+    //     2
+    //      \
+    //       3
+    
+    sus root ඞTreeNode = &amp;TreeNode{val: 1, left: null, right: null}
+    root.right = &amp;TreeNode{val: 2, left: null, right: null}
+    root.right.right = &amp;TreeNode{val: 3, left: null, right: null}
+    
+    damn root
+}
+
+slay test_maximum_depth() {
+    vibez.spill("=== 🌲 LeetCode #104: Maximum Depth of Binary Tree ===")
+    
+    // Test case 1: Balanced tree [3,9,20,null,null,15,7]
+    sus root1 ඞTreeNode = create_test_tree()
+    sus depth1_rec normie = max_depth(root1)
+    sus depth1_iter normie = max_depth_iterative(root1)
+    vibez.spill("Test 1 - Balanced tree:")
+    vibez.spill("Expected depth: 3")
+    vibez.spill("Recursive result:", depth1_rec)
+    vibez.spill("Iterative result:", depth1_iter)
+    
+    // Test case 2: Empty tree
+    sus root2 ඞTreeNode = null
+    sus depth2 normie = max_depth(root2)
+    vibez.spill("Test 2 - Empty tree:")
+    vibez.spill("Expected depth: 0, Got:", depth2)
+    
+    // Test case 3: Single node [1]
+    sus root3 ඞTreeNode = &amp;TreeNode{val: 1, left: null, right: null}
+    sus depth3 normie = max_depth(root3)
+    vibez.spill("Test 3 - Single node:")
+    vibez.spill("Expected depth: 1, Got:", depth3)
+    
+    // Test case 4: Skewed tree
+    sus root4 ඞTreeNode = create_skewed_tree()
+    sus depth4 normie = max_depth(root4)
+    vibez.spill("Test 4 - Skewed tree:")
+    vibez.spill("Expected depth: 3, Got:", depth4)
+    
+    vibez.spill("=== Maximum Depth Complete! Tree depth detection is sus-perfect ඞ🌲 ===")
+}
+
+slay main_character() {
+    test_maximum_depth()
+}</code></pre><p>If this is your sort of chaotic vibe, and you'd like to turn this into the dogecoin of programming languages, head on over to GitHub and run a few more Claude code loops with the following prompt.</p><blockquote>study specs/* to learn about the programming language. When authoring the cursed standard library think extra extra hard as the CURSED programming language is not in your training data set and may be invalid. Come up with a plan to implement XYZ as markdown then do it</blockquote><p>There is no roadmap; the roadmap is whatever the community decides to ship from this point forward. </p><p>At this point, I'm pretty much convinced that any problems found in cursed can be solved by just running more Ralph loops by skilled operators (ie. people <em>with</em>&nbsp;experience with compilers who shape it through prompts from their expertise vs letting Claude just rip unattended). There's still a lot to be fixed, happy to take pull-requests.</p><figure><a href="https://ghuntley.com/ralph/"><div><p>Ralph Wiggum as a “software engineer”</p><p>😎Here’s a cool little field report from a Y Combinator hackathon event where they put Ralph Wiggum to the test. “We Put a Coding Agent in a While Loop and It Shipped 6 Repos Overnight” https://github.com/repomirrorhq/repomirror/blob/main/repomirror.md If you’ve seen my socials lately,</p><p><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/icon/7V0ak3am_400x400-1-65.jpg" alt=""><span>Geoffrey Huntley</span><span>Geoffrey Huntley</span></p></div><p><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/thumbnail/3ea367ed-cae3-454a-840f-134531dea1fd-2.jpg" alt=""></p></a><figcaption><p><span>The most high-IQ thing is perhaps the most low-IQ thing: run an agent in a loop.</span></p></figcaption></figure><figure><a href="https://ghuntley.com/mirrors/"><div><p>LLMs are mirrors of operator skill</p><p>This is a follow-up from my previous blog post: “deliberate intentional practice”. I didn’t want to get into the distinction between skilled and unskilled because people take offence to it, but AI is a matter of skill. Someone can be highly experienced as a software engineer in 2024, but that</p><p><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/icon/7V0ak3am_400x400-1-66.jpg" alt=""><span>Geoffrey Huntley</span><span>Geoffrey Huntley</span></p></div><p><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/thumbnail/download--2--4.jpeg" alt=""></p></a><figcaption><p><span>LLMs amplify the skills that developers already have and enable people to do things where they don't have that expertise yet.</span></p></figcaption></figure><p>Success is defined as cursed ending up in the Stack Overflow developer survey as either the "most loved" or "most hated" programming language, and continuing the work to bootstrap the compiler to be written in cursed itself.</p><p>Cya soon in Discord? - <a href="https://discord.gg/CRbJcKaGNT?ref=ghuntley.com">https://discord.gg/CRbJcKaGNT</a> </p><figure></figure><figure><a href="https://cursed-lang.org/?ref=ghuntley.com"><div><p>the 💀 cursed programming language: programming, but make it gen z</p><p><img src="https://static.ghost.org/v5.0.0/images/link-icon.svg" alt=""><span>💀 cursed</span></p></div></a><figcaption><p><span>website</span></p></figcaption></figure><figure><a href="https://github.com/ghuntley/cursed?ref=ghuntley.com"><div><p>GitHub - ghuntley/cursed: the 💀 cursed programming language: programming, but make it gen z</p><p>the 💀 cursed programming language: programming, but make it gen z - ghuntley/cursed</p><p><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/icon/pinned-octocat-093da3e6fa40-29.svg" alt=""><span>GitHub</span><span>ghuntley</span></p></div><p><img src="https://storage.ghost.io/c/06/e5/06e5d12b-0328-469d-a0d0-3a0f0ba34c46/content/images/thumbnail/cursed-3" alt=""></p></a><figcaption><p><span>source code</span></p></figcaption></figure><p>ps. socials</p><figure><blockquote><div lang="en" dir="ltr"><p>I ran Claude in a loop for 3 months and created a brand new "GenZ" programming language. </p><p>It's called <a href="https://twitter.com/cursedlang?ref_src=twsrc%5Etfw&amp;ref=ghuntley.com">@cursedlang</a>. </p><p>v0.0.1 is now available, and the website is ready to go. </p><p>Details below! <a href="https://t.co/Ku5kbWMRgR?ref=ghuntley.com">pic.twitter.com/Ku5kbWMRgR</a></p></div>— geoff (@GeoffreyHuntley) <a href="https://twitter.com/GeoffreyHuntley/status/1965258228314636524?ref_src=twsrc%5Etfw&amp;ref=ghuntley.com">September 9, 2025</a></blockquote>
+</figure>
+        </div></div>

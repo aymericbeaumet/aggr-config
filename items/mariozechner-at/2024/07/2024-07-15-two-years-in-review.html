@@ -1,0 +1,462 @@
+<div class="page" id="readability-page-1"><article>
+
+
+
+<p>2024-07-15</p>
+
+<figure>
+<img src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/github.png">
+<figcaption>GitHub commits per day (2022-2024). King of shitty productivity metrics.</figcaption>
+</figure>
+
+<p><a href="https://x.com/chrcit">Christian Cito</a> wrote <a href="https://www.chrcit.com/articles/2023-year-in-review">2023 Year in Review</a> a while ago. He's an impressive fellow and a member of our group of naive computer kids who thought they could change the world by building grocery price tracking and comparison platforms to counteract price inflation. More on that later.</p>
+<p>I don't actually know his age, but given how little I understand his memes, my guess is that he's about 25 years younger than me. He keeps churning out project after project, both commercial and for the public good, without fitting the stereotype of a basement dweller or an insufferable start-up hustler.</p>
+<p>His year in review got me thinking about what my own would look like.</p>
+<p>I've been part of the open-source movement since 2009. As I write this, I actually have to press <code>CMD +</code> to increase the font size in my editor. That's how old I am.</p>
+<p>I've produced and published many projects over the years, some of which could be considered "big" in the software world. Those projects are boring for regular, non-tech folks.</p>
+<p>Starting in 2022, my work shifted towards being more accessible to non-nerds. I blame my now 3-year-old, who somehow manages to replace some of my old man grumpiness with a desire to do things that have actual, if limited, meaning in the real world. You know, a dad trying to make the world a better place for his son, naivety be damned.</p>
+<p>Buckle up, buttercup. This is going to be a long read. I'm just going to run through all the projects since May 2022 and give you some hopefully entertaining backroom details.</p>
+
+<div>
+<ul><li><a href="#toc_0">Cards for Ukraine</a></li><li><a href="#toc_1">lilray</a></li><li><a href="#toc_2">r96 article series</a></li><li><a href="#toc_3">Mario's BMFG</a></li><li><a href="#toc_4">asmcfg</a></li><li><a href="#toc_5">VS Code DOS Development Extension</a></li><li><a href="#toc_6">Heisse Preise</a></li><li><a href="#toc_7">littlefoot</a></li><li><a href="#toc_8">Bluesky stuff</a></li><li><a href="#toc_9">ORF ON Downloader</a></li><li><a href="#toc_10">Duck Radio</a></li><li><a href="#toc_11">Hoassis</a></li><li><a href="#toc_12">AMS Berufsinfomat</a></li><li><a href="#toc_13">Generative AI workshop</a></li><li><a href="#toc_14">Exxpress watch counter</a></li><li><a href="#toc_15">Wuztube</a></li><li><a href="#toc_16">Ledit</a></li><li><a href="#toc_17">Shit out of luck (SOL)</a></li><li><a href="#toc_18">Leitkulturomat</a></li><li><a href="#toc_19">Twitteria Podcast</a></li><li><a href="#toc_20">woswormeileistung</a></li><li><a href="#toc_21">Alkolenker</a></li><li><a href="#toc_22">Wahlomat</a></li><li><a href="#toc_23">Schulatlas</a></li><li><a href="#toc_24">Horizont collaboration</a></li><li><a href="#toc_25">Meta boy &amp; hobby Chrome extensions</a></li><li><a href="#toc_26">KärntenGPT</a></li><li><a href="#toc_27">blargh &amp; mariozechner.at</a></li><li><a href="#toc_28">What now?</a></li></ul>
+</div>
+
+<h2 id="toc_0">Cards for Ukraine</h2>
+<p>I have no idea how geopolitics work, so I will not comment on the political side of the war in Ukraine. Apart from the fact that Putin and his posse of asshats are massive dicks and I hope karma exists and is, in fact, a bitch.</p>
+<p>What I do know is that being a parent can suck. And while I can’t relate to how it must feel to flee a country at war, I can relate to how it feels being a parent in a messed-up situation.</p>
+<p>Immediately after the war began, <a href="https://x.com/tanjamaier17">Tanja Maier</a>, a Twitter acquaintance of mine, began helping Ukrainian refugees arriving at the train station in Vienna. Not only would she give logistical help to arrivals, but she also helped build a community of Ukrainian refugees around Austria. Through Telegram, a Russian messenger app. Gotta work with what you got, I guess.</p>
+<p>She documented the many failings of the state-managed system on Twitter. A system that was initially (and still is to some degree) ill-equipped to handle an influx of refugees adequately. And she'd ask for donations, which she’d convert to €50 grocery vouchers, one voucher per family.</p>
+<p>Tanja managed this with pen and paper by hand. As the number of requests on Telegram grew, so did her stress levels, something she mentioned in passing in her tweets.</p>
+<p>So I wrote her some stern DMs on May 10, 2022.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/tanja-1.png">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/tanja-2.png"></p>
+
+<p>We had a single 30-minute call, where I described what I was about to do and gathered some feedback on the ideas. I think at that point Tanja just took me as another loudmouth who wouldn’t deliver. Who can blame her?</p>
+<p>Then I sat down and:</p>
+<ul>
+<li>Built the website, which allowed donors to send us money and refugees to sign up for a voucher. It also includes a management interface to vet submissions, fuzzily deduplicate them, print address labels, etc. Everything except the actual envelope stuffing is automated.</li>
+<li>Got a PayPal account going, the wrong way.</li>
+<li>Requested access to bulk voucher purchases with discounts from the three big grocery chains in Austria. Only one would even reply (and granted us access and discounts).</li>
+<li>Initiated the creation of an association, with all the red tape this entails.</li>
+<li>Initiated the creation of a bank account, which had even more red tape.</li>
+</ul>
+<p>Five days later, on May 15, 2022, we went live.</p>
+<blockquote><p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/cards-1.png"></p><p><a href="https://x.com/badlogicgames/status/1525746439200116737">@badlogicgames on X</a></p></blockquote>
+
+<p>By that time, everything was in place except the association establishment confirmation from the state and the bank account, which was contingent on the former.</p>
+<p>A week later, we had €30,000 in donations and about 1,100 sign-ups and had already sent out over 500 €50 vouchers to as many families.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/cards-3.png"></p>
+
+<p>This <a href="https://threadreaderapp.com/thread/1528467892911714310.html">huge Twitter thread</a> summarizes the craziness of the first week, including our iterative approach to figuring out the logistics, and tons of statistics.</p>
+<p>Not everything was peachy. PayPal closed our account. I had already sent out the orders for about €29,000 in vouchers to the grocery chain, but could not access the money to pay for them. So I paid them using my own money. I then had several days of back and forth with PayPal. Well, that's not right. It took me a day to actually get in touch with anyone at PayPal that is not a crappy chatbot. They hide their business contact info for Austria pretty well. Then they made me suffer through the worst possible user interface to file a request for reinstatement. Which went nowhere. After another call, I eventually got not only a human but a human who cared. She told me to send the association papers via the crappy user interface once they are complete, and then give her another call. She couldn’t promise that I'd get the money, but she'd try her best.</p>
+<p>About a month later, the association was properly established and I did as she told me. And lo and behold, I actually got the money out of the PayPal account. So that was nice.</p>
+<p>What wasn’t nice were the couple of weeks in between getting the account closed down and getting the money back. We got quite a bit of (social) media coverage for our little project, but people could not donate. I cobbled together Stripe integration on the same day PayPal shut us down. But unless we could show Stripe our completed association paperwork, they’d shut us down too.</p>
+<p>Eventually, we found an interim solution. <a href="https://www.pcsfueralle.at/">PCs für alle</a>, an association that takes in used PC hardware, refurbishes it, then sends it out to people in need, all for free, offered us to temporarily receive donations for us. That worked out splendidly! Big shout-out to <a href="https://x.com/pbern12">Peter</a> and his team. Love ya.</p>
+<p>Eventually, we got all our ducks in a row and could finally focus entirely on the actual work: managing the donation flow, transparently and with zero overhead. Every cent that comes in goes towards donations. We cover everything else, from IT costs, envelopes, stamps, printer toner, and the man and woman hours we put in. Here’s our little team in action.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/cards-4.png"></p>
+
+<p>And we also got high-tech transport vehicles.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/cards-5.png"></p>
+
+<p>We've been doing this since May 2022, so a little over two years. We've been able to send out 5,269 vouchers to as many families so far, equaling over €259,000 in donations.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/cards-6.png"></p>
+
+<p>All our orders, payments, balances, etc. are <a href="https://drive.google.com/drive/folders/1PxOL8A44bIRU1Hdoq87_2iXSLNmnMXQr?usp=drive_link">publicly available</a>.</p>
+<p>A "move fast and break things" project, without the breaking part. And while the project did get quite a bit of media coverage, pretty much all of the donations can be traced back to Tanja's and my writing on Twitter. Which to me is kinda crazy. It's also a reason why I'm still part of that hellhole.</p>
+<p>While engagement on other social networks like Bluesky or Mastodon is similar, donations are not. My cost/benefit calculation with regards to staying on Twitter is thus in favor of staying.</p>
+<h2 id="toc_1">lilray</h2>
+<p>The remainder of 2022 was pretty uneventful in terms of side projects. The toddler threw new fun and exciting ways at us to fail as parents and my free time was mostly spent on either relaxing or Cards for Ukraine.</p>
+<p>But since it's tradition to fuck around with side projects during the Christmas season, I relived some of my youth by building a raycaster engine called <a href="https://github.com/badlogic/lilray">lilray</a>.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/lilray.png">
+
+<p>It is the same kind of technology that was used in games like Wolfenstein, DOOM, and many other 90s classics. It eventually fell out of favor when PCs became fast enough to draw arbitrary 3D triangle meshes. But it still has a place in my heart for its simplicity.</p>
+<p>I got kind of carried away and not only made it work on Windows, Linux, and macOS, but also in the <a href="https://marioslab.io/dump/lilray/">browser</a>. And in MS-DOS. I added an MS-DOS backend to <a href="https://github.com/emoon/minifb/pull/98">minifb</a>, a minimal toolkit to open a window to just poke some pixel colors into a linear memory area. A lovely piece of tech that allows me to feel young again.</p>
+<h2 id="toc_2">r96 article series</h2>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/r96.png">
+
+<p>Around the same time, I rediscovered the fun of writing technical articles on a topic that's dear to my heart. After lilray, I figured it might be enjoyable to write a series of articles on rendering tech from the 90s. This culminated in 5 articles that walk you from plotting a pixel to rendering bitmap fonts. Start <a href="https://marioslab.io/posts/rendering-like-its-1996/babys-first-pixel/">here</a>.</p>
+<p>As is tradition, I didn't finish the series, which should have culminated in a dissection of lilray's underlying principles. Instead, I got stuck on <a href="https://github.com/badlogic/line-rasterization">line rasterization</a>. You'd think this is a trivial thing, Bresenham this, DDA that. But it really, truly is not. That kind of took the fun out of it, so I quit. Not only the series but writing for my old blog in general.</p>
+<p>That said, I still enjoyed the process. It reminded me of the time when I wrote a <a href="https://link.springer.com/book/10.1007/978-1-4302-3043-4">770-page tome</a> on Android game development in 6 months. That was "fun" too. Never wrote another book either.</p>
+<p>If you truly want to jump into that old tech from the 90s, I can recommend Gustavo's various courses on <a href="https://pikuma.com/">Pikuma</a>.</p>
+<h2 id="toc_3">Mario's BMFG</h2>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/bmfg.png">
+
+<p>I needed a bitmap font generator for one of the r96 articles, so I wrote one using web tech. That's it. That's this section. <a href="https://marioslab.io/projects/bmfg/">Enjoy</a>.</p>
+<h2 id="toc_4">asmcfg</h2>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/asmcfg.png">
+
+<p>I did some light machine code performance analysis as part of the r96 articles series, but the lack of assembly control flow viewers was disturbing. So I wrote my own. It takes assembly code generated by MSVC, Clang, or GCC for x86 and ARM CPU architectures and tries its best to deduce a control flow graph, which it then renders as a Graphviz dot string or SVG.</p>
+<p>It comes as a <a href="https://github.com/badlogic/asmcfg">library</a> consumable via JavaScript/TypeScript, and as a web app called <a href="https://marioslab.io/projects/cfg/">Mario's Assembly CFG Viewer</a>.</p>
+<p>Around the same time, <a href="https://godbolt.org/">Compiler Explorer</a> added assembly CFG graph viewing. Whoop whoop.</p>
+<p>It will still come in handy if I write my own little programming language targeting my own little virtual machine ISA. I'm sure.</p>
+<h2 id="toc_5">VS Code DOS Development Extension</h2>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/dos.gif">
+
+<p>While working on the r96 article series, I fell into an MS-DOS programming rabbit hole. I ported lilray over to DOS as described above and found the development experience lackluster.</p>
+<p>Naturally, I wrote a VS Code extension that would streamline the experience, 21st century style. My proudest achievement is the DOSBox-X fork I had to create to get GDB debugging via my hacked-together serial stub working. Don't ask.</p>
+<p>This little project concluded my 2022 streak. The following months were pretty uneventful in terms of side projects. Until ...</p>
+<h2 id="toc_6">Heisse Preise</h2>
+<p>Austria's government managed to not manage inflation. This was especially apparent when looking at prices of groceries. In early May of 2023, I had a look at some grocery prices across the two biggest chains in Austria. I was specifically interested in discount store-branded products. Those are generally the brands folks with little financial means will go for, as they are the cheapest.</p>
+<p>I extracted the names and prices for those products from the online stores of each chain, then applied some light natural language processing to get pairs of equivalent products. That took 70 lines of code and about 15 minutes of my time.</p>
+<p><a href="https://gist.github.com/badlogic/0ad8fa841a9fbfe25683e5c7cba99808">51 pairs</a> had the exact same price.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-1.png">
+
+<p>This little insight got me cited in the <a href="https://x.com/badlogicgames/status/1661401581097570308">Austrian parliament</a> two weeks later. Surprisingly enough, by a member of one of the governing parties. And for the record: Mr. Schnabel has been very supportive of my efforts, and I think he's a cool dude, even if we do not agree on quite a few topics.</p>
+<p>A few days after my initial investigation, Mr. Kocher, Federal Minister of Digital and Economic Affairs (and Labour, lol), went on a radio interview, wherein he was asked what his plan was regarding skyrocketing grocery prices. His plan: a grocery price database for the most common goods, managed and made publicly available by some state organization. However, it would take at least until autumn 2023 for this to materialize. You see, it's all very delicate and complicated.</p>
+<p>Hearing this, I thought to myself, "how hard can it be?" and cobbled together a prototype the same day. I took the 70 lines of code from my initial investigation, which would scrape product information via each store's search API, and extended it to include all products. Basically changing <code>Clever</code> and <code>S-Budget</code> to <code>*</code>. I'd store the data for all products in a simple JSON file. Finally, I wrote a fugly web interface that would pull the entire file and make products searchable via keywords. Who needs a database, am I right?</p>
+<p>All of that took 2 hours. Then I published it on Twitter, quote tweeting the radio station's tweet from the same day featuring Mr. Kocher.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-2.png">
+
+<p>It was merely a proof-of-concept that should illustrate that the data is available and is easily accessible in machine-readable form. After farming some engagement, I took the site down again.</p>
+<p>Both stores have terms of services that do not permit scraping and displaying data from their sites. On the other hand, the <code>&lt;meta&gt;</code> tags on their site say: "Please, scrape us, put us in your search index, give us traffic." And so Google will happily display data and images from said stores if asked about chocolate milk.</p>
+<p>However, I'm not Google, and the whole legal aspect is a gray area. But the plan worked as intended. Political parties, NGOs, and media all approached me to see if there's some way to collaborate. Sadly, except for <a href="https://www.derwandel.at/">Der Wandel</a>, none of them had any interest in being the legal shield for this little project. Yes, this includes the party you, dear reader, are voting for.</p>
+<p>After 2 weeks of back and forth without results, I figured the grocery chains wouldn't really care if a shitty web app listed their sales prices. So I put the site back up.</p>
+<p>About an hour after I did so, a representative of one of the parties I talked to sent me a breathless DM, telling me they've just integrated the site into their mobile app for party members. It was the same exact party that told me for 2 weeks that they are working hard on getting this out under their name, but never delivered. Now that I'd published it under my name, all the problems on their end mysteriously vanished. Funny.</p>
+<p>Meanwhile, since the project was open-source, other programmers started to help out. They'd add scraping for other stores, fix my bugs, and make it look prettier. It was great!</p>
+<p>The app gathered prices daily, so slowly, we could build up historical data. I also found some old data from <a href="https://www.dossier.at/">Dossier</a>, an investigative magazine. They scraped grocery prices a few years ago for a limited time. Great! At least some historical data to compare against.</p>
+<p>Then a wild anonymous Twitter user appeared in my DMs and handed me full daily price data for all products starting in 2017 for the two biggest grocery chains. I spent a night plugging it into my system. And well.</p>
+<figure>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-3.png">
+<figcaption>Daily average price difference across all products relative to 1st of January 2017, for Austria's two biggest grocery chains.</figcaption>
+</figure>
+
+<p>That sure was interesting. I started building out analytics tools to better understand the chains' pricing policies. I won't bore you with the details; you can read up on some of my findings <a href="https://docs.google.com/document/d/1NYpX-xhZa9B8hRyLYTdZJ-4VzlF4fsvkvYL1l-SmoCI/edit?usp=drive_web&amp;ouid=102416766951447222370">here</a>. Here are just a few gems.</p>
+<p>Discount store-branded products almost all cost the same across chains. Funnily enough, when pressed about that in an interview, the PR folks from both chains had opposing explanations.</p>
+<p>One said, "There is extreme competition in this segment and products obviously do NOT cost the same!" The other said, "Yeah, d'oh, it's the cheapest segment, of course everything costs the same." Interestingly enough, it is also this price segment which saw the biggest price increases over the past 2 years.</p>
+<figure>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-4.png">
+<figcaption>Daily average price difference across discount store-branded products relative to 1st of January 2017, for Austria's two biggest grocery chains.</figcaption>
+</figure>
+
+<p>Prices of these discount store-branded products change on the same day or within a handful of days to the same exact price. Not downwards. Upwards.</p>
+<figure>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-5.png">
+<figcaption>Prices for 15 discount store-branded eggs for the two biggest chains over time.</figcaption>
+</figure>
+
+<p>The same products cost less in Germany, sometimes significantly so. Chains explain this away with differences in VAT (7% vs. 10% for groceries, 19% vs. 20% for other products) and higher transport costs through the Alps. Yes, really.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-7.png">
+
+<p>Interestingly enough, products produced in Austria and shipped to Germany cost less in Germany as well.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-6.png">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-8.png">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-9.png"></p>
+
+<p>And shrinkflation, that is, selling less of a product for the same price while sometimes even keeping the same packaging, is a thing too. And we can show it in the data.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-10.png">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-11.png"></p>
+
+<p>For a few months, media would happily write stories about the ever-increasing grocery prices. See this <a href="https://heisse-preise.io/media.html">selection of TV, radio, and newspaper articles</a>. As a nerd, the <a href="https://www.wired.com/story/heisse-preise-food-prices/">Wired article</a> obviously has a special place in my heart.</p>
+<p>And Austria's competition authority (Bundeswettbewerbsbehörde, or BWB for short) also took notice of our work. And by us, I mean all the grocery price comparison sites that showed up within a month after Kocher's radio interview.</p>
+<p>The BWB initially conducted interviews with all of us platform providers, based on which they identified pain points and formulated recommendations for Minister Kocher. In their own words:</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-12.png">
+
+<p>Which roughly translates to:</p>
+<blockquote>
+Following initial insights were gained through the analysis:
+
+<ul>
+<li>Price transparency is a crucial cornerstone, enabling consumers to make appropriate purchasing decisions based on needs-based and intuitive comparison options.</li>
+<li>Based on the price patterns presented by the platform operators and an initial assessment by the BWB, it is assumed that webshop operators increasingly crawl competitor prices online and accordingly set their own (online) prices.</li>
+<li>The current situation is characterized by asymmetric price information. Thus, companies are already utilizing information to an extent that is not currently available to consumers. Therefore, it is expected that increased price transparency for consumers will intensify competition.</li>
+</ul>
+<p>The following recommendations could make a significant contribution to the establishment and strengthening of price comparison platforms in the food sector:</p>
+<ul>
+<li>Food retailers who operate an online shop, possibly also independent of operating an online shop from a certain size onwards, should be obliged to make the price information of the offered food accessible via an Application Programming Interface (“API”).</li>
+<li>The scope of this information should include at least the following details concerning EAN barcode, product name, origin, manufacturer, brand, price, quantity, weight, offer, category, etc.</li>
+<li>Legal frameworks should be created to allow price comparison platforms to establish themselves sustainably.</li>
+<li>Retailers who are not subject to the obligation under point 1 should also be given the opportunity to make their offered products available under the same conditions via an API.</li></ul></blockquote>
+
+<p>Which is pretty much what we reported and what we wished for. The BWB's <a href="https://www.bwb.gv.at/fileadmin/user_upload/Fokuspapier_Preisvergleichsplattformen_Sept_2023_barrierefrei_14.09.2023.pdf">final report on price comparison platforms</a> was published on the 15th of September 2023, which prompted another round of interviews with Minister Kocher, in which he claimed his ministry is already in contact with all of us. Except, we were never contacted by the ministry.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/heisse-13.png">
+
+<p>We also expressed this fact on social media. All of us got invitations the following days. Magic.</p>
+<p>On the 26th of September 2023, our little gang of price comparison site owners met up in real life for the first time. At the ministry of digital and economic affairs.</p>
+<figure>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/gang.jpeg">
+<figcaption>The gang. Not in the picture: me.</figcaption>
+</figure>
+
+<p>We didn't learn anything new in this meeting. But they managed to misspell our names and/or websites on the little cards they put on the meeting table.</p>
+<p>We left, some of us disillusioned. Not me though, I'm old and had previous experience with governmentals.</p>
+<p>Driving back home, I started feeling ill. It being the 4th year of the never-ending pest, I did a COVID test back home. Which turned out positive. Thankfully, the ministry was equipped with the finest of air purifiers, so nobody else I met that day fell ill. Except for my wife a few days later. On her birthday.</p>
+<p>Shortly after, the minister started claiming in interviews that it was never his plan for the state to maintain a public database. That'd be stupid, because our platforms already existed.</p>
+<p>The BWB also published their <a href="https://www.bwb.gv.at/fileadmin/user_upload/PDFs2/Lebensmittelhandel%20Endbericht.pdf">final report on the grocery industry as a whole</a>, which again included a little section on price comparison sites, reiterating what they already said in the previous report.</p>
+<p>Interestingly enough, the final report found no ill-doing with regards to pricing strategy. Those little simultaneous bumps in prices across chains? That's not price fixing. That's "systemic price matching" and A-OK. Also interesting: they chose to illustrate this with a chart from heisse-preise.io. They selected a chart where prices go down simultaneously. Competition!</p>
+<p>At the time of release of the final report (October 2023), I was very fed up with the whole topic. I only bothered reading the final report in January. Which was an error on my part.</p>
+<p>The price and margin analysis in that report is, shall we say, creative. The report itself pointed that out. It was also not done by BWB, but Österreichische Nationalbank, another state organization with political appointments, whose <a href="https://www.derstandard.at/story/3000000222516/vermoegenssteuern-empfohlen-oenb-experten-duerfen-studie-nicht-oeffentlich-praesentieren">head seems to not like publishing scientific results which go against a specific political grain</a>. And guess who is now being rushed to become the next head of OeNB? Mr. Kocher. And that's the point in the story where I take off my tin foil hat and let things be.</p>
+<p>This little project has gotten me in contact with a lot of interesting people. It also gave me some insights into how media functions in this country, for better and sometimes for worse. In the end, the time spent on this did not move the needle for anyone.</p>
+<p>To this date, none of the recommendations by BWB have been implemented by Minister Kocher. Seeing as he already has his head in OeNB, it is not likely that anything discussed will materialize until the end of the legislative period.</p>
+<p>Folks who are at a financial disadvantage are reliant on the discount store-branded products. They won't gain anything from using the price comparison site, as everything costs the same in "their" price segment. Middle-class and upper-class people simply do not feel the grocery price pain enough to sit down and use a tool like this to save a few euros here and there.</p>
+<p>All that said, at its peak, the site got a few thousand unique visitors a day. It's still consistenly hovering around 600 unique visitors. So a few people seem to have found some use in it.</p>
+<p>However, that wasn't the only reason for me to continue posting shitty price analysis data on Twitter. You see, after a year of war, people don't care anymore. They need to be entertained anew. I used all those price analysis threads on Twitter to also solicit donations for Cards for Ukraine. And that worked quite well.</p>
+<p>As the grocery prices story also got a bit long in the tooth, I had to come up with new ideas to entertain the masses.</p>
+<h2 id="toc_7">littlefoot</h2>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/littlefoot.png">
+
+<p>During our summer vacation in 2023, I was bored one night after we put the boy to sleep. So I started designing and implementing a little programming language called <a href="https://github.com/badlogic/littlefoot/tree/main">Littlefoot</a>. For little people, like my boy.</p>
+<p>Littlefoot is a prototyping playground for language ideas that could fit my vision of a <a href="https://mariozechner.at/posts/2024-07-14-dissecting-history/">programming learning environment</a>. It doesn't compile to executable code yet but has a finished parser and type checker. Have a look at the <a href="https://marioslab.io/projects/littlefoot/">online demo</a> which walks you through the language features.</p>
+<p>I'll eventually come back to this.</p>
+<h2 id="toc_8">Bluesky stuff</h2>
+<p>In Autumn 2023, I became interested in Bluesky, entirely unrelated to Space Karen, of course. Not entirely thrilled with the official software but intrigued by the open protocol, I started to dick around a little.</p>
+<p>The first tool I built was <a href="https://sum-up.xyz/?account=badlogic&amp;type=funny&amp;style=dr.+seuss">sum-up.xyz</a>, which uses GPT-3.5 Turbo to summarize your last 50 Bluesky posts in the style of some person or fictional character. It kinda works.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/bluesky-1.png"></p>
+
+<p>Bluesky was lacking an equivalent to Twitter's thread reader app, so I built one called <a href="https://skyview.social">skyview.social</a>.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/bluesky-2.png"></p>
+
+<p>Next, I was a little perplexed by the lack of good analytics tools. What's the point of participating in social media if you cannot count your imaginary internet points?</p>
+<p>So I built <a href="https://skystats.social">skystats.social</a>. Bluesky has since changed their protocol a little, so that little tool has now fallen to bitrot. It was fun while it lasted. Seems like <a href="https://bsky.app/search?q=skystats.social">people had fun with it too</a>.</p>
+<p>Finally, I of course had to build my own Bluesky client app. Being very good with names, I called it <a href="https://skychat.social">Skychat</a>. It actually started out as a chat interface for live events under some hashtag, where users can abuse Bluesky posts including the hashtags as a form of live chat.</p>
+<p>The concept was making a lot of sense in my head, but not so much for everyone else. So I salvaged the code and made a Bluesky app.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/bluesky-3.png"></p>
+
+<p>It has a bunch of features no other Bluesky app had at the time, such as being able to show you who quoted a post, support for videos and GIFs, threaded view and thread reader mode, push notifications and filters, search, and so on. It works in the browser, and can be installed as a mobile app (PWA).</p>
+<p>Do not use it, I no longer work on it.</p>
+<h2 id="toc_9">ORF ON Downloader</h2>
+<p>As the title says, the nerdiest and most broken of all the tools on here. It's for <a href="https://github.com/badlogic/orfondl">techies</a>.</p>
+<h2 id="toc_10">Duck Radio</h2>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/duckradio.png"></p>
+
+<p>Someone on Twitter asked for an app that lets you listen to a web radio stream and can "duck" out news broadcasts, because they cannot stomach how messed up the world is, and instead play a different radio station. So I delivered <a href="https://github.com/badlogic/duckradio">Duck Radio</a>.</p>
+<h2 id="toc_11">Hoassis</h2>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/hoassis.png"></p>
+
+<p>I got my heating bill, which increased, and got fed up. So I wrote a little tool that lets me view daily min/max temperatures for any location in Austria, for multiple years. I don't know what I learned. <a href="https://hoassis.marioslab.io">But it's a thing</a>, and yet another ugly one at that.</p>
+<h2 id="toc_12">AMS Berufsinfomat</h2>
+<p>In January 2024, Austria's Arbeitsmarktservice (AMS), an agency that helps unemployed folks get a new job, released the AMS Berufsinfomat. It's a chat app based on GPT that is supposed to answer job-related questions. Naturally, it was a <a href="https://www.derstandard.at/story/3000000201774/vorurteile-und-zweifelhafte-umsetzung-der-ams-ki-chatbot-trifft-auf-spott-und-hohn">disaster</a>. Turns out that deploying unreliable technology like Large Language Models in a sensitive sector like unemployment services is an absolutely terrible idea. Who'd have thought?</p>
+<p>Our little group of Twitter friendos dissected its inner workings. AMS Berufsinfomat is based on <a href="https://goodguys.ai/en/">AI-Concierge</a>, which its creators successfully pitched as a chatbot for tourist destination websites. Why do we know? Because <a href="https://x.com/badlogicgames/status/1742640693082820653">the company deployed the AMS Berufsinfomat codebase to the city of Basel's tourism website</a> as well.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-1.jpeg">
+
+<p>The front-end code, that is, the code responsible for displaying the chatbot interface in your browser, was also partially written by ChatGPT itself. How do we know? Because the code contains tell-tale code comments that only ChatGPT generates as part of a back and forth between it and the developer.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-2.jpeg">
+
+<p>The <a href="https://x.com/badlogicgames/status/1742532248736342346">code quality in general was trash</a>, probably due to the non-judicious use of ChatGPT as a programming buddy. They later obfuscated that code, so it's harder to read, which is quite funny.</p>
+<p>The chatbot also didn't require any kind of authentication. Any techie could use their server as a proxy for free ChatGPT access, with a little prompt engineering.</p>
+<p>There were also no rate limits in place, so you could just hammer their service (which we didn't do).</p>
+<p>And it of course suffers from the same biases pretty much all machine learning models trained on "internet" data suffer from.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-3.png">
+
+<p>When folks pointed out all the shortcomings, which were mostly due to the trivial and naive implementation of the system, Mr. Kopf, head of AMS (no joke), didn't take it too well and insinuated we are all a bunch of clueless idiots (I'm paraphrasing here).</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-4.jpeg">
+
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-5.png">
+
+<p>Now, I will not throw that kind of shade at Mr. Kopf in reverse. But what I do know is that I'd likely wouldn't have paid €464.000 for this system.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-6.png">
+
+<p>Interestingly enough, the amount of money funneled towards Good Guys, who wrote the software, can be considered almost market rate. Most of that money actually got funneled towards Bundesrechenzentrum. We know, because Minister Kocher (yes, that guy from above) had to answer a parliamentary inquiry about the whole project and had to <a href="https://www.parlament.gv.at/dokument/XXVII/AB/16941/imfname_1616332.pdf">spill the details</a>.</p>
+<p>For shits and giggles, <a href="https://x.com/badlogicgames/status/1743063107138736507">I rebuilt "AMS Berufsinfomat"</a>. I took the same data as AMS Berufsinfomat from a bunch of AMS websites, like <a href="https://www.berufskompass.at/berufskompass/">Berufs Kompass</a>, and built a trivial <a href="https://en.wikipedia.org/wiki/Retrieval-augmented_generation">retrieval augmented generation (RAG)</a> system. Then I compared its output to that of AMS Berufsinfomat. You be the judge.</p>
+<video controls="" loop="" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-7.mp4">
+</video>
+
+<p>This took all of two nights. It also wasn't just a quick demo. It is a production system, that is actually used as a support request answering machine, serving many more requests than AMS Berufsinfomat will ever serve. And it doesn't require hundreds of thousands of euros in infrastructure spending. It runs on a potato that costs €30 a month.</p>
+<p>So, how can this be done so quickly? The answer is: because the bulk of the work is done by ChatGPT, or rather OpenAI's servers. RAG systems are stupid simple, at least in the case of AMS Berufsinfomat and my own system.</p>
+<p>You start by collecting all the documents you want the chatbot to base its answers on. In this case, I just scraped the AMS websites. Next, you cut each document up into smaller chunks, e.g., 2-3 consecutive paragraphs of a document each (there are much better strategies). You then put all those chunks into your (semantic) search engine. That's the preprocessing step, which you repeat every time your documents change. It is trivial and took about an hour for all the AMS sources I used in my Berufsinfomat replica.</p>
+<p>Next, you build your website, consisting of what the user sees in the browser (frontend), and a server application that manages user requests (backend). Every time a user enters a question in the frontend, the frontend sends that question to the backend. The backend then searches chunks matching the question in the search engine. Finally, it sends a request to ChatGPT, which looks something like this:</p>
+<pre><code data-language="text">You are a helpful assistant, capable of answering questions about different professions. You will be given supplementary information and a user question. You will answer the user questions only based on the supplemental information. Here is the supplemental information.
+
+... paragraphs of first search result ...
+... paragraphs of second search result ...
+... paragraphs of third search result ...
+
+Here is the user question:
+
+... user question ...
+</code></pre><p>You send that off to ChatGPT's server and hopefully get back an answer that makes sense, which happens more often than not but still fails a lot. That's it.</p>
+<p>Anyone who tells you it's more complex than that is full of shit. Anyone who tells you they will "train the AI based on your data" is also full of shit. All everyone does is  automated selecting, copying and pasting of document snippets into the ChatGPT prompt along with the user question. It is that fucking stupid. If your search engine returns the wrong, incomplete or no results, you get garbage answers from the large language model. But it seems everyone is glossing over that simple fact of life, because AI will "change everything, again".</p>
+<p>My Berufsinfomat replica is about 400 lines of code in total. Not even a day's worth of work. Add another 2 weeks of work, design meetings, and so on and you got a production-ready system that will still suffer from all those large language model and RAG deficiencies like hallucinations and bias, which you cannot get rid of entirely. Most of the cost will stem from requests to OpenAI. Your own server infrastructure is trivial. AMS Berufsinfomat answered around 190.000 request between January and April 2024. That's roughly 0,0185 requests per second according to my very scientific back of the napkin calculation. That is literally nothing.</p>
+<p>Why am I fussing about all of this? Because I'm sick and tired of governmentals botching IT projects and paying through the nose for them. In this specific case, I have friends and relatives who had to suffer through e-AMS, the website every unemployed person in Austria has to use when dealing with AMS.</p>
+<p>That piece of shit website still tells you not to press the back button, because it will break otherwise. And yet, the heads of such organizations believe that building trivial hype bullshit for almost half a million euros is a good use of resources, just so they can present themselves as innovators and disruptors, instead of fixing basic-ass shit every one of their "customers" has to actually deal with in real-life.</p>
+<p>This also isn't Mr. Kopf's first foray into using bad machine learning models in a sensitive area. His "AMS Algorithm", responsible for deciding how many resources are assigned to an unemployed person by AMS, has become <a href="https://www.oeaw.ac.at/ita/projekte/der-ams-algorithmus">a literal textbook example</a> of a biased decision-making algorithm within a governmental organization. There's also an <a href="https://www.derstandard.at/story/3000000206845/entscheidet-die-ki-ueber-jobs-hoechstgericht-laesst-ams-algorithmus-erneut-pruefen">ongoing lawsuit</a> regarding that same algorithm (a biased linear regression model).</p>
+<p>It just really grinds my gears.</p>
+<h2 id="toc_13">Generative AI workshop</h2>
+<p>As my rant about AMS Berufsinfomat got picked up by media and made the rounds on social media, a bunch of companies contacted me, asking for a workshop on generative AI. I've previously worked in machine learning and was also well-versed in giving workshops. But I simply didn't want to go on that kind of circuit anymore, as it's exhausting work.</p>
+<p>So instead, I sat down for a week and created <a href="https://github.com/badlogic/genai-workshop/tree/main">free as in beer workshop materials</a> for anyone to self-study. Companies who'd like to have me read out all those words in person instead of reading them themselves can, of course, insert coins to get my pretty face on their premises.</p>
+<p>The materials are basically a shallow machine learning crash course in the first half, followed by a large language model-focused second half that discusses the basics of their use, including retrieval augmented generation. Plenty of material to get you started. And if you outsource building any of that stuff, the materials will teach you enough to figure out if you are being sold snake oil.</p>
+<h2 id="toc_14">Exxpress watch counter</h2>
+<p><a href="https://x.com/florianklenk">Florian Klenk</a> is a famous Austrian investigative journalist with a large social media audience. Sometime in January, he started watching the livestream of a state-funded far-right, Putin-loving online "news" site called Exxpress, noting that they barely get any views at all.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-1.png"></p>
+
+<p>He'd almost religiously report the watch count every few days. I figured I'd automate it for him.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-3.jpeg">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-4.jpeg"></p>
+
+<p>The site would use the YouTube API to check the live watch count of the Exxpress livestream every 15 seconds, store the result, and display the historical data.</p>
+<p>For comparison, I set up a livestream of the watch count website itself (stream-ception) plus a few factoids about Richard Schmidt, head of Exxpress. I then started gathering watch counts for my stream as well as some random gorilla stream.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-7.jpg">
+
+<p>And what can I say? Both the gorilla livestream and the website livestream were competitive with the state-funded right-wing garbage.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-5.png"></p>
+
+<p>A week later, the head of Exxpress got fired.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-6.png">
+
+<p>Sad trombone. While I do not think that my little project had anything to do with this decision, I sure had a lot of fun watching everything unfold.</p>
+<p>Another interesting tidbit: the Exxpress website embeds the YouTube livestream. The embed autoplays, even if you are a first-time visitor who hasn't accepted their cookie shit yet (in violation of GDPR). Unless you have an ad-blocker. Which nobody on mobile has, which is the default way the very intellectual readers of Exxpress consume their content.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-8.png">
+
+<p>What I'm trying to say is: since we know their YouTube livestream watch count, we also know how many people are reading their site at any given point in time. What a bunch of idiots.</p>
+<p>The watch count site has bitrotted, as Exxpress keeps changing their livestream URL. Nothing of value was lost.</p>
+<h2 id="toc_15">Wuztube</h2>
+<p>If you give your kid a tablet with YouTube or YouTube Kids and let it run wild, your kid will be exposed to absolute abysmal, brain rotting garbage. YouTube's recommendations will funnel your kid into a black hole of mindless brain-damaging shit like some guy screaming for an hour while slapping a bird. Or they'll recommend videos where other kids review shitty products. The list of garbage is endless.</p>
+<p>Now, we do not let our little one watch videos for more than 15 minutes a day. He's usually accompanied by one of us. Every so often, we'll run out of the room he's in, which gives him ample time to switch to another video.</p>
+<p>I wanted to have control over what he can select from. So I built <a href="https://github.com/badlogic/wuztube">Wuztube</a>, a kid-friendly video player that uses YouTube in the background.</p>
+<p>He will see a list of "sanctioned" videos we pre-selected. We as parents can quickly filter videos by keyword if he has a specific show on his mind.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wuztube-1.png">
+
+<p>When he taps a video, it starts playing in fullscreen mode. There is no way to skip around. If he taps the screen or the video is finished, the app goes back to the selection screen. He never sees or gets to click any YouTube recommendations. And he also doesn't see any ads.</p>
+<p>Us parents can control his experience, that is, the videos he can select from, by first solving an immensely complex puzzle.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wuztube-2.png">
+
+<p>We are then presented with videos and playlists we previously added.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wuztube-3.png">
+
+<p>Tapping "Add video, channel, or playlist" lets us add additional media.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wuztube-4.png">
+
+<p>The app works in the browser and as a mobile app (PWA). The information about which videos you selected is stored on the device you made the selection on. Since we only use Wuztube on a single device, that's not an issue.</p>
+<p>I was initially unsure if such a trimmed-down experience would work. But it does! Amazingly so! The only feature I still want to implement is a video length filter and showing how much time is left in the video that's currently being viewed. Other than that, it serves its purpose well.</p>
+<p>Techies among you can take the code and run with it (provided you got a YouTube API key). Sadly, for the rest of you, it's not that simple. The app uses YouTube's services, which cost money and are heavily restricted. I have no plan to making this easily accessible for non-techies. But if you are interested, I'm happy to guide you through the setup.</p>
+<h2 id="toc_16">Ledit</h2>
+<p>Reddit's mobile app sucks. Reddit's website sucks. So does Hackernews on mobile. And I figured I'd also start reading some RSS feeds again. So I (re-)built <a href="https://github.com/badlogic/ledit2">ledit</a>.</p>
+<p>It's a web client for all the things mentioned above, that doesn't get in my way and lets me inject that sweet, sweet dopamine right into my brain by mindlessly scrolling through garbage.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ledit-1.png">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ledit-2.png">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ledit-3.png"></p>
+
+<p>You can use it too, both in the <a href="https://ledit2.marioslab.io">browser</a>, or on your mobile phone as a PWA.</p>
+<h2 id="toc_17">Shit out of luck (SOL)</h2>
+<p>Many moons ago, I wrote a small video game as a birthday present for my wife. It's a mix of various genres, including point-and-click adventure and Pong-like mechanics. Stef is the protagonist and must save me, the idiot. It's basically a real-life simulator.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/sol.png">
+
+<p>As with all software, the game suffered from bitrot and would no longer work. So I ported it over to the latest and greatest tech. You can enjoy it in your <a href="https://marioslab.io/projects/sol">browser</a>.</p>
+<h2 id="toc_18">Leitkulturomat</h2>
+<p>One of the governing parties had a brilliant idea: "Let's divert attention from all the real issues by publishing the most ridiculous campaign yet: Leit-kultur."</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leitkultur-3.jpg"></p>
+
+<p>I thus created <a href="https://mariozechner.at/posts/2024-07-15-two-years-in-review/">Leitkultur-o-mat</a>, so that the people's party can stop spending more money on this garbage.</p>
+<p>Instead, real Austrians can now ask a real Austrian chatbot (powered by the American GPT-3.5 Turbo) real Austrian questions. Just in case you start straying from the sanctioned Austrian mindset.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leitkultur-1.jpeg">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leitkultur-2.jpeg"></p>
+
+<p>What does it take to be a real Austrian? Not much, it turns out. Here's the system prompt, i.e., the instructions given to ChatGPT on how to behave.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leitkultur-4.png">
+
+<p>It's Schnitzel and climate change denying all the way down. We are simple minds.</p>
+<p>One interesting bit of trivia: while AMS Berufsinfomat cost roughly half a million Euros while serving a grand total of 193,000 individual answers from January to April 2024, Leitkultur-o-mat cost €70 in total (ChatGPT + server), while serving 35,000 conversations (each consisting of 8 user "questions" on average) in a single week.</p>
+<p>I had long-lost friends message me to congratulate me on this masterpiece. <a href="https://www.derstandard.at/story/3000000213754/leitkultur">Media picked up on it</a>. I suppose that's how they got to know it.</p>
+<p>Jesus fucking Christ on a stick.</p>
+<h2 id="toc_19">Twitteria Podcast</h2>
+<p>I started a <a href="https://twitteria.at">podcast</a> together with <a href="https://x.com/alltagsprolet">Alltagsprolet</a> and <a href="https://x.com/buffsinchucks">BuffsInChucks</a>.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/twitteria.png">
+
+<p>We were fortunate to have four great guests so far. It's currently on hiatus but will likely return once summer is over. Maybe.</p>
+<h2 id="toc_20">woswormeileistung</h2>
+<p>I scraped the parliament's stenographic protocols and built an API and website around it called <a href="https://woswormeileistung.marioslab.io">woswormeileistung</a>.</p>
+<p>The stenographic protocols are largely a mess, so I spent considerable time cleaning the data and making it nice for scientific and journalistic use. I also extract information not available anywhere else:</p>
+<ul>
+<li>Who shouted at what speaker when?</li>
+<li>How often were they absent?</li>
+<li>How many plaques did they hold up during their speeches?</li>
+<li>How many order calls did they receive?</li>
+</ul>
+<p>Which makes for some fun statistics.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leistung-1.png">
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leistung-2.png">
+
+<p>A couple of journalists and at least one Ph.D. candidate have since made use of the data in some form or another.</p>
+<p>Fun aside: until recently the fully finalized stenographic protocols were only available up until mid-2023. The steno team got overwhelmed by all those investigative committee meetings investigating Austrian politics corruption.</p>
+<h2 id="toc_21">Alkolenker</h2>
+<p>I got prompted via <a href="https://x.com/SerialMom_/status/1800896761709605066">tweet</a> by "Serial Mom".</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/alko-1.png">
+
+<p>So I delivered <a href="https://alkolenker.marioslab.io">alkolenker.marioslab.io</a> on the same day.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/alko-2.png">
+
+<p>The site lets you search all police press releases by keyword and state. Serial Mom uses it to monitor alcohol-related accidents. To each their kink, I suppose.</p>
+<h2 id="toc_22">Wahlomat</h2>
+<p>The EU parliament elections prompted me to do some light data sciencing.</p>
+<p>The first tool is more of an experiment really. It lets you visually explore the EU election programs of all parties.</p>
+<video controls="" loop="" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wahlomat-2.mp4">
+</video>
+
+<p>I've described the whole process on <a href="https://x.com/badlogicgames/status/1791948524092789108">Twitter</a>.</p>
+<p>The second tool is a simple visualization of EU election participation per Austrian region.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wahlomat-1.png">
+
+<p>The <a href="https://wahlomat.marioslab.io">Wahlomat website</a> is where I'll collect election-related tools and visualizations I may build in the future.</p>
+<h2 id="toc_23">Schulatlas</h2>
+<p>Dominik from <a href="https://www.tageins.at/">tag eins</a> got in touch with me, asking whether I could help him extract some data for an article.</p>
+<p>Statistik Austria, a state-funded organization in charge of gathering statistics about all things Austria, has a page called "Schulatlas." It visualizes school-related data, such as how many kids exited to what secondary school from a specific primary school. For some dubious reason, that data is not easily accessible.</p>
+<p>So I built a <a href="https://github.com/badlogic/schulatlas">scraper</a> in an afternoon and delivered Dominik the data he asked for.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/schulatlas.png">
+
+<p>As a data journalist himself, he took the raw data and created a <a href="https://www.tageins.at/bildung-gerechtigkeit-volksschule-ahs-dominik-ritter-wurnig/">great piece on educational inequality in Austria's school system</a>.</p>
+<h2 id="toc_24">Horizont collaboration</h2>
+<p>During the EU election, Austria's press and politics were up in arms about a candidate from the Green party, <a href="https://www.derstandard.at/story/3000000219374/worum-es-bei-den-vorwuerfen-rund-um-lena-schilling-gehht">who appears to be a bit at war with the truth and likes to invent interesting stories</a>.</p>
+<p>In any case, we got another round of "Everything and everyone in Austria is ridiculous" and I'll leave it at that.</p>
+<p>What did interest me was the engagement <a href="https://derstandard.at">derstandard</a>, the paper publishing the Schilling story, was able to farm with all the Schilling-related articles they pumped out like crazy. So <a href="https://x.com/badlogicgames/status/1795841187431235787">I scraped some data and visualized it</a>.</p>
+<p>Here you see the top 200 articles on derstandard.at, sorted by forum comment count. Red dots are articles on Schilling.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/schilling-1.png">
+
+<p>The same data, but sorted by date.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/schilling-2.png">
+
+<p>Seems to have paid off, as the derstandard forum is an important part of keeping people on the site, so they can get more ads pushed into their eyeballs.</p>
+<p>My dearest friend and journalist eextraordinaire <a href="https://x.com/binderstefan">Stefan Binder</a> saw my excellent tweets and asked for the data, based on which he created an article on <a href="https://www.horizont.at/medien/news/insights-fuer-so-viel-engagement-sorgte-die-causa-schilling-beim-standard-94788">horizont.at</a>.</p>
+<p>It's a nice article, presenting both the data and statements by derstandard.at. Totally worth a subscription if you ask me, an unbiased source.</p>
+<h2 id="toc_25">Meta boy &amp; hobby Chrome extensions</h2>
+<p>I built a Chrome extension that switches <a href="https://twitter.com/BrianCSchmidt">Brian's Twitter display name</a>
+to "Meta Boy". It's an inside joke.</p>
+<video autoplay="" controls="" loop="" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/chrome-1.mp4">
+</video>
+
+<p><a href="https://derstandard.at">derstandard.at</a> called me a "hobby programmer" in an article once.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/chrome-2.png">
+
+<p>So I built a Chrome extension that would prefix profession names in headlines on <a href="https://derstandard.at">derstandard.at</a> with "Hobby-", because why not.</p>
+<video controls="" loop="" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/chrome-3.mp4">
+</video>
+
+<h2 id="toc_26">KärntenGPT</h2>
+<p>The state of Carinthia is known to be at the forefront of technology. In early 2024, they held a press conference detailing their plans on establishing "Kärtner Künstliche Intelligenz." What sounded like a joke initially was <a href="https://threadreaderapp.com/thread/1772941999215128979.html">actually a pretty well-thought-out plan of action</a>, with caveats.</p>
+<p>The people responsible actually understood that basing governmental AI initiatives on the services of US American companies is a bad idea. Instead, they opted to self-host various open-source large language models like Llama and Mistral on their own NVIDIA hardware. And on top of that, they'd use open-source software and employ in-house AI experts for integration and custom development. Not bad!</p>
+<p>However, the whole marketing surrounding the project announcement was rather cringe. A little birdie sent me a DM with a Facebook screenshot that told us who was responsible for the initial prototype. So I had a little fun on <a href="https://x.com/badlogicgames/status/1772565815910351329">Twitter and dug deeper</a>.</p>
+<p>The state commissioned a company called Intranet GmbH, or rather their subsidiary <a href="https://t.co/D7W3pBaLWl">Bubble Explorer</a>, to create an initial chatbot prototype with basic functionality. Here's what the Bubble Explorer website states.</p>
+<p><img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/carinthia-1.png"></p>
+
+<p>Curious. The state of Carinthia managed to engage a Silicon Valley start-up with ties to Carinthia (by being a subsidiary of Intranet GmbH, which is located in Carinthia).</p>
+<p>The company basically (badly) reskinned <a href="https://www.librechat.ai/">LibreChat</a>, an open-source interface for chatbots, which can be plugged into any of the myriad of chatbot services like OpenAI. Well, I guess that's one way of making good use of your "presence in the epicenter of Silicon Valley." Just resell other people's stuff.</p>
+<p>So I dug deeper. This is their San Francisco office.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/carinthia-2.png">
+
+<p>A fucking P.O. box. That one ex-Googler who's a co-founder and is supposedly operating the Silicon Valley side of the start-up must be a very tiny man to fit into one of these boxes. Rumor has it that the actual software development is done by a single person located in an office around Wörthersee. It's all very Austrian.</p>
+<p>In any case, <a href="https://www.kleinezeitung.at/kaernten/18314189/ki-des-landes-kaernten-sorgt-fuer-lob-kritik-und-spott">media picked up my Twitter threads again</a>. A couple of weeks later, I got an email with a mysterious-sounding PDF attachment.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/carinthia-4.png">
+
+<p>I was invited to be an informant for a governmental meet-up. Fancy. Not so fancy: they demanded I do all this without compensation.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/carinthia-3.png">
+
+<p>Despite inquiries from my end, I got no heads-up on what was expected from me. Thankfully, I fucking LOVE my country, so I went there regardless on my own dime.</p>
+<p>The meeting itself was rather uneventful. Mr. Inzko laid out his plan in front of a couple of political stakeholders. Every now and then I was roped in to answer related questions, basically "is Mr. Inzko bullshitting us?" To which I could firmly reply with a "No, but."</p>
+<p>The "but" usually boiled down to managing expectations. The plan involved various visions, such as AI compensating employees leaving their state job due to retirement, or providing AI-powered first-level phone support. Something that may fall down on its face due to the lack of dialect-understanding AI models. Regardless, the overall plan was good. Everyone was very nice and forthcoming to me, and everyone left the meeting content as far as I can tell, including political opponents.</p>
+<p>View all this as a cautionary tale of where shitposting can lead you in life.</p>
+<h2 id="toc_27">blargh &amp; mariozechner.at</h2>
+<p>I've built another static site generator called <a href="https://github.com/badlogic/blargh">blargh</a>. It powers this website. It functions like PHP, but with JavaScript instead of PHP.</p>
+<img loading="lazy" src="https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/blargh.jpeg">
+
+<p>I'm happy with how it turned out and will not take any further questions. Thank you.</p>
+<p>My <a href="https://marioslab.io">old blog</a> is still online, and will continue to be so until I get my lazy ass up and port all the old articles over to this new blog. So, never.</p>
+<h2 id="toc_28">What now?</h2>
+<p>As you can see, I've kept busy at night over these past 2 years. The magic of using my evenings for side projects instead of watching TV shows.</p>
+<p>While the above may look excessive, keep in mind that most of these projects are unpolished turds. It's easy to be productive if you don't need to sell your shit.</p>
+<p>The only thing that really mattered in terms of side projects was Cards for Ukraine. Most of the follow up projects I created to solicit donations. Pretty much all Twitter threads showcasing a new thing would end in "And if you are entertained, please donate to <a href="https://cards-for-ukraine.at">cards-for-ukraine.at</a>".</p>
+<p>It worked. Thank you all.</p>
+<p>We'll see if my old brain can think of entertaining or even educational content in the future.</p>
+<p>Discuss this post on <a href="https://x.com/badlogicgames/status/1813471326943731932">Twitter</a> or <a href="https://mastodon.gamedev.place/@badlogic/112799138936363618">Mastodon</a>.</p>
+<p>
+    This page respects your privacy by not using cookies or similar technologies and by not collecting any personally identifiable information.
+</p>
+
+</article></div>

@@ -1,0 +1,63 @@
+<div id="readability-page-1" class="page"><div id="quarto-content">
+
+
+    
+
+<main id="quarto-document-content">
+
+
+
+
+  
+
+
+
+
+<p>Programmers love to proclaim they’ve found the best tool. Paul Graham called Lisp his “<a href="https://paulgraham.com/avg.html">secret weapon</a>.” DHH described Ruby as “<a href="https://rubyonrails.org/doctrine">a magical glove that just fit my brain perfectly</a>.” Pieter Levels ships million-dollar products with <a href="https://lexfridman.com/pieter-levels-transcript/">vanilla PHP and jQuery</a>.</p>
+<p>These declarations aren’t about the languages themselves. They’re about developers finding tools that fit how they think. When the environment clicks, you move fast.</p>
+<p>I had that experience with <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">nbdev</a>, a development environment for literate programming that I helped build and maintain<a href="#fn1" id="fnref1" role="doc-noteref"><sup>1</sup></a>. I created hundreds of projects with it and was one of its <a href="https://www.youtube.com/watch?v=rX1yGxJijsI">biggest</a> <a href="https://github.blog/developer-skills/programming-languages-and-frameworks/nbdev-a-literate-programming-environment-that-democratizes-software-engineering-best-practices/">proponents</a>.</p>
+<p>Today, I no longer use it. AI coding tools changed the trade-offs.</p>
+<section id="fighting-the-ai">
+<h2 data-anchor-id="fighting-the-ai">Fighting the AI</h2>
+<p>The beauty of nbdev is its workflow. You write code, documentation and tests in one source of truth: Jupyter notebooks. Afterwards, these notebooks are transpiled into a Python library and documentation website.</p>
+<p>This workflow is idiosyncratic. AI coding tools, trained on vast amounts of conventional source code, get confused. They struggle to differentiate between editing the notebook and editing the final source code. It feels like fighting the AI instead of working with it.</p>
+<p>I write software to solve problems, not to write code. I want to work in an environment where AI has the highest chance of success. With nbdev, I was swimming upstream.</p>
+<p>Some argue that AI tools encourage lazy thinking: that without guardrails, developers skip the hard work of breaking problems into steps. But thinking step-by-step is a human skill. Notebooks don’t force you to write clean code. AI tools don’t force you to think carefully. Discipline comes from the developer, not the environment.</p>
+</section>
+<section id="tools-dont-matter-as-much-as-i-thought">
+<h2 data-anchor-id="tools-dont-matter-as-much-as-i-thought">Tools Don’t Matter As Much As I Thought</h2>
+<p>A central promise of literate programming is better documentation. By keeping code and docs in one place, you reduce the chance they become stale.</p>
+<p>Strangely, many nbdev projects lacked sufficient documentation for my taste. Sometimes, this helped me learn a codebase by <a href="https://fastpages.fast.ai/fastcore/">contributing</a> to the docs. Other times, it was frustrating. This reinforced my belief that good documentation comes from effort, not tooling.</p>
+<p>This workflow is also less compelling now. AI can read a codebase without documentation and give you an overview on the fly. It can help maintain documentation that is separate from the code, handling the tedious parts. Keeping code and docs together isn’t the selling point it used to be.</p>
+</section>
+<section id="collaboration-and-adoption">
+<h2 data-anchor-id="collaboration-and-adoption">Collaboration and Adoption</h2>
+<p>nbdev asks developers to adopt a different system. It does not meet them where they are. Cursor won because it felt familiar and let developers change their habits slowly, rather than demanding a new workflow on day one.</p>
+<p>I didn’t worry about collaboration as much before. But collaborating with AI is table stakes. The same impediments that get in the way of collaborating with humans tend to get in the way of collaborating with AI.</p>
+<p>Today, developers increasingly span greater scope. Backend people do frontend. PMs create prototypes. Everyone is more polyglot. Idiosyncratic frameworks isolate you from your team to a greater extent than ever before. Idiosyncratic tooling once had a hidden upside: it filtered for a certain kind of contributor. Now I believe it’s more of a liability.</p>
+</section>
+<section id="what-im-using-now">
+<h2 data-anchor-id="what-im-using-now">What I’m Using Now</h2>
+<p>Because I have invested thousands of hours into nbdev, it’s difficult to admit there are better tools for the outcomes I want. But I must check my ego at the door<a href="#fn2" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>My daily drivers now include Amp, Cursor, and Claude Code. I still enjoy notebooks, but only for data analysis, machine learning, or other exploratory workflows where the iterative, visual nature of notebooks shines.</p>
+<p>More importantly, AI has nudged me out of my previous “Python for everything” mindset. I now use different languages for different tasks. For web development, I prefer the Next.js stack. Using a notebook for web development (even with specialized tooling) adds unnecessary complexity for me.</p>
+<p>This isn’t arbitrary preference. AI performs best on code with abundant training data for specific domains. <a href="https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/">TypeScript recently overtook both Python and JavaScript on GitHub</a>, driven partly by the fact that typed languages make AI-generated code more reliable in production<a href="#fn3" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Even Jane Street, famous for its OCaml-heavy infrastructure, <a href="https://www.efinancialcareers.com/news/python-ocaml-jane-street-ai">now uses Python</a> for machine learning and data work.</p>
+</section>
+<section id="a-place-for-joy">
+<h2 data-anchor-id="a-place-for-joy">A Place for Joy</h2>
+<p>None of this means idiosyncratic tools are worthless. Lisp, Haskell, and APL each teach you something different about computing. Joy is a valid reason to choose a language, even with less AI support. It’s just not my focus right now. My joy resides in solving problems, and I want tools that maximize my leverage. For that, conventional wins.</p>
+
+
+</section>
+
+
+<section id="quarto-appendix" role="doc-endnotes"><h2>Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>I <a href="https://github.blog/developer-skills/programming-languages-and-frameworks/nbdev-a-literate-programming-environment-that-democratizes-software-engineering-best-practices/">joined the nbdev project in 2020</a> while at GitHub. That same year I built <a href="https://www.youtube.com/watch?v=cduXZwZaBbM">fastpages</a>, a notebook blogging system that informed nbdev’s documentation approach. Along the way I contributed to tools like <a href="https://github.blog/developer-skills/programming-languages-and-frameworks/learn-about-ghapi-a-new-third-party-python-client-for-the-github-api/">ghapi</a> and <a href="https://fastpages.fast.ai/fastcore/">fastcore</a>. In 2022, I helped lead a <a href="https://www.fast.ai/posts/2022-07-28-nbdev2.html">complete rewrite</a> of nbdev. I discussed the philosophy behind this work on the <a href="https://vanishinggradients.fireside.fm/9">Vanishing Gradients Podcast</a> and at <a href="https://www.youtube.com/watch?v=rX1yGxJijsI">Data Council</a>. I was briefly interested in commercializing nbdev, but <a href="https://hamel.dev/blog/posts/nbdev/">decided not to pursue it</a>.<a href="#fnref1" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Other top nbdev maintainers and power users like <a href="https://github.com/sgugger">Sylvain Gugger</a>, <a href="https://github.com/seeM">Wasim Lorgat</a>, <a href="https://github.com/isaac-flath">Isaac Flath</a>, <a href="https://github.com/muellerzr">Zach Mueller</a>, and <a href="https://ohmeow.com/">Wayde Gilliam</a> have made similar moves.<a href="#fnref2" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Research shows 94% of LLM compilation errors in TypeScript come from type violations, suggesting type systems can guide better code generation. See <a href="https://arxiv.org/abs/2504.09246">Mündler et al., 2025</a>.<a href="#fnref3" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></main> 
+
+</div></div>

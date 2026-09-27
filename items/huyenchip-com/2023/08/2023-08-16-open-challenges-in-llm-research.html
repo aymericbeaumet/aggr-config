@@ -1,0 +1,425 @@
+<div id="readability-page-1" class="page"><div itemprop="articleBody">
+    <p>[<em><a href="https://www.linkedin.com/posts/chiphuyen_llm-airesearch-generativeai-activity-7097619722363408385-s5Cp">LinkedIn discussion</a>, <a href="https://twitter.com/chipro/status/1691858084824838427">Twitter thread</a></em>]</p>
+
+<p>Never before in my life had I seen so many smart people working on the same goal: making LLMs better. After talking to many people working in both industry and academia, I noticed the 10 major research directions that emerged. The first two directions, hallucinations and context learning, are probably the most talked about today. I’m the most excited about numbers 3 (multimodality), 5 (new architecture), and 6 (GPU alternatives).</p>
+
+<h2 id="1_reduce_and_measure_hallucinations">1. Reduce and measure hallucinations</h2>
+
+<p><a href="https://huyenchip.com/2023/05/02/rlhf.html#rlhf_and_hallucination">Hallucination</a> is a heavily discussed topic already so I’ll be quick. Hallucination happens when an AI model makes stuff up. For many creative use cases, hallucination is a feature. However, for most other use cases, hallucination is a bug. I was at a panel on LLM with Dropbox, Langchain, Elastics, and Anthropic recently, and the #1 roadblock they see for companies to adopt LLMs in production is hallucination.</p>
+
+<p>Mitigating hallucination and developing metrics to measure hallucination is a blossoming research topic, and I’ve seen many startups focus on this problem. There are also ad-hoc tips to reduce hallucination, such as adding more context to the prompt, chain-of-thought, self-consistency, or asking your model to be concise in its response.</p>
+
+<p>To learn more about hallucination:</p>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2202.03629">Survey of Hallucination in Natural Language Generation</a> (Ji et al., 2022)</li>
+  <li><a href="https://arxiv.org/abs/2305.13534">How Language Model Hallucinations Can Snowball</a> (Zhang et al., 2023)</li>
+  <li><a href="https://arxiv.org/abs/2302.04023">A Multitask, Multilingual, Multimodal Evaluation of ChatGPT on Reasoning, Hallucination, and Interactivity</a> (Bang et al., 2023)</li>
+  <li><a href="https://arxiv.org/abs/2212.10400">Contrastive Learning Reduces Hallucination in Conversations</a> (Sun et al., 2022)</li>
+  <li><a href="https://arxiv.org/abs/2203.11171">Self-Consistency Improves Chain of Thought Reasoning in Language Models</a> (Wang et al., 2022)</li>
+  <li><a href="https://arxiv.org/abs/2303.08896">SelfCheckGPT: Zero-Resource Black-Box Hallucination Detection for Generative Large Language Models</a> (​​Manakul et al., 2023)</li>
+  <li>A simple example of fact-checking and hallucination by <a href="https://github.com/NVIDIA/NeMo-Guardrails/blob/main/examples/grounding_rail/README.md#grounding-fact-checking-and-hallucination">NVIDIA’s NeMo-Guardrails</a></li>
+</ul>
+
+<h2 id="2_context_learning">2. Optimize context length and context construction</h2>
+
+<p>A vast majority of questions require context. For example, if we ask ChatGPT: “What’s the best Vietnamese restaurant?”, the context needed would be “where” because the best Vietnamese restaurant in Vietnam would be different from the best Vietnamese in the US.</p>
+
+<p>According to this cool paper <a href="https://arxiv.org/pdf/2109.06157.pdf">SituatedQA</a> (Zhang &amp; Choi, 2021), a significant proportion of information-seeking questions have context-dependent answers, e.g. roughly 16.5% of the <a href="https://ai.google.com/research/NaturalQuestions">Natural Questions NQ-Open dataset</a>. Personally, I suspect that this percentage would be even higher for enterprise use cases. For example, say a company builds a chatbot for customer support, for this chatbot to answer any customer question about any product, the context needed might be that customer’s history or that product’s information.</p>
+
+<p>Because the model “learns” from the context provided to it, this process is also called context learning.</p>
+
+<center>
+    <figure>
+    <img alt="Context needed for a customer support query" src="https://huyenchip.com/assets/pics/llm-research/2-context.png">
+    </figure>
+</center>
+
+
+<p>Context length is especially important for RAG – <a href="https://arxiv.org/abs/2005.11401">Retrieval Augmented Generation</a> (Lewis et al., 2020) – which has emerged to be the predominant pattern for LLM industry use cases. For those not yet swept away in the RAG rage, RAG works in two phases:</p>
+
+<p>Phase 1: chunking (also known as indexing)</p>
+
+<ol>
+  <li>Gather all the documents you want your LLM to use</li>
+  <li>Divide these documents into chunks that can be fed into your LLM to generate embeddings and store these embeddings in a vector database.</li>
+</ol>
+
+<p>Phase 2: querying</p>
+
+<ol>
+  <li>When user sends a query, like “<em>Does my insurance policy pay for this drug X</em>”, your LLM converts this query into an embedding, let’s call it QUERY_EMBEDDING</li>
+  <li>Your vector database fetches the chunks whose embeddings are the most similar to QUERY_EMBEDDING</li>
+</ol>
+
+<p>Screenshot from <a href="https://www.youtube.com/watch?v=njzB6fm0U8g">Jerry Liu’s talk on LlamaIndex</a> (2023)</p>
+<center>
+    <figure>
+    <img alt="Context needed for a customer support query" src="https://huyenchip.com/assets/pics/llm-research/2-rag.jpg">
+    </figure>
+</center>
+
+
+<p>The longer the context length, the more chunks we can squeeze into the context. The more information the model has access to, the better its response will be, right?</p>
+
+<p>Not always. How much context a model can use and how efficiently that model will use it are two different questions. In parallel with the effort to increase model context length is the effort to make the context more efficient. Some people call it “prompt engineering” or “prompt construction”. For example, a paper that has made the rounds recently is about how models are much better at understanding information at the beginning and the end of the index rather than in the middle of it – <a href="https://arxiv.org/abs/2307.03172">Lost in the Middle: How Language Models Use Long Contexts</a> (Liu et al., 2023).</p>
+
+<h2 id="3_incorporate_other_data_modalities">3. Incorporate other data modalities</h2>
+
+<p>Multimodality, IMO, is so powerful and yet so underrated. There are many reasons for multimodality.</p>
+
+<p>First, there are many use cases where multimodal data is required, especially in industries that deal with a mixture of data modalities such as healthcare, robotics, e-commerce, retail, gaming, entertainment, etc. Examples:</p>
+
+<ul>
+  <li>Oftentimes, medical predictions require both text (e.g. doctor’s notes, patients’ questionnaires) and images (e.g. CT, X-ray, MRI scans).</li>
+  <li>Product metadata often contains images, videos, descriptions, and even tabular data (e.g. production date, weight, color). You might want to automatically fill in missing product information based on users’ reviews or product photos. You might want to enable users to search for products using visual information, like shape or color.</li>
+</ul>
+
+<p>Second, multimodality promises a big boost in model performance. Shouldn’t a model that can understand both text and images perform better than a model that can only understand text? Text-based models require so much text that there’s a realistic concern that <a href="https://huyenchip.com/2023/05/02/rlhf.html#data_bottleneck_for_pretraining">we’ll soon run out of Internet data to train text-based models</a>. Once we run out of text, we’d need to leverage other data modalities.</p>
+
+<center>
+    <figure>
+    <img alt="Multimodal Flamingo's architecture" src="https://huyenchip.com/assets/pics/llm-research/3-flamingo.png">
+    </figure>
+    Flamingo architecture (Alayrac et al., 2022)
+</center>
+
+
+<p>One use case I’m especially excited about is that multimodality can enable visually impaired people to browse the Internet and navigate the real world.</p>
+
+<p>Cool multimodal work:</p>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2103.00020">[CLIP] Learning Transferable Visual Models From Natural Language Supervision</a> (OpenAI, 2021)</li>
+  <li><a href="https://arxiv.org/abs/2204.14198">Flamingo: a Visual Language Model for Few-Shot Learning</a> (DeepMind, 2022)</li>
+  <li><a href="https://arxiv.org/abs/2301.12597">BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models</a> (Salesforce, 2023)</li>
+  <li><a href="https://arxiv.org/abs/2302.14045">KOSMOS-1: Language Is Not All You Need: Aligning Perception with Language Models</a> (Microsoft, 2023)</li>
+  <li><a href="https://ai.googleblog.com/2023/03/palm-e-embodied-multimodal-language.html">PaLM-E: An embodied multimodal language model</a> (Google, 2023)</li>
+  <li><a href="https://arxiv.org/abs/2304.08485">LLaVA: Visual Instruction Tuning</a> (Liu et al., 2023)</li>
+  <li><a href="https://catalog.ngc.nvidia.com/orgs/nvidia/teams/playground/models/neva">NeVA: NeMo Vision and Language Assistant</a> (NVIDIA, 2023)</li>
+</ul>
+
+<p>I’ve been working on a post on multimodality that hopefully I can share soon!</p>
+
+<h2 id="4_make_llms_faster_and_cheaper">4. Make LLMs faster and cheaper</h2>
+
+<p>When GPT-3.5 first came out in late November 2022, many people had concerns about latency and cost of using it in production. However, latency/cost analysis has changed rapidly since then. Within half a year, the community found a way to create a model that came pretty close to GPT-3.5 in terms of performance, yet required just under 2% of GPT-3.5’s memory footprint.</p>
+
+<p>My takeaway: if you create something good enough, people will figure out a way to make it fast and cheap.</p>
+
+<table>
+
+  <tbody><tr>
+   <td><strong>Date</strong>
+   </td>
+   <td><strong>Model</strong>
+   </td>
+   <td><strong># params</strong>
+   </td>
+   <td><strong>Quantization</strong>
+   </td>
+   <td><strong>Memory to finetune</strong>
+   </td>
+   <td><strong>Can be trained on</strong>
+   </td>
+  </tr>
+  <tr>
+   <td>Nov 2022
+   </td>
+   <td>GPT-3.5
+   </td>
+   <td>175B
+   </td>
+   <td>16-bit
+   </td>
+   <td>375GB
+   </td>
+   <td>Many, many machines
+   </td>
+  </tr>
+  <tr>
+   <td>Mar 2023
+   </td>
+   <td><a href="https://crfm.stanford.edu/2023/03/13/alpaca.html">Alpaca 7B</a>
+   </td>
+   <td>7B
+   </td>
+   <td>16-bit
+   </td>
+   <td>15GB
+   </td>
+   <td>Gaming desktop
+   </td>
+  </tr>
+  <tr>
+   <td>May 2023
+   </td>
+   <td><a href="https://arxiv.org/abs/2305.14314">Guanaco 7B</a>
+   </td>
+   <td>7B
+   </td>
+   <td>4-bit
+   </td>
+   <td>6GB
+   </td>
+   <td>Any Macbook
+   </td>
+  </tr>
+</tbody></table>
+
+
+<p>Below is Guanaco 7B’s performance compared to ChatGPT GPT-3.5 and GPT-4, as reported in the Guanco paper. Caveat: in general, the performance comparison is far from perfect. LLM evaluation is very, very hard.</p>
+
+<center>
+    <figure>
+    <img alt="Guanaco 7B's performance compared to ChatGPT GPT-3.5 and GPT-4" src="https://huyenchip.com/assets/pics/llm-research/4-llm-optimization.png">
+    </figure>
+</center>
+
+
+<p>Four years ago, when I started working on the notes that would later become the section <strong><a href="https://learning.oreilly.com/library/view/designing-machine-learning/9781098107956/ch07.html#model_compression">Model Compression</a></strong> for the book <a href="https://www.amazon.com/Designing-Machine-Learning-Systems-Production-Ready/dp/1098107969"><strong>Designing Machine Learning Systems</strong></a>, I wrote about four major techniques for model optimization/compression:</p>
+
+<ol>
+  <li><strong>Quantization</strong>: by far the most general model optimization method. Quantization reduces a model’s size by using fewer bits to represent its parameters, e.g. instead of using 32 bits to represent a float, use only 16 bits, or even 4 bits.</li>
+  <li><strong>Knowledge distillation</strong>: a method in which a small model (student) is trained to mimic a larger model or ensemble of models (teacher).</li>
+  <li><strong>Low-rank factorization</strong>: the key idea here is to replace high-dimensional tensors with lower-dimensional tensors to reduce the number of parameters. For example, you can decompose a 3x3 tensor into the product of a 3x1 and a 1x3 tensor, so that instead of having 9 parameters, you have only 6 parameters.</li>
+  <li><strong>Pruning</strong></li>
+</ol>
+
+<p>All these four techniques are still relevant and popular today. Alpaca was trained using knowledge distillation. QLoRA used a combination of low-rank factorization and quantization.</p>
+
+<h2 id="5_design_a_new_model_architecture">5. Design a new model architecture</h2>
+
+<p>Since AlexNet in 2012, we’ve seen many architectures go in and out of fashion, including LSTM, seq2seq. Compared to those, Transformer is incredibly sticky. It’s been around since 2017. It’s a big question mark how much longer this architecture will be in vogue.</p>
+
+<p>Developing a new architecture to outperform Transformer isn’t easy. Transformer has been so heavily optimized over the last 6 years. This new architecture has to be performing at the scale that people care about today, on the hardware that people care about. Side note: <a href="https://timdettmers.com/2018/10/17/tpus-vs-gpus-for-transformers-bert/">Transformer was originally designed by Google to run fast on TPUs</a>, and only later optimized on GPUs.</p>
+
+<p>There was a lot of excitement in 2021 around S4 from Chris Ré’s lab – see <a href="https://arxiv.org/abs/2111.00396">Efficiently Modeling Long Sequences with Structured State Spaces</a> (Gu et al., 2021). I’m not quite sure what happened to it. Chris Ré’s lab is still very invested in developing new architecture, most recently with their architecture <a href="https://together.ai/blog/monarch-mixer">Monarch Mixer</a> (Fu et al., 2023) in collaboration with the startup <a href="https://together.ai/blog/monarch-mixer">Together</a>.</p>
+
+<p>Their key idea is that for the existing Transformer architecture, the complexity of attention is quadratic in sequence length and the complexity of an MLP is quadratic in model dimension. An architecture with subquadratic complexity would be more efficient.</p>
+
+<center>
+    <figure>
+    <img alt="Monarch Mixer architecture" src="https://huyenchip.com/assets/pics/llm-research/5-monarch-mixer.png">
+    </figure>
+</center>
+
+
+<p>I’m sure many other labs are working on this idea, though I’m not aware of any attempt that has been made public. If you know of any, please let me know!</p>
+
+<h2 id="6_develop_gpu_alternatives">6. Develop GPU alternatives</h2>
+
+<p>GPU has been the dominating hardware for deep learning ever since AlexNet in 2012. In fact, one commonly acknowledged reason for AlexNet’s popularity is that it was the first paper to successfully use GPUs to train neural networks. Before GPUs, if you wanted to train a model at AlexNet’s scale, you’d have to use thousands of CPUs, like the one <a href="https://www.nytimes.com/2012/06/26/technology/in-a-big-network-of-computers-evidence-of-machine-learning.html">Google released just a few months before AlexNet</a>. Compared to thousands of CPUs, a couple of GPUs were a lot more accessible to Ph.D. students and researchers, setting off the deep learning research boom.</p>
+
+<p>In the last decade, many, many companies, both big corporations, and startups, have attempted to create new hardware for AI. The most notable attempts are Google’s <a href="https://cloud.google.com/tpu/docs/intro-to-tpu">TPUs</a>, Graphcore’s <a href="https://www.graphcore.ai/products/ipu">IPUs</a> (what’s happening with IPUs?), and <a href="https://www.eetimes.com/cerebras-sells-100-million-ai-supercomputer-plans-8-more/">Cerebras</a>. SambaNova raised over <a href="https://spectrum.ieee.org/sambanova-ceo-ai-interview">a billion dollars to develop new AI chips</a> but seems to have pivoted to being a generative AI platform.</p>
+
+<p>For a while, there has been a lot of anticipation around quantum computing, with key players being:</p>
+
+<ul>
+  <li><a href="https://www.ibm.com/quantum">IBM’s QPU</a></li>
+  <li>Google’s Quantum computer reported <a href="https://www.nature.com/articles/d41586-023-00536-w">a major milestone in quantum error reduction</a> earlier this year in Nature. Its quantum virtual machine is publicly accessible via <a href="https://quantumai.google/quantum-virtual-machine">Google Colab</a></li>
+  <li>Research labs such as <a href="https://cqe.mit.edu/">MIT Center for Quantum Engineering</a>, <a href="https://www.mpq.mpg.de/en">Max Planck Institute of Quantum Optics</a>, <a href="https://chicagoquantum.org/">Chicago Quantum Exchange</a>, <a href="https://quantum-roadmap.ornl.gov/">Oak Ridge National Laboratory</a>, etc.</li>
+</ul>
+
+<p>Another direction that is also super exciting is photonic chips. This is the direciton I know the least about – so please correct me if I’m wrong. Existing chips today use electricity to move data, which consumes a lot of power and also incurs latency. Photonic chips use photons to move data, harnessing the speed of light for faster and more efficient compute. Various startups in this space have raised hundreds of millions of dollars, including <a href="https://lightmatter.co/">Lightmatter</a> ($270M), <a href="https://ayarlabs.com/">Ayar Labs</a> ($220M), <a href="https://www.lightelligence.ai/">Lightelligence</a> ($200M+), and <a href="https://www.luminous.com/">Luminous Computing</a> ($115M).</p>
+
+<p>Below is the timeline of advances of the three major methods in photonic matrix computation, from the paper <a href="https://www.nature.com/articles/s41377-022-00717-8">Photonic matrix multiplication lights up photonic accelerator and beyond</a> (Zhou et al., Nature 2022). The three different methods are plane light conversion (PLC), Mach–Zehnder interferometer (MZI), and wavelength division multiplexing (WDM).</p>
+
+<center>
+    <figure>
+    <img alt="Timeline of advances of the three major methods in photonic matrix multiplication" src="https://huyenchip.com/assets/pics/llm-research/6-photonic-matrix-multiplication.png">
+    </figure>
+</center>
+
+
+<h2 id="7_make_agents_usable">7. Make agents usable</h2>
+
+<p>Agents are LLMs that can take actions, like browsing the Internet, sending emails, making reservations, etc. Compared to other research directions in this post, this might be the youngest direction.</p>
+
+<p>Because of the novelty and the massive potential, there’s a feverish obsession with agents. <a href="https://github.com/Significant-Gravitas/Auto-GPT">Auto-GPT</a> is now the 25th most popular GitHub repo ever by the number of stars. <a href="https://github.com/AntonOsika/gpt-engineer">GPT-Engineering</a> is another popular repo.</p>
+
+<p>Despite the excitement, there is still doubt about whether LLMs are reliable and performant enough to be entrusted with the power to act.</p>
+
+<p>One use case that has emerged though is the use of agents for social studies, like the famous Stanford experiment that shows that a small society of generative agents produces emergent social behaviors: <em>for example, starting with only a single user-specified notion that one agent wants to throw a Valentine’s Day party, the agents autonomously spread invitations to the party over the next two days, make new acquaintances, ask each other out on dates to the party …</em> (<a href="https://arxiv.org/abs/2304.03442">Generative Agents: Interactive Simulacra of Human Behavior</a>, Park et al., 2023)</p>
+
+<p>The most notable startup in this area is perhaps Adept, founded by two Transformer co-authors (though <a href="https://www.theinformation.com/briefings/two-co-founders-of-adept-an-openai-rival-suddenly-left-to-start-another-company">both already left</a>) and an ex-OpenAI VP, and has raised almost half a billion dollars to date. Last year, they had a demo showing their agent browsing the Internet and adding a new account to Salesforce. I’m looking forward to seeing their new demos 🙂</p>
+
+<center>
+
+</center>
+
+
+<h2 id="8_improve_learning_from_human_preference">8. Improve learning from human preference</h2>
+
+<p><a href="https://huyenchip.com/2023/05/02/rlhf.html">RLHF, Reinforcement Learning from Human Preference</a>, is cool but kinda hacky. I wouldn’t be surprised if people figure out a better way to train LLMs. There are many open questions for RLHF, such as:</p>
+
+<p><strong>1. How to mathematically represent human preference?</strong></p>
+
+<p>Currently, human preference is determined by comparison: human labeler determines if response A is better than response B. However, it doesn’t take into account how much better response A is than response B.</p>
+
+<p><strong>2. What’s human preference?</strong></p>
+
+<p>Anthropic measured the quality of their model’s responses along the three axes: helpful, honest, and harmless. See <a href="https://arxiv.org/abs/2212.08073">Constitutional AI: Harmlessness from AI Feedback</a> (Bai et al., 2022).</p>
+
+<p>DeepMind tries to generate responses that please the most people. See <a href="https://www.deepmind.com/publications/fine-tuning-language-models-to-find-agreement-among-humans-with-diverse-preferences">Fine-tuning language models to find agreement among humans with diverse preferences</a>, (Bakker et al., 2022).</p>
+
+<p>Also, do we want AIs that can take a stand or a vanilla AI that shies away from any potentially controversial topic?</p>
+
+<p><strong>3. Whose preference is “human” preference, taking into account the differences in cultures, religions, political leanings, etc.?</strong></p>
+
+<p>There are a lot of challenges in obtaining training data that can be sufficiently representative of all the potential users.</p>
+
+<p>For example, for OpenAI’s InstructGPT data, there was no labeler above 65 years old. Labelers are predominantly Filipino and Bangladeshi. See <a href="https://arxiv.org/abs/2203.02155">InstructGPT: Training language models to follow instructions with human feedback</a> (Ouyang et al., 2022).</p>
+
+<center>
+    <figure>
+    <img alt="Demographics of labelers for InstructGPT" src="https://huyenchip.com/assets/pics/llm-research/8-instructgpt-demographics.png">
+    </figure>
+</center>
+
+
+<p>Community-led efforts, while admirable in their intention, can lead to biased data. For example, for the OpenAssistant dataset, 201 out of 222 (90.5%) respondents identify as male. <a href="https://twitter.com/jeremyphoward/status/1647763133665271808/photo/1">Jeremy Howard has a great Twitter thread on this</a>.</p>
+
+<center>
+    <figure>
+    <img alt="Self-reported demographics of contributors to OpenAssistant dataset" src="https://huyenchip.com/assets/pics/llm-research/8-openassistant-demographics.png">
+    </figure>
+</center>
+
+
+<h2 id="9_improve_the_efficiency_of_the_chat_interface">9. Improve the efficiency of the chat interface</h2>
+
+<p>Ever since ChatGPT, there have been multiple discussions on whether chat is a suitable interface for a wide range of tasks.</p>
+
+<ul>
+  <li><a href="https://austinhenley.com/blog/naturallanguageui.html">Natural language is the lazy user interface</a> (Austin Z. Henley, 2023)</li>
+  <li><a href="https://wattenberger.com/thoughts/boo-chatbots">Why Chatbots Are Not the Future</a> (Amelia Wattenberger, 2023)</li>
+  <li><a href="https://arxiv.org/abs/2303.17710">What Types of Questions Require Conversation to Answer? A Case Study of AskReddit Questions</a> (Huang et al., 2023)</li>
+  <li><a href="https://idratherbewriting.com/blog/ai-chat-interfaces-are-the-new-user-interface-for-docs">AI chat interfaces could become the primary user interface to read documentation</a> (Tom Johnson, 2023)</li>
+  <li><a href="https://eugeneyan.com/writing/llm-ux/">Interacting with LLMs with Minimal Chat</a> (Eugene Yan, 2023)</li>
+</ul>
+
+<p>However, this is not a new discussion. In many countries, especially in Asia, chat has been used as the interface for super apps for about a decade. <a href="http://dangrover.com/blog/2014/12/01/chinese-mobile-app-ui-trends.html">Dan Grover had this discussion back in 2014</a>.</p>
+
+<center>
+    <figure>
+    <img alt="Chat has been used as the universal interface for superapps in China for over a decade" src="https://huyenchip.com/assets/pics/llm-research/9-superapp-chat-interface.png">
+    </figure>
+    Chat as a universal interface for Chinese apps (Dan Grover, 2014)
+</center>
+
+
+<p>The discussion again got tense in 2016, when many people thought apps were dead and chatbots would be the future.</p>
+
+<ul>
+  <li><a href="https://acroll.medium.com/on-chat-as-interface-92a68d2bf854">On chat as interface</a> (Alistair Croll, 2016)</li>
+  <li><a href="https://www.technologyreview.com/2016/04/25/8510/is-the-chatbot-trend-one-big-misunderstanding/">Is the Chatbot Trend One Big Misunderstanding?</a> (Will Knight, 2016)</li>
+  <li><a href="http://dangrover.com/blog/2016/04/20/bots-wont-replace-apps.html">Bots won’t replace apps. Better apps will replace apps</a> (Dan Grover, 2016)</li>
+</ul>
+
+<p>Personally, I love the chat interface because of the following reasons:</p>
+
+<ol>
+  <li>Chat is an interface that everyone, even people without previous exposure to computers or the Internet, can learn to use quickly. When I volunteered at a low-income residential neighborhood (are we allowed to say slum?) in Kenya in the early 2010s, I was blown away by how comfortable everyone there was with doing banking on their phone, via texts. No one in that neighborhood had a computer.</li>
+  <li>Chat interface is accessible. You can use voice instead of text if your hands are busy.</li>
+  <li>Chat is also an incredibly robust interface – you can give it any request and it’ll give back a response, even if the response isn’t good.</li>
+</ol>
+
+<p>However, there are certain areas that I think the chat interface can be improved upon.</p>
+
+<ol>
+  <li>
+    <p>Multiple messages per turn</p>
+
+    <p>Currently, we pretty much assume one message per turn. This is not how my friends and I text. Often, I need multiple messages to complete my thought, because I need to insert different data (e.g. images, locations, links), I forgot something in the previous messages, or I just don’t feel like putting everything into a massive paragraph.</p>
+  </li>
+  <li>
+    <p>Multimodal input</p>
+
+    <p>In the realm of multimodal applications, most energy is spent on building better models, and very little on building better interfaces. Take <a href="https://catalog.ngc.nvidia.com/orgs/nvidia/teams/playground/models/neva">Nvidia’s NeVA chatbot</a>. I’m not a UX expert, but I suspect there might be room for UX improvement here.</p>
+
+    <p>P.S. Sorry the NeVA team for calling you out. Even with this interface, your work is super cool!</p>
+
+    <center>
+     <figure>
+     <img alt="NVIDIA's NeVA interface" src="https://huyenchip.com/assets/pics/llm-research/9-neva.png">
+     </figure>
+ </center>
+    
+  </li>
+  <li>
+    <p>Incorporating generative AI into your workflows</p>
+
+    <p>Linus Lee covered this point well in his talk <a href="https://www.youtube.com/watch?v=rd-J3hmycQs">Generative AI interface beyond chats</a>. For example, if you want to ask a question about a column of a chart you’re working on, you should be able just point to that column and ask a question.</p>
+  </li>
+  <li>
+    <p>Editing and deletion of messages</p>
+
+    <p>How would editing or deletion of a user input change the conversation flow with the chatbot?</p>
+  </li>
+</ol>
+
+<h2 id="10_build_llms_for_non_english_languages">10. Build LLMs for non-English languages</h2>
+
+<p>We know that current English-first LLMs don’t work well for many other languages, both in terms of performance, latency, and speed. See:</p>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2304.05613">ChatGPT Beyond English: Towards a Comprehensive Evaluation of Large Language Models in Multilingual Learning</a> (Lai et al., 2023)</li>
+  <li><a href="https://blog.yenniejun.com/p/all-languages-are-not-created-tokenized">All languages are NOT created (tokenized) equal</a> (Yennie Jun, 2023)</li>
+</ul>
+
+<center>
+    <figure>
+    <img alt="Tokenization for non-English languages" src="https://huyenchip.com/assets/pics/llm-research/10-non-english-tokens.png">
+    </figure>
+</center>
+
+
+<p>Here are some initiatives that I’m aware of. If you have pointers to others, I’d be happy to include them here.</p>
+
+<ul>
+  <li><a href="https://aya.for.ai/">Aya</a>: An Open Science Initiative to Accelerate Multilingual AI Progress</li>
+  <li><a href="https://discord.gg/a2PCzB4AdE">Symato</a>: Vietnamese ChatGPT</li>
+  <li><a href="https://github.com/22-hours/cabrita">Cabrita</a>: Finetuning InstructLLaMA with portuguese data</li>
+  <li><a href="https://github.com/LC1332/Luotuo-Chinese-LLM">Luotuo-Chinese-LLM</a></li>
+  <li><a href="https://github.com/ymcui/Chinese-LLaMA-Alpaca">Chinese-LLaMA-Alpaca</a></li>
+  <li><a href="https://github.com/Facico/Chinese-Vicuna">Chinese-Vicuna</a></li>
+</ul>
+
+<p>Several early readers of this post told me they don’t think I should include this direction for two reasons.</p>
+
+<ol>
+  <li>
+    <p>This is less of a research problem and more of a logistics problem. We already know how to do it. Someone just needs to put money and effort into it. This is not entirely true. Most languages are considered low-resource, e.g. they have far fewer high-quality data compared to English or Chinese, and might require different techniques to train a large language model. See:</p>
+
+    <ul>
+      <li><a href="https://arxiv.org/abs/2006.07264">Low-resource Languages: A Review of Past Work and Future Challenges</a> (Magueresse et al., 2020)</li>
+      <li><a href="https://aclanthology.org/P19-1310/">JW300: A Wide-Coverage Parallel Corpus for Low-Resource Languages</a> (Agić et al., 2019)</li>
+    </ul>
+  </li>
+  <li>
+    <p>Those more pessimistic think that in the future, many languages will die out, and the Internet will consist of two universes in two languages: English and Mandarin. This school of thought isn’t new – anyone remembers Esperando?</p>
+  </li>
+</ol>
+
+<p>The impact of AI tools, e.g. machine translation and chatbots, on language learning is still unclear. Will they help people learn new languages faster, or will they eliminate the need of learning new languages altogether?</p>
+
+<h2>Conclusion</h2>
+
+<p>Phew, that was a lot of papers to reference, and I have no doubt that I still missed a ton. If there’s something you think I missed, please let me know.</p>
+
+<p>For another perspective, check out this comprehsive paper <a href="https://arxiv.org/abs/2307.10169">Challenges and Applications of Large Language Models</a> (Kaddour et al., 2023).</p>
+
+<p>Some of the problems mentioned above are harder than others. For example, I think that number 10, building LLMs for non-English languages, is more straightforward with enough time and resources.</p>
+
+<p>Number 1, reducing hallucination, will be much harder, since hallucination is just LLMs doing their probabilistic thing.</p>
+
+<p>Number 4, making LLMs faster and cheaper, will never be completely solved. There is already so much progress in this area, and there will be more, but we will never run out of room for improvement.</p>
+
+<p>Number 5 and number 6, new architectures and new hardware, are very challenging, but they are inevitable with time. Because of the symbiosis between architecture and hardware – new architecture will need to be optimized for common hardware, and hardware will need to support common architecture – they might be solved by the same company.</p>
+
+<p>Some of these problems won’t be solved using only technical knowledge. For example, number 8, improving learning from human preference, might be more of a policy problem than a technical problem. Number 9, improving the efficiency of the chat interface, is more of a UX problem. We need more people with non-technical backgrounds to work with us to solve these problems.</p>
+
+<p>What research direction are you most excited about? What are the most promising solutions you see for these problems? I’d love to hear from you.</p>
+
+  </div></div>

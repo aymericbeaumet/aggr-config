@@ -1,0 +1,358 @@
+<div id="readability-page-1" class="page"><div><p>Multimodal LLMs are making tremendous progress recently. We now have a diverse ecosystem of powerful open Multimodal models, mostly Vision-Language Models (VLM), including Meta AI's <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-3.2-11B-Vision-Instruct">Llama-3.2-11B-Vision</a>, Mistral AI's <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/mistralai/Pixtral-12B-2409">Pixtral-12B</a>, Qwen's <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/Qwen/Qwen2-VL-7B">Qwen2-VL-7B</a>, and Allen AI's <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/allenai/Molmo-7B-D-0924">Molmo-7B-D-0924</a>.</p>
+<p>These VLMs can handle a variety of multimodal tasks, including image captioning, visual question answering, and image-text matching without additional training. However, to customize a model for your specific application, you may need to fine-tune it on your data to achieve higher quality results or to create a more efficient model for your use case.</p>
+<p>This blog post walks you through how to fine-tune open VLMs using Hugging Face <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/trl/index">TRL</a>, <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/transformers/index">Transformers</a> &amp; <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/datasets/index">datasets</a> in 2024. We'll cover:</p>
+<ol>
+<li><a href="#1-define-our-multimodal-use-case">Define our multimodal use case</a></li>
+<li><a href="#2-setup-development-environment">Setup development environment</a></li>
+<li><a href="#3-create-and-prepare-the-multimodal-dataset">Create and prepare the multimodal dataset</a></li>
+<li><a href="#4-fine-tune-vlm-using-trl-and-the-sfstrainer">Fine-tune VLM using <code>trl</code> and the <code>SFTTrainer</code></a></li>
+<li><a href="#5-test-and-evaluate-the-vlm">Test and evaluate the VLM</a></li>
+</ol>
+<p><em>Note: This blog was created to run on consumer size GPUs (24GB), e.g. NVIDIA A10G or RTX 4090/3090, but can be easily adapted to run on bigger GPUs.</em></p>
+<h2 id="1-define-our-multimodal-use-case">1. Define our multimodal use case</h2>
+<p>When fine-tuning VLMs, it's crucial to clearly define your use case and the multimodal task you want to solve. This will guide your choice of base model and help you create an appropriate dataset for fine-tuning. If you haven't defined your use case yet, you might want to revisit your requirements.</p>
+<p>It's worth noting that for most use cases fine-tuning might not be the first option. We recommend evaluating pre-trained models or API-based solutions before committing to fine-tuning your own model.</p>
+<p>As an example, we'll use the following multimodal use case:</p>
+<blockquote>
+<p>We want to fine-tune a model that can generate detailed product descriptions based on product images and basic metadata. This model will be integrated into our e-commerce platform to help sellers create more compelling listings. The goal is to reduce the time it takes to create product descriptions and improve their quality and consistency.</p>
+</blockquote>
+<p>Existing models might already be very good for this use case, but you might want to tweak/tune it to your specific needs. This image-to-text generation task is well-suited for fine-tuning VLMs, as it requires understanding visual features and combining them with textual information to produce coherent and relevant descriptions. I created a test dataset for this use case using Gemini 1.5 <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/datasets/philschmid/amazon-product-descriptions-vlm">philschmid/amazon-product-descriptions-vlm</a>.</p>
+<h2 id="2-setup-development-environment">2. Setup development environment</h2>
+<p>Our first step is to install Hugging Face Libraries and Pyroch, including trl, transformers and datasets. If you haven't heard of trl yet, don't worry. It is a library on top of transformers and datasets, which makes it easier to fine-tune, rlhf, align open LLMs.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Install Pytorch &amp; other libraries
+%pip install "torch==2.4.0" tensorboard pillow
+ 
+# Install Hugging Face libraries
+%pip install  --upgrade \
+  "transformers==4.45.1" \
+  "datasets==3.0.1" \
+  "accelerate==0.34.2" \
+  "evaluate==0.4.3" \
+  "bitsandbytes==0.44.0" \
+  "trl==0.11.1" \
+  "peft==0.13.0" \
+  "qwen-vl-utils"</code></pre></div></figure>
+<p>We will use the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/models">Hugging Face Hub</a> as a remote model versioning service. This means we will automatically push our model, logs and information to the Hub during training. You must register on the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/join">Hugging Face</a> for this. After you have an account, we will use the <code>login</code> util from the <code>huggingface_hub</code> package to log into our account and store our token (access key) on the disk.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from huggingface_hub import login
+ 
+login(
+  token="", # ADD YOUR TOKEN HERE
+  add_to_git_credential=True
+)
+ </code></pre></div></figure>
+<h2 id="3-create-and-prepare-the-dataset">3. Create and prepare the dataset</h2>
+<p>Once you have determined that fine-tuning is the right solution we need to create a dataset to fine-tune our model. We have to prepare the dataset in a format that the model can understand.</p>
+<p>In our example we will use <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/datasets/philschmid/amazon-product-descriptions-vlm">philschmid/amazon-product-descriptions-vlm</a>, which contains 1,350 amazon products with title, images and descriptions and metadata. We want to fine-tune our model to generate product descriptions based on the images, title and metadata. Therefore we need to create a prompt including the title, metadata and image and the completion is the description.</p>
+<p>TRL supports popular instruction and conversation dataset formats. This means we only need to convert our dataset to one of the supported formats and <code>trl</code> will take care of the rest.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>JSON</span></p><pre><code data-language="json">"messages": [
+  {"role": "system", "content": [{"type":"text", "text": "You are a helpful...."}]},
+  {"role": "user", "content": [{
+    "type": "text", "text":  "How many dogs are in the image?", 
+    "type": "image", "text": &lt;PIL.Image&gt; 
+    }]},
+  {"role": "assistant", "content": [{"type":"text", "text": "There are 3 dogs in the image."}]}
+],</code></pre></div></figure>
+<p>In our example we are going to load our dataset using the Datasets library and apply our frompt and convert it into the the conversational format.</p>
+<p>Lets start with defining our instruction prompt.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># note the image is not provided in the prompt its included as part of the "processor"
+prompt= """Create a Short Product description based on the provided ##PRODUCT NAME## and ##CATEGORY## and image. 
+Only return description. The description should be SEO optimized and for a better mobile search experience.
+ 
+##PRODUCT NAME##: {product_name}
+##CATEGORY##: {category}"""
+ 
+system_message = "You are an expert product description writer for Amazon."</code></pre></div></figure>
+<p>Now, we can format our dataset.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from datasets import load_dataset
+ 
+# Convert dataset to OAI messages       
+def format_data(sample):
+    return {"messages": [
+                {
+                    "role": "system",
+                    "content": [{"type": "text", "text": system_message}],
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt.format(product_name=sample["Product Name"], category=sample["Category"]),
+                        },{
+                            "type": "image",
+                            "image": sample["image"],
+                        }
+                    ],
+                },
+                {
+                    "role": "assistant",
+                    "content": [{"type": "text", "text": sample["description"]}],
+                },
+            ],
+        }
+ 
+# Load dataset from the hub
+dataset_id = "philschmid/amazon-product-descriptions-vlm"
+dataset = load_dataset("philschmid/amazon-product-descriptions-vlm", split="train")
+ 
+# Convert dataset to OAI messages
+# need to use list comprehension to keep Pil.Image type, .mape convert image to bytes
+dataset = [format_data(sample) for sample in dataset]
+ 
+print(dataset[345]["messages"])</code></pre></div></figure>
+<h2 id="4-fine-tune-vlm-using-trl-and-the-sfttrainer">4. Fine-tune VLM using <code>trl</code> and the <code>SFTTrainer</code></h2>
+<p>We are now ready to fine-tune our model. We will use the <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/trl/sft_trainer">SFTTrainer</a> from <code>trl</code> to fine-tune our model. The <code>SFTTrainer</code> makes it straightfoward to supervise fine-tune open LLMs and VLMs. The <code>SFTTrainer</code> is a subclass of the <code>Trainer</code> from the <code>transformers</code> library and supports all the same features, including logging, evaluation, and checkpointing, but adds additiional quality of life features.</p>
+<p>We will use the PEFT features in our example. As peft method we will use <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2305.14314">QLoRA</a> a technique to reduce the memory footprint of large language models during finetuning, without sacrificing performance by using quantization. If you want to learn more about QLoRA and how it works, check out <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/blog/4bit-transformers-bitsandbytes">Making LLMs even more accessible with bitsandbytes, 4-bit quantization and QLoRA</a> blog post.</p>
+<p><em>Note: We cannot use Flash Attention as we need to pad our multimodal inputs.</em></p>
+<p>We are going to use Qwen 2 VL 7B model, but we can easily swap out the model for another model, including Meta AI's <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/meta-llama/Llama-3.2-11B-Vision-Instruct">Llama-3.2-11B-Vision</a>, Mistral AI's <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/mistralai/Pixtral-12B-2409">Pixtral-12B</a> or any other LLMs by changing our <code>model_id</code> variable. We will use bitsandbytes to quantize our model to 4-bit.</p>
+<p><em>Note: Be aware the bigger the model the more memory it will require. In our example we will use the 7B version, which can be tuned on 24GB GPUs.</em></p>
+<p>Correctly, preparing the LLM, Tokenizer and Processor for training VLMs is crucial. The Processor is responsible for including the special tokens and image features in the input.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import torch
+from transformers import AutoModelForVision2Seq, AutoProcessor, BitsAndBytesConfig
+ 
+# Hugging Face model id
+model_id = "Qwen/Qwen2-VL-7B-Instruct" 
+ 
+# BitsAndBytesConfig int-4 config
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True, bnb_4bit_use_double_quant=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16
+)
+ 
+# Load model and tokenizer
+model = AutoModelForVision2Seq.from_pretrained(
+    model_id,
+    device_map="auto",
+    # attn_implementation="flash_attention_2", # not supported for training
+    torch_dtype=torch.bfloat16,
+    quantization_config=bnb_config
+)
+processor = AutoProcessor.from_pretrained(model_id)</code></pre></div></figure>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># Preparation for inference
+text = processor.apply_chat_template(
+    dataset[2]["messages"], tokenize=False, add_generation_prompt=False
+)
+print(text)</code></pre></div></figure>
+<p>The <code>SFTTrainer</code> supports a native integration with <code>peft</code>, which makes it super easy to efficiently tune LLMs using, e.g. QLoRA. We only need to create our <code>LoraConfig</code> and provide it to the trainer. Our <code>LoraConfig</code> parameters are defined based on the <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/pdf/2305.14314.pdf">qlora paper</a> and sebastian's <a target="_blank" rel="noopener noreferrer" href="https://magazine.sebastianraschka.com/p/practical-tips-for-finetuning-llms">blog post</a>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from peft import LoraConfig
+ 
+# LoRA config based on QLoRA paper &amp; Sebastian Raschka experiment
+peft_config = LoraConfig(
+        lora_alpha=16,
+        lora_dropout=0.05,
+        r=8,
+        bias="none",
+        target_modules=["q_proj", "v_proj"],
+        task_type="CAUSAL_LM", 
+)</code></pre></div></figure>
+<p>Before we can start our training we need to define the hyperparameters (<code>SFTConfig</code>) we want to use and make sure our inputs are correcty provided to the model. Different to text-only supervised fine-tuning we need to provide the image to the model as well. Therefore we create a custom <code>DataCollator</code> which formates the inputs correctly and include the image features. We use the <a target="_blank" rel="noopener noreferrer" href="https://github.com/QwenLM/Qwen2-VL/blob/main/qwen-vl-utils/src/qwen_vl_utils/vision_process.py#L321">process_vision_info</a> method from a utility package the Qwen2 team provides. If you are using another model, e.g. Llama 3.2 Vision you might have to check if that creates the same processsed image information.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from trl import SFTConfig
+from transformers import Qwen2VLProcessor
+from qwen_vl_utils import process_vision_info
+ 
+args = SFTConfig(
+    output_dir="qwen2-7b-instruct-amazon-description", # directory to save and repository id
+    num_train_epochs=3,                     # number of training epochs
+    per_device_train_batch_size=4,          # batch size per device during training
+    gradient_accumulation_steps=8,          # number of steps before performing a backward/update pass
+    gradient_checkpointing=True,            # use gradient checkpointing to save memory
+    optim="adamw_torch_fused",              # use fused adamw optimizer
+    logging_steps=5,                       # log every 10 steps
+    save_strategy="epoch",                  # save checkpoint every epoch
+    learning_rate=2e-4,                     # learning rate, based on QLoRA paper
+    bf16=True,                              # use bfloat16 precision
+    tf32=True,                              # use tf32 precision
+    max_grad_norm=0.3,                      # max gradient norm based on QLoRA paper
+    warmup_ratio=0.03,                      # warmup ratio based on QLoRA paper
+    lr_scheduler_type="constant",           # use constant learning rate scheduler
+    push_to_hub=True,                       # push model to hub
+    report_to="tensorboard",                # report metrics to tensorboard
+    gradient_checkpointing_kwargs = {"use_reentrant": False}, # use reentrant checkpointing
+    dataset_text_field="", # need a dummy field for collator
+    dataset_kwargs = {"skip_prepare_dataset": True} # important for collator
+)
+args.remove_unused_columns=False
+ 
+# Create a data collator to encode text and image pairs
+def collate_fn(examples):
+    # Get the texts and images, and apply the chat template
+    texts = [processor.apply_chat_template(example["messages"], tokenize=False) for example in examples]
+    image_inputs = [process_vision_info(example["messages"])[0] for example in examples]
+ 
+    # Tokenize the texts and process the images
+    batch = processor(text=texts, images=image_inputs, return_tensors="pt", padding=True)
+ 
+    # The labels are the input_ids, and we mask the padding tokens in the loss computation
+    labels = batch["input_ids"].clone()
+    labels[labels == processor.tokenizer.pad_token_id] = -100  #
+    # Ignore the image token index in the loss computation (model specific)
+    if isinstance(processor, Qwen2VLProcessor):
+        image_tokens = [151652,151653,151655]
+    else: 
+        image_tokens = [processor.tokenizer.convert_tokens_to_ids(processor.image_token)]
+    for image_token_id in image_tokens:
+        labels[labels == image_token_id] = -100
+    batch["labels"] = labels
+ 
+    return batch</code></pre></div></figure>
+<p>We now have every building block we need to create our <code>SFTTrainer</code> to start then training our model.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from trl import SFTTrainer
+ 
+trainer = SFTTrainer(
+    model=model,
+    args=args,
+    train_dataset=dataset,
+    data_collator=collate_fn,
+    dataset_text_field="", # needs dummy value
+    peft_config=peft_config,
+    tokenizer=processor.tokenizer,
+)</code></pre></div></figure>
+<p>Start training our model by calling the <code>train()</code> method on our <code>Trainer</code> instance. This will start the training loop and train our model for 3 epochs. Since we are using a PEFT method, we will only save the adapted model weights and not the full model.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># start training, the model will be automatically saved to the hub and the output directory
+trainer.train()
+ 
+# save model 
+trainer.save_model(args.output_dir)</code></pre></div></figure>
+<p>Training for 3 epochs with a dataset of ~1k samples took 01:31:58 on a <code>g6.2xlarge</code>. The instance costs <code>0.9776$/h</code> which brings us to a total cost of only <code>1.4$</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python"># free the memory again
+del model
+del trainer
+torch.cuda.empty_cache()</code></pre></div></figure>
+<h2 id="5-test-model-and-run-inference">5. Test Model and run Inference</h2>
+<p>After the training is done we want to evaluate and test our model. First we will load the base model and let it generate a description for a random Amazon product. Then we will load our Q-LoRA adapted model and let it generate a description for the same product.</p>
+<p>Finally we can merge the adapter into the base model to make it more efficient and run inference on the same product again.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import torch
+from transformers import AutoProcessor, AutoModelForVision2Seq
+ 
+adapter_path = "./qwen2-7b-instruct-amazon-description"
+ 
+# Load Model base model
+model = AutoModelForVision2Seq.from_pretrained(
+  model_id,
+  device_map="auto",
+  torch_dtype=torch.float16
+)
+processor = AutoProcessor.from_pretrained(model_id)</code></pre></div></figure>
+<p>I selected a random product from Amazon and prepared a <code>generate_description</code> function to generate a description for the product.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from qwen_vl_utils import process_vision_info
+ 
+# sample from amazon.com
+sample = {
+  "product_name": "Hasbro Marvel Avengers-Serie Marvel Assemble Titan-Held, Iron Man, 30,5 cm Actionfigur",
+  "catergory": "Toys &amp; Games | Toy Figures &amp; Playsets | Action Figures",
+  "image": "https://m.media-amazon.com/images/I/81+7Up7IWyL._AC_SY300_SX300_.jpg"
+}
+ 
+# prepare message
+messages = [{
+        "role": "user",
+        "content": [
+            {
+                "type": "image",
+                "image": sample["image"],
+            },
+            {"type": "text", "text": prompt.format(product_name=sample["product_name"], category=sample["catergory"])},
+        ],
+    }
+]
+ 
+def generate_description(sample, model, processor):
+    messages = [
+        {"role": "system", "content": [{"type": "text", "text": system_message}]},
+        {"role": "user", "content": [
+            {"type": "image","image": sample["image"]},
+            {"type": "text", "text": prompt.format(product_name=sample["product_name"], category=sample["catergory"])},
+        ]},
+    ]
+    # Preparation for inference
+    text = processor.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
+    image_inputs, video_inputs = process_vision_info(messages)
+    inputs = processor(
+        text=[text],
+        images=image_inputs,
+        videos=video_inputs,
+        padding=True,
+        return_tensors="pt",
+    )
+    inputs = inputs.to(model.device)
+    # Inference: Generation of the output
+    generated_ids = model.generate(**inputs, max_new_tokens=256, top_p=1.0, do_sample=True, temperature=0.8)
+    generated_ids_trimmed = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)]
+    output_text = processor.batch_decode(
+        generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+    )
+    return output_text[0]
+ 
+# let's generate the description
+base_description = generate_description(sample, model, processor)
+print(base_description)
+# you can disable the active adapter if you want to rerun it with
+# model.disable_adapters()</code></pre></div></figure>
+<p>Awesome it is working! Lets load our adapter and compare if with the base model.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">model.load_adapter(adapter_path) # load the adapter and activate
+ 
+ft_description = generate_description(sample, model, processor)
+print(ft_description)</code></pre></div></figure>
+<p>Lets compare them side by side using a markdown table.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">import pandas as pd
+from IPython.display import display, HTML
+ 
+def compare_generations(base_gen, ft_gen):
+    # Create a DataFrame
+    df = pd.DataFrame({
+        'Base Generation': [base_gen],
+        'Fine-tuned Generation': [ft_gen]
+    })
+    # Style the DataFrame
+    styled_df = df.style.set_properties(**{
+        'text-align': 'left',
+        'white-space': 'pre-wrap',
+        'border': '1px solid black',
+        'padding': '10px',
+        'width': '250px',  # Set width to 150px
+        'overflow-wrap': 'break-word'  # Allow words to break and wrap as needed
+    })
+    
+    # Display the styled DataFrame
+    display(HTML(styled_df.to_html()))
+  
+compare_generations(base_description, ft_description)</code></pre></div></figure>
+<blockquote><table><thead><tr><th>Base Generation</th><th>Fine-tuned Generation</th></tr></thead><tbody><tr><td>Introducing the Hasbro Marvel Avengers Series Marvel Assemble Titan-Held Iron Man Action Figure, a 30.5 cm tall action figure that is sure to bring the excitement of the Marvel Universe to life! This highly detailed Iron Man figure is perfect for fans of all ages and makes a great addition to any toy collection. With its sleek red and gold armor, this Iron Man figure is ready to take on any challenge. The Titan-Held feature allows for a more realistic and dynamic pose, making it a must-have for any Marvel fan. Whether you're a collector or just looking for a fun toy to play with, this Iron Man action figure is the perfect choice.</td><td>Unleash the power of Iron Man with this 30.5 cm Hasbro Marvel Avengers Titan Hero Action Figure!  This highly detailed Iron Man figure is perfect for collectors and kids alike.  Features a realistic design and articulated joints for dynamic poses.  A must-have for any Marvel fan's collection!</td></tr></tbody></table></blockquote>
+<p>Nice! Even though we just had ~1k samples we can see that the fine-tuning improve the product description generation. The description is way shorter and more concise, which fits our training data.</p>
+<h3 id="optional-merge-lora-adapter-in-to-the-original-model">Optional: Merge LoRA adapter in to the original model</h3>
+<p>When using QLoRA, we only train adapters and not the full model. This means when saving the model during training we only save the adapter weights and not the full model. If you want to save the full model, which makes it easier to use with Text Generation Inference you can merge the adapter weights into the model weights using the <code>merge_and_unload</code> method and then save the model with the <code>save_pretrained</code> method. This will save a default model, which can be used for inference.</p>
+<p><em>Note: This requires &gt; 30GB CPU Memory.</em></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from peft import PeftModel
+from transformers import AutoProcessor, AutoModelForVision2Seq
+ 
+adapter_path = "./qwen2-7b-instruct-amazon-description"
+base_model_id = "Qwen/Qwen2-VL-7B-Instruct"
+merged_path = "merged"
+ 
+# Load Model base model
+model = AutoModelForVision2Seq.from_pretrained(model_id, low_cpu_mem_usage=True)
+ 
+# Path to save the merged model
+ 
+# Merge LoRA and base model and save
+peft_model = PeftModel.from_pretrained(model, adapter_path)
+merged_model = peft_model.merge_and_unload()
+merged_model.save_pretrained(merged_path,safe_serialization=True, max_shard_size="2GB")
+ 
+processor = AutoProcessor.from_pretrained(base_model_id)
+processor.save_pretrained(merged_path)</code></pre></div></figure>
+<h2 id="bonus-use-trl-example-script">Bonus: Use TRL example script</h2>
+<p>TRL provides a simple example script to fine-tune multimodal models. You can find the script <a target="_blank" rel="noopener noreferrer" href="https://github.com/huggingface/trl/blob/main/examples/scripts/sft_vlm.py">here</a>. The script can be directly run from the command line and supports all the features of the <code>SFTTrainer</code>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash"># Tested on 8x H100 GPUs
+accelerate launch
+    --config_file=examples/accelerate_configs/deepspeed_zero3.yaml \
+    examples/scripts/sft_vlm.py \
+    --dataset_name HuggingFaceH4/llava-instruct-mix-vsft \
+    --model_name_or_path llava-hf/llava-1.5-7b-hf \
+    --per_device_train_batch_size 8 \
+    --gradient_accumulation_steps 8 \
+    --output_dir sft-llava-1.5-7b-hf \
+    --bf16 \
+    --torch_dtype bfloat16 \
+    --gradient_checkpointing</code></pre></div></figure></div></div>

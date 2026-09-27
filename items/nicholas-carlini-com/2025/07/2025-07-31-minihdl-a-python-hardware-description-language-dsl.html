@@ -1,0 +1,584 @@
+<div id="readability-page-1" class="page"><div>
+      <p>
+        <a href="https://en.wikipedia.org/wiki/Hardware_description_language">Hardware description languages</a>
+        (like <a href="https://en.wikipedia.org/wiki/Verilog">Verilog</a> or
+        <a href="https://en.wikipedia.org/wiki/VHDL">VHDL</a>)
+          have always confused me.
+        This is despite the fact that they're just another programming language,
+        albeit one that describes how to connect logic gates together
+        instead of how to perform some dynamic computation.
+        Probably this is just a skill issue on my part.
+        I decided a while ago that I wanted to learn this dark art,
+        and since the best way to learn anything is to build it from scratch,
+        in this article I want to walk through the design of <a href="https://github.com/carlini/miniHDL">miniHDL</a>,
+        a python domain-specific language I wrote.
+        In order to be as simple as possible,
+        this HDL is meant to generate circuits that work in a determinsitic simulator;
+        lets me write much simpler idealized circuits than you can write in practice.
+        <span id="footnote1">
+          <a href="#footnote1">
+            <label for="foot">[a]</label>
+          </a>
+          <span>
+            For example, my clock will be some not
+            gates connected toether, the HDL it doesn't care about
+            clock domain crossing, can't represent unknown X or Z states, etc etc.
+            In fact, if you know what those words mean, you probably are going to
+            have a bad time reading this post.
+          </span>
+        </span>
+      </p>
+
+      <p>
+        This is the first in a two-part series of articles. 
+        I mainly wrote this article because the next part I'm preparing to upload
+        just crossed ten thousand words... and so I decided to pull this HDL piece out of it
+        to make the second part more readable. So look forward to that coming soon.
+        For now it's top secret though.
+      </p>
+
+      <p>
+        I'll spend the first half of this post introducing the DSL, and then using it to build
+        a simple 32-bit CPU in ~a hundred lines of code.
+        Below I've added a visual
+        representation of the circuit running a short program that computes
+        successive Fibonacci numbers in registers R1 and R2.
+        Each cell in the grid below represents one
+        logic gate.
+        I've clustered the logic gates according to the function that they're performing,
+        and view what logic gates it's receiving data from, and what logic gates it's pushing
+        data out to. (Below that, I've pulled out some named values that are particularly
+        interesting, like the values of the registers, the currently executing instruction,
+        and ALU inputs and outputs.
+      </p>
+
+      <div>
+        
+        
+        
+        <p>Loading circuit...</p>
+        
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      <br>
+      <h3>
+        miniHDL Architecture
+      </h3>
+
+      <p>
+        The entirety miniHDL is, at the moment, <a href="https://github.com/carlini/miniHDL/blob/main/minihdl.py">212 lines of Python</a>.
+        It defines two classes: <code>Bit</code>, and <code>Bit</code>s. The <code>Bit</code>s class is just a <code>List[Bit]</code> and so there's
+        not much to say about it for now.
+        A <code>Bit</code> is the fundamental primitive, and corresponds to the value held at a single location
+        on a physical electronic circuit.
+        Each <code>Bit</code> keeps track of how its value is computed, as a function of other <code>Bit</code>s.
+      </p>
+
+
+      <div>
+<p><span>class</span><span> </span><span>Bit</span><span>():</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>signals</span><span> = []</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>__init__</span><span>(</span><span>self</span><span>, how):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>self</span><span>.</span><span>how</span><span> = how</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>self</span><span>.signals.append(</span><span>self</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>self</span><span>.</span><span>uid</span><span> = </span><span>len</span><span>(</span><span>self</span><span>.signals)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>__and__</span><span>(a, b):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>return</span><span> Bit((</span><span>'&amp;'</span><span>, a, b))</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>__xor__</span><span>(a, b):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>return</span><span> Bit((</span><span>'^'</span><span>, a, b))</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>connect</span><span>(</span><span>self</span><span>, other):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>self</span><span>.</span><span>how</span><span> = other.uid</span></p>
+      </div>
+      
+      <p>
+        For example, if I have <code>a = Bit()</code> and <code>b = Bit()</code>
+        then I can write <code>c = a &amp; b</code> to calculate the bitwise AND of these two Bits.
+        (And similarly for OR, or XOR, or NOT operations.)
+        The resulting value <code>c</code> then remembers that its two inputs are <code>a</code>
+        and <code>b</code>.
+      </p>
+
+
+      <p>
+        The final piece of the program is then the “compiler” that takes in a bunch of <code>Bit</code>s,
+        and converts this to a text file that describes which gates should connect to which other gates.
+        This text file can then be processed by the simulator, which maintains a large array of the state
+        of each gate, and updates the state of each gate depending on the state of all others.
+      </p>
+
+      <div>
+<p><span>def</span><span> </span><span>export_gates</span><span>(f, signals):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> i, signal </span><span>in</span><span> </span><span>enumerate</span><span>(signals):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>if</span><span> signal.how[0] == </span><span>'VAR'</span><span>:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>f.write(f</span><span>"out</span><span>{i}</span><span> = out</span><span>{signal.how[1]}</span><span>\n</span><span>"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>elif</span><span> signal.how[0] == </span><span>'~'</span><span>:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>f.write(f</span><span>"out</span><span>{i}</span><span> = ~out</span><span>{signal.how[1].uid}</span><span>\n</span><span>"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>elif</span><span> signal.how[0] == </span><span>'&amp;'</span><span>:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>f.write(f</span><span>"out</span><span>{i}</span><span> = out</span><span>{signal.how[1].uid}</span><span> &amp; out</span><span>{signal.how[2].uid}</span><span>\n</span><span>"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>elif</span><span> signal.how[0] == </span><span>'|'</span><span>:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>f.write(f</span><span>"out</span><span>{i}</span><span> = out</span><span>{signal.how[1].uid}</span><span> | out</span><span>{signal.how[2].uid}</span><span>\n</span><span>"</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>elif</span><span> signal.how[0] == </span><span>'^'</span><span>:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>f.write(f</span><span>"out</span><span>{i}</span><span> = out</span><span>{signal.how[1].uid}</span><span> ^ out</span><span>{signal.how[2].uid}</span><span>\n</span><span>"</span><span>)</span></p>
+
+      </div>
+      
+      <p>
+        Taken together, this lets you write nice Python code that corresponds to circuits you might want to
+        use.
+        Here, for example, is the implementation of a simple ripple-carry full-adder on the left.
+        And when the HDL compiler lowers this when adding two four-bit numbers,
+        you end up with the following circuit (assuming that the arguments are
+        passed in v[0..3], v[4..7], and v[8].
+      </p>
+
+      <div>
+          <pre><code>v[9] = v[8]
+v[10] = v[0] ^ v[4]
+v[11] = v[10] ^ v[9]
+v[12] = v[0] &amp; v[4]
+v[13] = v[10] &amp; v[9]
+v[14] = v[12] | v[13]
+v[15] = v[1] ^ v[5]
+v[16] = v[15] ^ v[14]
+v[17] = v[1] &amp; v[5]
+v[18] = v[15] &amp; v[14]
+v[19] = v[17] | v[18]
+v[20] = v[2] ^ v[6]
+v[21] = v[20] ^ v[19]
+v[22] = v[2] &amp; v[6]
+v[23] = v[20] &amp; v[19]
+v[24] = v[22] | v[23]
+v[25] = v[3] ^ v[7]
+v[26] = v[25] ^ v[24]
+v[27] = v[3] &amp; v[7]
+v[28] = v[25] &amp; v[24]
+v[29] = v[27] | v[28]</code></pre>
+</div>
+
+      <div>
+<p><span>def</span><span> </span><span>full_add</span><span>(in1, in2, in3):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>low1</span><span> = in1^in2</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>low2</span><span> = low1^in3</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>high</span><span> = (in1 &amp; in2) | (low1 &amp; in3)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> low2, high</span></p>
+
+<p><span>def</span><span> </span><span>add</span><span>(in1, in2, carry):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>out</span><span> = []</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> a,b </span><span>in</span><span> </span><span>zip</span><span>(in1, in2):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>c</span><span>, </span><span>carry</span><span> = full_add(a, b, carry)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>out.append(c)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> Bits(out)</span></p>
+
+        </div>
+      
+
+
+
+      <p>
+        The above full adder is fairly standard compared to what you might see
+        in any other HDL language, but I find it a lot easier to understand when
+        presented in this way.
+        Things become a tiny bit more complicated when you need to introduce cyclic
+        dependencies in the computation graph.
+        For this, you need to explicitly construct a Bit, and then set its value after having defined it.
+        Let me give you an example for this:
+      </p>
+
+      <div>
+<p><span>def</span><span> </span><span>dff_half</span><span>(inp, clock):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>q</span><span> = Bit()</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>out</span><span> = mux(clock, iftrue=inp, iffalse=q)</span></p>
+<p><span><span>&nbsp; &nbsp; </span>q.connect(out)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> q</span></p>
+
+<p><span>def</span><span> </span><span>dff</span><span>(inp, clock):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>q</span><span> = dff_half(inp, ~clock)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>q</span><span> = dff_half(q, clock)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> q</span></p>
+
+      </div>
+
+      <p>
+        Before we start implementing things, let me briefly explain what a D flip-flop is and why it's important.
+        A <a href="https://en.wikipedia.org/wiki/Flip-flop_(electronics)">D-flip-flop</a> is a fundamental 
+        building block in digital circuits that can store exactly one bit of information. Think:
+        a single cell of memory that can remember either a 0 or 1 until you give it new data:
+        whatever 
+        data you present to its input will be stored when the clock signal triggers it.
+      </p>
+      
+      <p>
+        Without flip-flops, digital circuits would be purely linear---data
+        would flow through logic gates from inputs to outputs and quickly settle into a steady state.
+        There would be no way to set a variable, and then reference it in the future. Flip-flops 
+        enable temporal logic by introducing memory into the circuit, and this is what
+        lets us to counters, 
+        state machines, and ultimately, the registers and program counters that make CPUs possible.
+        At the most basic level, all a flip-flop does is multiplex
+        to set the <i>next</i> state either as the currently held state,
+        or whatever new input is being passed in.
+        A full D flip-flop actually has two back-to-back flip-flops to ensure that we
+        only grab the value of the input exactly as it was on the rising edge,
+        and then hold that value until the next clock tick.
+        If we didn't have them back to back in this way, it wouldn't be much of a flip-flop,
+        because it would only hold the value when the clock was 0: when the clock was 1,
+        it would constantly be updating the output to whatever the input currently was set to.
+      </p>
+
+      <p>
+        Notice, here, how the output <code>q</code> is first defined as a <code>Bit</code> with no value.
+        We then have the variable output, which is either equal to the input value (when the clock is high),
+        or the as-of-yet-undefined value <code>q</code> (when the clock is low).
+        (The <code>mux</code> function is a multiplexor, defined just as <code>(iftrue &amp; clock) | (iffalse &amp; ~clock)</code>.)
+        Then, we actually assign the value of <code>q</code> to the output of the multiplexor.
+      </p>
+
+      <p>
+        For this flip-flop to work, we're going to need a clock.
+        Unlike a real chip that has to use some physical crystal or something to get
+        a reliable clock signal, I can just create a long chain of <code>Bit</code>s, each of
+        which is connected to the next, and then put a NOT gate at the end. That is, this
+        looks basically like an inverting ring oscillator but it's much simpler. That looks
+        something like this:
+
+      </p>
+
+        <div>
+<p><span>def</span><span> </span><span>clock</span><span>(latency):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>inv</span><span> = ~out</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>delays</span><span> = [Bit() </span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(latency)]</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> a,b </span><span>in</span><span> </span><span>zip</span><span>(delays,delays[1:] + [delays[0]):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>b.connect(a)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> delays[-1]</span></p>
+
+        </div>
+      
+<p>
+  The final component of miniHDL is a class <code>Bits</code>.
+  All that this class does is directly pass through any function to the inner list of <code>Bit</code> objects inside of it.
+</p>
+
+<div>
+<p><span>class</span><span> </span><span>Bits</span><span>:</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>__init__</span><span>(</span><span>self</span><span>, bits):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>self</span><span>.bits = bits</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>__and__</span><span>(a, b):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>if</span><span> </span><span>isinstance</span><span>(b, Bit):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>return</span><span> Bits([x &amp; b </span><span>for</span><span> x </span><span>in</span><span> a.bits])</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>return</span><span> Bits([x &amp; y </span><span>for</span><span> x,y </span><span>in</span><span> </span><span>zip</span><span>(a.bits, b.bits)])</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>__or__</span><span>(a, b):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>if</span><span> </span><span>isinstance</span><span>(b, Bit):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>return</span><span> Bits([x | b </span><span>for</span><span> x </span><span>in</span><span> a.bits])</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>return</span><span> Bits([x | y </span><span>for</span><span> x,y </span><span>in</span><span> </span><span>zip</span><span>(a.bits, b.bits)])</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>connect</span><span>(</span><span>self</span><span>, other, reuse=</span><span>False</span><span>):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>[x.connect(y, reuse) </span><span>for</span><span> x,y </span><span>in</span><span> </span><span>zip</span><span>(</span><span>self</span><span>.bits, other.bits)]</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>def</span><span> </span><span>clone</span><span>(</span><span>self</span><span>):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>out = Bits([Bit() </span><span>for</span><span> _ </span><span>in</span><span> </span><span>range</span><span>(</span><span>len</span><span>(</span><span>self</span><span>.bits))])</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>out.connect(</span><span>self</span><span>)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>return</span><span> out</span></p>
+
+</div>
+
+
+<p>
+  This means that you can do things like create <code>dff(Bits(...), clock)</code> without having to think about the fact
+  that you're operating on a whole block of <code>Bit</code>s at the same time.
+</p>
+      
+      
+
+
+      <br>
+      <h3>
+        From Basic Gates to a Complete CPU
+      </h3>
+      
+      <p>
+        So far, we've built up a collection of basic components: logic gates for computation, 
+        flip-flops for memory, and a clock to make everything tick at the same time.
+        At a very high level, we turn these
+        simple building blocks into something as complex as a CPU by making the observation
+        that a CPU
+        is fundamentally just a state machine that repeatedly executes a simple cycle: fetch an 
+        instruction from memory, decode what operation it represents, execute that operation, 
+        and store the result. Each of these steps can be built from our basic components.
+      </p>
+      
+      <p>
+        A RISC CPU makes each of these steps extremely explicit, and so I'll design here a
+        simple but complete 32-bit CPU to do just that. We'll need several 
+        key components: a register file to store data, an ALU (Arithmetic Logic Unit) to perform 
+        operations, a program counter to track which instruction we're executing, and instruction 
+        memory to store our program. By connecting these components together with the right control 
+        logic, we'll have a working processor.
+      </p>
+
+      <br>
+      <h3>
+        CPU Architecture Overview
+      </h3>
+      
+      <p>
+        Let me define the architecture of our CPU. This is a RISC-style processor with 32-bit words: all registers and data paths are 32 bits wide. It has 16 general-purpose registers numbered R0-R15, and each instruction can access any register. The instruction format uses fixed 32-bit instructions with three formats: Register-Register operations like <code>Rd = Rs OP Rt</code> (e.g., R3 = R1 + R2), Register-Immediate operations like <code>Rd = Rs OP constant</code> (e.g., R1 = R1 + 5), and Branch operations that jump if a register is non-zero. The ALU supports operations including ADD, SUB, AND, OR, XOR, NOT, and bit shifts. For memory, we have separate instruction memory (ROM) and the register file, but there's no data memory in this CPU, so your program had better use only 16 words of RAM!
+      </p>
+      
+      <p>
+        The instruction encoding uses the first byte for control: bits 0-3 specify the ALU operation, 
+        bit 4 selects between register-register and register-immediate modes, and bit 5 indicates 
+        if this is a branch instruction. The remaining 24 bits encode the operands.
+      </p>
+
+<p>
+  As an example, here's a simple program for our CPU (the program that's running at the top of this page).
+</p>
+
+      <div>
+<p><span><span></span>&nbsp;&nbsp;LD 1, 0 <span></span></span><span>&nbsp;# set r1 to 0 (0th Fib number) </span><span><span>&nbsp;</span></span></p>
+<p><span><span></span>&nbsp;&nbsp;LD 2, 1 <span></span></span><span>&nbsp;# set r2 to 1 (1st Fib number) </span><span><span>&nbsp;</span></span></p>
+<p><span>loop:</span></p>
+<p><span><span></span>&nbsp;&nbsp;ADD 3, 1, 2 </span><span>&nbsp;# Fib update: c=a+b<span>&nbsp;</span></span><span> <span>&nbsp;</span></span></p>
+<p><span><span></span>&nbsp;&nbsp;MOV 1, 2<span></span></span><span>&nbsp;# move fib_{i} = fib_{i+1} </span><span><span>&nbsp;</span></span></p>
+<p><span><span></span>&nbsp;&nbsp;MOV 2, 3<span></span></span><span>&nbsp;# move fib_{i+1} = fib_{i+2} </span><span><span>&nbsp;</span></span></p>
+<p><span><span></span>&nbsp;&nbsp;JMP loop<span></span></span><span>&nbsp;# repeat </span><span><span>&nbsp;</span></span></p>
+
+      </div>
+      
+      <br>
+      <h3>
+        Building the CPU Components
+      </h3>
+      
+
+
+
+      <p>
+        Let's get started designing the circuit for this.
+        To start we'll define a n-way multiplexer, where instead of just looking at a
+        single bit <code>b</code> and deciding to either take the left or right piece, we'll take a
+        n-bit condition, and use that to select from a corresponding element of a list.
+      </p>
+
+      <div>
+<p><span>def</span><span> </span><span>muxn</span><span>(cond, choices):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> </span><span>len</span><span>(choices) == 1: </span><span>return</span><span> choices[0]</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> muxn(Bits(cond[1:]),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>[mux(cond[0], b, a) </span><span>for</span><span> a,b </span><span>in</span><span> \</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>zip</span><span>(choices[::2], choices[1::2])])</span></p>
+
+      </div>
+
+      <p>
+        Notice, here how we just write natural python to operate on all the bits at once.
+        This code probably looks horrific to hardware engineers,
+        but to someone who's used to reading Python every day, I actually prefer
+        code like this to something like VHDL that feels very arcane.
+      </p>
+
+      <p>
+        With this, we can build our program ROM, which is nothing more than a big giant
+        lookup table that takes as the argument the current program counter, and picks which
+        ROM value it wants to return as the output.
+        We do this by just bit-slicing the input program ROM into 32 individual bits,
+        and then putting a big multiplexor that, given the current program counter,
+        retrieves the corresponding 32-bit instruction that is located at that address.
+      </p>
+
+      <div>
+<p><span>def</span><span> </span><span>rom</span><span>(addr, arr, depth):</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>if</span><span> </span><span>len</span><span>(arr) &lt; 2**</span><span>len</span><span>(addr):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>arr = arr + [0] * (2**</span><span>len</span><span>(addr) - </span><span>len</span><span>(arr))</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>zero = const(0)</span></p>
+<p><span><span>&nbsp; &nbsp; </span>one = ~zero</span></p>
+<p><span><span>&nbsp; &nbsp; </span>myconst = [zero, one]</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>arr = [Bits([myconst[(x&gt;&gt;i)&amp;1] </span><span>for</span><span> i </span><span>in</span><span> </span><span>range</span><span>(depth)]) \</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>for</span><span> x </span><span>in</span><span> arr]</span></p>
+<p><span><span>&nbsp; &nbsp; </span>low_byte = muxn(addr, arr)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> low_byte</span></p>
+
+      </div>
+
+      <p>
+        Now let's build our first interesting component: the register file.
+        This will be a function that holds the 16 registers in our CPU,
+        and lets us read from two at a time, and write to one at a time.
+        By making use of the components we've built so far,
+        this actually is fairly straightforward, here's the entire program to do that:
+      </p>
+
+      <div>
+<p><span>def</span><span> </span><span>regfile</span><span>(clock, read1, read2, write3, data, enable_write):</span></p>
+<p><span><span>&nbsp; &nbsp; </span>registers = []</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>for</span><span> idx </span><span>in</span><span> </span><span>range</span><span>(16):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>ok = const(1)</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>for</span><span> bit </span><span>in</span><span> </span><span>range</span><span>(</span><span>int</span><span>(math.log(16, 2))):</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>if</span><span> (idx&gt;&gt;bit)&amp;1:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>ok &amp;= write3[bit]</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span><span>else</span><span>:</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>ok &amp;= ~write3[bit]</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>update = clock &amp; enable_write &amp; ok</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span>registers.append(dff(data, update, 32))</span></p>
+<p><span><span>&nbsp; &nbsp; </span>out1 = muxn(read1, registers)</span></p>
+<p><span><span>&nbsp; &nbsp; </span>out2 = muxn(read2, registers)</span></p>
+<p><span><span>&nbsp; &nbsp; </span></span><span>return</span><span> out1, out2, registers</span></p>
+
+      </div>
+
+      <p>
+        We loop for each of the 16 registers in our CPU, and create 16 (32-bit) D Flip-Flops for each.
+        The input to the flip flop is whatever value the current instruction wants to be writing
+        into our register file,
+        and we selectively write to that flip-flop if
+        (1) <code>enable_write</code> is set, e.g., we're not executing a jump instruction,
+        and (2) we're at the correct register index as determined by the <code>write3</code> argument.
+        We put these 16 registers into a list, and then with two n-way multiplexors
+        return the two output registers that we want to read as output.
+      </p>
+
+      <p>
+        And then the final component of our circuit is the ALU,
+        which actually calculates the operation we want our CPU to perform.
+        The ALU is nothing more than a big n-way multiplexor again,
+        where we switch between the different values we might have wanted to
+        compute: addition, subtraction, some boolean operations, and some bit shifts.
+        The input to the ALU is always one register, and then either another register,
+        or a constant, as determined by the fifth bit of the instruction opcode.
+      </p>
+
+      <div>
+<p><span>def</span><span> </span><span>alu</span><span>(opcode, left, right, const_bits, use_const_not_right):</span></p>
+<p><span><span>&nbsp; &nbsp; </span>right = mux(use_const_not_right,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>const_bits.upcast(32), right)</span></p>
+
+<p><span><span>&nbsp; &nbsp; </span>alu_out = muxn(opcode,</span></p>
+<p><span><span>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>[add(left, right, const(0)),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>add(left, ~right, const(1)),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>left &amp; right,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>left | right,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>left ^ right,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>~left,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>const_bits.upcast(32),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>left[1:].upcast(32),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>Bits([const(0)]+ left[:-1].value),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>Bits([any_set(left)]*32),</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>])</span></p>
+
+</div>
+
+      <p>
+        The final thing we have to do is connect the output of the ALU back to the
+        data input on the register (if it's a register write instruction),
+        and look at the output of the ALU to decide what the next instruction should be
+        (if it's a jump instruction).
+      </p>
+
+      <div>
+<p><span>data.connect(alu_out)</span></p>
+
+<p><span>next_insn = mux(alu_out[-1] &amp; is_jump,</span></p>
+<p><span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>const_bits.upcast(32), ip_inc)</span></p>
+<p><span>ip_in.connect(next_insn)</span></p>
+      </div>
+
+      <p>
+        All in, <a href="https://github.com/carlini/miniHDL/blob/main/examples/risc32/cpu.py">this CPU is about 170 lines of code</a>, so really there's not much to it.
+        But it's sufficient to do fairly interesting things, like calculate
+        Fibonacci numbers or even do basic arithmetic like (multiply, divide, and
+        calculate square roots).
+        Notably absent are instructions to read or write to a larger memory (but this
+        wouldn't be that hard, you'd just have to define a bigger chunk of memory),
+        instructions that allow for anything indirect (e.g., indirect branches),
+        or instructions that do more complex arithmetic operations directly
+        (e.g., multiplication).
+      </p>
+
+      <br>
+      <h3>
+        Efficient Circuit Simulation
+      </h3>
+
+        <p>
+          The provided simulator in <a href="https://github.com/carlini/miniHDL/blob/main/simulator.py">simulator.py</a>
+          (and shown at the top of this page)
+          efficiently simulates the gates in any provided circuit.
+          Naively this just means running through each of the gates one by one,
+          and performing the corresponding operation, and then saving the result.
+        </p>
+
+      <p>
+        And while this would work quite well for small circuits,
+        it would get rather slow on large circuits. (Like the ones I will build in the next post.)
+        As has been said many times before,
+        you can't make computers perform the same amount of work faster.
+        You can only make them do less.
+        
+        And so I've implemented a caching mechanism so that on each iteration of the loop
+        it only updates the gates need to be re-calculated because at least one of their
+        inputs has changed.
+        (If all inputs to the gate have remained the same, its output is also going to be the same.)
+      </p>
+
+
+      <p>
+        Instead of re-calculating every gate on every iteration of the loop,
+        it keeps track of which inputs have changed last time, and then only re-calculates the
+        gates whose input changed during the prior round.
+        Doing this efficiently is rather easy: I just maintain a
+        <a href="https://en.wikipedia.org/wiki/Heap_(data_structure)">heap</a>
+        that stores which gates need to be updated next, and then push and pop from the
+        heap on each pass through the circuit.
+        On reasonably large circuits, this gives 100x-500x performance boost on average.
+      </p>
+      
+      <br>
+      <h3>
+        Future Work: VLSI layout/gate placement
+      </h3>
+
+      <p>
+        The current project only supports a way to design circuits, and the output of this design
+        is just a text file that says what gates should be connected to which other gates.
+        This is enough for what I'm going to do it in the next post. (Something that's top secret
+        for a bit longer.)
+      </p>
+
+      <p>
+        But in the future, I'd like to extend miniHDL to also have some code to actually physically
+        lay out the gates onto a proper circuit board. My hope, maybe in a future part 3 (but
+        no promises!), is that it'll be able to actually
+        automatically convert a miniHDL program to a
+        <a href="https://en.wikipedia.org/wiki/Gerber_format">Gerber</a> file,
+        that I could then get manufactured in order to make my own discrete transistor CPU.
+        This might take some time, but it seems like something that would be fun to try.
+      </p>
+
+
+      <br>
+      <h3>
+        Coming Soon: Part 2
+      </h3>
+
+<p>
+  I don't want to spoil the surprise, but in Part 2 I'll have a very exciting use of all of this
+  code I just built.
+  So stay tuned. (Or, as the kids say, “like comment subscribe”..?
+  just kidding this is the real Internet and not one of those walled gardens; we don't have those features here.)
+  But, more seriously, I'd encourage you to try and go design some circuits with
+  whatever HDL you find fits your style---I've had a lot of fun playing with this since I built it.
+</p>
+      
+    </div></div>

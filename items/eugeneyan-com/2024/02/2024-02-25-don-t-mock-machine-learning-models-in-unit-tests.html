@@ -1,0 +1,164 @@
+<div id="readability-page-1" class="page"><div>
+            
+
+
+
+
+
+<p>I’ve been applying typical unit testing practices to machine learning code and it hasn’t been straightforward. In software, units are small, isolated pieces of logic that we can test independently and quickly. In machine learning, models are blobs of logic learned from data, and machine learning code is the logic to learn and use these derived blobs of logic. This difference makes it necessary to rethink how we unit test machine learning code.</p>
+
+<h2 id="how-ml-code-differs-from-regular-software">How ML code differs from regular software</h2>
+
+<p><strong>In software, we write code that <em>contains</em> logic; in ML, we write code that <em>learns</em> logic and then uses that learned logic.</strong> Software code transforms input data + handcrafted logic into expected output. We can then test these outputs against asserts. In contrast, machine learning code transforms input data + expected output into learned logic (i.e., a model).</p><p>
+
+\[\text{Software}: \text{Input Data} + Handcrafted \text{ Logic} = \text{Expected Output}\]
+
+\[\text{Machine Learning}: \text{Input Data} + \text{Expected Output} = Learned \text{ Logic}\]
+
+</p><p>Thus, in machine learning, instead of writing code that contains logic, we write code to learn logic, such as via <a href="https://github.com/eugeneyan/testing-ml/blob/master/src/tree/decision_tree.py#L149" target="_blank">building a decision tree</a> or <a href="https://github.com/eugeneyan/visualizing-finetunes/blob/main/3_ft_usb_then_fib.ipynb" target="_blank">finetuning a hallucination classifier</a>. Because the logic that acts on the input data is embedded within the model, if we want to test the learned logic, we’ll need to load the model, perform inference on some sample output, and then assert if the output matches the expected input.</p>
+
+<p><strong>In software, we typically mock dependencies like APIs; in ML, we want to test the actual model (sometimes).</strong> When unit testing software, it’s good practice to mock database calls, filesystem access, sending emails/push notifications, etc. However, in ML, there are scenarios where we’ll want to test against the actual model.</p>
+
+<p>For example, we want to test that loss decreases with each batch and the model can overfit (before wasting compute on an hopeless run.) If the model is a classifier, we want to check that the inference logic is correct. For instance, two models may have different output classes: <a href="https://huggingface.co/google/t5_11b_trueteacher_and_anli" target="_blank">Google’s T5 NLI model</a> classifies factual consistency with class = 1 while <a href="https://huggingface.co/facebook/bart-large-mnli" target="_blank">Meta’s BART NLI model</a> classifies it with class = 2!</p>
+
+<p><strong>Machine learning / language models can be large and unwieldy.</strong> Some neural networks can be in the billions of parameters, exceeding what a laptop or standard dev environment can load. And even if we have the memory for smaller models, they are slow to load and perform inference on, testing our patience as we unit test while coding.</p>
+
+<h2 id="some-guidelines-for-unit-testing-ml-code--models">Some guidelines for unit testing ML code &amp; models</h2>
+
+<p>(These are a work in progress and my thinking’s still evolving—all feedback welcome!)</p>
+
+<p><strong>Use small, simple data samples.</strong> Avoid loading CSVs or Parquet files as sample data. (It’s fine for integration tests and evals but not unit tests.) Define sample data directly in unit test code—so that the test is self-contained—to test key functionality such as:</p>
+<ul>
+  <li>Splitting into train/test tests when you have custom logic</li>
+  <li>Custom implementations, such as Cosine or Euclidean distance in Java</li>
+  <li>Preprocessing such as data augmentation or encoding</li>
+  <li>Postprocessing such as diversification or filtering recommendations</li>
+  <li>Error handling for empty or malformed input</li>
+</ul>
+
+<p><strong>When viable, test against random or empty weights.</strong> For example, we can initialize a model configuration with random weights to test output shape and device movement (from CPU to GPU and back). Here’s an example of how to initialize a model without having to download the weights and then assert the output shape:</p>
+
+<div><pre><code data-language="python">from transformers import AutoConfig, AutoModelForSequenceClassification
+
+model_name = "valhalla/distilbart-mnli-12-1"
+config = AutoConfig.from_pretrained("valhalla/distilbart-mnli-12-1")
+model = AutoModelForSequenceClassification.from_config(config)
+assert model.classification_head.out_proj.out_features == 3
+</code></pre></div>
+
+<p>The accelerate library also has <a href="https://github.com/huggingface/accelerate/blob/main/tests/test_big_modeling.py#L955" target="_blank">an example of initializing a model with empty weights</a>:</p>
+
+<div><pre><code data-language="python">def test_dispatch_model_bnb(self):
+    """Tests that `dispatch_model` quantizes int8 layers"""
+    from huggingface_hub import hf_hub_download
+    from transformers import AutoConfig, AutoModel, BitsAndBytesConfig
+    from transformers.utils.bitsandbytes import replace_with_bnb_linear
+
+    with init_empty_weights():
+        model = AutoModel.from_config(AutoConfig.from_pretrained("bigscience/bloom-560m"))
+
+    quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+    model = replace_with_bnb_linear(
+        model, modules_to_not_convert=["lm_head"], quantization_config=quantization_config
+    )
+
+    model_path = hf_hub_download("bigscience/bloom-560m", "pytorch_model.bin")
+
+    model = load_checkpoint_and_dispatch(
+        model,
+        checkpoint=model_path,
+        device_map="balanced",
+    )
+
+    assert model.h[0].self_attention.query_key_value.weight.dtype == torch.int8
+    assert model.h[0].self_attention.query_key_value.weight.device.index == 0
+
+    assert model.h[(-1)].self_attention.query_key_value.weight.dtype == torch.int8
+    assert model.h[(-1)].self_attention.query_key_value.weight.device.index == 1
+</code></pre></div>
+
+<p><strong>Write critical tests against the actual model.</strong> If they take a while to run, <a href="https://docs.pytest.org/en/latest/how-to/mark.html#registering-marks" target="_blank">mark them as slow</a> and run only when needed (e.g., pre-commit and pre-merge). Some essentials include:</p>
+<ul>
+  <li>Verify training is done correctly, such as loss going down, model overfitting, and training till convergence on a small sample of data</li>
+  <li>Verify model outputs match expectation, such as 0.99 = unsafe instead of safe</li>
+  <li>Verify model server can start, take batch input, and return the expected output</li>
+</ul>
+
+<p><strong>Don’t test external libraries.</strong> We can assume that external libraries work. Thus, no need to test data loaders, tokenizers, optimizers, etc.</p>
+
+<p>• • •</p>
+
+<p>What are your best practices for unit testing machine learning code and models? I would love to hear from you. <a href="https://twitter.com/eugeneyan" target="_blank">Please reach out!</a></p>
+
+<h2 id="further-reading">Further reading</h2>
+
+<ul>
+  <li><a href="https://eugeneyan.com/writing/testing-ml/" target="_blank">How to Test Machine Learning Code and Systems</a></li>
+  <li><a href="https://eugeneyan.com/writing/testing-pipelines/" target="_blank">Writing Robust Tests for Data &amp; Machine Learning Pipelines</a></li>
+  <li><a href="https://www.jeremyjordan.me/testing-ml/" target="_blank">Effective Testing for Machine Learning Systems</a></li>
+  <li><a href="https://krokotsch.eu/posts/deep-learning-unit-tests/" target="_blank">How to Trust Your Deep Learning Code</a></li>
+  <li><a href="https://karpathy.github.io/2019/04/25/recipe/" target="_blank">A Recipe for Training Neural Networks</a></li>
+  <li><a href="https://theaisummer.com/unit-test-deep-learning/" target="_blank">How to Unit Test Deep Learning</a></li>
+  <li><a href="https://microsoft.github.io/code-with-engineering-playbook/machine-learning/ml-testing/" target="_blank">Testing Data Science and MLOps Code</a></li>
+</ul>
+
+
+
+<blockquote>
+  <p>The problem when mocks happen when all your unit test passes and the program fails on integration. The mocks are a pristine place where your library unit test works like a champ. Bad mocks or bad library? Or both. Developers are then sent to debug the unit test… overhead.</p>
+</blockquote>
+
+<blockquote>
+  <p>Probablistic tests create an impossible problem: if you tighten your assertions you struggle with meaningless failing tests and normalize ignoring test failures, while if you loosen your assertions your tests aren’t really asserting anything any more. And there isn’t a happy balance: if you go somewhere in the middle, you end up having both problems.</p>
+</blockquote>
+
+<blockquote>
+  <p>How does it matter whether I inline my test data inside the unit test code, or have my unit test code load that same data from a checked-in file instead?</p>
+
+  <blockquote>
+    <p>It makes tests self-contained and easier to reason about. As a side-effect, random tests won’t accidentally break whenever you change some seemingly unrelated csv file.
+As a rule of thumb, I also only assert on input/output values that are explicitly defined as part of the test body. Saves a ton of time chasing down fixture definitions.</p>
+  </blockquote>
+</blockquote>
+
+<blockquote>
+  <p>I was expecting an article about side effects of hurting an LLM’s feelings in tests.</p>
+</blockquote>
+
+
+            
+            
+<p>If you found this useful, please cite this write-up as:</p>
+
+<blockquote>
+    <p>Yan, Ziyou. (Feb 2024). Don't Mock Machine Learning Models In Unit Tests. eugeneyan.com.
+        https://eugeneyan.com/writing/unit-testing-ml/.</p>
+</blockquote>
+
+<p>or</p>
+
+<div><pre><code>@article{yan2024unit,
+  title   = {Don't Mock Machine Learning Models In Unit Tests},
+  author  = {Yan, Ziyou},
+  journal = {eugeneyan.com},
+  year    = {2024},
+  month   = {Feb},
+  url     = {https://eugeneyan.com/writing/unit-testing-ml/}
+}</code></pre>
+</div>
+
+            
+            
+            
+
+
+
+<p><span>Share on:  </span></p><div>
+    <p><img src="https://eugeneyan.com/assets/icon-twitter.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-linkedin.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/bluesky.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-facebook.svg" loading="lazy" alt=""></p>
+    <p><img src="https://eugeneyan.com/assets/icon-mail.svg" loading="lazy" alt=""></p>
+</div>
+
+        </div><p>Join <b>11,800+</b> readers getting updates on machine learning, RecSys, LLMs, and engineering.</p></div>

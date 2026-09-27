@@ -1,0 +1,140 @@
+<div id="readability-page-1" class="page"><div><p>This week <a target="_blank" rel="noopener noreferrer" href="https://developers.googleblog.com/en/gemini-2-family-expands/">Google DeepMind released Gemini 2.0</a>, including Gemini 2.0 Flash (General Available), Gemini 2.0 Flash-Lite (New cost-efficient) and Gemini 2.0 Pro (Experimental). All models support up to at least 1 million input tokens with support for text, images and audio and function calling/structured outputs.</p>
+<p>This opens up a cool use cases especially with PDFs. Converting PDF into structured or machine-readable text has been a major headache. What if we could transform PDFs from documents into structured data? This is where Gemini 2.0 comes into play.</p>
+<p>In this tutorial, you will learn how to extract structured information, like invoice numbers, dates, directly from your PDF documents using Gemini 2.0:</p>
+<ol>
+<li><a href="#1-set-up-environment-and-create-inference-client">Set up Environment and create inference Client</a></li>
+<li><a href="#2-work-with-pdfs-and-other-files">Work with PDFs and other files</a></li>
+<li><a href="#3-structured-outputs-with-gemini-20-and-pydantic">Structured outputs with Gemini 2.0 and Pydantic</a></li>
+<li><a href="#4-extract-structured-data-from-pdfs-using-gemini-20">Extract Structured data from PDFs using Gemini 2.0</a></li>
+</ol>
+<h2 id="1-set-up-environment-and-create-inference-client">1. Set up Environment and create inference Client</h2>
+<p>The first task is to install the <code>google-genai</code> <a target="_blank" rel="noopener noreferrer" href="https://googleapis.github.io/python-genai/">Python SDK</a> and obtain an API key. If you don”t have a can get one from Google AI Studio: <a target="_blank" rel="noopener noreferrer" href="https://aistudio.google.com/app/apikey">Get a Gemini API key</a>.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">%pip install "google-genai&gt;=1"</code></pre></div></figure>
+<p>Once you have the SDK and API key, you can create a client and define the model you are going to use the new Gemini 2.0 Flash model, which is available via <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/pricing#2_0flash">free tier</a> with 1,500 request per day (at 2025-02-06).</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from google import genai
+# Create a client
+api_key = "XXXXX"
+client = genai.Client(api_key=api_key)
+ 
+# Define the model you are going to use
+model_id =  "gemini-2.0-flash" # or "gemini-2.0-flash-lite-preview-02-05"  , "gemini-2.0-pro-exp-02-05"</code></pre></div></figure>
+<p><em>Note: If you want to use Vertex AI see <a target="_blank" rel="noopener noreferrer" href="https://googleapis.github.io/python-genai/#create-a-client">here</a> how to create your client</em></p>
+<h2 id="2-work-with-pdfs-and-other-files">2. Work with PDFs and other files</h2>
+<p>Gemini models are able to process <a target="_blank" rel="noopener noreferrer" href="https://ai.google.dev/gemini-api/docs/vision?lang=python#image-input">images and videos</a>, which can used with base64 strings or using the <code>files</code>api. After uploading the file you can include the file uri in the call directly. The Python API includes a <a target="_blank" rel="noopener noreferrer" href="https://googleapis.github.io/python-genai/#upload">upload</a> and <a target="_blank" rel="noopener noreferrer" href="https://googleapis.github.io/python-genai/#delete">delete</a> method.</p>
+<p>For this example you have 2 PDFs samples, one basic invoice and on form with and written values.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Bash</span></p><pre><code data-language="bash">!wget -q -O https://storage.googleapis.com/generativeai-downloads/data/pdf_structured_outputs/handwriting_form.pdf
+!wget -q -O https://storage.googleapis.com/generativeai-downloads/data/pdf_structured_outputs/invoice.pdf</code></pre></div></figure>
+<p>You can now upload the files using our client with the <code>upload</code> method. Let's try this for one of the files.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">invoice_pdf = client.files.upload(file="invoice.pdf", config={'display_name': 'invoice'})</code></pre></div></figure>
+<p><em>Note: The File API lets you store up to 20 GB of files per project, with a per-file maximum size of 2&nbsp;GB. Files are stored for 48 hours. They can be accessed in that period with your API key, but they cannot be downloaded. File uploads are available at no cost.</em></p>
+<p>After a file is uploaded you can check to how many tokens it got converted. This not only help us understand the context you are working with it also helps to keep track of the cost.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">file_size = client.models.count_tokens(model=model_id,contents=invoice_pdf)
+print(f'File: {invoice_pdf.display_name} equals to {file_size.total_tokens} tokens')
+# File: invoice equals to 821 tokens</code></pre></div></figure>
+<h2 id="3-structured-outputs-with-gemini-20-and-pydantic">3. Structured outputs with Gemini 2.0 and Pydantic</h2>
+<p>Structured Outputs is a feature that ensures Gemini always generate responses that adhere to a predefined format, such as JSON Schema. This means you have more control over the output and how to integrate it into our application as it is guaranteed to return a valid JSON object with the schema you define.</p>
+<p>Gemini 2.0 currenlty supports 3 dfferent types of how to define a JSON schemas:</p>
+<ul>
+<li>A single python type, as you would use in a <a target="_blank" rel="noopener noreferrer" href="https://docs.python.org/3/library/typing.html">typing annotation</a>.</li>
+<li>A Pydantic <a target="_blank" rel="noopener noreferrer" href="https://docs.pydantic.dev/latest/concepts/models/">BaseModel</a></li>
+<li>A dict equivalent of <a target="_blank" rel="noopener noreferrer" href="https://googleapis.github.io/python-genai/genai.html#genai.types.Schema">genai.types.Schema</a> / <a target="_blank" rel="noopener noreferrer" href="https://docs.pydantic.dev/latest/concepts/models/">Pydantic BaseModel</a></li>
+</ul>
+<p>Lets look at quick text-based example.</p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from pydantic import BaseModel, Field
+ 
+# Define a Pydantic model
+# Use the Field class to add a description and default value to provide more context to the model
+class Topic(BaseModel):
+    name: str = Field(description="The name of the topic")
+ 
+class Person(BaseModel):
+    first_name: str = Field(description="The first name of the person")
+    last_name: str = Field(description="The last name of the person")
+    age: int = Field(description="The age of the person, if not provided please return 0")
+    work_topics: list[Topic] = Field(description="The fields of interest of the person, if not provided please return an empty list")
+ 
+ 
+# Define the prompt
+prompt = "Philipp Schmid is a Senior AI Developer Relations Engineer at Google DeepMind working on Gemini, Gemma with the mission to help every developer to build and benefit from AI in a responsible way.  "
+ 
+# Generate a response using the Person model
+response = client.models.generate_content(model=model_id, contents=prompt, config={'response_mime_type': 'application/json', 'response_schema': Person})
+ 
+# print the response as a json string
+print(response.text)
+ 
+# sdk automatically converts the response to the pydantic model
+philipp: Person = response.parsed
+ 
+# access an attribute of the json response
+print(f"First name is {philipp.first_name}")</code></pre></div></figure>
+
+<p>Now, let's combine the File API and structured output to extract information from our PDFs. You can create a simple method that accepts a local file path and a pydantic model and return the structured data for us. The method will:</p>
+<ol>
+<li>Upload the file to the File API</li>
+<li>Generate a structured response using the Gemini API</li>
+<li>Convert the response to the pydantic model and return it</li>
+</ol>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">def extract_structured_data(file_path: str, model: BaseModel):
+    # Upload the file to the File API
+    file = client.files.upload(file=file_path, config={'display_name': file_path.split('/')[-1].split('.')[0]})
+    # Generate a structured response using the Gemini API
+    prompt = f"Extract the structured data from the following PDF file"
+    response = client.models.generate_content(model=model_id, contents=[prompt, file], config={'response_mime_type': 'application/json', 'response_schema': model})
+    # Convert the response to the pydantic model and return it
+    return response.parsed</code></pre></div></figure>
+<p>In our Example every PDF is a different to each other. So you want to define unique Pydantic models for each PDF to show the performance of the Gemini 2.0. If you have very similar PDFs and want to extract the same information you can use the same model for all of them.</p>
+<ul>
+<li><code>Invoice.pdf</code> : Extract the invoice number, date and all list items with description, quantity and gross worth and the total gross worth</li>
+<li><code>handwriting_form.pdf</code> : Extract the form number, plan start date and the plan liabilities beginning of the year and end of the year</li>
+</ul>
+<p><em>Note: Using Pydantic features you can add more context to the model to make it more accurate as well as some validation to the data. Adding a comprehensive description can significantly improve the performance of the model. Libraries like <a target="_blank" rel="noopener noreferrer" href="https://python.useinstructor.com/">instructor</a> added automatic retries based on validation errors, which can be a great help, but come at the cost of additional requests.</em></p>
+<h3 id="invoicepdf">Invoice.pdf</h3>
+<p><img src="https://storage.googleapis.com/generativeai-downloads/data/pdf_structured_outputs/invoice.png" alt="Invoice.pdf"></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">from pydantic import BaseModel, Field
+ 
+class Item(BaseModel):
+    description: str = Field(description="The description of the item")
+    quantity: float = Field(description="The Qty of the item")
+    gross_worth: float = Field(description="The gross worth of the item")
+ 
+class Invoice(BaseModel):
+    """Extract the invoice number, date and all list items with description, quantity and gross worth and the total gross worth."""
+    invoice_number: str = Field(description="The invoice number e.g. 1234567890")
+    date: str = Field(description="The date of the invoice e.g. 2024-01-01")
+    items: list[Item] = Field(description="The list of items with description, quantity and gross worth")
+    total_gross_worth: float = Field(description="The total gross worth of the invoice")
+ 
+ 
+result = extract_structured_data("invoice.pdf", Invoice)
+print(type(result))
+print(f"Extracted Invoice: {result.invoice_number} on {result.date} with total gross worth {result.total_gross_worth}")
+for item in result.items:
+    print(f"Item: {item.description} with quantity {item.quantity} and gross worth {item.gross_worth}")</code></pre></div></figure>
+<p>Fantastic! The model did a great job extracting the information from the invoice.</p>
+<h3 id="handwriting_formpdf">handwriting_form.pdf</h3>
+<p><img src="https://storage.googleapis.com/generativeai-downloads/data/pdf_structured_outputs/handwriting_form.jpg" alt="handwriting_form.pdf"></p>
+<figure data-rehype-pretty-code-figure=""><div><p><span>Python</span></p><pre><code data-language="python">class Form(BaseModel):
+    """Extract the form number, fiscal start date, fiscal end date, and the plan liabilities beginning of the year and end of the year."""
+    form_number: str = Field(description="The Form Number")
+    start_date: str = Field(description="Effective Date")
+    beginning_of_year: float = Field(description="The plan liabilities beginning of the year")
+    end_of_year: float = Field(description="The plan liabilities end of the year")
+ 
+result = extract_structured_data("handwriting_form.pdf", Form)
+ 
+print(f'Extracted Form Number: {result.form_number} with start date {result.start_date}. \nPlan liabilities beginning of the year {result.beginning_of_year} and end of the year {result.end_of_year}')
+# Extracted Form Number: CA530082 with start date 02/05/2022. 
+# Plan liabilities beginning of the year 40000.0 and end of the year 55000.0</code></pre></div></figure>
+<h2 id="best-practices-and-limitations">Best Practices and Limitations</h2>
+<p>When working with Gemini 2.0 for PDF processing, keep these considerations in mind:</p>
+<ol>
+<li>File Size Management: While the File API supports large files, it's good practice to optimize your PDFs before upload.</li>
+<li>Token Limits: Check token counts when processing large documents to ensure you stay within model limits and your budget.</li>
+<li>Structured Output Design: Design your Pydantic models carefully to capture all necessary information while maintaining clarity, adding descriptions and examples can improve the performance of the model.</li>
+<li>Error Handling: Implement robust error handling for file uploads and processing states, inclduing retries and handeling error messages from the model.</li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p>Gemini 2.0's multimodal capabilities, combined with structured output help you to process and extract information from PDFs and other files. This can eliminate complex and painfull manual or semi-automated data extraction processes. Whether you're building an invoice processing system, document analysis tool, or any other document-centric application you should try out Gemini 2.0 as it is free to test and then only $0.1 per 1M input tokens.</p>
+<hr>
+<p>Thanks for reading! If you have any questions or feedback, please let me know on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/_philschmid">Twitter</a> or <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/philipp-schmid-a6a2bb196/">LinkedIn</a>.</p></div></div>
