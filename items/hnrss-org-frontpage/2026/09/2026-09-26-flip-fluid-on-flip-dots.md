@@ -726,6 +726,12 @@ images:
     width: 1200
     height: 800
   color: '#242a27'
+- source: https://i.ytimg.com/vi/aZzOWnEWgww/hqdefault.jpg
+  original:
+    file: 2026-09-26-flip-fluid-on-flip-dots.image-216faa537bea.jpg
+    width: 480
+    height: 360
+  color: '#000100'
 ---
 
 [![Back to Hardware](https://mitxela.com/img/titles/mitxela_dot_com-65.png "Back to Hardware")](https://mitxela.com/projects/hardware)
