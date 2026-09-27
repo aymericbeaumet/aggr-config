@@ -26,6 +26,18 @@ images:
     width: 600
     height: 644
   color: '#fefefe'
+- source: https://i.ytimg.com/vi/cFx9Z3ZXca0/hqdefault.jpg
+  original:
+    file: 2026-09-21-jev-system-one-models-for-prod-not-god-with-diogo-almeida.image-aaeaa442d709.jpg
+    width: 480
+    height: 360
+  color: '#010002'
+- source: https://i.ytimg.com/vi/cJ0EOzey--o/hqdefault.jpg
+  original:
+    file: 2026-09-21-jev-system-one-models-for-prod-not-god-with-diogo-almeida.image-32afdeb47a17.jpg
+    width: 480
+    height: 360
+  color: '#020202'
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/216783460/cdf8e02436aa264178bb2aa2c85db57c.mp3

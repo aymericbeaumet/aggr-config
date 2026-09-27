@@ -82,6 +82,18 @@ images:
     width: 1200
     height: 675
   color: '#f87109'
+- source: https://i.ytimg.com/vi/0YhJxJZOWBw/hqdefault.jpg
+  original:
+    file: 2026-02-05-teleporting-into-the-future-and-robbing-yourself-of.image-33f0685d244f.jpg
+    width: 480
+    height: 360
+  color: '#020102'
+- source: https://i.ytimg.com/vi/Jr2auYrBDA4/hqdefault.jpg
+  original:
+    file: 2026-02-05-teleporting-into-the-future-and-robbing-yourself-of.image-232ee5004c0e.jpg
+    width: 480
+    height: 360
+  color: '#010101'
 ---
 
 I'm going to make this a really quick one because this is doing the rounds, and whilst I've tweeted about it, it's time to dig in.

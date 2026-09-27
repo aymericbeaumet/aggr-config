@@ -146,6 +146,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/_0n4QS--3V8/hqdefault.jpg
+  original:
+    file: 2025-09-14-training-an-llm-recsys-hybrid-for-steerable-recs-with.image-88db3e5d2b7a.jpg
+    width: 480
+    height: 360
+  color: '#323447'
 ---
 
 I got nerdsniped when I first heard about Semantic IDs. The idea is simple: Instead of using random hash IDs for videos or songs or products, we can use semantically meaningful tokens that an LLM can natively understand. I wondered, could we train an LLM-recommender hybrid on the rich behavioral data that makes today’s recommender systems so effective?

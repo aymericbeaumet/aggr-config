@@ -330,6 +330,253 @@ images:
     width: 1456
     height: 795
   color: '#fcfcfd'
+- source: https://substackcdn.com/image/fetch/$s_!qmQC!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fcf489564-f69c-4aa7-b335-0f7d172205c4_4349x3076.jpeg
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-aedd1376cc8f.jpg
+    width: 1456
+    height: 1030
+  color: '#fcfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!hFr9!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F6bc7588c-88bc-408e-8c71-9190d476149f_2280x1262.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-d5f5c3a02fed.jpg
+    width: 1456
+    height: 806
+  color: '#fcfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!iUTU!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fce674219-3fb4-4c76-b397-408f477ce827_4111x2244.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-5e0d0b1bdf11.jpg
+    width: 1456
+    height: 795
+  color: '#fcfcfd'
+- source: https://substackcdn.com/image/fetch/$s_!o36C!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F9a248bdb-c1f2-4c7f-861a-1d2921d785e5_8676x3593.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-4109056b12cd.jpg
+    width: 1456
+    height: 603
+  color: '#fcfbfc'
+- source: https://substackcdn.com/image/fetch/$s_!FZo2!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe5c8bd5f-4bef-4a7e-81e0-6b9923b9cfb3_2154x818.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-269d40a2ba49.jpg
+    width: 1456
+    height: 553
+  color: '#fefcfe'
+- source: https://substackcdn.com/image/fetch/$s_!9tSa!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc2c47830-113c-4742-a20d-61c65be805ed_2540x1398.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-fcbafab7a9c7.jpg
+    width: 1456
+    height: 801
+  color: '#fbfbfb'
+- source: https://substackcdn.com/image/fetch/$s_!3NS4!,w_140,h_140,c_fill,f_auto,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F69bfee26-ea3b-42a6-8a1a-6b8187852082_738x564.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-b5764dbc8691.jpg
+    width: 140
+    height: 140
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!fVCN!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F2602d095-c73d-4b70-a461-d1e84555d2cb_793x831.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-acc3c2b96630.png
+    width: 793
+    height: 831
+  variants:
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-4445a4e4e5a0.webp
+    width: 320
+    height: 335
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-a4ae544bc541.webp
+    width: 793
+    height: 831
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!8d7L!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F7bfd3b82-47f8-4efd-abc9-1e8ae2a1c350_948x362.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-22ca23744cc8.png
+    width: 948
+    height: 362
+  variants:
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-18f6fa1b590f.webp
+    width: 320
+    height: 122
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-b79de72a0ff5.webp
+    width: 640
+    height: 244
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-cac3efe30d3c.webp
+    width: 948
+    height: 362
+  color: '#fefdfe'
+- source: https://substackcdn.com/image/fetch/$s_!StPn!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F3b813eae-03ec-4289-aa18-bde7b7ef887c_2224x1468.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-be394cdba900.jpg
+    width: 1456
+    height: 961
+  color: '#fafbfb'
+- source: https://substackcdn.com/image/fetch/$s_!ZTgh!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fb2735736-1197-49d4-8a53-84a0ce178247_718x600.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-19537cbecfd0.jpg
+    width: 718
+    height: 600
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!-a3F!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fbdc2e5a4-ebf8-49a5-bada-e42712d7cff5_7624x4202.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-48f05a3a375c.jpg
+    width: 1456
+    height: 802
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!ah3K!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F9dc738f6-7d4b-467f-a417-21623af37341_7401x4103.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-4245073c197d.jpg
+    width: 1456
+    height: 807
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!3k9N!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F8e05d2ad-c3f3-4ba3-9f41-6f266fdc385a_2318x778.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-ddf49e51be15.jpg
+    width: 1456
+    height: 489
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!0Nu7!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F889af384-7748-4eb7-9caf-1fa332f8ed10_2652x1442.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-f41788d09acb.jpg
+    width: 1456
+    height: 792
+  color: '#fefdfd'
+- source: https://substackcdn.com/image/fetch/$s_!C3LV!,w_140,h_140,c_fill,f_auto,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F0c867bba-a952-4285-849e-e70a5555622c_1990x1576.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-941c1446a019.jpg
+    width: 140
+    height: 140
+  color: '#fdfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!hyFt!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F991a079d-36d9-433a-befb-f783f7e1df85_2340x1156.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-33273ff5cdd6.jpg
+    width: 1456
+    height: 719
+  color: '#fcfbfb'
+- source: https://substackcdn.com/image/fetch/$s_!GkUD!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F8cf4dcd3-76ef-43df-92d1-1d0e1832a5de_1596x1562.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-0b29761c4ecf.jpg
+    width: 1456
+    height: 1425
+  color: '#fcfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!vFov!,w_140,h_140,c_fill,f_auto,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe1732960-2119-429d-96e7-bafee7f79283_5862x3699.jpeg
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-fef61a21d038.jpg
+    width: 140
+    height: 140
+  color: '#fefefd'
+- source: https://substackcdn.com/image/fetch/$s_!csBk!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F2416e3bd-8628-42da-b8bc-2cead9970971_2048x1284.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-35a968db3dce.jpg
+    width: 1456
+    height: 913
+  color: '#f9f8f8'
+- source: https://substackcdn.com/image/fetch/$s_!5eJd!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Faf154466-501f-411c-8552-b605ca6c3f20_1862x1656.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-7cbae2faa6d9.jpg
+    width: 1456
+    height: 1295
+  color: '#fcfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!dA9C!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc5749706-bfd2-4210-a9b0-d1e6f6d7edb8_1858x894.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-1fb37cf28a6d.jpg
+    width: 1456
+    height: 701
+  color: '#fbfbfb'
+- source: https://substackcdn.com/image/fetch/$s_!3OQi!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F83e10345-16d1-4c00-883b-08946c9980a3_2556x1212.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-1de66cb492e0.jpg
+    width: 1456
+    height: 690
+  color: '#fcfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!Zfu9!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5d18dfdb-dacf-40fb-aae0-937abe96ea12_1512x1556.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-79bf1acc6f4f.jpg
+    width: 1456
+    height: 1498
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!DQdq!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F8c156e1e-f414-46bb-aadf-76db5059bdbc_2478x1242.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-cbd48337a55b.jpg
+    width: 1456
+    height: 730
+  color: '#fbfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!y7Xt!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fcac96315-e4a7-43ec-b48f-158161090a2d_1426x940.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-4d28aaaf5560.png
+    width: 1426
+    height: 940
+  color: '#1f1f1f'
+- source: https://substackcdn.com/image/fetch/$s_!UmUH!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fd5369a4c-218b-4987-b28f-f36d7e3fa37e_5807x2924.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-40e2fdd61413.jpg
+    width: 1456
+    height: 733
+  color: '#fcfcfd'
+- source: https://substackcdn.com/image/fetch/$s_!TY2g!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F916c0755-6c9d-4f14-bec5-d0daf9337e00_5680x5821.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-7428143f63e7.jpg
+    width: 1456
+    height: 1492
+  color: '#fcfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!4ppK!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F6e610250-2793-4aa0-8a98-a0acf4a68d7e_1908x942.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-0e1d70b4874d.jpg
+    width: 1456
+    height: 719
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!c7Za!,w_140,h_140,c_fill,f_auto,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F1748fa24-e946-47fb-bf1b-e488d08547fd_1764x1244.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-bacf2fc9e167.jpg
+    width: 140
+    height: 140
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!TDMh!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F208e9bab-a2f8-4e5b-bed0-2db600993c41_4200x2400.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-500e0089b3fb.png
+    width: 1456
+    height: 832
+  variants:
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-5536bf7b16e6.webp
+    width: 320
+    height: 183
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-77c73761ca26.webp
+    width: 640
+    height: 366
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-f1a2d4c95855.webp
+    width: 960
+    height: 549
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-069e4d51f08d.webp
+    width: 1280
+    height: 731
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-6969b8936428.webp
+    width: 1456
+    height: 832
+  color: '#fdfdfd'
+- source: https://substackcdn.com/image/fetch/$s_!CFGk!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Faffe325a-5dce-4298-96d0-61c7d8f6b673_1828x920.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-90133945b020.jpg
+    width: 1456
+    height: 733
+  color: '#fcfcfc'
+- source: https://substackcdn.com/image/fetch/$s_!NgKc!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F95bfad09-34e9-463d-8a0e-745108c383b6_4050x2400.png
+  original:
+    file: 2025-07-19-the-big-llm-architecture-comparison.image-c18ed91c11a1.png
+    width: 1456
+    height: 863
+  variants:
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-2fb4585529b4.webp
+    width: 320
+    height: 190
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-89c5759aef1e.webp
+    width: 640
+    height: 379
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-fe991aa9b69c.webp
+    width: 960
+    height: 569
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-113198097f5e.webp
+    width: 1280
+    height: 759
+  - file: 2025-07-19-the-big-llm-architecture-comparison.image-adaeb2816b20.webp
+    width: 1456
+    height: 863
+  color: '#fdfdfd'
 html_truncated: true
 ---
 

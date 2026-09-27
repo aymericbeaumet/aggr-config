@@ -37,6 +37,12 @@ images:
     width: 1602
     height: 1214
   color: '#fbfbfc'
+- source: https://i.ytimg.com/vi/0ASUz7gFRcw/hqdefault.jpg
+  original:
+    file: 2026-06-29-it-s-hard-to-eval-is-a-product-smell.image-27b6554e96fe.jpg
+    width: 480
+    height: 360
+  color: '#010101'
 ---
 
 For the past 3 years, AI evals have been my professional focus.[^1] The most common objection I hear to evals is “our product is hard to eval”.

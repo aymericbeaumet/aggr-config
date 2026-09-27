@@ -71,6 +71,24 @@ images:
     width: 1100
     height: 601
   color: '#01aae8'
+- source: https://i.ytimg.com/vi/4Nna09dG_c0/hqdefault.jpg
+  original:
+    file: 2026-01-17-everything-is-a-ralph-loop.image-ceefd34ade7a.jpg
+    width: 480
+    height: 360
+  color: '#000000'
+- source: https://i.ytimg.com/vi/HqPL5ONfOL8/hqdefault.jpg
+  original:
+    file: 2026-01-17-everything-is-a-ralph-loop.image-78a6b23761da.jpg
+    width: 480
+    height: 360
+  color: '#0d1017'
+- source: https://i.ytimg.com/vi/Jr2auYrBDA4/hqdefault.jpg
+  original:
+    file: 2026-01-17-everything-is-a-ralph-loop.image-232ee5004c0e.jpg
+    width: 480
+    height: 360
+  color: '#010101'
 ---
 
 I’ve been thinking about how I build software is so very very different how I used to do it three years ago.

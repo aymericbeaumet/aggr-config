@@ -65,6 +65,12 @@ images:
     width: 484
     height: 228
   color: '#fbfbfb'
+- source: https://i.ytimg.com/vi/JoAxZsdw_3w/hqdefault.jpg
+  original:
+    file: 2024-10-29-using-llm-as-a-judge-for-evaluation-a-complete-guide.image-2683b309fc3b.jpg
+    width: 480
+    height: 360
+  color: '#fdfefe'
 ---
 
 Earlier this year, I wrote [Your AI product needs evals](https://hamel.dev/blog/posts/evals/). Many of you asked, “How do I get started with LLM-as-a-judge?” This guide shares what I’ve learned after helping over [30 companies](https://parlance-labs.com/) set up their evaluation systems.

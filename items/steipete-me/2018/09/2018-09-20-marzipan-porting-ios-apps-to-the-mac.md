@@ -94,6 +94,12 @@ images:
     width: 1788
     height: 866
   color: '#2b2a30'
+- source: https://i.ytimg.com/vi/2OuQarA0a7I/hqdefault.jpg
+  original:
+    file: 2018-09-20-marzipan-porting-ios-apps-to-the-mac.image-3696eedd78b8.jpg
+    width: 480
+    height: 360
+  color: '#010102'
 ---
 
 With macOS Mojave, Apple is adding support to run UIKit apps on macOS without the requirement of rewriting the UI in AppKit. While this isn’t yet something that’s officially supported for third-party developers, let’s explore what to expect in 2019 and how to try it out today.

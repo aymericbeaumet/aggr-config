@@ -558,6 +558,12 @@ images:
     width: 1456
     height: 819
   color: '#fdfdfd'
+- source: https://i.ytimg.com/vi/tLv7qRWFMlw/hqdefault.jpg
+  original:
+    file: 2026-08-22-how-claude-watermarks-ai-generated-text.image-3f15fb238c8c.jpg
+    width: 480
+    height: 360
+  color: '#010101'
 ---
 
 I recently posted a [Substack note](https://substack.com/@rasbt/note/c-315339554?r=gb4sb&utm_source=notes-share-action&utm_medium=web) about Claude’s new [watermarking process](https://www.anthropic.com/news/claude-text-watermark) and implementation. Since it’s such a popular topic and sparked such a lively discussion, I thought it might be interesting to go into a bit more detail when explaining how it works.

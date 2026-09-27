@@ -24,6 +24,12 @@ images:
     width: 320
     height: 244
   color: '#fefefe'
+- source: https://i.ytimg.com/vi/kc8YL3P4LUc/hqdefault.jpg
+  original:
+    file: 2025-10-05-infinite-footguns-writing-a-javascript-interpreter-in.image-6c4abc9bf626.jpg
+    width: 480
+    height: 360
+  color: '#fcfcfc'
 ---
 
 ![](https://mariozechner.at/posts/2025-10-05-jailjs/media/footgun.webp)\

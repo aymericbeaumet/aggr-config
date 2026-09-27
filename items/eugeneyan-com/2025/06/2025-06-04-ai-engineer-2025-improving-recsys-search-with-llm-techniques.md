@@ -84,6 +84,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/2vlCqD6igVA/hqdefault.jpg
+  original:
+    file: 2025-06-04-ai-engineer-2025-improving-recsys-search-with-llm-techniques.image-fd513b9be08d.jpg
+    width: 480
+    height: 360
+  color: '#020203'
 ---
 
 Was invited to host the RecSys track at AI Engineer World’s Fair 2025 in San Francisco. Sharing my opening slides here, as well as the YouTube recording of the entire track.

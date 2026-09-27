@@ -72,6 +72,12 @@ images:
     width: 1600
     height: 902
   color: '#190501'
+- source: https://i.ytimg.com/vi/m12vGjfbNlo/hqdefault.jpg
+  original:
+    file: 2026-09-27-the-eighteen-month-recap-ai-engineer-singapore-may-2026.image-1a98c64d44cc.jpg
+    width: 480
+    height: 360
+  color: '#010001'
 ---
 
 This is the eighteen-month recap: the talk I gave on day two of AI Engineer Singapore. A lot has happened since the [six-month recap](https://ghuntley.com/six-month-recap/) in Melbourne. The recording is below, followed by an edited transcript with the slides.

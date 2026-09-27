@@ -26,6 +26,12 @@ images:
     width: 1456
     height: 1302
   color: '#f6f6f6'
+- source: https://i.ytimg.com/vi/Sc2_LfWgHb4/hqdefault.jpg
+  original:
+    file: 2026-09-16-underwriting-superintelligence-backing-agents-you-can-sue.image-713d31c49c2e.jpg
+    width: 480
+    height: 360
+  color: '#000001'
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/215893904/498e50787a4f6e12e12b40465b0792de.mp3

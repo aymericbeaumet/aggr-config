@@ -92,6 +92,12 @@ images:
     width: 1024
     height: 571
   color: '#000000'
+- source: https://i.ytimg.com/vi/PngHcmMmwWI/hqdefault.jpg
+  original:
+    file: 2025-11-19-are-large-language-models-worth-it.image-f0a5a96505fb.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 Large language models may be transformative over the next few years. But they come with a number of serious potential risks, and are already harming people today. In this article I want to try to pose the question: *"are LLMs worth it?"* Should we be creating these models given their externalities, current harms, and potential eventual consequences?

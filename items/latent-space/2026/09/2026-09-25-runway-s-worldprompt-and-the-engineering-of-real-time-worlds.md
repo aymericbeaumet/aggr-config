@@ -52,6 +52,12 @@ images:
     width: 1456
     height: 948
   color: '#1a1a1a'
+- source: https://i.ytimg.com/vi/fGRd5gYhztg/hqdefault.jpg
+  original:
+    file: 2026-09-25-runway-s-worldprompt-and-the-engineering-of-real-time-worlds.image-10902a6e3a40.jpg
+    width: 480
+    height: 360
+  color: '#000101'
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/217289983/80ecbf8ba268d83a6cde12d5f719e123.mp3

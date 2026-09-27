@@ -159,6 +159,12 @@ images:
     width: 1037
     height: 660
   color: '#fcfdfd'
+- source: https://i.ytimg.com/vi/a7CXIE_Gyy8/hqdefault.jpg
+  original:
+    file: 2023-08-16-open-challenges-in-llm-research.image-a7760499c47e.jpg
+    width: 480
+    height: 360
+  color: '#fafafa'
 ---
 
 \[*[LinkedIn discussion](https://www.linkedin.com/posts/chiphuyen_llm-airesearch-generativeai-activity-7097619722363408385-s5Cp), [Twitter thread](https://twitter.com/chipro/status/1691858084824838427)*\]

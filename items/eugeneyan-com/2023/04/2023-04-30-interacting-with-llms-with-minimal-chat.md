@@ -83,6 +83,24 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/6aLOcD7EJRQ/hqdefault.jpg
+  original:
+    file: 2023-04-30-interacting-with-llms-with-minimal-chat.image-da6ba9f1fa89.jpg
+    width: 480
+    height: 360
+  color: '#000000'
+- source: https://i.ytimg.com/vi/rd-J3hmycQs/hqdefault.jpg
+  original:
+    file: 2023-04-30-interacting-with-llms-with-minimal-chat.image-6a30044e9499.jpg
+    width: 480
+    height: 360
+  color: '#000001'
+- source: https://i.ytimg.com/vi/JdwpVKKrL2o/hqdefault.jpg
+  original:
+    file: 2023-04-30-interacting-with-llms-with-minimal-chat.image-df1cd9c4c42b.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 I’ve been thinking about user experiences for LLMs. Currently, most demos interact with LLMs via chat. This is a good start, but I think we can do better. I’m not convinced most users want to interact via text. Also, I think we can provide LLMs with the context of the user, without the user having to type or voice it out.

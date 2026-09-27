@@ -38,6 +38,12 @@ images:
     width: 1200
     height: 675
   color: '#155657'
+- source: https://i.ytimg.com/vi/zc4cqtibTzs/hqdefault.jpg
+  original:
+    file: 2026-07-23-engineer-away-the-slop.image-869efdb1cb89.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 🎉

@@ -83,6 +83,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/1ZQ7IQhGP6Y/hqdefault.jpg
+  original:
+    file: 2021-12-02-the-data-scientist-show-building-end-to-end-ml-systems.image-27dee910ed9b.jpg
+    width: 480
+    height: 360
+  color: '#fded43'
 ---
 
 I’ve known Daliana for a while and was humbled when she invited me to chat on her podcast, The Data Scientist Show. In this close to 2hr chat, we discussed all things data science and ML, including:

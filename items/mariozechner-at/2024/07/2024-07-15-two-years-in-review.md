@@ -188,6 +188,300 @@ images:
     width: 1272
     height: 1766
   color: '#fefefe'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/bluesky-2.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-a14b230cc290.png
+    width: 1516
+    height: 1256
+  color: '#010101'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/bluesky-3.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-4d9bf80410ba.png
+    width: 744
+    height: 1322
+  color: '#121212'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/duckradio.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-ac63c3bbfac0.png
+    width: 676
+    height: 1194
+  color: '#030303'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/hoassis.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-4d21860fc709.png
+    width: 890
+    height: 1792
+  variants:
+  - file: 2024-07-15-two-years-in-review.image-0c5b4a3523cb.webp
+    width: 320
+    height: 644
+  - file: 2024-07-15-two-years-in-review.image-54f358a34ac7.webp
+    width: 640
+    height: 1289
+  - file: 2024-07-15-two-years-in-review.image-340a10c7aaa9.webp
+    width: 890
+    height: 1792
+  color: '#fcfcfc'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-1.jpeg
+  original:
+    file: 2024-07-15-two-years-in-review.image-7211d8a269c9.jpg
+    width: 2566
+    height: 2094
+  color: '#292929'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-2.jpeg
+  original:
+    file: 2024-07-15-two-years-in-review.image-09e2a20a00aa.jpg
+    width: 1052
+    height: 658
+  color: '#282828'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-3.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-6b97e7a3b637.png
+    width: 1072
+    height: 902
+  color: '#010101'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-4.jpeg
+  original:
+    file: 2024-07-15-two-years-in-review.image-198e3fd43fbd.jpg
+    width: 1080
+    height: 1044
+  color: '#020202'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-5.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-7876dfa8e7c9.png
+    width: 980
+    height: 880
+  color: '#f6f8f8'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ams-6.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-1b66d0c912e4.png
+    width: 1296
+    height: 460
+  color: '#b9c9a5'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-1.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-aa2672ba4b32.png
+    width: 1064
+    height: 1790
+  color: '#060606'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-3.jpeg
+  original:
+    file: 2024-07-15-two-years-in-review.image-078ca323aa49.jpg
+    width: 1150
+    height: 2048
+  color: '#121212'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-4.jpeg
+  original:
+    file: 2024-07-15-two-years-in-review.image-6fdb42e7e7dd.jpg
+    width: 1179
+    height: 1723
+  color: '#121212'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-7.jpg
+  original:
+    file: 2024-07-15-two-years-in-review.image-7ed66f4f0ea7.jpg
+    width: 3384
+    height: 1790
+  color: '#141414'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-5.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-b5f67e215257.png
+    width: 1080
+    height: 2400
+  color: '#131313'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-6.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-03715920a7e4.png
+    width: 1318
+    height: 1080
+  color: '#fbfbfa'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/exxpress-8.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-daa7d247f553.png
+    width: 1566
+    height: 1734
+  color: '#f6f1ec'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wuztube-1.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-41096fd7b34d.png
+    width: 2054
+    height: 1758
+  color: '#121212'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wuztube-2.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-6364031308b8.png
+    width: 2062
+    height: 1784
+  color: '#111111'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wuztube-3.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-94cdd996ef1c.png
+    width: 2058
+    height: 1784
+  color: '#121111'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wuztube-4.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-ab1ceb76ac10.png
+    width: 2064
+    height: 1786
+  color: '#111111'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ledit-1.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-9b54ad0b4165.png
+    width: 1081
+    height: 2162
+  variants:
+  - file: 2024-07-15-two-years-in-review.image-dd9835102fae.webp
+    width: 320
+    height: 640
+  - file: 2024-07-15-two-years-in-review.image-394da358a795.webp
+    width: 640
+    height: 1280
+  - file: 2024-07-15-two-years-in-review.image-0a94d33f926b.webp
+    width: 1081
+    height: 2162
+  color: '#111111'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ledit-2.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-6b4be9c4e147.png
+    width: 782
+    height: 1568
+  color: '#131212'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/ledit-3.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-34961810e630.png
+    width: 782
+    height: 1574
+  color: '#131313'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/sol.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-4f221e833687.png
+    width: 1574
+    height: 784
+  color: '#434343'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leitkultur-3.jpg
+  original:
+    file: 2024-07-15-two-years-in-review.image-c52924528a85.jpg
+    width: 1080
+    height: 1080
+  color: '#151615'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leitkultur-1.jpeg
+  original:
+    file: 2024-07-15-two-years-in-review.image-e7a41f3ec186.jpg
+    width: 1386
+    height: 1618
+  color: '#fdfdfd'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leitkultur-2.jpeg
+  original:
+    file: 2024-07-15-two-years-in-review.image-ae14b528b01d.jpg
+    width: 1446
+    height: 1914
+  color: '#fefefe'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leitkultur-4.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-18a5ee82d474.png
+    width: 1498
+    height: 1594
+  color: '#0e1116'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/twitteria.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-82bb4f29a863.png
+    width: 1590
+    height: 1604
+  color: '#fdfdfd'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leistung-1.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-d90236c87dde.png
+    width: 1380
+    height: 1858
+  color: '#111212'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/leistung-2.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-2e22dc18de98.png
+    width: 1400
+    height: 1700
+  color: '#121212'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/alko-1.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-d8ff2f1ab23d.png
+    width: 1050
+    height: 284
+  color: '#010101'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/alko-2.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-10a4f6d10b9e.png
+    width: 1346
+    height: 1914
+  color: '#fdfdfd'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/wahlomat-1.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-5ec466095c9c.png
+    width: 1400
+    height: 1174
+  color: '#111111'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/schulatlas.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-9becd438f446.png
+    width: 1292
+    height: 996
+  color: '#fdfdfd'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/schilling-1.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-42e3d556554b.png
+    width: 868
+    height: 528
+  color: '#fefefe'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/schilling-2.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-e9ae7e095766.png
+    width: 868
+    height: 580
+  color: '#fdfdfd'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/chrome-2.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-d4e71b125222.png
+    width: 1200
+    height: 429
+  color: '#d7ddc0'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/carinthia-1.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-9a32fabef223.png
+    width: 826
+    height: 1360
+  color: '#ebebeb'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/carinthia-2.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-0b3895305113.png
+    width: 800
+    height: 600
+  variants:
+  - file: 2024-07-15-two-years-in-review.image-cd4f9d08940c.webp
+    width: 320
+    height: 240
+  - file: 2024-07-15-two-years-in-review.image-3a5bbd663458.webp
+    width: 640
+    height: 480
+  - file: 2024-07-15-two-years-in-review.image-9e96744263c2.webp
+    width: 800
+    height: 600
+  color: '#765847'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/carinthia-4.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-e879db7af1db.png
+    width: 1672
+    height: 1844
+  color: '#fdfdfd'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/carinthia-3.png
+  original:
+    file: 2024-07-15-two-years-in-review.image-004b542e1392.png
+    width: 1268
+    height: 132
+  color: '#fefefe'
+- source: https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/blargh.jpeg
+  original:
+    file: 2024-07-15-two-years-in-review.image-3c232136f360.jpg
+    width: 1178
+    height: 1218
+  color: '#1e1e1e'
 ---
 
 ![](https://mariozechner.at/posts/2024-07-15-two-years-in-review/media/github.png)\

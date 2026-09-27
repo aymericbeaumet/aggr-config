@@ -591,6 +591,12 @@ images:
     width: 1500
     height: 844
   color: '#121219'
+- source: https://i.ytimg.com/vi/lA4MfpgF91Y/hqdefault.jpg
+  original:
+    file: 2026-03-26-the-revenge-of-the-data-scientist.image-f3d077399a0f.jpg
+    width: 480
+    height: 360
+  color: '#030303'
 ---
 
 Is the heyday of the data scientist over? The Harvard Business Review once called it “The Sexiest Job of the 21st Century.”[^1] In tech, data scientist roles were often among the best paid.[^2] The job also demanded an unusual mix of skills:

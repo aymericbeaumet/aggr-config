@@ -82,6 +82,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/EE1u1dbPZWQ/hqdefault.jpg
+  original:
+    file: 2021-03-26-talkpython-what-ml-can-teach-us-about-life.image-4e1e19f4ed86.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 [Michael Kennedy](https://twitter.com/mkennedy), host of Talk Python to Me, invited me to chat on his podcast. It was a slightly more philosophical episode of TalkPython where we dived into a recent post I wrote about some life lessons I gained from machine learning.

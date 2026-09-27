@@ -83,6 +83,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/lh9CNRDqKBk/hqdefault.jpg
+  original:
+    file: 2021-09-15-mlops-community-system-design-for-recsys-search.image-73ec6b26d27b.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 Recently, I was invited to speak about System Design for Recommendation Systems and Search at the [MLOps Community meetup](https://mlops.community/watch/system-design-for-recommendations-and-search_BXaYUFIBe7Bexm/). Here’s the recorded talk.

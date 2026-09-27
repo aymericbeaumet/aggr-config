@@ -889,6 +889,614 @@ images:
     width: 2100
     height: 900
   color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q20_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-a9b2d73082f4.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-e6f7ad06e256.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-422e973561c9.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-973eef75bd07.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-eb02a289f499.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c88f21abdc4b.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q20_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-d8d6e20eb9b6.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-605f13ed6bdb.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-0bbb8da5a9cb.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-1ae5507f18e6.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-37e7c197ed18.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q21_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-5e8f8964cc37.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-93e0c3c0e891.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-44e73bc2fa36.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c3191fcca5e6.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-10b280614459.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-6666998e0fbd.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-02697749c452.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q21_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-434de2a44042.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-ce6145417307.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-adf740aa0da4.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-7c5f2ea33c46.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-116fd0345600.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-7b339fd0f41f.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-6f417f94b653.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q22_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-bc1a4d6cc019.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f7f7d2cf32c4.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-3a84925ecbb7.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-78b1c229862e.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-35d38f2072ec.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-4b74449df4e6.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-a70bcb5bcaa2.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q22_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-a9eb091259e7.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-42ee700f7864.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-1ab52ce9c03e.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-b15d0aa3b5f3.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-22dc08f9036f.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-869cfc92d714.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-032268b0ba23.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q23_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-40bb72b0d372.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-248427070969.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-695905f96bea.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-5e06fd7b521a.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-dd04eab38849.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-b056e886328d.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-002190df01cb.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q23_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-5d5cdf34a4e4.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-5e10bda1ded8.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-53e2cb5bc54a.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-1ad67caf9fea.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-51b4519a9164.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-02a5ca4f0bde.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-d55a0ca9ca5a.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q24_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-a56641ec54e1.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c3d5f2c1c4b9.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-b33ea69c652a.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-0a7a52aab4e5.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f45debdcf84f.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-8b59ed9a072b.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q24_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c2ec7e9d5bb9.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f116c8dfa346.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-67774ffeec5e.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-8cc1aa3dc992.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-28fdce718e25.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q25_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-91cae1ac967c.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-cd1db06d2907.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-32aa289bb096.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-cb594e9a3656.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f63e9036c09e.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q25_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-df9388f37f04.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-725fa198998f.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f19bbd4a112f.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-7aabbbc88047.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-df8dddb7754d.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q26_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-58c6226a0743.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-56642a47bdb8.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-e33718be1e08.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-df3c149bdb60.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-491b0f4119a3.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-13fc28c600f8.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-e44b5dafaf4f.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q26_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-21c2a5642ec6.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-ff58e54dc0c9.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c241540d0794.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-21eaeb32e182.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-b7efe507a835.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-ba24612de79e.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-3b5162750aee.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q27_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-b1d2052667ae.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-3fe2ccc4f8c4.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-90fe3ad939bc.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-a529a1e66093.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-a7023e36aaf9.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-2f7321017cb0.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c47a1356cd8f.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q27_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-9885e825dae0.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-4fc4c175e836.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f78f2030d354.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-875a5992c5c0.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-eae703bd3d40.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-7f4d972284f5.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-963208b958e0.webp
+    width: 2100
+    height: 900
+  color: '#fdfefe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q28_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f9e3f4593543.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-76d840a7727c.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-fef5dbdedae2.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f62180ce1608.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-405f3d500e18.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-491319c05971.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-74798dc423d2.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q28_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-4b846f2995b3.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-efe8bdf99e60.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-7900c20dd40b.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-6ba60ce731af.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-be4d8d4e9536.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-7c1b0e40be75.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-4fdd8fdcad0f.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q29_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-353dcd12a235.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-9226c737517a.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-6abf90950ef6.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-48d76c771383.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-6336980d98dd.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-4de930a0e5b1.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-305c6dd386cc.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q29_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-23cc54827a1e.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-1832bebfa514.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-e82fb9a0566a.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-7bbfaa1f5dd7.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f119b2875362.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-9fc3b2787972.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-70596c34cac0.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q30_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-544ac7e4552e.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-11b88a132ca4.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-ab9951b0b64e.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-90ed6fe2148c.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-793474ebc2e0.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c763db98e264.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-d9bcbc5236b9.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q30_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-04f5a8b67189.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-089c7986f053.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c725eb3ce287.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-f2156ffd7a5a.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-d83674cfa4a8.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-50a6c612de10.webp
+    width: 1600
+    height: 686
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-77941304965f.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfd'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q31_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-a1cf94128d1d.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-42f2d3001cdf.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-6c54e9647307.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-40481c8ac677.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-fa104b5d38d1.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-0c2a1635c4fe.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q31_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-e327ad7aaba2.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-5aae6866f886.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-2f131cb8b681.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-df96393a6088.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-85a7bd0e6aa4.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-8c65290bc5c4.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q32_2027.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c27596520e12.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-65b69a420b7c.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-32b7f1697e45.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-9fa8dfd4d9a6.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-e82707f7661e.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-163f71973518.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
+- source: https://nicholas.carlini.com/writing/2025/qs_fig/q32_2030.png
+  original:
+    file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-9660e8bcce81.png
+    width: 2100
+    height: 900
+  variants:
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-63bc9682b7ab.webp
+    width: 320
+    height: 137
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-38cf28228308.webp
+    width: 640
+    height: 274
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-c9eaeb0b32bb.webp
+    width: 960
+    height: 411
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-b502463ee9d3.webp
+    width: 1280
+    height: 549
+  - file: 2025-02-09-ai-forecasting-retrospective-you-re-probably-over-confident.image-aaa459c64088.webp
+    width: 2100
+    height: 900
+  color: '#fdfdfe'
 ---
 
 Late last year, I published an article asking readers to [make 30 forecasts about the future of AI](https://nicholas.carlini.com/writing/2024/forecasting-ai-future.html) in 2027 and 2030---from whether or not you could buy a robot to do your laundry, to predicting the valuation of leading AI labs, to estimating the likelihood of an AI-caused catastrophe.

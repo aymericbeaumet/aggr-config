@@ -595,6 +595,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/LzeC1AQ-U5o/hqdefault.jpg
+  original:
+    file: 2023-10-09-ai-engineer-2023-keynote-building-blocks-for-llm-systems.image-ed2e1e80cb26.jpg
+    width: 480
+    height: 360
+  color: '#000004'
 ---
 
 I was invited to give a [talk at the inaugural AI Engineer Summit](https://www.ai.engineer/summit/schedule/building-blocks-for-llm-systems-and-products) in San Francisco. It’s largely a combination of my recent writing on [design patterns for LLM systems](https://eugeneyan.com/writing/llm-patterns/) and [evals for abstractive summarization](https://eugeneyan.com/writing/abstractive/), albeit heavily truncated (each speaker only had 18 minutes!). Here are the slides and talking points for my talk.

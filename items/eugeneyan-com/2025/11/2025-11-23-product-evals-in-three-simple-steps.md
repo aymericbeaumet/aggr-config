@@ -83,6 +83,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/mz7mAo4zIC8/hqdefault.jpg
+  original:
+    file: 2025-11-23-product-evals-in-three-simple-steps.image-656f1c3ca0f5.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 After repeating myself for the $n^\\text{th}$ time on how to build product evals, I figured I should write it down. There are three basic steps: (i) labeling a small dataset, (ii) aligning our LLM evaluators, and (iii) running the experiment + evaluation harness with each config change.

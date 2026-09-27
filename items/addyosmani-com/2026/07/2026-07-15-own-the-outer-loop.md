@@ -243,6 +243,12 @@ images:
     width: 1599
     height: 900
   color: '#060606'
+- source: https://i.ytimg.com/vi/n97BCfyFIvw/hqdefault.jpg
+  original:
+    file: 2026-07-15-own-the-outer-loop.image-e08cdf5512b7.jpg
+    width: 480
+    height: 360
+  color: '#030303'
 ---
 
 In the past year, the conversation around **agentic engineering** has moved to **harnesses** and **[loops](https://x.com/addyosmani/article/2064127981161959567)**, **fleets** and **software factories**. My 2c is engineers need to **own the outer loop** - the **accountability** for these systems. This only gets more true as powerful models like Fable and GPT-5.6 become available.

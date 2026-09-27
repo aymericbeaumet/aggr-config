@@ -40,6 +40,12 @@ images:
     width: 1392
     height: 700
   color: '#fdfdfd'
+- source: https://i.ytimg.com/vi/B7DdNj_VjcU/hqdefault.jpg
+  original:
+    file: 2026-09-23-microscope-bio-security-is-an-ai-arms-race-eric-nguyen-ceo.image-ef5db4260066.jpg
+    width: 480
+    height: 360
+  color: '#020202'
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/216723291/8511fc2825689ad610a1ca70864be49f.mp3

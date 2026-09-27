@@ -89,6 +89,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/QRJW5jT5VRA/hqdefault.jpg
+  original:
+    file: 2023-06-11-obsidian-copilot-an-assistant-for-writing-reflecting.image-d269f319753f.jpg
+    width: 480
+    height: 360
+  color: '#f5f0dd'
 ---
 
 What would a copilot for writing and thinking look like? To try answering this question, I built a prototype: Obsidian-Copilot. Given a section header, it helps draft a few paragraphs via [retrieval-augmented generation](https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-customize-rag.html). Also, if you write a daily journal, it can help you reflect on the past week and plan for the week ahead.

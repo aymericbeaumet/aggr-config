@@ -96,6 +96,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/Tw4HGtUMF_U/hqdefault.jpg
+  original:
+    file: 2021-07-13-sf-big-analytics-system-design-for-recsys-search.image-b475ae1257e6.jpg
+    width: 480
+    height: 360
+  color: '#fdfdfd'
 ---
 
 I was recently invited to speak at the [San Francisco Big Analytics meetup](https://www.meetup.com/en-AU/SF-Big-Analytics/events/279188202/) about system design for recommendations and search. Here’s the recorded talk.

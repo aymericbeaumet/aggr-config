@@ -32,6 +32,18 @@ images:
     width: 1456
     height: 960
   color: '#040405'
+- source: https://i.ytimg.com/vi/eDFXtSg3zB8/hqdefault.jpg
+  original:
+    file: 2026-09-14-humanity-s-last-invention-richard-socher-of-recursive.image-2dc31c21926e.jpg
+    width: 480
+    height: 360
+  color: '#010101'
+- source: https://i.ytimg.com/vi/F5FEj9U-CJM/hqdefault.jpg
+  original:
+    file: 2026-09-14-humanity-s-last-invention-richard-socher-of-recursive.image-574d6f94eb19.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/215289811/2fb38b11f6378b842e98c121de6c47e9.mp3

@@ -89,6 +89,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/q41YevguhQw/hqdefault.jpg
+  original:
+    file: 2025-05-04-building-news-agents-for-daily-news-recaps-with-mcp-q-and.image-4c86fc3c6de1.jpg
+    width: 480
+    height: 360
+  color: '#23262d'
 ---
 
 To better understand MCPs and agentic workflows, I built news-agents to help me generate a daily news recap. It’s built on [Amazon Q CLI](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html) and [MCP](https://modelcontextprotocol.io). The former provides the agentic framework and the latter provides news feeds via tools. It also uses [tmux](https://github.com/tmux/tmux/wiki) to spawn and display each sub-agent’s work. At a high level, here’s how it works:

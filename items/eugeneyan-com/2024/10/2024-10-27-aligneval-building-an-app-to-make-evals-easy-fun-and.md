@@ -151,6 +151,18 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/nnhMnNh_ZvU/hqdefault.jpg
+  original:
+    file: 2024-10-27-aligneval-building-an-app-to-make-evals-easy-fun-and.image-cede7447f011.jpg
+    width: 480
+    height: 360
+  color: '#fcfcfc'
+- source: https://i.ytimg.com/vi/OJJ7aHIBtPw/hqdefault.jpg
+  original:
+    file: 2024-10-27-aligneval-building-an-app-to-make-evals-easy-fun-and.image-c1ee3666b054.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 Go to [aligneval.com](https://aligneval.com) to start building your own LLM-evaluator; sample data included.

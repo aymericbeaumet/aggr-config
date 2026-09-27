@@ -42,6 +42,12 @@ images:
     width: 1024
     height: 1024
   color: '#fefefe'
+- source: https://i.ytimg.com/vi/fbqAh46eMkc/hqdefault.jpg
+  original:
+    file: 2026-06-26-a-couple-of-months-ago-in-miami-i-sat-down-and-dumped-my.image-35a9d52c0220.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 By [Geoffrey Huntley](https://ghuntley.com/author/ghuntley/) in [AI](https://ghuntley.com/tag/ai/) — 27 Jun 2026

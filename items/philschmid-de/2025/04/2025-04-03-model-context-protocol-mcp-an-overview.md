@@ -96,6 +96,18 @@ images:
     width: 4000
     height: 2055
   color: '#fafafa'
+- source: https://i.ytimg.com/vi/HyzlYwjoXOQ/hqdefault.jpg
+  original:
+    file: 2025-04-03-model-context-protocol-mcp-an-overview.image-53170a49c0fd.jpg
+    width: 480
+    height: 360
+  color: '#1d1d23'
+- source: https://i.ytimg.com/vi/kQmXtrmQ5Zg/hqdefault.jpg
+  original:
+    file: 2025-04-03-model-context-protocol-mcp-an-overview.image-2b304ed567d4.jpg
+    width: 480
+    height: 360
+  color: '#020202'
 ---
 
 The [Model Context Protocol](https://modelcontextprotocol.io/introduction) (MCP) is an open standard [introduced by Anthropic](https://www.anthropic.com/news/model-context-protocol) with the goal to standardize how AI applications (chatbots, IDE assistants, or custom agents) connect with external tools, data sources, and systems.

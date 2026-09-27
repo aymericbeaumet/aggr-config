@@ -52,6 +52,12 @@ images:
     width: 1000
     height: 543
   color: '#fafafb'
+- source: https://i.ytimg.com/vi/68BS5GCRcBo/hqdefault.jpg
+  original:
+    file: 2025-09-06-live-coding-session-building-arena.image-8e7a23d79c8c.jpg
+    width: 480
+    height: 360
+  color: '#000001'
 ---
 
 ![](https://steipete.me/assets/img/2025/live-coding-session-building-arena/hero.png)

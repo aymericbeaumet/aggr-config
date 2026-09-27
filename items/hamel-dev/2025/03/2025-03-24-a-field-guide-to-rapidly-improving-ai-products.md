@@ -123,6 +123,12 @@ images:
     width: 484
     height: 228
   color: '#fbfbfb'
+- source: https://i.ytimg.com/vi/e2i6JbU2R-s/hqdefault.jpg
+  original:
+    file: 2025-03-24-a-field-guide-to-rapidly-improving-ai-products.image-de1013b3e978.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 Most AI teams focus on the wrong things. Here’s a common scene from my consulting work:

@@ -50,6 +50,12 @@ images:
     width: 1414
     height: 1028
   color: '#0d0b10'
+- source: https://i.ytimg.com/vi/cJ0EOzey--o/hqdefault.jpg
+  original:
+    file: 2026-09-16-ainews-jev-a-system-one-model-that-only-decides-classifies.image-32afdeb47a17.jpg
+    width: 480
+    height: 360
+  color: '#020202'
 ---
 
 *[AIEi Paris](https://ai.engineer/paris/2026) (Sep 23-24) and [AIE NYC](https://ai.engineer/nyc/2026) (Oct 12-14) is >50% sold out, [AIE CODE](https://ai.engineer/code/2026) ( [Nov 10-12 in SF](https://ai.engineer/code/2026)) and [AIEi Shanghai](https://ai.engineer/shanghai/2026) (Nov 5-6) are next on deck before [AIEi Sydney](https://webdirections.org/ai-engineer/) (Dec 7-8 alongside NeurIPS) closes the year!*

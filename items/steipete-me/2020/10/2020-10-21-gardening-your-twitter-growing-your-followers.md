@@ -51,6 +51,12 @@ images:
     width: 1229
     height: 2182
   color: '#fbfcfc'
+- source: https://i.ytimg.com/vi/0c6izSzP-KQ/hqdefault.jpg
+  original:
+    file: 2020-10-21-gardening-your-twitter-growing-your-followers.image-5e5ac6505062.jpg
+    width: 480
+    height: 360
+  color: '#010102'
 ---
 
 ![](https://steipete.me/assets/img/2020/make-twitter-work/gardening-growing.jpg)

@@ -148,6 +148,18 @@ images:
     width: 1200
     height: 600
   color: '#fefefe'
+- source: https://i.ytimg.com/vi/0YhJxJZOWBw/hqdefault.jpg
+  original:
+    file: 2025-09-09-i-ran-claude-in-a-loop-for-three-months-and-it-created-a.image-33f0685d244f.jpg
+    width: 480
+    height: 360
+  color: '#020102'
+- source: https://i.ytimg.com/vi/BiFt4vw1-uM/hqdefault.jpg
+  original:
+    file: 2025-09-09-i-ran-claude-in-a-loop-for-three-months-and-it-created-a.image-6c65b8631aab.jpg
+    width: 480
+    height: 360
+  color: '#010101'
 ---
 
 It's a strange feeling knowing that you can create anything, and I'm starting to wonder if there's a seventh stage to the "[people stages of AI adoption by software developers](https://ghuntley.com/ngmi/)"

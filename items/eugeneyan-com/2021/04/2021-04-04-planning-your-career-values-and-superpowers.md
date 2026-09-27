@@ -82,6 +82,12 @@ images:
     width: 512
     height: 512
   color: '#000000'
+- source: https://i.ytimg.com/vi/veriqDHLXsw/hqdefault.jpg
+  original:
+    file: 2021-04-04-planning-your-career-values-and-superpowers.image-ab1d57780c77.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 A typical career spans [decades](https://lethain.com/forty-year-career/). As Cedric Chin [writes](https://commoncog.com/blog/your-time-preference/), the first 10 years of a career is often considered [early game](https://slangit.com/meaning/early_game).
