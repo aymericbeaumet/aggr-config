@@ -1,0 +1,145 @@
+<div id="readability-page-1" class="page"><div><article>
+    
+    <p>September 25, 2026</p>
+
+    <p>Ten lines of code that, one way or another, mean something to me. Either because I wrote them, or I extensively copied them, or they made me laugh. Or cry.</p>
+
+<p><img src="https://pixelambacht.nl/img/helloworld.webp" alt="Hello world lines running down a homecomputer screen"></p>
+
+<h2 id="hello-world">Hello World</h2>
+
+<figure><pre><code data-language="pascal">10 PRINT "HELLO, WORLD!"
+20 GOTO 10</code></pre></figure>
+
+<p>I don’t know when I typed this for the first time, or if it was exactly this version. Might have been without the comma, or with more exclamation marks.</p>
+
+<p>Nevertheless, the computer obliged, cheerfully greeting the world, and very much in particular, the wide-eyed kid who had just communicated with a computer for the first time.</p>
+
+<p>The second line drove home the point that a computer will do anything you tell it to. Hello world forever!</p>
+
+<h2 id="holy-javascript-weirdness-batman">Holy JavaScript weirdness, Batman!</h2>
+
+<figure><pre><code data-language="javascript">Array(16).join('wat' - 1) + ' Batman'</code></pre></figure>
+
+<p>Copy the line and paste it your browser’s console for a crossover between old school pop culture TV and nerdy coding humor, with a big fat dose of “JavaScript is stupid” on top.</p>
+
+<p><a href="https://www.destroyallsoftware.com/talks/wat">A classic</a>, and a genuine LOL when I first ran it.</p>
+
+<h2 id="self-modifying-6502-assembly-code">Self modifying 6502 assembly code</h2>
+
+<figure><pre><code data-language="nasm">        LDX #$00        ; Load X with the value 0
+.loop   LDA $2000,X     ; Load A with the byte at address $2000 + X
+        STA $0400,X     ; Store A at address $0400 + X
+        INX             ; Increase X by one
+        BNE .loop       ; Branch back to .loop while X is not 0
+        INC .loop+2     ; X is 0, increase the byte at .loop + 2
+        INC .loop+5     ; Also increase the byte at .loop + 5
+        LDA .loop+5     ; Load A with the byte at address .loop + 5
+        CMP #$07        ; Compare it with 7
+        BNE .loop       ; Branch back to .loop if A is not 7</code></pre></figure>
+
+<p>Machine language is as close to the metal as it gets. No warnings, no logs, no guardrails. It even allows you to modify itself, by overwriting the actual bytes of the code while it runs.</p>
+
+<p>Like in this example, where you update the high bytes of the source and destination addresses. The branch loops from <code>$2000</code> to <code>$20FF</code>, and the subsequent <code>INC</code> changes the address from <code>$2000</code> to <code>$2100</code>, before starting the loop again.</p>
+
+<p>(The 6502 is little endian, so we do <code>+2</code> and <code>+5</code> instead of <code>+1</code> and <code>+4</code>)</p>
+
+<p>As low-level as it gets, hardcore, and slightly dangerous. Realizing you could do this really drove home the point that, when coding this close to the metal, anything goes.</p>
+
+<h2 id="touchbat">touch.bat</h2>
+
+<figure><pre><code data-language="powershell">type nul &gt; .\"%*"</code></pre></figure>
+
+<p>This tiny batch script allowed for a poor man’s <code>touch</code> on Windows, which I used extensively from Windows NT to Windows 7. I typed <code>touch filename.txt</code> in the Total Commander mini-shell to quickly generate new, empty files. Couldn’t live without it.</p>
+
+<h2 id="css-debugger">CSS debugger</h2>
+
+<figure><pre><code data-language="css">border: 10px solid hotpink;</code></pre></figure>
+
+<p>The <code>console.log</code> of the cascades! The <code>var_dump()</code> of the styles! The <code>printf()</code> of the sheets!</p>
+
+<p>And always hotpink.</p>
+
+<h2 id="infinite-lives">Infinite lives</h2>
+
+<figure><pre><code data-language="lineos">POKE 9450,173</code></pre></figure>
+
+<p>Just poke a specific byte into the right place of the binary code currently in the computer’s memory, and you suddenly get infinite lives, enegry or money.</p>
+
+<p>Not only did this allow you to cheat at the game, it also brought the powerful realization that <em>everything</em> in <em>any</em> game could be manipulated, as long as you knew where to PEEK and POKE.</p>
+
+<h2 id="the-speed-up-loop">The speed-up loop</h2>
+
+<figure><pre><code data-language="c">for(i=0;i&lt;1000000;i++) {;}</code></pre></figure>
+
+<p>“The idea is,” Wayne continued, “whenever we have those really slow weeks – you know, the kind where don’t actually fix any bugs or make any other changes – we just drop one of the zeros on the loop. And then we just tell the manager that we ran into some speed issues with the latest change request, but after a whole lot of deep-juju optimization, we were able to speed things up significantly and should be able to do the change request the next week.”</p>
+
+<p>A <a href="https://thedailywtf.com/articles/The-Speedup-Loop">funny story</a>, and for those of us who ever had to toil away on boring, aimless projects, an idea that might have its appeal.</p>
+
+<h2 id="rtfm-or-rm--rf-">RTFM or rm -rf /</h2>
+
+<figure><pre><code data-language="lineos"># rm -rf /</code></pre></figure>
+
+<p>If you ran into a problem with Linux around the 2000s, you often took to IRC in search for help. It was there that many found the magic cure to all Linux problems, which was always the same: log in as root, and run <code>rm -rf /</code>.</p>
+
+<p>Without fail, it made every Linux problem dissappear!</p>
+
+<h2 id="skan2pas">SKAN2.PAS</h2>
+
+<figure><pre><code data-language="pascal">{$M $4000,0,0 } {16 Kb stack}
+{Skan v2.00 by Trexx}
+Program Skan2;
+uses crt,dos;
+var a,b,c:char;
+    b1:byte;
+    str:string[3];
+    Ends:boolean;
+begin
+    Ends:=False;
+    a:='a';      {Start values}
+    b:='a';
+    c:='a';
+    repeat
+        inc(c);
+        if (c='z') then
+        begin
+            inc(b);
+            c:='a';
+        end;
+        if (b='z') then
+        begin
+            inc(a);
+            b:='a';
+        end;
+        str:=a+b+c;
+        {Change this when FULL.EXE is in another directory}
+        exec('z:\public\full.exe',str);
+        if (whereY&gt;10) then readln;
+    {Hit anykey to quit}
+    until KeyPressed or Ends;
+end.</code></pre></figure>
+
+<p>It was the early 90s and our school finally set up a LAN, so of course my cyberpunk <del>scriptkiddies</del> <del>lamers</del> 1337 h4x0rz buddies and I explored it. We knew that all usernames consisted of three letters, and those not in use would be left at the default password.</p>
+
+<p>So we whipped up this extremely crude username scanner in Borland Pascal. More bugs than lines of code, but it sorta did the job. (And it should — it’s version 2.00 after all!)</p>
+
+<p>We happily hacked all the dormant accounts we could find, and then… moved on.</p>
+
+<h2 id="css280">CSS280</h2>
+
+<figure><pre><code data-language="css">*{transform:translateY(24vh);text-align:center}*&gt;:before{animation:a 9s
+1e+9 linear;content:'Roses are #F00'}@keyframes a{10%,15%,35%,40%,60%,65%,
+85%,90%{opacity:1}12%,37%,62%,87%{opacity:0}25%{content:'Violets are #00F'
+}50%{content:'All my base'}75%{content:'Are belong to you'}}</code></pre></figure>
+
+
+<p>An animated poem in nothing but 280 characters of CSS. No JavaScript, not even HTML&nbsp;— it would run in an empty document with just a <code>&lt;style&gt;</code> block, and these 280 characters of pure CSS.</p>
+
+<p>The artifical limit was a step up from the earlier 140 character limit, dictated by Twitter, allowing small snippets of code to be posted that you could <a href="https://codepen.io/RoelN/pen/bYYmzd">copy over to an empty CodePen</a> to see an amusing effect.</p>
+
+<p>I’m especially proud of the <code>1e+9</code> duration, which is shorter than <code>infinite</code> (both in time as in character count).</p>
+
+
+
+
+</article></div></div>
