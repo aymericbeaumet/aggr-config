@@ -1,0 +1,285 @@
+<div id="readability-page-1" class="page"><section id="content">
+        <article>
+            
+            <div>
+                
+                <p>Like many programmers, I find Alexis King's <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">Parse, don't validate</a>
+article fascinating, because it gives a name to an idiom that seems familiar and
+important - one I've observed and used in the past without naming it explicitly.
+This post is a review of the "Parse, don't validate" pattern applied to the Rust
+programming language (the original post uses Haskell). I was particularly
+interested in finding educational examples of this pattern in the Rust standard
+library and other well-known projects.</p>
+<p>Without repeating the original article (please read it first!), here's the
+gist of it.</p>
+<p>Consider the venerable <code>Vec</code>; its <code>first</code> method returns <code><span>Option&lt;&amp;T&gt;</span></code>.
+Why? Because a vector is not guaranteed to have any elements in it, so what
+to do if <code>first</code> is invoked on an empty one? Returning an <code>Option</code> in this
+case is idiomatic in Rust <a href="#footnote-1" id="footnote-reference-1">[1]</a>, with convenient syntax sugar for accepting
+the result of functions that return <code>Option</code> and deciding what to do next.</p>
+<p>So what's the issue?</p>
+<p>Imagine we have a function to read some configuration paths from an env var,
+while enforcing the invariant that the list can't be empty:</p>
+<div><pre><code>use anyhow::{Result, ensure};
+
+fn get_configuration_directories() -&gt; Result&lt;Vec&lt;PathBuf&gt;&gt; {
+    let value = env::var("CONFIG_DIRS").context("could not read CONFIG_DIRS")?;
+
+    let directories: Vec&lt;PathBuf&gt; = value
+        .split(',')
+        .map(str::trim)
+        .map(PathBuf::from)
+        .collect();
+
+    ensure!(!directories.is_empty(), "empty CONFIG_DIRS");
+    Ok(directories)
+}</code></pre></div>
+<p>So far, so good. Now let's take a typical usage of this function:</p>
+<div><pre><code>fn main() -&gt; Result&lt;()&gt; {
+    let config_dirs = get_configuration_directories()?;
+
+    match config_dirs.first() {
+        Some(cache_dir) =&gt; initialize_cache(cache_dir),
+        None =&gt; unreachable!("already checked that CONFIG_DIRS is non-empty"),
+    }
+
+    Ok(())
+}</code></pre></div>
+<p>Once <code>get_configuration_directories</code> returns a successful result,
+we are guaranteed that the vector isn't empty. And yet, if we want to get the
+first element of this vector, we have to use the <code>first</code> method that returns
+<code><span>Option&lt;&amp;T&gt;</span></code>. We are therefore forced - again - to handle a potentially
+empty case (where the option is <code>None</code>).</p>
+<p>As the original article states, this has a number of problems with code clarity,
+potential performance implications and a ticking time bomb if the invariant
+is ever changed in <code>get_configuration_directories</code>.</p>
+<p>The core issue is that <code>Vec</code> is fundamentally a type that can be empty; we
+can carry along a "This one can't be empty, pinky promise!" comment on all the
+relevant code, but it's not formally checked by anything.</p>
+<div id="a-type-for-non-empty-vector">
+<h2>A type for "non-empty" vector</h2>
+<p>The solution is leveraging the type system to enforce a newly established
+invariant. We can use a separate type for "a vector that cannot be empty";
+in fact, such types already exist in several Rust crates - for example
+<a href="https://docs.rs/nonempty/latest/nonempty/">nonempty</a>:</p>
+<div><pre><code>pub struct NonEmpty&lt;T&gt; {
+    pub head: T,
+    pub tail: Vec&lt;T&gt;,
+}</code></pre></div>
+<p>This type has no constructor that permits "no elements"; its <code>new</code> takes
+one element, and its <code>first</code> method returns <code>&amp;T</code> without an <code>Option</code>:</p>
+<div><pre><code>pub const fn new(e: T) -&gt; Self {
+    Self::singleton(e)
+}
+
+pub const fn singleton(head: T) -&gt; Self {
+    NonEmpty {
+        head,
+        tail: Vec::new(),
+    }
+}
+
+pub const fn first(&amp;self) -&gt; &amp;T {
+    &amp;self.head
+}</code></pre></div>
+<p>The rest of the crate deals with making <code>NonEmpty</code> behave as close as possible
+to a normal <code>Vec</code>, by implementing many useful traits, as well as conversions
+like:</p>
+<div><pre><code>pub fn from_vec(mut vec: Vec&lt;T&gt;) -&gt; Option&lt;NonEmpty&lt;T&gt;&gt; {
+    if vec.is_empty() {
+        None
+    } else {
+        let head = vec.remove(0);
+        Some(NonEmpty { head, tail: vec })
+    }
+}</code></pre></div>
+<p>Let's see how our <code>get_configuration_directories</code> function would look if it
+returned a <code>NonEmpty</code> instead of a plain <code>Vec</code>:</p>
+<div><pre><code>fn get_configuration_directories() -&gt; Result&lt;NonEmpty&lt;PathBuf&gt;&gt; {
+    let value = env::var("CONFIG_DIRS").context("could not read CONFIG_DIRS")?;
+
+    let directories = value
+        .split(',')
+        .map(str::trim)
+        .map(PathBuf::from)
+        .collect();
+
+    let Some(directories) = NonEmpty::from_vec(directories) else {
+        bail!("CONFIG_DIRS cannot be empty");
+    };
+
+    Ok(directories)
+}</code></pre></div>
+<p>Note the use of <code><span>NonEmpty::from_vec</span></code> here - this is where the invariant is
+established. Now a successful result is <code>NonEmpty</code>, not just <code>Vec</code>. The
+client code looks like:</p>
+<div><pre><code>fn main() -&gt; Result&lt;()&gt; {
+    let config_dirs = get_configuration_directories()?;
+
+    initialize_cache(config_dirs.first())?;
+    Ok(())
+}</code></pre></div>
+<p>There's no need to check if the returned value is empty again; this is enforced
+by the type system!</p>
+<p>This is where the parse vs. validate terminology of the original article comes
+from. When <code>get_configuration_directories</code> returned a <code>Vec</code>, it simply
+validated it. But when it returns a <code>NonEmpty</code> - the vector is transformed
+into another entity which carries additional meaning. If we treat the concept
+of parsing in the most generic sense - "transforming data from one format to
+another", this fits.</p>
+<p>To mention a less artificial example, the
+<a href="https://github.com/rustcoreutils/posixutils-rs">Rust rewrite of core POSIX utilities</a>
+uses <code>NonEmpty</code> in several places <a href="#footnote-2" id="footnote-reference-2">[2]</a>. For example, when constructing a
+shell pipeline:</p>
+<div><pre><code>pub struct Pipeline {
+    pub commands: NonEmpty&lt;Command&gt;,
+    pub negate_status: bool,
+}</code></pre></div>
+<p>The command parser's code:</p>
+<div><pre><code>fn parse_pipeline(&amp;mut self, alias_table: &amp;AliasTable) -&gt; ParseResult&lt;Option&lt;Pipeline&gt;&gt; {
+    // pipeline = "!" command ("|" linebreak command)*
+    let negate_status = self.match_alternatives(&amp;[CommandToken::Bang])?.is_some();
+    let mut commands = if let Some(command) = self.parse_command(alias_table)? {
+        NonEmpty::new(command)
+    } else {
+        return Ok(None);
+    };
+
+    // ...</code></pre></div>
+<p>A valid <code>Pipeline</code> is only returned if there are some commands in the
+parsed AST. Otherwise, it just returns <code>None</code>. Once this is done, the client
+code can use <code>commands.first()</code> without having to worry about the
+possibility of it returning <code>None</code>.</p>
+</div>
+<div id="gradual-parsing-and-type-refinement">
+<h2>Gradual parsing and type refinement</h2>
+<p>A somewhat more interesting example can be found in the source code of
+<a href="https://github.com/rust-lang/rust-analyzer">rust-analyzer</a>. This project
+has a type that represents an absolute filesystem path:</p>
+<div><pre><code>pub struct AbsPathBuf(Utf8PathBuf);</code></pre></div>
+<p>Instead of carrying around a regular path, the absoluteness is recorded in
+the type once the initial parsing and validation is done:</p>
+<div><pre><code>impl TryFrom&lt;Utf8PathBuf&gt; for AbsPathBuf {
+    type Error = Utf8PathBuf;
+    fn try_from(path_buf: Utf8PathBuf) -&gt; Result&lt;AbsPathBuf, Utf8PathBuf&gt; {
+        if !path_buf.is_absolute() {
+            return Err(path_buf);
+        }
+        Ok(AbsPathBuf(path_buf))
+    }
+}</code></pre></div>
+<p>Subsequent code doesn't have to validate the the path is absolute. The type
+enforces it.</p>
+<p>Note also that <code>AbsPathBuf</code> wraps <code>Utf8PathBuf</code>, not <code>PathBuf</code>.
+<code>Utf8PathBuf</code> is itself a custom, "parsed" type refinement from the
+<a href="https://docs.rs/camino/latest/camino/">camino crate</a>. Regular paths in the
+Rust standard library aren't guaranteed to be valid UTF-8, so they cannot be
+easily converted to a <code>String</code> (which has to be valid UTF-8 in Rust);
+<code><span>camino::Utf8PathBuf</span></code> establishes validity on construction, and can then
+be converted to a string with just:</p>
+<div><pre><code>fn as_str(&amp;self) -&gt; &amp;str {
+  ...
+}</code></pre></div>
+<p>So we have an example of gradual parsing and type refinement here:</p>
+<div><pre><code>std::path::PathBuf
+
+      |
+      |   prove UTF-8
+      |
+      V
+
+camino::Utf8PathBuf
+
+      |
+      |   prove absolute
+      |
+      V
+
+rust-analyzer's paths::AbsPathBuf</code></pre></div>
+</div>
+<div id="non-zero-integers">
+<h2>Non-zero integers</h2>
+<p>Rust has a generic type called <a href="https://doc.rust-lang.org/std/num/struct.NonZero.html">NonZero</a>,
+to describe unsigned numeric quantities that are known to be non-zero.</p>
+<p>For example, <code><span>thread::available_parallelism</span></code> is defined as:</p>
+<div><pre><code>pub fn available_parallelism() -&gt; Result&lt;NonZero&lt;usize&gt;&gt;</code></pre></div>
+<p>If the call is successful, it returns a <code>NonZero&lt;usize&gt;</code>, which is like
+a normal <code>usize</code> with the restriction that it's not zero. Client code doesn't
+have to keep checking whether the parallelism is 0 - it's enshrined in the type
+system.</p>
+<p>Rust defines the <a href="https://doc.rust-lang.org/std/primitive.u32.html#impl-Div%3CNonZero%3Cu32%3E%3E-for-u32">division operator</a>
+with <code>NonZero&lt;usize&gt;</code> in the denominator as an operation that "cannot panic".</p>
+<p><code>NonZero</code> has an additional advantage: zero is an invalid value for the
+type, so Rust can use the zero bit pattern to represent <code>None</code>. Consequently,
+<code>Option&lt;NonZeroUsize&gt;</code> is <a href="https://doc.rust-lang.org/std/option/index.html#representation">guaranteed to have the same size</a> and alignment as
+<code>NonZeroUsize</code> itself (and as <code>usize</code>). This can avoid the extra storage
+that an <code>Option&lt;usize&gt;</code> would generally require.</p>
+</div>
+<div id="parsing-json">
+<h2>Parsing JSON</h2>
+<p>A common example of the "parse, don't validate" idiom appears in deserializing
+data from a JSON string. Rust's <code>serde</code> crate enables us to do the parsing,
+with validated decisions encoded into the type system, e.g.:</p>
+<div><pre><code>#[derive(Debug, Deserialize)]
+struct Config {
+    name: String,
+    workers: NonZeroUsize,
+    mode: Mode,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum Mode {
+    Fast,
+    Safe,
+}</code></pre></div>
+<p>And then later:</p>
+<div><pre><code>let input = r#"
+     {
+         "name": "compiler",
+         "workers": 4,
+         "mode": "fast"
+     }
+ "#;
+
+ let config: Config = serde_json::from_str(input)?;</code></pre></div>
+<p>There is a lot happening behind the scenes:</p>
+<ul>
+<li>The types of all fields are enforced (e.g. "name" cannot be an array).</li>
+<li>The <code>mode</code> is validated to be one of the enum values of <code>Mode</code>.</li>
+<li><code>workers</code> is validated to be a non-zero integer, because of the
+<code>NonZeroUsize</code> field type.</li>
+</ul>
+<p>We take code like this for granted these days, but it's still a great example
+of the pattern discussed in this post. Once the parser converted <code>mode</code> into
+the <code>Mode</code> enum, no further validation is required.</p>
+<p>In dynamic languages like Python and JS, the process is usually much more
+manual. Python's <code>json.loads</code> gives us a dictionary, and it's up to the user
+to validate its contents. Libraries like Pydantic permit an approach closer to
+Rust's, but they're not universally used.</p>
+<hr>
+<table id="footnote-1">
+<colgroup><col><col></colgroup>
+<tbody>
+<tr><td><a href="#footnote-reference-1">[1]</a></td><td>Other languages - like Go or Python - have a runtime check that raises
+some sort of exception or panic when <code>lst[0]</code> is accessed on an empty
+list or slice.</td></tr>
+</tbody>
+</table>
+<table id="footnote-2">
+<colgroup><col><col></colgroup>
+<tbody>
+<tr><td><a href="#footnote-reference-2">[2]</a></td><td>The project implements its own <code>NonEmpty</code>, without relying on the
+<code>nonempty</code> crate, but all the points in this post apply.</td></tr>
+</tbody>
+</table>
+</div>
+
+            </div>
+            
+<hr>
+<p>
+For comments, please send me
+<a href="mailto:eliben@gmail.com"><i></i> an email</a>.
+</p>        </article>
+    </section></div>

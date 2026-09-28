@@ -1,0 +1,302 @@
+---
+title: 'Holo4: powering generalist computer-use agents'
+link: https://huggingface.co/blog/Hcompany/holo4
+source: huggingface-co
+published: 2026-09-28T09:44:05Z
+updated: 2026-09-28T09:44:05Z
+first_seen: 2026-09-28T15:21:52.698000543Z
+content: extracted
+html: 2026-09-28-holo4-powering-generalist-computer-use-agents.html
+preview:
+  file: 2026-09-28-holo4-powering-generalist-computer-use-agents.preview-fb8b4e23ea4d.webp
+  width: 256
+  height: 130
+  color: '#e8e5e1'
+images:
+- source: https://cdn-uploads.huggingface.co/production/uploads/69fc7e49052f11ab9931b672/yzjxvlmlZKtjASwAYu6bN.jpeg
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-a33ef213dc49.jpg
+    width: 1280
+    height: 648
+  color: '#f0ede7'
+- source: https://assets.hcompanyprod.fr/holo4/hf/holo4-cover.jpg
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-f9952ab70667.jpg
+    width: 1920
+    height: 1005
+  color: '#161419'
+- source: https://assets.hcompanyprod.fr/holo4/hf/holo4-benchmark-table.png
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-a8aa00fce638.png
+    width: 1640
+    height: 2012
+  variants:
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-3754c9cecfdf.webp
+    width: 320
+    height: 393
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-52f4f24b7fe7.webp
+    width: 640
+    height: 785
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-2fad1ce1a47d.webp
+    width: 960
+    height: 1178
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-61245e7ae063.webp
+    width: 1640
+    height: 2012
+  color: '#fbfbfb'
+- source: https://assets.hcompanyprod.fr/holo4/hf/holo4-cost-osworld2.png
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-d09bf6bf1702.png
+    width: 1656
+    height: 1280
+  variants:
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-6c6725f07789.webp
+    width: 320
+    height: 247
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-c2d735058598.webp
+    width: 640
+    height: 495
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-524032c3b468.webp
+    width: 960
+    height: 742
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-43a4e25bdadd.webp
+    width: 1280
+    height: 989
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-3c4c6a6e99e9.webp
+    width: 1656
+    height: 1280
+  color: '#fafafb'
+- source: https://assets.hcompanyprod.fr/holo4/hf/holo4-cost-automationbench.png
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-29c4dba5ed08.png
+    width: 1656
+    height: 1280
+  variants:
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-c5592cb62216.webp
+    width: 320
+    height: 247
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-9fdef8d297d3.webp
+    width: 640
+    height: 495
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-7484a7dc4df7.webp
+    width: 960
+    height: 742
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-5134f9147ec6.webp
+    width: 1280
+    height: 989
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-c7fbaeb3a49f.webp
+    width: 1656
+    height: 1280
+  color: '#fafafc'
+- source: https://assets.hcompanyprod.fr/holo4/hf/holo4-task-factory.png
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-d883c1ae752d.png
+    width: 2208
+    height: 910
+  variants:
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-566c71b8474f.webp
+    width: 320
+    height: 132
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-eef3708454c3.webp
+    width: 640
+    height: 264
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-abbf67f65a0d.webp
+    width: 960
+    height: 396
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-fae65e970404.webp
+    width: 1280
+    height: 528
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-c43b17ce185d.webp
+    width: 1600
+    height: 659
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-c133fce9e715.webp
+    width: 2208
+    height: 910
+  color: '#f6f6f8'
+- source: https://assets.hcompanyprod.fr/holo4/hf/holo4-training.png
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-947ee739b09e.png
+    width: 1640
+    height: 1252
+  variants:
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-52c3e231070e.webp
+    width: 320
+    height: 244
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-90b99d84c8b2.webp
+    width: 640
+    height: 489
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-4193bdd13fb2.webp
+    width: 960
+    height: 733
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-ee745d7c8030.webp
+    width: 1640
+    height: 1252
+  color: '#fdfcfd'
+- source: https://assets.hcompanyprod.fr/holo4/hf/holo4-harness-history.png
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-fba0eaad7efc.png
+    width: 2208
+    height: 1090
+  variants:
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-2a4f0626383c.webp
+    width: 320
+    height: 158
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-81f8db95ab0d.webp
+    width: 640
+    height: 316
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-848c37bc31b8.webp
+    width: 960
+    height: 474
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-42991f52e030.webp
+    width: 1280
+    height: 632
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-154b85ccca98.webp
+    width: 1600
+    height: 790
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-57967262a430.webp
+    width: 2208
+    height: 1090
+  color: '#fdfdfd'
+- source: https://assets.hcompanyprod.fr/holo4/hf/holotron4-benchmarks.png
+  original:
+    file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-733d84534070.png
+    width: 1640
+    height: 582
+  variants:
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-10fd34fce5c2.webp
+    width: 320
+    height: 114
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-5d4698a46006.webp
+    width: 640
+    height: 227
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-abbcee6a33c3.webp
+    width: 960
+    height: 341
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-01eb3b9e7814.webp
+    width: 1280
+    height: 454
+  - file: 2026-09-28-holo4-powering-generalist-computer-use-agents.image-8e25c139f9d7.webp
+    width: 1640
+    height: 582
+  color: '#fcfcfd'
+---
+
+[![Floor of screens from Holo4 benchmark runs across web apps, desktop software and mobile.](https://assets.hcompanyprod.fr/holo4/hf/holo4-cover.jpg)](https://assets.hcompanyprod.fr/holo4/hf/holo4-cover.jpg)
+
+Holo4 is our new series of agentic models. It comes in two sizes: 27B dense and 35B-A3B Mixture of Experts. Both are available on the H Models API. We are also releasing an updated version of Holotron 3: Holotron4 Nano.
+
+Holo4 builds on our previous model and interacts with software through any available interface: GUIs, code, MCP and APIs. It scores well on academic benchmarks, but we built it for real business workflows. It was trained through supervised and reinforcement learning on a large set of environments and tasks, including those generated by our Agentic Task Factory.
+
+**Get started now:**
+
+- 🤖 **Models:** [Holo4-27B](https://huggingface.co/Hcompany/Holo4-27B) | [Holo4-35B-A3B](https://huggingface.co/Hcompany/Holo4-35B-A3B) | [Holotron4 Nano](https://huggingface.co/Hcompany/Holotron4-30B-A3B)
+- 🗂️ **Full collection (FP16, FP8, GGUF):** [Holo4](https://huggingface.co/collections/Hcompany/holo4)
+- 🎞️ **Trajectories:** [viewer](https://trajectories.hcompany.ai) | [dataset](https://huggingface.co/datasets/Hcompany/trajectories)
+- ⚡ **H Models API:** [quickstart](https://hub.hcompany.ai/models-api/quickstart)
+- 📝 **Full blog post:** [hcompany.ai/newsroom/holo4](https://hcompany.ai/newsroom/holo4)
+
+## Models built for every interface
+
+Holo4 clicks and types on a screen, writes and runs its own code, and calls MCP or API tools. It uses whichever fits the task. Most agentic models are trained for one interface only: GUI-focused models are blind without a screen, while models that prefer tool calling are stuck in front of an application that has no API. Real work is not siloed that way, and a single business task can require combining these different approaches.
+
+Holo4 runs on desktops, on the web, on Android, in a code sandbox and against business APIs. It is the same model in each case and it is called the same way. You do not need to select a different model for each platform.
+
+[![Holo4 benchmark results with cost per task, against Qwen3.8 27B and frontier models](https://assets.hcompanyprod.fr/holo4/hf/holo4-benchmark-table.png)](https://assets.hcompanyprod.fr/holo4/hf/holo4-benchmark-table.png)
+
+Holo4 models improve significantly over their Qwen base. Holo4 trails only the strongest closed models on long workflows: on OSWorld 2.0, Holo4 27B scores 61.7% against 81.8% for Opus 5.5, and Holo4 35B-A3B reaches 30.9%. However, it does so with orders of magnitude fewer parameters and at a much lower cost. We open-source every trajectory behind our scores on public benchmarks: replay each step at [trajectories.hcompany.ai](https://trajectories.hcompany.ai) or download them from [Hugging Face](https://huggingface.co/datasets/Hcompany/trajectories).
+
+## Competitive with the frontier, at a fraction of the cost
+
+On the hardest academic benchmarks for desktop control (OSWorld 2.0) and API use (AutomationBench), Holo4 competes with frontier models at a much lower cost per task.
+
+[![OSWorld 2.0: average partial score vs. cost per task](https://assets.hcompanyprod.fr/holo4/hf/holo4-cost-osworld2.png)](https://assets.hcompanyprod.fr/holo4/hf/holo4-cost-osworld2.png)
+
+[![AutomationBench: score vs. cost per task](https://assets.hcompanyprod.fr/holo4/hf/holo4-cost-automationbench.png)](https://assets.hcompanyprod.fr/holo4/hf/holo4-cost-automationbench.png)
+
+Notes on the cost-performance charts
+
+**OSWorld 2.0.** Costs are estimated from the input and output tokens of each agentic run. Holo4 is priced at H Models API rates (single run). Qwen3.8 27B: model card score, cost from the tokens of our run at Alibaba Cloud list prices. Qwen3.6 35B-A3B: single run in our harness, at Alibaba Cloud list prices with cache hits at 20% of the input price. OpenAI launch data supplies the GPT and Opus effort sweeps; other closed and open-weight points use the [official OSWorld 2.0 leaderboard](https://osworld-v2.xlang.ai/). Releases, harnesses and task subsets differ. The line connects non-dominated score and cost pairs among the closed models; Holo4 is excluded.
+
+**AutomationBench.** Holo4, Qwen3.8 27B and Qwen3.6 35B-A3B: AutomationBench v1.0.6, scores and costs measured in our internal harness. Other models: public-set scores from the [AutomationBench README](https://github.com/zapier/AutomationBench), cost per task from the [official leaderboard](https://zapier.com/benchmarks), which runs on the private set. We will report Holo4 on the private set once it is evaluated.
+
+## AI that does work
+
+Trained on environments and tasks from our Agentic Task Factory, Holo4 models excel on professional software. The examples below show Holo4 27B alongside Qwen3.8 27B, its base model. Same prompt and harness for both models.
+
+### 3D modeling · Eiffel tower
+
+> Build a 3D model of the Eiffel Tower in FreeCAD, at a scale of 1 mm to 1 metre, centred on the origin and aligned to the X and Y axes. Work to this design.
+>
+> The tower is square in plan at every height, never round. Its half-width, measured from the central axis out to the corner, is 62.5 mm at ground level, 32.5 mm at height 57, 17.5 mm at height 115, and 9.35 mm at height 276. Between those heights the half-width follows a smooth curve that falls steeply near the ground and gently higher up, never a straight line.
+>
+> Four identical legs, one per quadrant, each a square column whose outer corner follows that profile. Each leg is 14 mm across at the ground and tapers to 4 mm at height 276. The legs stand apart from the ground up to the first platform, and converge as they rise. Nothing fills the space between them: the tower is open, and you can see straight through it from every side.
+>
+> Three platforms, each a solid square slab centred on the axis: 72 mm across and 4 mm thick at height 57; 40 mm across and 3 mm thick at height 115; 22 mm across and 3 mm thick at height 276.
+>
+> A mast from height 276 to 324, square, 8 mm across at its base tapering to 2 mm at the tip.
+>
+> Every part must be a closed solid with non-zero volume, and no part may fill the space between the legs.
+
+**Holo4 27B** (84 calls, 1.3M tokens)
+
+**Qwen3.8 27B** (60 calls, 1.0M tokens)
+
+### 3D modeling · H logo
+
+> Build a 3D model in FreeCAD of the H company logo: a solid filled disc beside a blocky sans-serif capital letter H, both extruded to the same thickness, the two shapes of similar height and set apart so they do not overlap, with the centre of the disc level with the middle of the H. Colour both shapes black.
+
+**Holo4 27B** (94 calls, 1.5M tokens)
+
+**Qwen3.8 27B** (118 calls, 1.9M tokens)
+
+### Game design · Pac-Man
+
+> Build a Pac-Man-style game in Godot and leave it running.
+>
+> A rectangular maze of walls laid out on a grid, with pellets filling every open corridor. A player marker moves continuously along the corridors, eating each pellet it passes over and scoring a point for it. Three ghosts move through the same corridors and chase the player. If a ghost catches the player, the player loses a life and everything resets to its starting position. Score and lives are drawn on screen.
+>
+> No one is going to play this. The player drives itself with a simple heuristic: at each junction it heads toward the nearest pellet, unless a ghost is close, in which case it moves away from the ghost. The game must run unattended and indefinitely, with no keyboard input at all.
+>
+> When it works, start the game and leave it playing.
+
+**Holo4 27B** (68 calls, 2.4M tokens, 268 lines)
+
+**Qwen3.8 27B** (197 calls, 11.4M tokens, 327 lines)
+
+## How we built Holo4
+
+### Agentic task factory
+
+Our internal set of agentic pipelines builds interactive environments and verifiable tasks from documentation alone, such as screenshots of real websites or open-source software. So far it has produced about 10,000 tasks across web apps, MCP servers and desktop environments, including hybrid environments that expose the same state through a GUI and MCP.
+
+[![Agentic Task Factory: sources, build, gates, runtime and output](https://assets.hcompanyprod.fr/holo4/hf/holo4-task-factory.png)](https://assets.hcompanyprod.fr/holo4/hf/holo4-task-factory.png)
+
+### Training
+
+[![Holo4 training: supervised fine-tuning on 127B tokens, two RL experts, one merged model](https://assets.hcompanyprod.fr/holo4/hf/holo4-training.png)](https://assets.hcompanyprod.fr/holo4/hf/holo4-training.png)
+
+### Harness
+
+Alongside training, we rebuilt our harness, the loop that executes the model's actions and manages its context over hundreds of steps, using feedback from agentic performance on OSWorld 2.0. Agents tagged why each task failed and engineers reviewed their fixes. The largest changes were giving the agent a reliable memory that can keep track of hundreds of steps, and a shell on the desktop machine itself.
+
+[![Automatic harness engineering: OSWorld 2.0 score of every evaluation run over time](https://assets.hcompanyprod.fr/holo4/hf/holo4-harness-history.png)](https://assets.hcompanyprod.fr/holo4/hf/holo4-harness-history.png)
+
+*Opus 5 (70.2%) and GPT-5.6 Sol (66.2%) use max-effort partial rewards on the v2026.08.08 offline set from [OpenAI's launch chart](https://openai.com/index/introducing-gpt-6-sol-and-luna/), as in the cost-performance plot. Other reference scores come from model cards and the official leaderboard. Task releases, subsets and harnesses vary.*
+
+## Holotron4 Nano
+
+Our post-training stack is designed to adapt to new foundation models and produce agents that generalize across interfaces and environments. As a member of the [NVIDIA Nemotron Coalition](https://hcompany.ai/newsroom/h-joins-nemotron-coalition), we applied our latest stack to the Nemotron 3 Nano Omni model as a follow-up to Holotron 3.
+
+The same recipe turns Nemotron 3 Nano Omni into Holotron4 Nano, a generalist agentic model that significantly improves over the base model on GUI workflows and in environments exposing MCP, APIs or coding sandboxes.
+
+[![Holotron4 Nano vs. Nemotron 3 Nano Omni across five benchmarks](https://assets.hcompanyprod.fr/holo4/hf/holotron4-benchmarks.png)](https://assets.hcompanyprod.fr/holo4/hf/holotron4-benchmarks.png)
+
+*Gains are absolute percentage-point improvements over Nemotron 3 Nano Omni.*
+
+These gains show that our recipe transfers well and can turn a generalist model into an agentic expert. Nothing in it is size-specific.
+
+## Run it yourself
+
+Both sizes are available today on the [H Models API](https://hub.hcompany.ai/models-api/introduction). Weights are on [Hugging Face](https://huggingface.co/collections/Hcompany/holo4) in BF16, FP8, NVFP4 and 4-bit GGUF, next to our small model, [Holotron4 Nano](https://huggingface.co/Hcompany/Holotron4-30B-A3B).
+
+We will release optimized DSpark drafter checkpoints in the coming days to further accelerate inference.
