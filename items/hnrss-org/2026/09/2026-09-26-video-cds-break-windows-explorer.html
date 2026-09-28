@@ -1,0 +1,33 @@
+<div id="readability-page-1" class="page"><div id="post-body-3469618691936154349">
+<p>There is an odd bug in Windows related to <a href="https://en.wikipedia.org/wiki/Video_CD">Video CDs</a>.<br>
+To reproduce it:</p>
+<ol>
+<li>Insert a Video CD (if you don't have one, you can download <a href="https://archive.org/download/video-cd-sampler/Video%20CD%20Sampler.7z">this file</a>, extract it and burn it with something that supports bin+cue images, like AnyBurn).</li>
+<li>Open Explorer and copy the Video CD contents to the PC (you can copy just the <em>MPEGAV</em> folder, which contains the big multimedia files).</li>
+</ol>
+<p>The typical outcome is that at some point the copying speed drops to zero and it stays there:<br></p>
+<p><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhmEXpyEYrKp1IrBYcszlrHRpBjTAvVf4YsSvuuaJSHMt4GIe1IK5wY29MGno4NiTYDAQd3LWEchLC65hmShxwPVBp1xZhpb0YICEog5e1m7kA4FrUsw2XFK5yzD8_plHvcetHaTC1t7yU7hGFIpt4LUePB98vCxqjltTa7oww8Wyy1bUQ0FOeLv0fqqAFQ/s1600/vcdbug.png"><img alt="" data-original-height="842" data-original-width="1733" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhmEXpyEYrKp1IrBYcszlrHRpBjTAvVf4YsSvuuaJSHMt4GIe1IK5wY29MGno4NiTYDAQd3LWEchLC65hmShxwPVBp1xZhpb0YICEog5e1m7kA4FrUsw2XFK5yzD8_plHvcetHaTC1t7yU7hGFIpt4LUePB98vCxqjltTa7oww8Wyy1bUQ0FOeLv0fqqAFQ/s1600/vcdbug.png"></a></p>
+<p>When that happens, Windows Explorer is in a "broken" state. You can close the copy window and eject the VCD and it might look like everything is fine, but there are problems. For example, new files and folders are not visible without manually refreshing the view, some parts of the Windows UI become glitchy and the Windows Explorer process can't be restarted.</p>
+<p>The only way to get the system working properly again is to restart the PC. A "soft" restart from Windows doesn't work, though; it just gets stuck at the "Restarting" screen forever. You need to do it by pressing the restart or power button. To investigate this bug more easily, I used virtual machines (VMware Workstation works best here and you can reboot the VM without affecting the host).</p>
+<p>Here are my findings:</p>
+<ul>
+<li>The bug first appeared with the monthly updates 2023-03 (KB5023706) for Windows 11 and 2023-04 (KB5025221) for Windows 10. The initial releases of Windows 10 and Windows 11 22H2 with no updates do not have this bug.</li>
+<li>You can often reproduce the bug even with a virtual CD drive (by mounting the VCD image with Alcohol 120%, for example). But doing it with a physical CD is more reliable, maybe just because the copying process lasts longer and the bug has more time to appear.</li>
+<li>If you can't reproduce the bug the first time, delete the copied files, reboot and try again.</li>
+<li>Playing the VCD content with Windows Media Player does not trigger the bug.</li>
+<li>Extracting the content with a dedicated app like VCDGear does not trigger the bug.</li>
+<li>Copying files with a 3rd party app (FastCopy, TeraCopy) does not trigger the bug, unless the app uses the standard Windows method for copying (Total Commander does, by default).</li>
+<li>The bug cannot always be reproduced. But I've seen it on different systems, even with untouched Windows installations. I also found a few reports from other people (<a href="https://www.reddit.com/r/techsupport/comments/16kto9o/old_cds_are_trying_to_kill_my_computers_off_what/">example 1</a>, <a href="https://www.reddit.com/r/DataHoarder/comments/1gruw45/copying_family_videos_from_vcddvd_format_into_pc/">example 2</a>).</li>
+</ul>
+<p>I have reported the bug to Microsoft through the Feedback Hub at the end of 2025. Nothing has happened since — no feedback, no confirmation, no fix. Granted, it <em>is</em> a rare bug that very few people will encounter these days, to put it mildly. But a bug that affects system stability is still somewhat urgent, I think.</p>
+<h4>Why are Video CDs different and how to deal with them?</h4>
+<p>Even though VCDs appear as regular data discs in Windows Explorer, they're actually not. While searching for clues online, I found out that, for example, Linux doesn't let you copy the files the same way that Windows does. That caused some complaints from users over the years, which prompted some explanations.</p>
+<blockquote>
+<p>VCD's look like standard iso9660 filesystems, but they are not. Attempting to use the filesystem entries for other than pointers to the start of files will result in pointing off the disk due to invalid data. Typically when you copy a VCD you want the still images, menus, CD audio, i-frame index, etc. Copying the disk with dd retains that. Pulling the files off (and ignoring errors, the way Windows does) loses that. (<a href="https://www.linuxquestions.org/questions/fedora-35/copy-standard-video-cd%27s-avseq01-dat-avseq02-dat-525215/">source</a>)</p>
+</blockquote>
+<blockquote>
+<p>About .DAT files.&nbsp; The ~600 MB file visible on the first track of the mounted VCD is not a real file! It is a so called ISO gateway, created to allow Windows to handle such tracks (Windows does not allow raw device access to applications at all). Under Linux you cannot copy or play such files (they contain garbage). Under Windows it is possible as its iso9660 driver emulates the raw reading of tracks in this file. (<a href="http://www.mplayerhq.hu/DOCS/HTML/en/vcd.html">source</a>)</p>
+</blockquote>
+<p>Also, even if you successfully copy the .dat files several times without triggering the bug, the resulting files are not identical, probably because there's no error detection and error correction like on a typical data disc. To rip a Video CD properly, it's therefore better to use dedicated software, such as VCDGear, which will extract the AV content and try to fix the mpeg stream errors. Or clone the whole VCD with imaging software to a bin+cue image.</p>
+<p>To sum up: yes, copying VCD files in Windows Explorer was never the optimal way to get the content. But many people were doing that, because the UI says it's <em>possible</em> and it more or less worked fine. A Windows update in early 2023 changed something that affects copying those files. I would expect a fix that either restores the old behavior or just prevents copying VCD files and redirects users to alternative ways. Anything would be better than making the system unstable.</p>
+</div></div>
