@@ -168,6 +168,12 @@ images:
     width: 320
     height: 424
   color: '#f9f9f6'
+- source: https://i.ytimg.com/vi/l1A7EzO6SKc/hqdefault.jpg
+  original:
+    file: 2026-09-26-what-reversing-modernising-old-games-tells-us-about-the.image-1dcc45c145be.jpg
+    width: 480
+    height: 360
+  color: '#2a3435'
 ---
 
 Some observations from my [War of the Lance](https://en.wikipedia.org/wiki/War_of_the_Lance_%28video_game%29) (1989) Code Harness assisted modernisation (WIP)

@@ -66,6 +66,12 @@ images:
     width: 1028
     height: 578
   color: '#332a1b'
+- source: https://i.ytimg.com/vi/IZAlq-V19U8/hqdefault.jpg
+  original:
+    file: 2026-09-29-claude-code-s-next-era-thariq-shihipar-anthropic.image-b219c9897b12.jpg
+    width: 480
+    height: 360
+  color: '#010001'
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/217893105/b910afe71a4c96e14fd7271715a2cd15.mp3
