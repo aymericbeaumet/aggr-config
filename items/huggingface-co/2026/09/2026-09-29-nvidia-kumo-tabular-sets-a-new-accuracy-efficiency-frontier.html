@@ -1,0 +1,120 @@
+<div id="readability-page-1" class="page"><div>
+<h2>
+	<a id="highlights-tldr" href="#highlights-tldr" rel="nofollow">
+		
+	</a>
+	<span>
+		Highlights (TL;DR)
+	</span>
+</h2>
+<p>NVIDIA Kumo Tabular, part of the NVIDIA Kumo Structured model collection, is an open foundation model for tabular data now available on <a href="https://huggingface.co/nvidia/Kumo-Tabular">Hugging Face</a>. Given a table of labeled rows, it predicts the labels of new rows in a single forward pass, with no training, no tuning, and no feature engineering, for both classification and regression. It was pretrained only on artificial data, comes in three sizes (28M to 215M parameters), runs through our <a href="https://github.com/NVIDIA/structured-data-models" rel="nofollow">open-source library</a>, and is released under the <a href="https://openmdw.ai/license/1-1/" rel="nofollow">OpenMDW-1.1 license</a> for commercial use. It ranks first on the four benchmarks <a href="https://github.com/autogluon/tabarena" rel="nofollow">TabArena</a>, <a href="https://github.com/autogluon/tabarena" rel="nofollow">BeyondArena</a>, <a href="https://github.com/LAMDA-Tabular/TALENT" rel="nofollow">TALENT</a> and <a href="https://github.com/jonaslandsgesell/ScoringBench" rel="nofollow">ScoringBench</a>.</p>
+<ul>
+<li><strong>Model Code:</strong> <a href="https://github.com/NVIDIA/structured-data-models" rel="nofollow">https://github.com/NVIDIA/structured-data-models</a></li>
+<li><strong>Model Weights:</strong> <a href="https://huggingface.co/nvidia/Kumo-Tabular">https://huggingface.co/nvidia/Kumo-Tabular</a></li>
+</ul>
+<h2>
+	<a id="the-shift-to-tabular-foundation-models" href="#the-shift-to-tabular-foundation-models" rel="nofollow">
+		
+	</a>
+	<span>
+		The Shift to Tabular Foundation Models
+	</span>
+</h2>
+<p>Tabular data is the backbone of enterprise machine learning. Customer records, transactions, sensor logs, claims, and orders all live in tables, and predicting churn, default, demand, or price from them is among the most common machine learning tasks in industry. For two decades, this work has been done with gradient-boosted trees, and it has worked well. But the lifecycle around those models has barely changed. Every new question means collecting labels, engineering features, searching hyperparameters, validating, and deploying a model that knows nothing about tables in general and learns each task from scratch.</p>
+<p>Large Language Models showed a different way of working with new tasks. Given a few examples in the prompt, a pretrained model solves the task without updating a single weight. This is <em>in-context learning</em>, and it applies to tables just as well as to text: a model pretrained on millions of tables can read a labeled table as its context and predict the labels of new rows directly.</p>
+<p>Today, we are releasing <strong>NVIDIA Kumo Tabular</strong> (<a href="https://github.com/NVIDIA/structured-data-models" rel="nofollow">GitHub</a>, <a href="https://huggingface.co/nvidia/Kumo-Tabular">HuggingFace</a>), an open foundation model for tabular classification and regression. Given a table with labeled rows and the rows you want predictions for, Kumo Tabular returns class probabilities or numeric predictions in a single forward pass.</p>
+<h2>
+	<a id="how-kumo-tabular-works" href="#how-kumo-tabular-works" rel="nofollow">
+		
+	</a>
+	<span>
+		How Kumo Tabular Works
+	</span>
+</h2>
+<p>Kumo Tabular is a Transformer built around the structure of a table, utilizing column, row and in-context attention as introduced in <a href="https://github.com/soda-inria/tabicl" rel="nofollow">TabICL</a> and <a href="https://github.com/PriorLabs/tabpfn" rel="nofollow">TabPFN</a>. To predict a label it has to do three things: <strong>(1)</strong> understand what each value means within its column, <strong>(2)</strong> understand how the columns of a row interact, and <strong>(3)</strong> relate the context rows with existing labels to the query rows with unknown labels. Kumo Tabular achieves this as follows:</p>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/684040a5de1ad7f4fcec9508/TkT695UAWJnUIyEydIYRv.png" rel="nofollow"><img src="https://cdn-uploads.huggingface.co/production/uploads/684040a5de1ad7f4fcec9508/TkT695UAWJnUIyEydIYRv.png" alt="architecture"></a></p>
+<p><strong>Cell Embedding:</strong> A group of cells becomes a token. Numerical and categorical values pass through Fourier features, sines and cosines of learned frequencies, with separate weights for each type. Missing values need no imputation and are treated specially. Finally, every token in the context receives a label embedding.</p>
+<p><strong>Row Embedding:</strong> We then turn each row into an embedding by alternating two kinds of attention multiple times. Column attention looks down a single column and learns what a value means in the distribution of its column, <em>e.g.</em>, whether a <code>42</code> is typical or extreme, via induced self-attention. Its cost therefore grows linearly with the number of rows. Row attention looks across the tokens of a single row and learns how features interact, with rotary positions to tell columns apart. Four learnable <code>[CLS]</code> tokens join each row and act as the final readout of a row. After this row compression, the cost of the final stage no longer depends on the number of columns.</p>
+<p><strong>In-context Learning:</strong> A final Transformer operates on the row embeddings. Context rows attend to each other, while query rows attend to context rows only. Each prediction therefore depends only on the context and on the row itself, not on which other rows are scored alongside it. Because the context never looks at the queries, its keys and values are computed once and can be reused for follow-up predictions. Query rows utilize Test-GQA, which shrinks the cache that every prediction reads. A head turns each query row into class probabilities for classification and 999 quantiles for regression, from which a point prediction and an uncertainty estimate follow.</p>
+<p><strong>Length-aware Attention Temperature:</strong> Softmax attention spreads out as the number of keys grows. Attention that is sharp over a few hundred rows can dissolve over tens of thousands, which is exactly the situation when a table at inference is much larger than a typical training table. Kumo Tabular therefore scales every query by a temperature that grows with the logarithm of the number of keys, with a coefficient learned separately for each attention head. The result is attention that stays sharp as tables grow longer or wider.</p>
+<h2>
+	<a id="how-kumo-tabular-was-built" href="#how-kumo-tabular-was-built" rel="nofollow">
+		
+	</a>
+	<span>
+		How Kumo Tabular was Built
+	</span>
+</h2>
+<p>Kumo Tabular is pretrained entirely on artificial tables. Each training table is sampled from a <em>Structural Causal Model (SCM)</em> in the six steps shown below:</p>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/684040a5de1ad7f4fcec9508/ipJNJTNO5ZH2zviIdR8eo.png" rel="nofollow"><img src="https://cdn-uploads.huggingface.co/production/uploads/684040a5de1ad7f4fcec9508/ipJNJTNO5ZH2zviIdR8eo.png" alt="prior"></a></p>
+<p>We first draw a configuration for the whole table, from its size and task to its mechanisms and missingness. A random causal graph then links hidden variables, evaluated from root to leaf via randomly drawn functions at every node (<em>e.g.</em>, linear maps, small neural networks, trees or Gaussian processes). Some nodes become numerical or categorical columns, one becomes the target, and the rest stay hidden, like the unmeasured causes behind real data. Post-processing correlates groups of columns, clips outliers, and injects missing values, and a quick tree-ensemble check discards any table without a learnable signal. Because the generator is a procedural sampler rather than a trained model, it produces an endless supply of tables, each with a new graph and new mechanisms.</p>
+<p>Real-world tables are messy, so we built more of their imperfections into the generator. Values go missing in several patterns, some features are coarsened so that duplicate rows may disagree on their label, some categorical columns carry many levels, and regression targets can be heavy-tailed. A model that has seen millions of such tables learns to handle these imperfections without any cleanup.</p>
+<p>On every artificial table, the model sees most of the rows with their labels as context and learns to predict the labels of the remaining rows, with a cross-entropy loss for classification and a quantile loss for regression. Classification and regression are trained as separate models. Similarly to TabICLv2, training runs in three stages. The first and longest stage uses tables of 1,024 rows and up to 100 columns and teaches the model what tables look like. The second stage varies the context from 400 to 10,240 rows, and the third extends it to 60,000 rows, still with up to 100 columns. In total, Kumo Tabular-Small/Medium/Large saw about 35/71/137 million artificial tables.</p>
+<p>Our training recipe and artificial data generators will be released soon.</p>
+<h2>
+	<a id="performance" href="#performance" rel="nofollow">
+		
+	</a>
+	<span>
+		Performance
+	</span>
+</h2>
+<p>We ran all three Kumo Tabular sizes with default settings against the full <a href="https://github.com/autogluon/tabarena" rel="nofollow">TabArena</a> leaderboard, spanning tuned gradient-boosted trees, AutoGluon, and the latest tabular foundation models. Kumo Tabular ranks first overall with an ELO of 1950 while running 17 faster than <a href="https://github.com/limix-ldm-ai/LimiX" rel="nofollow">LimiX-2</a> under a uniform single RTX 6000 Pro evaluation setup. Across all three three model sizes, Kumo Tabular establishes a new state-of-the-art on the accuracy-efficiency Pareto front:</p>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/684040a5de1ad7f4fcec9508/CpOXm3g9du6Uw3zQDh2QC.png" rel="nofollow"><img src="https://cdn-uploads.huggingface.co/production/uploads/684040a5de1ad7f4fcec9508/CpOXm3g9du6Uw3zQDh2QC.png" alt="pareto"></a></p>
+<p>We also evaluated Kumo Tabular on <a href="https://github.com/autogluon/tabarena" rel="nofollow">BeyondArena</a>, <a href="https://github.com/LAMDA-Tabular/TALENT" rel="nofollow">TALENT</a> and <a href="https://github.com/jonaslandsgesell/ScoringBench" rel="nofollow">ScoringBench</a>. On BeyondArena, Kumo Tabular reaches an ELO of 1418 with an Improvability score of 7.78%, placing first on the leaderboard. On TALENT, it achieves the top overall ranking across classification accuracy, classification log-loss, and regression RMSE, with average ranks of 6.67, 3.98, and 4.22. On ScoringBench, a benchmark for predictive distributions, Kumo Tabular-Large and Medium rank first and second on average rank.</p>
+<h2>
+	<a id="limitations" href="#limitations" rel="nofollow">
+		
+	</a>
+	<span>
+		Limitations
+	</span>
+</h2>
+<p>Kumo Tabular works on numerical and categorical columns only, while text, images, or timestamps can be turned into features via built-in pre-processing recipes. A single forward pass covers up to 10 classes, which the library extends to any number of classes with error-correcting output codes. Accuracy may degrade on tables far beyond the training ranges or when the query rows come from a different distribution than the context rows, so, as with any predictive model, validate accuracy and calibration on your own held-out data before deployment.</p>
+<h2>
+	<a id="demo" href="#demo" rel="nofollow">
+		
+	</a>
+	<span>
+		Demo
+	</span>
+</h2>
+<p>Kumo Tabular runs via NVIDIA's newly released GPU-native library for <a href="https://github.com/NVIDIA/structured-data-models" rel="nofollow"><code>structured-data-models</code></a>. The library downloads the weights from the Hub on first use and provides the preprocessing, ensembling, and many-class handling used in our evaluations. The code below is all it takes to go from a <code>pandas.DataFrame</code> to a prediction:</p>
+<pre><code data-language="python">import sdm  # structured-data-models
+
+# Tensorize tabular data:
+table = sdm.TableTensor.from_pandas(pd.load_csv(...), device="cuda")
+na_mask = table["target"].isnan()
+
+model = sdm.models.KumoTabular(device="cuda")
+pred = model(
+    # In-context examples (features/targets):
+    x_context=table[~na_mask].drop_columns("target"),
+    y_context=table[~na_mask, "target"],
+    # Prediction examples (features):
+    x_query=table[na_mask].drop_column("target"),
+)
+</code></pre>
+<h2>
+	<a id="start-building-with-kumo-tabular" href="#start-building-with-kumo-tabular" rel="nofollow">
+		
+	</a>
+	<span>
+		Start Building with Kumo Tabular
+	</span>
+</h2>
+<p>Kumo Tabular is released under the <a href="https://huggingface.co/blog/nvidia/(https://openmdw.ai/license/1-1/">OpenMDW License Agreement, version 1.1</a>. NVIDIA believes Trustworthy AI is a shared responsibility, and we have established policies and practices to enable development for a wide array of AI applications. When downloaded or used in accordance with our terms of service, developers should work with their supporting model team to ensure this model meets requirements for the relevant industry and use case and addresses unforeseen product misuse. Please report model quality, risk, security vulnerabilities, or NVIDIA AI concerns <a href="https://github.com/NVIDIA/structured-data-models/issues" rel="nofollow">here</a>.</p>
+<ul>
+<li><strong>Model Code:</strong> <a href="https://github.com/NVIDIA/structured-data-models" rel="nofollow">https://github.com/NVIDIA/structured-data-models</a></li>
+<li><strong>Model Weights:</strong> <a href="https://huggingface.co/nvidia/Kumo-Tabular">https://huggingface.co/nvidia/Kumo-Tabular</a></li>
+</ul>
+<h2>
+	<a id="acknowledgements" href="#acknowledgements" rel="nofollow">
+		
+	</a>
+	<span>
+		Acknowledgements
+	</span>
+</h2>
+<p>We thank <a href="https://dholzmueller.github.io/" rel="nofollow">David Holzmüller</a> for contributing significant ideas and ablations to Kumo Tabular. We thank <a href="https://kvignesh1420.github.io/" rel="nofollow">Vignesh Kothapalli</a> for his help on Kumo Tabular during his internship.</p>
+</div></div>
