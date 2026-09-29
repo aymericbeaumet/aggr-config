@@ -1,0 +1,206 @@
+---
+title: 'Cf: The Agentic CLI for the Cloudflare API'
+link: https://blog.cloudflare.com/cloudflare-cf-cli-launch/
+source: hnrss-org
+published: 2026-09-28T15:28:13Z
+updated: 2026-09-28T15:28:13Z
+first_seen: 2026-09-29T01:16:22.439760281Z
+authors:
+- macleos
+content: extracted
+html: 2026-09-28-cf-the-agentic-cli-for-the-cloudflare-api.html
+preview:
+  file: 2026-09-28-cf-the-agentic-cli-for-the-cloudflare-api.preview-fe4cf1151890.webp
+  width: 256
+  height: 134
+  color: '#1a0e3b'
+images:
+- source: https://blog.cloudflare.com/_emdash/api/media/file/01M3KR59T13YTXBHQW0ZAX7MBG.01M3KR5AZTG3VJ8REJ9047KYC4.png
+  original:
+    file: 2026-09-28-cf-the-agentic-cli-for-the-cloudflare-api.image-377a64a3f678.png
+    width: 1200
+    height: 628
+  color: '#080033'
+---
+
+Over the last year, agent use of Wrangler has skyrocketed.
+
+In March 2026, agents were responsible for a quarter of Wrangler use, up from single-digit percentages the year prior. Last week, agent usage reached 48%.
+
+Agents are more prolific users, using almost twice as many distinct commands per day, and are almost four times as likely to use six or more commands.
+
+Agents love CLIs. But Wrangler only provides commands for around 280 operations, and Cloudflare offers thousands.
+
+Earlier in the year we teased [how we were planning to solve this](https://blog.cloudflare.com/cf-cli-local-explorer) and today, we’re enabling agents to use every Cloudflare product by introducing a new CLI: cf.
+
+cf is a CLI that is built for the next generation of software development:
+
+- Agents can find the command they need to do anything they want to do with bespoke search and steering.
+- JSON is the default interface, pretty printed for humans and condensed for agents for maximum context savings.
+- cloudflare.config.ts is the new configuration format for the whole of Cloudflare, starting with Workers, and bringing the safety and accuracy of TypeScript to you and your agent’s language server protocol (LSP)
+- Vite becomes default, bringing with it the best local development server, and a plugin suite for developers and framework authors.
+
+Install the open beta today globally and run it from anywhere:
+
+```
+npm i -g cf
+```
+
+## cf gives your agent access to the entire Cloudflare API
+
+What if your agent could do everything Cloudflare can do? That’s the question that sparked our interest earlier this year: agents were getting ever more powerful, but what they were able to do with Cloudflare’s CLI was still limited.
+
+Wrangler was hand-built with each product team contributing and taking their own approach to their command developer experience. Enforcing patterns across teams was virtually impossible, even across our ~280 command paths. We had inconsistent terminology across `d1 info`, `hyperdrive get`, `workflows describe` as each team came up with their own practices at different times. Some teams built entirely custom experiences across thousands of lines of code that turned out to be used extremely rarely, and teams came up with different approaches to solve the same problems.
+
+We wanted to both standardize what we had and make a massive expansion, all at once. [Forge](https://blog.cloudflare.com/forge-open-source-generation-pipeline) — Cloudflare’s new unified API generation pipeline — enabled us to do this, building on the idea of generating our CLI commands directly from the API schema that powers our API documentation and SDK generation. Everything we provide has an OpenAPI schema, and if we annotate this with just a little more information, we can use it as the source for Forge to make a CLI.
+
+This enables us to expand `cf` from the ~280 functions that Wrangler had built up over time, to cover the entirety of the Cloudflare API surface of over 3,000 operations.
+
+Now it’s simple to give your agent `cf` and ask it to go set up a worker, deploy it, monitor and observe it, protect it with Cloudflare Access, buy a domain, and front it with Cloudflare WAF, all from a single tool.
+
+## Building for an agent that has never used cf
+
+cf is built for the trajectory of software engineering, where agentic development is drastically changing how software is built and deployed. This year we’ve been focused on providing tools to support this shift, culminating in cf. cf has been built from the ground up with agents in mind, and includes novel tools for agentic command discovery that we think will become standard in more CLIs in the near future.
+
+Wrangler came with the advantage that years of documentation, blogs, and third-party guides have been absorbed into the training process of LLMs. It also came with the same disadvantage: changing how Wrangler works now goes against learned behavior, and significant change would be inevitable given the scale of improvement we want to make.
+
+Introducing a new CLI that agents have never seen sounds like a big disruptive change — but actually it’s the cleanest thing we can do. Because of the design decisions we have made, the context injections we can make, and the AGENTS.md files we can append, making a switch in this way is actually less confusing than having an agent contextualize the major differences between two versions of a tool it is familiar with. We’re launching with a couple of these agent-focused features built in, with more to come.
+
+## Agents need to filter JSON, not look at tables
+
+When agents use Wrangler, they append `--json` to every command they run, and then often filter the output with `jq` to extract a subset of fields. But only some commands in Wrangler supported `--json` ; many commands returned unicode tables, designed for humans looking at output in their terminal. Agents can figure these out, but it costs them more time and tokens than a `jq` filter.
+
+In cf we’re taking the opposite stance: agents just need JSON, and if agents are the future primary user of this tool, it should be the default. For the vast majority of commands that will rarely be accessed by humans, this is obviously the right call.
+
+You as the human customer of this CLI are, in reality, one step removed from using it. Agents being able to easily filter their results and then return that filtered list in whatever format you request is preferable to supplying tables you will never likely read directly.
+
+But what if you’re looking to do something that might require real personal input, like searching for a domain to buy?
+
+For commands that your agent can access through chaining named parameters in a long and unwieldy sequence, you can simply fill in a form. Cf deconstructs the requirements of the API into a series of validated inputs, so buying a domain, even one with complex requirements, is simple to follow.
+
+Or, if you insist, just ask your agent to do it.
+
+## Your agent can find the right command itself
+
+With 3,000 possible routes through a CLI, how can your agent find the right operation it needs quickly without bloating your context? For this reason we have also added `cf cli search`.
+
+This command allows your agent to ask in natural language what it needs to do, and a small search index will provide a list of appropriate commands, based on their API description and parameters. We automatically tell your agent about this command when it runs `--help` for the first time.
+
+## Configuration that type-checks your agent
+
+Our new configuration format is based on TypeScript, which is easy for humans and agents to parse, and allows you to write your configuration programmatically.
+
+Typed configuration is enormously helpful for agents. We’ve found that even with no prior context of the programmatic configuration format, agents are able to easily identify and edit the configuration on demand, even across elements like `env` which have dramatically changed from the same named feature in Wrangler. All agents that use LSP plugins, such as Claude Code and Codex, benefit from being able to interpret more about the configuration file format in context, and make much more accurate suggestions as a result.
+
+Compare this to TOML, which had no accessible schema, or JSONC, which had a linked schema that agents rarely used.
+
+Some Wrangler configuration files inside Cloudflare have been condensed by 40% from over 5,000 lines, with many custom environments per developer, to factory files that build each developer’s configuration more efficiently.
+
+This is achieved through programmatically defining each environment from the same universal base, instead of copying `env` blocks as was typical in Wrangler. A simple Worker with multiple environments simply switches on the Vite-native `mode` argument to swap between one set of configuration and another.
+
+A simple configuration that does this now looks like:
+
+```
+import { bindings, defineConfig } from "cf/config";
+import * as entrypoint from "./index.js" with { type: "cf-worker" };
+
+export default defineConfig(({ mode }) => ({
+  worker: {
+    name: "example-worker", 
+      entrypoint,
+      compatibilityDate: "2026-09-27",
+      env: {
+        Environment: bindings.text(`This is ${mode} environment`),
+      },
+    },
+}));
+```
+
+You can migrate your Cloudflare Worker to this new format through `cf migrate`.
+
+We’re also providing a few helper functions to make building your Worker a breeze.
+
+`bindings` gives you a simple place for your agent to discover all the developer platform has to offer. Everything — from environment variables to storage, database, and queues — can be auto-completed and explained by your editor.
+
+```
+import { bindings, defineConfig } from "cf/config";
+
+export default defineConfig(({ mode }) => ({
+  worker: {
+    // ...
+    env: {
+      API_URL: bindings.text(
+        mode === "production"
+          ? "https://example.com"
+          : "https://staging.example.com",
+      ),
+      API_TOKEN: bindings.secret(),
+      CACHE: bindings.kv({
+        id: mode === "production"
+          ? "production-namespace-id"
+          : "staging-namespace-id",
+      }),
+      DATABASE: bindings.d1({ name: `example-${mode}-database` }),
+      UPLOADS: bindings.r2({ name: `example-${mode}-uploads` }),
+      JOBS: bindings.queue < { userId: string } > ({
+        name: `example-${mode}-jobs`,
+      }),
+      AI: bindings.ai(),
+      SEARCH_INDEX: bindings.vectorize({
+        name: `example-${mode}-search`,
+      }),
+      API: bindings.worker({ worker: `example-${mode}-api` }),
+    },
+  },
+}));
+```
+
+Similarly, we have included a helper for `triggers,` which is the new way to define routes, queues, schedules, and email triggers for your Worker. Rather than having these scattered through your configuration file, it’s now simple to find, in a single block, the actions that could trigger your Worker to run.
+
+```
+import { defineConfig, triggers } from "cf/config";
+
+export default defineConfig({
+  worker: {
+    // ...
+    triggers: [
+      triggers.fetch({ pattern: "example.com/*" }),
+      triggers.scheduled({ schedule: "0 * * * *" }),
+      triggers.queue({ name: "jobs", maxBatchSize: 10 }),
+      triggers.email({ addresses: ["support@example.com"] }),
+    ],
+  },
+});
+```
+
+`defineConfig.worker` is just the start here. Our intention with cloudflare.config.ts is that this is how you manage Cloudflare as a whole. Every product you need — along with its API being available to your agent through cf — will be able to be expressed through typesafe configuration. Soon you will be able to configure entire policies, set up zones, configure DNS and more, all through this configuration file.
+
+## A best in class development experience
+
+When Wrangler first started building JavaScript Workers, [Vite](https://vite.dev/) didn’t exist. Instead, we used esbuild in Wrangler to bundle your Workers. The dev server that Wrangler made available on :8787 was something that the Wrangler team built, and modifying any of this meant reaching into the internals of Cloudflare-specific local tooling like Miniflare.
+
+Vite is a huge improvement on this, and comes with a large ecosystem of plugins you can use, as well as providing a best in class dev server with HMR (hot module replacement), and builds that use the Rust-based library Rolldown for tree-shaking. Anything you can do with Vite, you can do with the Cloudflare Vite Plugin.
+
+The Cloudflare Vite Plugin is the recommended way we suggest you build Workers, whatever you are building: whether that’s a frontend-focused project or a backend API. Together with our Vitest plugin it provides a cohesive development and testing environment that matches the Workers runtime and gives you direct access to bindings and platform APIs.
+
+cf is built on Vite as default. Most of your Workers will migrate simply with agents. Others may take more time, which is why cf will continue to delegate to Wrangler for dev and deployment for JavaScript Workers that need to continue to use esbuild and Rust and Python Workers.
+
+## Migrating from Wrangler
+
+Migrating a Worker from Wrangler is as simple as running
+
+```
+cf migrate
+```
+
+Workers that already build with Vite will be converted to cloudflare.config.ts for you. If your Worker relies on Wrangler for esbuild, then cf will continue to delegate builds to Wrangler.
+
+When the open beta ends we will release a final major version of Wrangler that directs you and your agent to use cf. We’ll continue to provide maintenance support for Wrangler for 18 months after the beta ends, to give you time to migrate.
+
+You can also take new projects and automatically configure them for Cloudflare by running `cf init/deploy`, which will install the Cloudflare Vite Plugin for you and create a configuration file.
+
+Static sites still don’t require a configuration file to start, and deploying them is as simple as running `cf deploy` in your project.
+
+To start a new Hello World project with cf, use `cf init`.
+
+*cf is open source and issues can be [reported to our GitHub repository](https://github.com/cloudflare/cf)*.
