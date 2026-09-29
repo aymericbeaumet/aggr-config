@@ -1,0 +1,96 @@
+<div id="readability-page-1" class="page"><div>
+        <p>Article</p>
+        
+        
+          <p>DeepSeek-V4.1-Flash lands on NVIDIA and AMD.</p>
+        
+        
+          <p><span>September 29, 2026</span>
+            
+            
+              <span>inference / serving / NVIDIA / AMD / DeepSeek</span></p>
+        
+      </div><div>
+        <p>We’re happy to announce the release of <code>zml/llmd 20260929.0</code>, which notably brings
+<a href="https://hf.co/deepseek-ai/DeepSeek-V4.1-Flash">deepseek-ai/DeepSeek-V4.1-Flash</a> support on NVIDIA and AMD GPUs.</p>
+<h2 id="models">Models</h2>
+<p>This release adds 2 model families:</p>
+<ul>
+<li><a href="https://hf.co/deepseek-ai/DeepSeek-V4.1-Flash">deepseek-ai/DeepSeek-V4.1-Flash</a> (with native DSpark support)</li>
+<li><a href="https://hf.co/meta-models/Muse-Glimmer-30B">meta-models/Muse-Glimmer-30B</a></li>
+</ul>
+<p>As stated, DeepSeek is only available on platforms with enough VRAM to host it natively. We do not plan to support custom quants
+in the near future.</p>
+<h2 id="deepseek-v41-flash">DeepSeek-V4.1-Flash</h2>
+<p>Obviously the highlight, this is our first release supporting a frontier model. ZML is now mature enough to support complex
+frontier models, and we wanted to bring it to you. Bear in mind this is a 763B model, weighing 510GB, so for now we only
+support it on platforms LLMD supports with enough VRAM, namely NVIDIA and AMD GPUs.</p>
+<p>That said, this is a cool release because it pushes the limits and shows how powerful ZML can be: MXFP4 MoEs, block-FP8,
+DSpark speculative decoding, DSA, HCA, and more. Nothing was spared. And it all works.</p>
+<p>Sadly, we couldn’t bring it to TPUs because Google told us there were no TPUv7s available “for at least a few weeks”.
+LLMD doesn’t support Trainium yet due to an AWS Neuron bug that has since been fixed. We’ll revisit that.</p>
+<p>On performance, we’re about 20% slower than vLLM and 30% slower than SGLang on 4xGB300. We could’ve waited to close the gap, but we wanted to bring it to you now. The
+roadmap is clear and we’ll get there, so why wait?</p>
+<figure>
+  <figcaption>Token Generation, deepseek-ai/DeepSeek-V4.1-Flash, bs=1, 4xGB300 <span>(tok/s)</span></figcaption>
+  
+</figure>
+<p>Speculative decoding is also supported on DeepSeek-V4.1-Flash, and it works well.
+It can be enabled with the <code>--speculative-drafter-model=native</code> flag.</p>
+<h2 id="cold-start">Cold start</h2>
+<p>We’re pretty happy about our cold-start performance. We already have improvements that are not in this release that we can’t
+wait to share with you soon.</p>
+<figure>
+  <figcaption>Cold Start, deepseek-ai/DeepSeek-V4.1-Flash, 4xGB300</figcaption>
+  
+</figure>
+<h2 id="bringing-frontier-ir-support-to-zml">Bringing frontier IR support to ZML</h2>
+<p>It was always possible in <a href="https://github.com/zml/zml">zml/zml</a> to emit custom kernels as MLIR bytecode using the built-in
+codegen builder. This allows to leverage ZML’s memory allocation, stream management, concurrency and sharding while going
+off the trail if needed. We used that feature to emit <a href="https://github.com/zml/zml/tree/master/kernels/triton">Triton</a> and
+<a href="https://github.com/zml/zml/tree/master/kernels/mosaic_tpu">Mosaic (Pallas)</a> kernels.</p>
+<p>Since the last release, we have added support for <a href="https://github.com/zml/zml/tree/master/kernels/cute">CuTe IR</a>,
+<a href="https://github.com/zml/zml/tree/master/kernels/cuda_tile">CUDA Tile IR</a>, and <a href="https://github.com/zml/zml/tree/master/kernels/fly">Fly IR</a>.</p>
+<p>Why does this matter? Well, because Triton cannot get the full performance of the underlying hardware. That’s why there’s
+<a href="https://github.com/triton-lang/triton/blob/main/python/tutorials/gluon/01-intro.py">Gluon</a> now (which we’ll add support for
+soon).</p>
+<p>On NVIDIA, CUDA Tile is faster than Triton, and CuTe is as fast as raw C++ CUDA (while still being a JIT). On AMD, Fly IR is
+faster than AMD’s preferred Triton path.</p>
+<p>Using these new backends, we replaced the few custom kernels we had (MoE and PagedAttention) using their fastest respective
+IR. For instance, on NVIDIA, CuTe IR is as fast as C++ CUDA. So here goes.</p>
+<p>As always with us, this was achieved with zero Python. No compromise.</p>
+
+<p>Metal gains MXFP8, MXFP4 and NVFP4 block scaled dot products and block-FP8 MoE paths.</p>
+<p>That means you can run NVFP4 models on Apple Silicon:</p>
+<pre><code>$ llmd --model=hf://nvidia/Qwen3.8-27B-NVFP4 --batch-size=1
+</code></pre><p>The performance is nice, too:</p>
+<figure>
+  <figcaption>Apple M3 Max, nvidia/Qwen3.8-27B-NVFP4, 1024/128, bs=1 <span>(tg tok/s)</span></figcaption>
+  
+</figure>
+<h2 id="various-improvements">Various improvements</h2>
+<h2 id="amd">AMD</h2>
+<p>This release ships with ROCm 10.</p>
+<h2 id="intel">Intel</h2>
+<p>This release brings fixes for four GPU configurations.</p>
+<h2 id="serving-diagnostics">Serving diagnostics</h2>
+<p>Prometheus metrics (<code>/metrics</code>) now cover scheduling, request outcomes, prompt-token counts, and speculative-decoding efficiency.</p>
+<p><code>ignore_eos</code> is also now supported for benchmarking.</p>
+<h2 id="try-it-today">Try it today</h2>
+<p><strong>NVIDIA</strong></p>
+<div><pre><code data-language="bash">docker run -p 8000:8000 --shm-size=256GB --gpus=all -e HF_TOKEN -it zmlai/llmd:cuda \
+    --model=hf://deepseek-ai/DeepSeek-V4.1-Flash
+</code></pre></div><p><strong>AMD</strong></p>
+<div><pre><code data-language="bash">docker run -p 8000:8000 --shm-size=256GB --device=/dev/kfd --device=/dev/dri -e HF_TOKEN -it zmlai/llmd:rocm \
+    --model=hf://deepseek-ai/DeepSeek-V4.1-Flash
+</code></pre></div><p><strong>Intel</strong></p>
+<div><pre><code data-language="bash">docker run -p 8000:8000 --device=/dev/dri -e HF_TOKEN -it zmlai/llmd:oneapi \
+    --model=hf://Qwen/Qwen3.8-27B
+</code></pre></div><p><strong>Google TPU</strong></p>
+<div><pre><code data-language="bash">docker run --net=host --privileged -e HF_TOKEN -it zmlai/llmd:tpu \
+    --model=hf://Qwen/Qwen3.8-27B
+</code></pre></div><p><strong>Apple Metal</strong></p>
+<div><pre><code data-language="bash">brew install zml/zml/llmd
+llmd --model=hf://nvidia/Qwen3.8-27B-NVFP4 --batch-size=1
+</code></pre></div>
+      </div></div>
