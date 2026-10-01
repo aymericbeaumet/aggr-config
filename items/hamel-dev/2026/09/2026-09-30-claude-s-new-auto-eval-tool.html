@@ -1,0 +1,72 @@
+<div id="readability-page-1" class="page"><div id="quarto-content">
+
+
+    
+
+<main id="quarto-document-content">
+
+
+
+
+  
+
+
+
+
+<p>Anthropic released <a href="https://claude.dev/blog/automating-eval-design-and-hillclimbing/">new eval tooling for Claude Code</a>. Their <code>claude-api</code> plugin now includes a new <code>build_eval</code> and <code>hill-climb</code> command that helps you build evals, check the graders, and improve your application against them.</p>
+<p>I usually don’t review eval tools. Software changes so often that a review has a short shelf life. But a first-party tool from Anthropic is likely to influence how people approach evals, so I wanted to try it.</p>
+<p><a href="https://isaacflath.com/">Isaac Flath</a> and I <a href="https://x.com/i/broadcasts/1nKOLQOwQEEGR">livestreamed ourselves using it</a> on conversation traces from an apartment leasing assistant. Here’s what we found:</p>
+<section id="the-bad">
+<h2 data-anchor-id="the-bad">The bad</h2>
+<section id="it-pushes-you-to-create-an-eval-before-looking-at-data">
+<h3 data-anchor-id="it-pushes-you-to-create-an-eval-before-looking-at-data">1. It pushes you to create an eval before looking at data</h3>
+<p>Claude started by suggesting several potential failures, then asked us to pick one straight away to turn into an eval. It gave us the below menu of options, with call-transfer rules as the recommended choice. We hadn’t yet reviewed the conversations ourselves, so it was hard to know if this was a real failure or worth prioritizing. Despite this, we went ahead with the recommended choice, because we figured that’s what typical users would do.</p>
+<p><img src="https://hamel.dev/blog/posts/claude-auto-evals/images/choose-eval-annotated.png" alt="A red box highlights the recommended call-transfer evaluator. An arrow points to it beneath the question: How are we supposed to know this is a good eval to invest in at this point?"></p>
+<p>I believe you should be looking at data first to inform your understanding and prioritize which evals to write. An agent can help you find issues, but you still should do <a href="https://hamel.dev/blog/posts/evals-faq/why-is-error-analysis-so-important-in-llm-evals-and-how-is-it-performed.html" target="_blank">error analysis</a> to decide which failures deserve attention before proceeding.</p>
+</section>
+<section id="it-asks-you-to-validate-judgments-without-enough-context">
+<h3 data-anchor-id="it-asks-you-to-validate-judgments-without-enough-context">2. It asks you to validate judgments without enough context</h3>
+<p>Next, Claude created Markdown files for looking at data associated with the call-transfer failure. In the screenshot below, Claude asks us to skim <code>inputs.md</code> and “tell it” which labels are wrong. That meant reading long conversations in an editor and reporting corrections separately in a chat.</p>
+<p><img src="https://hamel.dev/blog/posts/claude-auto-evals/images/markdown-review-annotated-v3.png" alt="Red text reads: This is the most painful way you can think of to label data. Create a web app instead! A question mark, arrow, and underline highlight the full sentence Please skim inputs.md and tell me in Claude's request to review labels."></p>
+<p>We found this very silly as we were using a coding agent, so it should have built an annotation app that made the conversations easy to read and let us leave feedback in-situ. We eventually asked Claude to build a web app for us and used that instead.</p>
+<p>Later in the workflow, Claude made an initial attempt at creating an evaluator for the call-transfer failure. It presented aggregate label counts and asked us, “Would you have scored any case differently?” without giving us enough information to know if the labels were correct. A recurring theme of the workflow was to jump too fast into creating artifacts or asking us for approval without helping us understand the data.</p>
+<p><img src="https://hamel.dev/blog/posts/claude-auto-evals/images/score-review-question-annotated-v3.png" alt="Red text reads: There is no way to know the answer to this without seeing the data. You need to label this in-situ, not in a separate chat. A question mark, arrow, and underline highlight Claude asking: Would you have scored any case differently?"></p>
+</section>
+<section id="the-evaluators-scope-was-too-broad">
+<h3 data-anchor-id="the-evaluators-scope-was-too-broad">3. The evaluator’s scope was too broad</h3>
+<p>Next, the tool created a call-transfer evaluator that checked four different failures at once:</p>
+<ul>
+<li>Asking for confirmation more than once, or transferring without asking for confirmation. (LLM as a Judge)</li>
+<li>Saying something between the caller’s consent and the transfer. (Code-based eval)</li>
+<li>Saying something during or after the transfer. (Code-based eval)</li>
+<li>Saying tool mechanics aloud, such as “triggering” a transfer. (Code-based eval)</li>
+</ul>
+<p>There were too many things bundled into this evaluator. I would prefer to scope the eval to focus on one error at a time, or at the very least separate the evals into those that needed a code-based eval vs a LLM as a Judge.</p>
+<p>Claude’s description of the evaluator was also confusing:</p>
+<blockquote>
+<p>protocol_ok is the headline. A case passes only if all four checks pass. On “should not transfer” calls, protocol_ok is 1 if no transfer happened.</p>
+</blockquote>
+<p>This AI slop is hard to read. I’d much rather see the code or the judge prompt so I can understand whats being created. I’ve found that it <a href="https://hamel.dev/blog/posts/prompt/">always pays to read the prompt</a>, especially for something as important as an eval. Below is a screenshot of what this part of the workflow looked like:</p>
+<p><img src="https://hamel.dev/blog/posts/claude-auto-evals/images/bundled-grader.png" alt="Claude defines protocol_ok as a single pass/fail result requiring four checks: confirm once, transfer immediately, remain silent, and avoid saying tool mechanics aloud."></p>
+</section>
+</section>
+<section id="the-good">
+<h2 data-anchor-id="the-good">The good</h2>
+<p>I was impressed by this plugin’s out-of-the-box ability to discover issues that <a href="https://parlance-labs.com/blog/posts/auto-evals.html">other auto-eval approaches</a> haven’t been able to find! It found issues with human handoff, formatting, voice agents, and more. It’s still better to look at your data iteratively with an agent, but this was the strongest performance I’ve seen with a more “one-shot” issue discovery approach.</p>
+<p>Anthropic’s <a href="https://claude.dev/blog/automating-eval-design-and-hillclimbing/">blog post introducing this tool</a> broadly conveys thinking that I agree with, such as the importance of looking at data, sampling intelligently, not saturating your own evals, etc. I’m really happy more people are thinking about evals this way.</p>
+</section>
+<section id="would-i-use-it">
+<h2 data-anchor-id="would-i-use-it">Would I use it?</h2>
+<p>I’d hold off for now. I’d want the workflow to help me explore the data before committing to an evaluator, with a better review interface from the start. Additionally, I’m already quite happy with what coding agents can do using these <a href="https://hamel.dev/blog/posts/evals-skills/">Eval skills Shreya and I put together</a> which is less opinionated (but more flexible).</p>
+<p>I’ve since spoken with the author of the Claude eval plugin. He was appreciative of the feedback and said he’d update the plugin accordingly, so I expect it to change soon. It could be worth revisiting in the future.</p>
+<p>Even as this plugin changes, I hope this walkthrough helps you assess other eval tools. Make sure the tool helps you understand your data before choosing evals and inspect its judgments carefully. I believe much of the eval workflow should happen in a web application rather than chat to remove friction from data exploration and annotation.</p>
+<p>Remember, if an eval tool doesn’t put looking at data at the center of your workflow, it’s not worth using.</p>
+
+<p><em>Thanks to <a href="https://isaacflath.com/">Isaac Flath</a> for reviewing this article and joining me for <a href="https://x.com/i/broadcasts/1nKOLQOwQEEGR">the livestream</a>.</em></p>
+
+
+</section>
+
+</main> 
+
+</div></div>

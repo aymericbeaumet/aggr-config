@@ -47,6 +47,12 @@ images:
     width: 320
     height: 64
   color: '#fafafa'
+- source: https://i.ytimg.com/vi/ywJ8i61Z9Uo/hqdefault.jpg
+  original:
+    file: 2026-09-30-linkedin-larpmaxxing.image-06dfe9582871.jpg
+    width: 480
+    height: 360
+  color: '#f2f3eb'
 ---
 
 ## table of contents

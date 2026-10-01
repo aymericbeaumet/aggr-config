@@ -59,6 +59,12 @@ images:
     width: 1395
     height: 700
   color: '#242424'
+- source: https://i.ytimg.com/vi/0GzwuYGvKA4/hqdefault.jpg
+  original:
+    file: 2026-09-30-distributed-databases-with-peter-mattis.image-bdc1c7131aa7.jpg
+    width: 480
+    height: 360
+  color: '#f1f1f1'
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/217889431/bba96d28746310eb65c6f215045feb9f.mp3
