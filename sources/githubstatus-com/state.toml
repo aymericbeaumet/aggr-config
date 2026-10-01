@@ -3,5 +3,5 @@ resolved_url = "https://www.githubstatus.com/history.atom"
 title = "GitHub Status - Incident History"
 site_url = "https://www.githubstatus.com/"
 language = "en-US"
-etag = 'W/"e65cd67be2d4e41e973a710c1f3e887d"'
-body_hash = "5fbe0355ceb3dd04a81c1ca580e24fe3f02443b2"
+etag = 'W/"9fb685169f62fcbaae12602a7958d796"'
+body_hash = "dc646e813e481c0e4c9d1ee64c14829a71191907"

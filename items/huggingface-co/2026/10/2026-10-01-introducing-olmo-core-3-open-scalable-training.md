@@ -1,0 +1,121 @@
+---
+title: 'Introducing Olmo-core 3: Open, scalable training infrastructure for large MoEs'
+link: https://huggingface.co/blog/allenai/olmocore3
+source: huggingface-co
+published: 2026-10-01T15:01:43Z
+updated: 2026-10-01T15:01:43Z
+first_seen: 2026-10-01T19:33:44.897168732Z
+content: extracted
+html: 2026-10-01-introducing-olmo-core-3-open-scalable-training.html
+preview:
+  file: 2026-10-01-introducing-olmo-core-3-open-scalable-training.preview-19e230ef7fda.webp
+  width: 256
+  height: 183
+  color: '#103b40'
+images:
+- source: https://cdn-uploads.huggingface.co/production/uploads/638e39b249de7ae552d977b5/uKnK93gjkKbmJmSx94WO2.png
+  original:
+    file: 2026-10-01-introducing-olmo-core-3-open-scalable-training.image-bf182f9986f1.png
+    width: 2048
+    height: 1463
+  color: '#0a3336'
+- source: https://cdn-uploads.huggingface.co/production/uploads/638e39b249de7ae552d977b5/gZSxRv34VBkkUCXDoq7UE.png
+  original:
+    file: 2026-10-01-introducing-olmo-core-3-open-scalable-training.image-bf182f9986f1.png
+    width: 2048
+    height: 1463
+  color: '#0a3336'
+- source: https://www.datocms-assets.com/64837/1790799330-olmo-core-3-blog-draft-google-docs-image-2.png?fit=max&h=810&w=1550
+  original:
+    file: 2026-10-01-introducing-olmo-core-3-open-scalable-training.image-ba18c539f12b.png
+    width: 1134
+    height: 810
+  color: '#0a3235'
+- source: https://www.datocms-assets.com/64837/1790799917-olmo-core-3-blog-draft-google-docs-image-3.png?fit=max&h=810&w=1550
+  original:
+    file: 2026-10-01-introducing-olmo-core-3-open-scalable-training.image-afc44d267429.png
+    width: 1134
+    height: 810
+  color: '#0a3235'
+- source: https://cdn-uploads.huggingface.co/production/uploads/638e39b249de7ae552d977b5/n5JgwywROtehA5Zr6-Dbf.jpeg
+  original:
+    file: 2026-10-01-introducing-olmo-core-3-open-scalable-training.image-a79ce1c111c9.jpg
+    width: 1800
+    height: 500
+  color: '#092c2e'
+---
+
+📄 [Tech Report](https://allenai.org/papers/olmocore3) | 💻 [Code](https://github.com/allenai/olmo-core) | 🧩 [Interactive demo](https://narrative.allen.ai/scaling-up-training) [![Olmo-core 3 blog draft - Google Docs-image-1 (2)](https://cdn-uploads.huggingface.co/production/uploads/638e39b249de7ae552d977b5/gZSxRv34VBkkUCXDoq7UE.png)](https://cdn-uploads.huggingface.co/production/uploads/638e39b249de7ae552d977b5/gZSxRv34VBkkUCXDoq7UE.png)
+
+Today we’re releasing [**Olmo-core 3**](https://github.com/allenai/olmo-core), a significant upgrade to our framework for developing large language models featuring a redesigned open mixture-of-experts (MoE) training system.
+
+Olmo-core 3 is designed to scale MoE training into the trillion-parameter range while preserving computational efficiency. It’s one of the core systems behind the next generation of Olmo, and part of our ongoing commitment to open up the tools and training infrastructure behind each new model.
+
+Training large AI models takes a lot of compute, driving up costs and energy use and putting advanced model development out of reach for many academic researchers and smaller labs. MoE models offer a more efficient approach—they can contain many more learned components, or parameters, without requiring every input to use all of them. But the full model still has to be stored across GPU memory and updated during training, and directing inputs to the right experts – the specialized components within an MoE – across a cluster creates its own communication and coordination costs. As MoEs grow, those costs can erode much of the computational advantage of using only part of the model for each input.
+
+Olmo-core 3 is built to close that gap. In one benchmark, we increased the expert pool from 8 to 128 while still selecting only four experts per token – the small units of text a language model processes – keeping the number of active parameters per token roughly fixed at about 3.2B. Total parameter capacity grew from 4.6B to 47B, while training throughput fell by less than 5%.
+
+The same infrastructure has been benchmarked at over one trillion total parameters.
+
+[![Olmo-core 3: expert-pool scaling and training throughput](https://www.datocms-assets.com/64837/1790799330-olmo-core-3-blog-draft-google-docs-image-2.png?fit=max&h=810&w=1550)](https://www.datocms-assets.com/64837/1790799330-olmo-core-3-blog-draft-google-docs-image-2.png?fit=max&h=810&w=1550)
+
+## **Building a training stack around how MoEs actually work**
+
+Olmo-core has evolved with each generation of Olmo.
+
+Our work on sparse models goes back to [OlmoE](https://allenai.org/blog/olmoe-an-open-small-and-state-of-the-art-mixture-of-experts-model-c258432d0514), which used an MoE architecture with 64 routed experts. [Olmo 3](https://allenai.org/blog/olmo3), by contrast, used a dense architecture, meaning nearly all of the model was active for every token and its training stack was built around that design. Olmo-core 3 extends the framework with a training system designed for much larger MoE models.
+
+Our earlier MoE implementation in Olmo-core used fully sharded data parallelism (FSDP), configured to gather and reshard model weights for each small batch of training data. Olmo-core 3 switches to a system based on [distributed data parallelism (DDP)](https://narrative.allen.ai/scaling-up-training#data-parallelism). It keeps experts resident on GPUs and routes the relevant data to them, avoiding that repeated weight gathering.
+
+NVIDIA’s Megatron-Core is an established option for training large MoEs. Olmo-core 3 brings an integrated MoE training stack to the framework behind Olmo, with a redesign that improves throughput over our earlier FSDP-based implementation. In a preliminary test on eight NVIDIA B300 GPUs, a 47-billion-parameter MoE processed 52,000 tokens per second per GPU with the new stack, compared with 19,400 using our earlier implementation—about 2.7× the throughput.
+
+[![Olmo-core 3 training throughput compared with the earlier implementation](https://www.datocms-assets.com/64837/1790799917-olmo-core-3-blog-draft-google-docs-image-3.png?fit=max&h=810&w=1550)](https://www.datocms-assets.com/64837/1790799917-olmo-core-3-blog-draft-google-docs-image-3.png?fit=max&h=810&w=1550)
+
+## **Scaling and optimizing MoE training**
+
+Olmo-core 3 combines several techniques for distributing large MoEs across GPU clusters with optimizations that make routing and computation more efficient.
+
+Three techniques determine how the model and its training state are split across hardware:
+
+- **[Expert parallelism](https://narrative.allen.ai/scaling-up-training#expert-parallelism)** spreads the experts across GPUs, so each GPU stores only part of the full expert pool.
+- **[Pipeline parallelism](https://narrative.allen.ai/scaling-up-training#pipeline-parallelism)** splits the model’s layers – the successive stages that transform an input – across groups of GPUs, reducing how much of the model each GPU needs to keep in memory.
+- **A distributed optimizer** spreads the optimizer state – the additional data used to calculate and apply updates during training – across GPUs instead of storing a full copy on every GPU.
+
+Together, these techniques allow an MoE to scale without requiring every GPU to keep the entire model and its training state in memory.
+
+Olmo-core 3 also reduces the cost of routing data to the right experts and running their computations. *Rowwise expert parallelism* places routed data directly into expert input buffers, minimizing the extra work needed to rearrange it. *GPU-resident routing* keeps routing metadata on the GPUs, so the CPU can queue work without waiting for that information to be copied back. And *grouped GEMM* combines many small expert computations so GPUs can execute them more efficiently.
+
+Finally, Olmo-core 3 supports **MXFP8**, a lower-precision number format that represents some values with fewer bits. This can reduce computation and the amount of data moved between GPUs, as long as those savings outweigh the cost of converting between number formats.
+
+We measured MXFP8’s effect on end-to-end training throughput in a controlled benchmark on four NVIDIA B300 GPUs, with work distributed uniformly across experts. With MXFP8 enabled across the parts of the system where it helped most, training throughput was about 21% higher than with BF16, the higher-precision format we used as our baseline, while peak active memory fell from 103 GiB to 95 GiB. Most of the gain came from feed-forward computation and moving data between experts rather than attention alone.
+
+These techniques and optimizations have to work together. Speeding up one part of training can create costs elsewhere; faster computation may require more data movement, while moving fewer bits may not help if converting the data takes too long. Olmo-core 3 is built around those trade-offs across the full training process, giving us – and researchers using the open stack – control over how the pieces fit together.
+
+[Explore our interactive walkthrough](https://narrative.allen.ai/scaling-training) to see how data, expert, and pipeline parallelism work together to scale MoE training—from a single GPU to many.
+
+[![Blog Banner](https://cdn-uploads.huggingface.co/production/uploads/638e39b249de7ae552d977b5/n5JgwywROtehA5Zr6-Dbf.jpeg)](https://cdn-uploads.huggingface.co/production/uploads/638e39b249de7ae552d977b5/n5JgwywROtehA5Zr6-Dbf.jpeg)
+
+## **Scaling into the trillion-parameter range**
+
+We’ve benchmarked Olmo-core 3 across a range of configurations on NVIDIA B300 GPUs, including a 1.2-trillion-parameter model with 58.36 billion parameters active per token across 512 GPUs. Its highest observed throughput was 858 TFLOP/s/GPU—a measure of useful model computation per second on each GPU. These tests used random routing to measure system performance, rather than the quality of a trained model.
+
+We’ve also experimented with DeepEP v2, an alternative way of handling communication between experts across GPUs, reaching a configuration with 2.38 trillion total parameters. This was a short-capacity test rather than a full training run, so it demonstrates the scale Olmo-core 3 can reach rather than sustained training performance.
+
+At these scales, systems performance is only part of the picture. Our technical report also documents experiments that informed how we train MoEs and measure their performance. For example:
+
+- A score intended to encourage balanced routing could improve even as the actual workload became less balanced. We call this failure *token gerrymandering*.
+- Lowering experts’ learning rates – the size of their training updates – because they process fewer tokens did not improve results in the model family we tested.
+- GPU calculations took different amounts of time when the values being processed changed, even with the same matrix dimensions. Performance comparisons therefore need matching input values as well as matching shapes.
+- Overlapping communication and computation on separate GPU streams did not always make training faster. In some tests, it slowed end-to-end execution—a reminder that more overlap does not necessarily mean higher throughput.
+
+The report explains these findings alongside the approaches we tested and chose not to adopt.
+
+## **Built for the next generation of Olmo, open for everyone**
+
+Olmo-core 3 is the foundation for what we’re building next. Our next-generation Olmo will use an MoE architecture, and we’re aiming for it to be our most capable Olmo yet, trained on our largest dataset and with our longest context window.
+
+The new stack lets us scale beyond our previous MoE work while giving us more flexibility to adapt training as models and hardware evolve. And it’s fully open—researchers and developers can use Olmo-core 3 to train their own MoEs, adapt it to different hardware, and experiment with routing, parallelism, and other parts of the system.
+
+That’s part of how we think about open model development—model weights are more useful when the infrastructure and training decisions behind them are open too.
+
+For a deeper look at the systems design, experiments, ablations, and approaches we tested along the way, read our technical report and [explore Olmo-core 3 on GitHub](https://github.com/allenai/olmo-core).
