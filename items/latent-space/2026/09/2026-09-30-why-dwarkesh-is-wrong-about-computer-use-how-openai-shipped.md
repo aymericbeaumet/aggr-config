@@ -56,6 +56,12 @@ images:
     width: 1028
     height: 579
   color: '#020407'
+- source: https://i.ytimg.com/vi/z9OkBD2-MDU/hqdefault.jpg
+  original:
+    file: 2026-09-30-why-dwarkesh-is-wrong-about-computer-use-how-openai-shipped.image-a075073eec25.jpg
+    width: 480
+    height: 360
+  color: '#010101'
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/218243619/4623bf38297ddb16dba4460b8b439140.mp3
