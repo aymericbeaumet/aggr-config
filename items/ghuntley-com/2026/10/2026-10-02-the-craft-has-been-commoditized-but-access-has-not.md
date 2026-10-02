@@ -30,6 +30,12 @@ images:
     width: 2560
     height: 1440
   color: '#865a39'
+- source: https://i.ytimg.com/vi/Jr2auYrBDA4/hqdefault.jpg
+  original:
+    file: 2026-10-02-the-craft-has-been-commoditized-but-access-has-not.image-232ee5004c0e.jpg
+    width: 480
+    height: 360
+  color: '#010101'
 ---
 
 One of the original promises of a personal computer was that the computer would be personal. It's kind of strange to think that, now in 2026, it has taken circa 40 years for this to actually become true.

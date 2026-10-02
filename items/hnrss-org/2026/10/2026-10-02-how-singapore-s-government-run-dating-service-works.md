@@ -69,6 +69,12 @@ images:
     width: 1456
     height: 1939
   color: '#d7d5d6'
+- source: https://i.ytimg.com/vi/Qcv1IqHWAzg/hqdefault.jpg
+  original:
+    file: 2026-10-02-how-singapore-s-government-run-dating-service-works.image-5368b1e0d90f.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 [![](https://substackcdn.com/image/fetch/$s_!g2hS!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fa6da96f2-5327-4b47-9832-9e9bf0ee3093_2400x1860.png)](https://substackcdn.com/image/fetch/$s_!g2hS!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fa6da96f2-5327-4b47-9832-9e9bf0ee3093_2400x1860.png)

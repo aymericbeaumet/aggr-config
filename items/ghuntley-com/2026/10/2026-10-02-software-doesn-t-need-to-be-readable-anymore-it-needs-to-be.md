@@ -48,6 +48,12 @@ images:
     width: 1200
     height: 670
   color: '#fdfdfd'
+- source: https://i.ytimg.com/vi/vrCE5m2MRys/hqdefault.jpg
+  original:
+    file: 2026-10-02-software-doesn-t-need-to-be-readable-anymore-it-needs-to-be.image-71ff0e687426.jpg
+    width: 480
+    height: 360
+  color: '#000000'
 ---
 
 I sat down with the folks at AI21 Labs for their YAAP podcast at the AI:Engineer World Fair, and we went deep on something I've been chewing on for most of this year: almost every decision in computing for the last forty years was made with a human in the loop, as the reader, the writer, or the operator. What happens when that stops being true?
