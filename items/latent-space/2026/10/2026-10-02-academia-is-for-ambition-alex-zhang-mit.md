@@ -1,0 +1,1596 @@
+---
+title: Academia is for Ambition — Alex Zhang, MIT
+link: https://www.latent.space/p/rlm
+source: latent-space
+published: 2026-10-02T00:28:04Z
+updated: 2026-10-02T00:28:04Z
+first_seen: 2026-10-02T02:35:29.351097324Z
+summary: We catch up with RLM first author Alex Zhang, MIT PhD, on Jev, PhD masxing, and the future of harnesses.
+content: extracted
+html: 2026-10-02-academia-is-for-ambition-alex-zhang-mit.html
+preview:
+  file: 2026-10-02-academia-is-for-ambition-alex-zhang-mit.preview-f53b7af96ba0.webp
+  width: 256
+  height: 128
+  color: '#796953'
+images:
+- source: https://substackcdn.com/image/fetch/$s_!iVu8!,w_1200,h_600,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-video.s3.amazonaws.com%2Fvideo_upload%2Fpost%2F218414422%2F29eff1ae-7f69-4af5-a42b-a64a66b90590%2Ftranscoded-1790900128.png
+  original:
+    file: 2026-10-02-academia-is-for-ambition-alex-zhang-mit.image-2e2d21a154a0.jpg
+    width: 1200
+    height: 600
+  color: '#171819'
+- source: https://substackcdn.com/image/fetch/$s_!vVd9!,w_120,h_120,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fpbs.substack.com%2Fprofile_images%2F1985433557448216576%2Fqwc8NvJ9.jpg
+  original:
+    file: 2026-10-02-academia-is-for-ambition-alex-zhang-mit.image-44a4bd2f5226.jpg
+    width: 120
+    height: 120
+  color: '#fee401'
+- source: https://substackcdn.com/image/fetch/$s_!Cvcr!,w_120,h_120,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fpbs.substack.com%2Fprofile_images%2F1837605403359633411%2FStj4eLIH.jpg
+  original:
+    file: 2026-10-02-academia-is-for-ambition-alex-zhang-mit.image-a4b4c48327b9.jpg
+    width: 120
+    height: 120
+  variants:
+  - file: 2026-10-02-academia-is-for-ambition-alex-zhang-mit.image-3971fbe91b7e.webp
+    width: 120
+    height: 120
+  color: '#000000'
+- source: https://substackcdn.com/image/fetch/$s_!ysmJ!,w_1028,c_limit,f_auto,q_auto:best,fl_progressive:steep/l_play_button_usfui2,w_88,e_colorize:0/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F__ss-rehost__tw-video-preview-13_2085082284139614208.jpg
+  original:
+    file: 2026-10-02-academia-is-for-ambition-alex-zhang-mit.image-b369daffa86a.jpg
+    width: 1028
+    height: 771
+  color: '#060606'
+- source: https://substackcdn.com/image/fetch/$s_!PQjF!,w_120,h_120,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fpbs.substack.com%2Fprofile_images%2F1669189019945820160%2FDBYUCQvu.jpg
+  original:
+    file: 2026-10-02-academia-is-for-ambition-alex-zhang-mit.image-0cc7f58f796d.jpg
+    width: 120
+    height: 120
+  color: '#fcfafc'
+extra:
+  audio_type: audio/mpeg
+  audio_url: https://api.substack.com/feed/podcast/218414422/044c92ee79bb60914986e42706d74969.mp3
+---
+
+*Last call for regular tickets for [AI Engineer NYC](https://ai.engineer/nyc)! As an exclusive for Latent Space subscribers, the first 30 of you can [take a 30% off code](https://app.ai.engineer/e/ai-engineer-new-york-2026?discount=LS-NYC26) if it helps - for new tickets only, no refunds! See you in 2 weeks!*
+
+While we tend to cover industry on the pod, every so often we celebrate a clearly emerging superstar PhD. In **2024** we featured [Shunyu Yao](https://www.latent.space/p/shunyu?utm_source=publication-search), who went on to build Operator at OpenAI and is now [Chief AI Scientist of Tencent](https://www.scmp.com/tech/big-tech/article/3356090/tencents-chief-ai-scientist-dismisses-lag-concerns-says-race-long-term-game). In **2025** we featured [Jack Morris](https://www.latent.space/p/information-theory-for-language-models?utm_source=publication-search), who went on to cofound [Engram](https://www.youtube.com/watch?v=jhpmMTus5a0) at [$600m](https://www.calcalistech.com/ctechnews/article/skoqbrumze) and is now a leading voice on [continual learning](https://www.youtube.com/watch?v=WiqDvX6isc4).
+
+This year we are proud to feature the work of **[Alex Zhang](https://x.com/a1zhang)** of MIT.
+
+[www.youtube.com](https://www.youtube.com/watch?v=kog7mwsDqnk)
+
+From GPU kernels and [KernelBench](https://www.alphaxiv.org/abs/2502.10517) to [Recursive Language Models](https://arxiv.org/abs/2512.24601), [Mismanaged Geniuses](https://alexzhang13.github.io/blog/2026/mgh/), and massive multi-agent swarms, **Alex Zhang** is exploring how much capability we’re leaving on the table by wrapping increasingly powerful models in primitive systems.
+
+RLMs took over the timeline early this year:
+
+> alex zhang @a1zhang
+>
+> Much like the switch in 2025 from language models to reasoning models, we think 2026 will be all about the switch to Recursive Language Models (RLMs). It turns out that models can be far more powerful if you allow them to treat \*their own prompts\* as an object in an external …
+>
+> [@a1zhang on X](https://x.com/a1zhang/status/2007198916073136152)
+
+and an RLM based harness was the first to ~solve ARC-AGI-3 before [OpenAI’s Astra:](https://www.latent.space/p/ainews-gpt-6-astra-openais-biggest)
+
+> Prime Intellect @PrimeIntellect
+>
+> Introducing Prime Agent: A self-improving RLM harness for coding and long-running autonomous tasks. Designed to be both token-efficient and expressive through programmatic tool calling, context as a variable, multi-agent messaging, and a self-modifiable harness state.
+>
+> [@PrimeIntellect on X](https://x.com/PrimeIntellect/status/2085086999267144083)
+
+and is even today, influencing new research that has [more extreme](https://x.com/a1zhang/status/2105409935936782708) implications than RLMs:
+
+> Rulin Shao @RulinShao
+>
+> ‼️The Bitter Lesson for context management: Giving LMs unrestricted control over their context beats human-designed SOTA! Introducing 🩵Context Language Models (CLMs)🩵 - Natively manage their own context - Treat context as a file - Learn policies in CLM weights, no harness
+>
+> [@RulinShao on X](https://x.com/RulinShao/status/2105282444270448647)
+
+We go deep on GPU Mode and AI-written kernels, research taste and why academics should take bets industry labs won’t, GEV and alternatives to the standard autoregressive language model, and the idea of harnesses as compositional generalizers. Alex explains RLMs, context offloading, programmatic subagent calling, Prime Agent, persistent subagents, and why the “language model” of the future may actually be an invisible swarm of agents underneath a simple interface. We also discuss OpenAI’s massive agent experiments, Kimi swarms, open-ended research at Sakana AI, speculative programmatic tool calling, capability overhang, Neuralese, and where Alex thinks the next big research opportunities may lie.
+
+- Why **AI-generated GPU kernels** still leave substantial room for human expertise
+
+- How one expert insight can potentially replace enormous amounts of **brute-force token search**
+
+- Why PhD students should take **research bets** that initially look trivial, weird, or pointless
+
+- What **SWE-bench, RLMs, ReAct, and Quiet-STaR** reveal about research taste
+
+- GEV and why a **language model** does not have to mean an autoregressive text-to-text decoder
+
+- Why **Claude Code, Codex, and Pi** are structurally more similar than they look
+
+- How **harness design** can improve compositional generalization across tasks and domains
+
+- RLMs: **context offloading, code execution, recursive subagents, and shared memory**
+
+- Prime Agent, continual harnesses, and **persistent agent-to-agent communication**
+
+- Why the model you query in the future may secretly be an **entire swarm or scaffold**
+
+- OpenAI’s **10,000-agent experiment, 130B output tokens, and ~$40M-equivalent** problem solving
+
+- Why much of an agent swarm may be **wasted search** — and why convergence is still hard
+
+- **Kimi versus OpenAI** and different approaches to multi-agent systems
+
+- Open-endedness, **Sakana AI**, and finding hidden gems in enormous amounts of generated work
+
+- Why current frontier models may already have a large **capability overhang**
+
+- **Speculative programmatic tool calling** and overlapping tool execution with generation
+
+- Whether English, code, or an entirely new **“Neuralese”** constrains how models reason
+
+- **AI for science**, fast-moving benchmarks, and how Alex chooses what research problems to bet on
+
+- Website: alexzhang13.github.io
+
+- X: @a1zhang
+
+**00:00:00** Introduction
+
+**00:00:49** GPU Mode, KernelBench, and AI-Written Kernels
+
+**00:07:38** Human Expertise vs. Brute-Force AI Search
+
+**00:13:20** Research Taste and Taking Big Bets
+
+**00:19:28** GEV and Rethinking the Language Model
+
+**00:29:03** Video Game Agents and the Harness Problem
+
+**00:31:01** Why Claude Code, Codex, and Pi Are So Similar
+
+**00:36:42** Harnesses as Compositional Generalizers
+
+**00:44:24** RLMs Explained
+
+**00:52:01** Prime Agent and Persistent Subagents
+
+**00:57:41** RLMs in the Wild
+
+**01:00:30** OpenAI Swarms and the Future of Language Models
+
+**01:07:26** Open-Endedness and Sakana AI
+
+**01:15:52** Kimi vs. OpenAI Agent Swarms
+
+**01:20:06** Capability Overhang and Speculative Tool Calling
+
+**01:28:19** Neuralese, Future Research, and AI for Science
+
+**Swyx \[00:00:00\]:** All right, we’re here in the studio with Alex Zhang, I guess most famously of, RLMs, but you have a few other affiliations. Welcome to the show.
+
+**Alex Zhang \[00:00:12\]:** Yeah. Thank you for having me.
+
+**Swyx \[00:00:13\]:** Yeah. I guess GPU Mode as well?
+
+**Alex Zhang \[00:00:15\]:** Yes, GPU Mode as well.
+
+**Swyx \[00:00:16\]:** You were shepherded in by Mark Saroufim. Not everyone gets that kind of welcome.
+
+**Alex Zhang \[00:00:19\]:** Yep. Yeah. Yeah. I’m very close to all the people in GPU Mode, so yeah
+
+**Swyx \[00:00:23\]:** Yeah
+
+**Alex Zhang \[00:00:23\]:** We often end up working together in various capacities, like even beyond just GPU Mode itself, so.
+
+**Swyx \[00:00:29\]:** Yeah. Can we explain, so people who are not that close Don’t know about this. It’s just a-- it’s a Discord. It used to be focused on, I guess, CUDA Mode, and then generalized a little bit. it was started by Mark.
+
+**Alex Zhang \[00:00:41\]:** Yep.
+
+**Swyx \[00:00:42\]:** It was basically like. To me, it’s like the hiring pipeline of the PyTorch team.
+
+**Swyx \[00:00:45\]:** And then you left PyTorch.
+
+**Alex Zhang \[00:00:47\]:** Yep.
+
+**Alex Zhang \[00:00:49\]:** Yeah. So it used to be, I think, it started actually around when I was in college, in like 2023. I think it was started by Mark, Andreas, and Jeremy Howard. The original premise was just like, it was a GPU-- or it was a Discord dedicated to learning how to write GPU kernels, and they had, like, lectures. That was basically the extent of it. and I got interested in it because I was writing GPU kernels. It was actually out of, like, pure chance. I was interning at Snapchat at the time, and
+
+**Swyx \[00:01:22\]:** Rexis.
+
+**Alex Zhang \[00:01:23\]:** Yeah, I was very bored with Rexis. So, they had a project where, like, they were interested in writing. It was this paper called Infinite Attention. It was like a Google paper.
+
+**Swyx \[00:01:35\]:** Yes, we’ve covered it on Paper Club.
+
+**Alex Zhang \[00:01:36\]:** Yes, yeah. So I was interested in whether or not you could write specialized kernels for it at Snapchat. it didn’t. Nothing really came of it, but I joined GPU Mode. At the time, it was called CUDA Mode, I think for, like, legal reasons or something, they changed the name. But I met Mark, I met Matei, I met a bunch of other people that were very involved in the community. And then Mark had pitched this idea called Popcorn, which was now what you see as the leaderboard today. But the general idea was like. I think all of us had this, like, intuition that GPU programming is, like, very similar to if you guys have done, like, competitive programming. It’s a, it’s a not. I don’t mean to say, like, they’re transferable skills.
+
+**Swyx \[00:02:17\]:** You have constraints. You code golf a little bit.
+
+**Alex Zhang \[00:02:19\]:** Yep.
+
+**Swyx \[00:02:19\]:** Yeah.
+
+**Alex Zhang \[00:02:19\]:** Yeah. And there’s like. There’s actually a surprisingly small space of optimizations that people do. and there’s actually not that many kernels per se that people are interested in optimizing. And so we kind of had this thought that, like, if you had enough data, like, in the same way that Codeforces, there’s millions of problems. If you could do this with GPU code, like, you could scale and automate kind of GPU kernel development, which for researchers is a huge deal. ‘Cause I think one of the bigger bottlenecks. Like, if you look at, like, Mamba, for example, like, they release the paper with kernels because otherwise, like, you can’t really use it in any meaningful way? And not everyone has, like, a Tri Dao on their team. So we’re very interested in this. KernelBench kind of spawned from that too, of like, can we get LLMs to automate, GPU kernel code? And I think that was like a. It was a very fun time. It was like between college and my PhD, and yeah, I had a really pleasant time doing stuff with GPU Mode. Now I kind of just help with the lectures sometimes. I’m not as involved, and I think in general, like, we don’t have as many competitions as we used to. But, yeah, I still keep in touch a lot with everyone there.
+
+**Swyx \[00:03:27\]:** Is there a friendly rivalry? Because I think the previous community that used to do this was like MLSys, MLPerf
+
+**Alex Zhang \[00:03:32\]:** Yeah
+
+**Swyx \[00:03:32\]:** Kind of thing. Is there a friendly rivalry? Is this like just new generation MLPerf, or what’s going on?
+
+**Alex Zhang \[00:03:38\]:** The nice thing about GPU Mode is that it is also a community in the sense that, like, a lot of the lectures are very easy enough for a beginner to follow and ask questions and things like that. And, like, the competitions are, like, somewhat, not secondary, but, like, you can participate in them to learn. I think with a lot of, like, MLSys, MLPerf kind of benchmarks, like, for the most part, like, only serious labs and companies participate. Like, seriously in them, at least. That was my understanding of it. I could be wrong. But I think also beyond GPU Mode now, one thing that has been really exciting is there’s a lot more websites and, like, people that work on hosting competitions. Like, I think there’s this.
+
+**Alex Zhang \[00:04:21\]:** I think there’s this website called, like, LeetGPU or something, and it’s like leet code for GPU problems.
+
+**Swyx \[00:04:26\]:** Wow.
+
+**Alex Zhang \[00:04:26\]:** There’s, like, other ones that I’ve. Like, we’ve, we’ve seen. Like, there’s many that have kind of spawned and, like, talked on GPU Mode, and like, it’s very exciting in the sense that I think GPU programming used to be super niche, like when I was interested in it. And the only reason I got interested in it was Tri Dao gave a talk at Princeton because he was, applying for faculty. he is faculty there now, but I listened to his talk on FlashAttention in like 2023, and I was like, “Wow, this is like the coolest thing ever.”
+
+**Alex Zhang \[00:04:56\]:** And I was like, “This is like. This is what everyone should be working on.” I guess, like, vLLM and stuff had come out too, and it was like, “Oh, we should be writing kernels.” But now it’s like, everyone writes kernels. Like, everyone. It’s, it’s. I think it’s actually almost saturated in some sense, as a field.
+
+**Vibhu \[00:05:11\]:** Any interesting takes for people that wanna get into it? So I think one of the biggest news is GPT-5.6 Wrote more efficient kernels, so Terra and, Luna could be 80% cheaper.
+
+**Alex Zhang \[00:05:24\]:** Yeah.
+
+**Vibhu \[00:05:25\]:** And then we’ve seen other competitions where people are, like, setting records, and they’re like, “We’re doing some auto research loop,” and these are people that don’t have a background
+
+**Alex Zhang \[00:05:34\]:** Yep
+
+**Vibhu \[00:05:34\]:** In any kernel writing, right?
+
+**Alex Zhang \[00:05:36\]:** Yeah. So even on the GPU Mode leaderboard, if you look at, like, a lot of the recent problems, almost all the solutions are AI generated. However, you’ll notice on the leaderboard. So there’s this guy named Gauners who’s, like, a very, like, regular member of GPU Mode. We’ve always known for a long time that he’s, like, a super cracked, like, GPU kernel writer. One thing we discovered on this leaderboard is, like, almost ev-- Like, he also used AI to help him with these solutions, but for the most part, like, he helped prompt and move it in certain directions. we found that, like, his kernel was, like, basically the only one in, like, the top 10 that was actually stable in, like, actual, like. end-to-end systems. And it does bring into question, like, it’s not. Like, GPU kernels have a verification problem. Like, we’ve kind of known this. It’s been a problem since KernelBench was released. Like, there’s a lot of reward hacking that goes on. But you al-- Yeah, you also notice, like, the lines of code is a lot smaller, but
+
+**Vibhu \[00:06:33\]:** Yeah, I was gonna ask, is that noticeable, or is it just
+
+**Alex Zhang \[00:06:36\]:** Yeah, no, it’s, it’s
+
+**Vibhu \[00:06:36\]:** Okay
+
+**Alex Zhang \[00:06:36\]:** It’s definitely, like, very important, and I think, like, it’s, it’s really interesting that still there’s a lot of alpha in being good at writing GPU kernels.
+
+**Vibhu \[00:06:44\]:** Okay, so there is a gap from verifying
+
+**Alex Zhang \[00:06:45\]:** There definitely is, yeah. I think, like. And this applies to a lot of AI systems as well. Like, I think, even with the most recent, like, math proofs and stuff, like, it doesn’t necessarily mean mathematicians are obsolete. these companies still hire mathematicians, like, to do, whether it be, like, data labeling work or even just, like, steering the models to solve problems. Like, there is still a lot of alpha in being, like, knowledgeable in these things, so.
+
+**Swyx \[00:07:12\]:** Is it just knowledge, or is it also there is just more planning, and is there, an emergent style of planning that works better?
+
+**Alex Zhang \[00:07:22\]:** I think it’s, it’s a mix of. Maybe this is what you mean, like intuition for
+
+**Swyx \[00:07:27\]:** Something like that
+
+**Alex Zhang \[00:07:28\]:** How to solve the problems.
+
+**Swyx \[00:07:29\]:** Like, for example, I always diagram my code.
+
+**Alex Zhang \[00:07:31\]:** Yeah.
+
+**Swyx \[00:07:31\]:** Right?
+
+**Alex Zhang \[00:07:31\]:** Yeah.
+
+**Swyx \[00:07:31\]:** And then, like, if there’s a part of the diagram I don’t understand, I work until I understand it. Otherwise, I, it’s not allowed.
+
+**Alex Zhang \[00:07:37\]:** Yeah.
+
+**Swyx \[00:07:38\]:** Yeah.
+
+**Alex Zhang \[00:07:38\]:** So I think it’s, like, it’s a mix of those things of, like, the people who work. Like, the people who know how to look at these problems and how to solve them, like, also know how to use AI to do them. Because, like, you’re acting as a very strong verifier. Like, if you are knowled- or if what to do and you are also. Like, I think the thing that we’ve kind of discovered with all these agent swarms and things like this is, like, when you throw enough compute at a problem, you, like, can sufficiently explore solutions to that problem. But oftentimes, like, maybe you can burn, like, 100 billion or a trillion tokens on something, but if you bring in someone who knows something about the problem, they can uncover something for the model that would, like, erase that one trillion token spend. it’s not, it’s not super clear, like, what exactly the trends are here. But I think, like, there are so many problems in the wild still right now that we want to solve, and, like, we can’t afford to just always, throw as much compute as possible at it. Like, there is still an efficiency aspect of all of these things that is super important.
+
+**Swyx \[00:08:41\]:** Is there, like, a theoretical right answer that you just calculate based on physics, and then you just get close to the physics limit?
+
+**Alex Zhang \[00:08:49\]:** Yes. So for GPU kernels, you can compute. It’s actually not that easy to compute sometimes, like, depending on how complex the problem is. Like, for matrix multiplication, it’s very easy to compute, this, like, speed-of-light kind of, estimate of what the fastest kernel can be. And, like, this is also assuming, like, maybe all of your, all your data starts on the CPU, or maybe it starts in DRAM, on the GPU, et cetera. Like, this changes these numbers slightly, but
+
+**Swyx \[00:09:18\]:** The transfers and all these things, yeah.
+
+**Alex Zhang \[00:09:20\]:** Yeah. But I will say, like, it’s not clear, though, like, in a lot of cases if it’s even possible to hit this theoretical number, if that makes sense. Like, this is assuming, like, perfect overlapping and transfer of data, and, like, there’s maybe some bottleneck that you can’t get around. But often, the kernels are not even close. Like, that we write are not nearly close enough to this number to be, like, meaningful at all.
+
+**Swyx \[00:09:43\]:** Yeah. And is it speed that matters? Do you also care about, obviously memory, which
+
+**Alex Zhang \[00:09:48\]:** Mm
+
+**Swyx \[00:09:48\]:** Feeds into speed? Do you care about power consumption? So one of my, one of our top pods of the year was Geoff Dean, who was like, “Actually, I just tracked the microjoules or, like, the nanojoules, picojoules.”
+
+**Alex Zhang \[00:09:59\]:** Yeah, it’s often picojoules today.
+
+**Swyx \[00:10:01\]:** Picojoules.
+
+**Alex Zhang \[00:10:01\]:** Yeah.
+
+**Swyx \[00:10:01\]:** Do you care about that?
+
+**Alex Zhang \[00:10:03\]:** So I don’t.
+
+**Alex Zhang \[00:10:04\]:** Yeah. I guess maybe I’m not, I’m not as
+
+**Swyx \[00:10:06\]:** But everything here is speed, right? Like
+
+**Alex Zhang \[00:10:07\]:** Everything here is speed
+
+**Swyx \[00:10:08\]:** Nobody’s counting picojoules.
+
+**Alex Zhang \[00:10:09\]:** But I-- There’s a caveat here, which is, I think, like, there is speed in the context of a single kernel, and there is speed in the context of a larger problem, like maybe the N10 model. Because, like, one thing to consider, and this is why it’s important to talk about what speed-of-light is referring to, because in these cases for the kernels, like, we always start with everything in, like HBM, for example, right? But you can imagine that, like, an end-to-end like an end-to-end model, what you might wanna do between two layers is, like, you might sacrifice the speed of the first operation to keep things in the cache for the second operation. And, like, these are things that, like, you can’t really get out of, in isolation with, like, these kinds of kernels. And, people call this, like, the fusion or, like, the
+
+**Swyx \[00:11:01\]:** Megakernel
+
+**Alex Zhang \[00:11:02\]:** Kernel fusion problem. Yeah, or, like, megakernel stuff. And it generally only applies, like, when you are, like, memory-bound in most cases. But this is something that, like, also there is this question of, like, as these models get better, like, should we just be generating like, megakernels? Is that, like, what we want?
+
+**Vibhu \[00:11:20\]:** What’s, what’s your take?
+
+**Alex Zhang \[00:11:21\]:** I think that this is really difficult because you need the data to do this. And I think, like, I have yet to see an example in the wild of, like, we bootstrap the ability to solve a very difficult class of problems without any examples. and I think, like, the other reason why I think maybe this isn’t that interesting is that at the level of an individual kernel, A, like, they’re not that, they’re not as complex, but B, you’re somewhat confident that there’s not as much structure in a single kernel. But, like, in a megakernel, like, I would be more inclined to believe that, like, a compiler would be better here. Like, some compiler over, like, higher level- Ops makes sense, because in general, like actually, I think mega kernels are very, like the pieces are very composable of like the individual kernels. There’s some areas where you might wanna do like weird fusions and everything, but in general, I think these are cases that like a compiler can probably handle. And there is a company that’s working on this from what I understand that has given some talks on GPU mode as well.
+
+**Swyx \[00:12:28\]:** Yeah, I wanna basically cluster all the GPU mode discussions here because obviously there’s other parts
+
+**Alex Zhang \[00:12:32\]:** Right.
+
+**Swyx \[00:12:32\]:** That we need to move on to.
+
+**Vibhu \[00:12:33\]:** I think there is something to plug. You guys do host a lot of really good lectures. They’re all on YouTube. People can follow. And you
+
+**Alex Zhang \[00:12:39\]:** Yes
+
+**Vibhu \[00:12:39\]:** Lead quite a bit of it. You’re still quite involved.
+
+**Alex Zhang \[00:12:41\]:** I used to. sometimes I still do. I think they’re mostly Mark. Mark is the one who usually does them. Matei does sometimes as well, but, yeah, I highly recommend them. They are extremely good resources. Like, I think it’s kind of crazy how much people share on there, so yeah.
+
+**Swyx \[00:12:59\]:** ‘Cause like if you’re there, like you’re very, like you’re exactly the right audience?
+
+**Alex Zhang \[00:13:03\]:** Yes, exactly.
+
+**Swyx \[00:13:03\]:** Like this isn’t gonna reach the mainstream.
+
+**Alex Zhang \[00:13:04\]:** And there’s a lot of like introductory material as well, that we’ve put on, that I think is useful for people.
+
+**Swyx \[00:13:10\]:** KernelBench was kind of influential. I just wanna see like, that was last year.
+
+**Alex Zhang \[00:13:13\]:** Yep.
+
+**Swyx \[00:13:14\]:** What other ongoing work do you wanna shout out that people should pay attention to? ‘Cause obviously you’re involved in this
+
+**Alex Zhang \[00:13:20\]:** Yep
+
+**Swyx \[00:13:20\]:** Field.
+
+**Alex Zhang \[00:13:20\]:** Yeah. I will give maybe the background story of like I am actually involved in a lot of benchmarks, or I used to be, maybe prior to my PhD. It started because I was at Princeton. I worked with the SWE-bench team there.
+
+**Swyx \[00:13:33\]:** John, Carlos
+
+**Alex Zhang \[00:13:33\]:** John, Carlos
+
+**Swyx \[00:13:34\]:** Ofir
+
+**Alex Zhang \[00:13:34\]:** And Ofir. They’re all great. Like
+
+**Swyx \[00:13:36\]:** Karthik
+
+**Alex Zhang \[00:13:36\]:** I love them. Yeah.
+
+**Swyx \[00:13:37\]:** There’s basically this, like I think people don’t understand how much benchmarks come from the same group
+
+**Alex Zhang \[00:13:42\]:** Yeah
+
+**Swyx \[00:13:42\]:** At Princeton.
+
+**Alex Zhang \[00:13:44\]:** It is crazy.
+
+**Swyx \[00:13:45\]:** Do Xun Yu?
+
+**Alex Zhang \[00:13:45\]:** Yes. Yeah.
+
+**Swyx \[00:13:46\]:** We had him on a pod before. Now he’s like running Tencent.
+
+**Alex Zhang \[00:13:48\]:** Yeah, now he’s like, he’s like a superstar. when I met him, so he was advising my friend Michael Tang, who is now at Anthropic, but they worked together a lot. We were like the two undergrads in Karthik’s lab. I-- And then some others joined later as well. But yeah, Xun Yu is great. I did not know he was like such a superstar until like later on, like after I left, but
+
+**Swyx \[00:14:12\]:** Yeah. like, okay, so there are very few PhD students. Like yours is like the next one. Like once a year, we feature someone like who is like basically entire PhD, has been like on target.
+
+**Swyx \[00:14:25\]:** There’s not that many of them. Xun Yu was like clearly one of them. And, Jack Morris is another one. And like, we talked, before the show, we talked about research taste.
+
+**Swyx \[00:14:33\]:** Right? Like somehow some grad students just have a very blessed career where like, yeah, mostly like, yep, this is like going to stick around, relevant, everyone should know this.
+
+**Alex Zhang \[00:14:42\]:** Yeah.
+
+**Swyx \[00:14:42\]:** And then others, just nothing.
+
+**Alex Zhang \[00:14:44\]:** I think this is also true of like even people within like industry labs as well. I think it’s just like grad students are a lot more visible. So you just see, like you see, like, there are some people who
+
+**Swyx \[00:14:56\]:** Yeah, you can publish
+
+**Alex Zhang \[00:14:57\]:** Who really like get lucky and like, or it’s, it’s a mix of being lucky and also being very smart and things like that. I think like with research taste as well, like I think it gets developed through opportunities, at least in my case. Like I got-- I was very fortunate to have like taken the path that I took, like working at Princeton and then like later, like finding my like Omar at MIT. Like he’s a fantastic advisor. I will say, though, I find that the most successful research from grad students or like in academia comes when people care about problems that maybe like most people in industry are not looking at. I think this is the issue that like a lot of grad students work on things that benefit, like that look good to an industry lab. Like for example, they’ll work on some, like some benchmark that’s really popular now. I think benchmarks in 2023 were a very different story than benchmarks now. There are a lot of people that work on like harnesses and like meta-harnesses and like specific harnesses for XYZ task. And when you really think about it, the reason someone would work on this is like maybe there’s like a clear goal shaped around the models that we have today of like, this is what I want to see. But like, I’ll give, I’ll give the like RLM, like the recursive language model paper as an example, because I think like it’s a super simple idea. I think when it came out as well, like there were a lot of people that were like, when they see something like that, they’re like, “What is even the purpose of this?”
+
+**Swyx \[00:16:27\]:** Or like too cool.
+
+**Alex Zhang \[00:16:28\]:** Yeah. Like why, like what? This is just subagents or something, right?
+
+**Alex Zhang \[00:16:32\]:** And I think it’s like when you get a reaction like that, it’s almost like a good sign in the sense that like it’s clear that people aren’t thinking about what the purpose of this is. And I will give another example of like SWE-bench. When SWE-bench came out, Ofir loves to tell this story. When it came out, like nobody cared. Like everybody was like, “This is an impossible task. Like why would we ever even consider this as a benchmark?” And it wasn’t until Devin came out that everyone was like, “Whoa, like this is something we wanna hill climb.” And I think this is, this rings true for. You tend to see that a lot of ideas. I think like the. My favorite, I guess, example of this is Eric Seligman’s work, with like STaR and like Quiet-STaR. Like I think when you read the paper, at least when I first read the paper, I was like, “Is this not like an obvious idea?” Or maybe not. I don’t know. I was like, “Oh, this seems really simple.” Or like chain of thought, and the same thing. Or like Xun Yu’s react. It’s like, okay, like, yeah, sure. But then like when you really think about it’s like why. What is the value of the paper? And I think it comes from like, it tells a bit of a story as to like what you want the field to look like. And that is something that it’s very hard to do this in academia because if you look at all these papers, Quiet-STaR, ReAct, RLMs, SWE-bench, none of these papers are. It’s not like a GPT-6 Astro release? It’s not like everyone’s like, “Oh my gosh, like I’m gonna use this now and this is the best thing in the world.” Like academia just can’t afford to do this, at least right now. I. There’s a whole slew of reasons why I think that should change, but I think it’s like. If you don’t have. As a PhD student, I think you’re in such a unique position where you can work on literally whatever you want for the most part. If you’re not taking advantage of that and working on things that, like, nobody cares about or, like, people see as some trivial thing, like, “Oh, I thought about this, but, like, I don’t use it,” I just think, like, in the end, the research is just never gonna be that interesting because you kind of need to take big bets if you’re gonna be in academia. Because otherwise, I think, like, just go to an industry lab. Like, they have tons of resources, tons of talent. Why constrain yourself in an area where you don’t have a lot of resources and, like, there’s not even that many people around? And I think it’s just. it literally just comes down to, like, big bets. like, you just have to take big bets, and, like, a lot of them will fail? Like, that’s just. it’s, it’s natural. But I think
+
+**Alex Zhang \[00:18:55\]:** That is, as a PhD student, like, that’s the biggest advantage you have over any single person at another lab because you don’t have to deal with bureaucracy and all these other things.
+
+**Swyx \[00:19:07\]:** Fair enough.
+
+**Alex Zhang \[00:19:07\]:** Yeah.
+
+**Swyx \[00:19:08\]:** I ask a lot of people this question, and usually they hand-wave away. So I think. I appreciate that you’re actually giving a thoughtful response on Like, no, like, this is your unfair advantage because everything else is biased against you, basically.
+
+**Alex Zhang \[00:19:20\]:** Yeah, exactly. And so, like, it’s honestly. I will bring up Jev as an example because it’s, it’s not an academic
+
+**Swyx \[00:19:26\]:** Wow, okay.
+
+**Alex Zhang \[00:19:27\]:** It’s not an academic project.
+
+**Swyx \[00:19:28\]:** Yes.
+
+**Alex Zhang \[00:19:28\]:** I want to bring this up because this also happened with RLMs and, it happens with many other works. Like, things get overhyped, right? To an extent, like, something gets overhyped and then people are like, “Why is this overhyped?” Like, “This is trivial. This is stupid.” And I saw the same thing with Jev because I think the release was like. there is this whole thing about, like, academics, or they’re not an academic group, but, like, people have to do branding and they have to, like, kind of market their research. And so, like, I understand, but I think there was a lot of discourse about Jev just being, like, something we’ve known for years. And I think it’s kind of missing the point of, like, why is such a system so interesting? It’s why is it not just some stupid NLP classifier that, like, we’ve, we’ve been doing, back in our intro ML classes or something? I think what’s really interesting about Jev is that it kind of opens up this question of, are language models correct? Like, in the form that they’re in, can we consider a different design space other than text-to-text? Because what they’re doing is they’re basically saying like, “I will take advantage of this language model backbone. Like, I know it captures a lot of information about language, but I’m going to change the output space of the model to give you a trade-off, which is I will do very fast inference over.” Like, if you have some prior about this problem, like, let’s say I only need to make a binary classification. Am I gonna ask my language model to do this and pay, like, a 400X cost? Like, no. That’s-- it’s, like, silly, right? and I think for the longest time, because the labs are the only places that control, you’re never gonna use something other than, like, GPT-4 or GPT-6 or Fable because they’re the best models. But because of that, like, people have gotten kind of accustomed to this idea that a language model is just a autoregressive decoder. Like, we have accepted this. And I think when RLMs came out, it was the same thing. Like, one of the comments, like a very frequent criticism I got was like, “This is not a language model.” Or like, “When I look at this, like, I thought it was a new architecture, but it’s actually not.” And my response to that is like, “Well, a language model is just modeling language. It doesn’t have to be this transformer decoder,”? and Jev is really interesting in that, like, we now have a new
+
+**Alex Zhang \[00:21:49\]:** Thing to tune, which is like, what is the output space and how does this affect inference latency? and I think we can actually start asking this about various parts of the language model itself. we are seeing this too with, like, loop transformers. It’s a similar idea of a lot of the attention around it was like, “This is a silly idea.” Like, “Why? Who cares about this?” But it’s like, it is a simple idea, but it’s actually. it opens up a whole new set of questions that I think, like, especially if you’re a PhD student, these are the things that you wanna answer. Because I think it’s like we don’t know. For Jev, for example, we don’t know how far we can take this. for loop transformers, we also don’t know how far we can take this. What if you loop only a subset of the model? what if you route to, like, only. like you have some router to different parts of the model? Like, can you mimic what you do in a harness inside of the model? What can you bridge between a harness choice and a model architecture choice? These are all questions I think that open up with works like this, and that’s, like, really exciting. Jev in particular, when I saw it, I was like, “This is actually really useful for RLMs.” Like, I think it’s, it’s. it makes sense ‘cause the biggest bottleneck in RLMs or swarms or systems like these is they’re slow. When you do multiple language model calls all the time, you’re not distributing your compute correctly because, like, maybe there’s something trivial that you just want a simple model to do, but you can’t do it because your language model is just this bulky thing? So I’m very excited. I think we will start to see new types of models emerge beyond just the bog-standard frontier model, and that is like. there’s so many things that you can do with these, like, new trade-offs.
+
+**Swyx \[00:23:34\]:** I’ll also shout out Thinky with their interaction models.
+
+**Alex Zhang \[00:23:36\]:** Yes. Yeah. Another great example.
+
+**Swyx \[00:23:38\]:** Yeah. So, like, basically try to break the paradigm from sequence to sequence, decoder only, and just literally do anything else.
+
+**Alex Zhang \[00:23:46\]:** Yeah.
+
+**Vibhu \[00:23:46\]:** I think there’s, there’s a level of if you’re trying to compete, you’re not gonna compete with a Frontier lab doing an autoregressive
+
+**Alex Zhang \[00:23:54\]:** No.
+
+**Vibhu \[00:23:54\]:** Decoder on. Like, the amount of compute scaling resources they Even Thinky will not. okay, there may be one of the handful that can, but you’re not really gonna do much in that at least.
+
+**Alex Zhang \[00:24:06\]:** I don’t know too much about Thinky, or I don’t wanna say anything either, but it’s like if their strategy is just to replicate OpenAI or Anthropic, like that’s a horrible strategy.
+
+**Alex Zhang \[00:24:15\]:** Because, well, because, like, they just don’t have. Like, you kinda just have to think of it in terms of, like, what advantage do you have? And if you’re going to use the same setup. I’m sure they’re not, but it’s like if you’re going to do the same setup, like you’re basically competing on the things you can control, which is data and compute, and obviously they cannot compete with the Frontier Labs on that. So yeah, it makes sense that, like, if you are a neo lab, like. Actually, I don’t know if you would consider them to be a neo lab, but I guess, like
+
+**Vibhu \[00:24:40\]:** Yeah. That’s why they’re, they’re in there.
+
+**Alex Zhang \[00:24:42\]:** I guess they’re kind of a weird one, yeah.
+
+**Vibhu \[00:24:43\]:** They’re in their list. They shipped Inkling. Like, they can’t.
+
+**Alex Zhang \[00:24:46\]:** Anything other than OpenAI or Anthropic, maybe like Meta and GDM, like you just, you gotta do something else? Like, it just. It’s the sad reality, but I think. I actually think it’s a good thing. I’m very happy that, like, scale works and these companies will just keep doing it because it opens up, like, potentially new players, like if they uncover something really interesting. Because I sort of have my doubts that this is, like, seriously going on at Frontier Labs, ‘cause it’s like why would you do that? like, why would you take the risk of allocating a large amount of compute to new bets when the old bet already works? So
+
+**Vibhu \[00:25:24\]:** And I think that’s what spins off a lot of neo labs, right?
+
+**Alex Zhang \[00:25:27\]:** Yeah.
+
+**Vibhu \[00:25:27\]:** You have a side bet and you don’t get compute, and you’re like
+
+**Alex Zhang \[00:25:30\]:** Yeah
+
+**Vibhu \[00:25:30\]:** “Okay, I’ll go, I’ll go do that.”
+
+**Alex Zhang \[00:25:31\]:** Exactly.
+
+**Vibhu \[00:25:31\]:** And, your example of the potential upside is something like Jev, which is X hundred times cheaper, comes out, and maybe it is language model.
+
+**Alex Zhang \[00:25:41\]:** Yeah.
+
+**Vibhu \[00:25:41\]:** In this case, it’s just different.
+
+**Alex Zhang \[00:25:42\]:** Yeah.
+
+**Swyx \[00:25:43\]:** Yeah.
+
+**Swyx \[00:25:44\]:** So no speculation on what Jev actually is?
+
+**Alex Zhang \[00:25:46\]:** I guess I have some guesses for what it might be. I have seen some people say like, “Oh, it’s like a diffusion thing.” I guess that
+
+**Swyx \[00:25:56\]:** Which is the parallel decode, right?
+
+**Alex Zhang \[00:25:58\]:** Yeah, parallel decode. Honestly, I think regardless of what it actually is, ‘cause I think you can. I’ve seen some, like, open-source replications of it. What is really exciting to me about what they did is I’m not entirely sure what their optimization objective was and how they trained it. And I think, like, this is a thing for RLMs that we’ve also been thinking about, which is like, okay, like RLMs are a very simple idea. If I come out with this paper, like anyone can use it now. But what distinguishes The actual value of an RLM is whether or not you can train it properly, and whether or not maybe you can mold some architecture around the system to make it really good. And that’s something that, like, I’m actively working on, I guess. But I think for them, like, they figured out a way to train the system, which is completely non-trivial. Like, I actually don’t really know how they did it. And I’ve seen some comparisons online of, some people are claiming they used Qwen, or they post-trained on top of Qwen, but every open-source Qwen that you use is gonna be worse, ‘cause whatever they did to train it clearly works very well. And so that’s, that’s very exciting.
+
+**Swyx \[00:27:04\]:** There’s one element of calibration Which, is a rare topic that I don’t think people even knew about or understood. We covered it with, our conversation with Clementine Foley of Hugging Face, and she used to run the evals, at Hugging Face, which is basically the idea that, models are attuned to give you the most likely next token. But, they’re gonna lie to you when you ask them, “How confident are you?” Because they’re just gonna give you the most likely next answer instead of, like, actually, like, no, let’s calibrate. Like, I am actually fifty percent sure, or I am twenty percent sure, and, like, let’s try to calibrate that. I would say, like, if anything, I think that actually that’s pretty easy to generate synthetic data around Because you can sort of see the truth and then synthetically generate a bunch of answers, have Jev classify it, and then compare with ground truth.
+
+**Alex Zhang \[00:27:52\]:** Oh, I see.
+
+**Swyx \[00:27:52\]:** That would be my reverse engineering of this.
+
+**Alex Zhang \[00:27:54\]:** Yeah.
+
+**Swyx \[00:27:54\]:** I’ve actually. I think calibration is probably the under. Like, people are just using it as a very fast classifier But they’re actually not even using the probability or calibration estimates.
+
+**Alex Zhang \[00:28:04\]:** Yeah.
+
+**Vibhu \[00:28:04\]:** I think it’s also still just misunderstood to reiterate. When you ask a model, “How confident are you?” it will spew out what, forty-three percent. the big delta is this is a grounded classification, right?
+
+**Alex Zhang \[00:28:16\]:** Yeah. Yeah, I’m, I’m very excited to see what people do with this model. is it gonna solve everything? Like, no, of course not. But I think it solves a class of problems that we traditionally struggled with, which is low-latency things. So I love the examples with games. That’s actually like. I
+
+**Swyx \[00:28:34\]:** Yeah, the Doom example
+
+**Alex Zhang \[00:28:35\]:** Yeah
+
+**Swyx \[00:28:35\]:** Was very good.
+
+**Alex Zhang \[00:28:35\]:** I have a benchmark on language models playing video games. I’ve always been fascinated by whether you can have an intelligent system play new games and things of this nature. And so I think it’s really cool that they have sort of a unique way to do this, to capture language and understanding in, like, a fast, a very fast model.
+
+**Vibhu \[00:28:59\]:** Oh, while you’re on the topic, anything you wanna point out for video games?
+
+**Alex Zhang \[00:29:02\]:** Oh, yeah.
+
+**Vibhu \[00:29:03\]:** This is. you did do a benchmark on any project, right?
+
+**Alex Zhang \[00:29:05\]:** So, yeah. I guess these numbers are very outdated
+
+**Vibhu \[00:29:08\]:** Yeah.
+
+**Alex Zhang \[00:29:08\]:** Because a lot of the models are very different. And I’ve seen actually people run. There are some folks out there that are running newer models on these games, which is really cool. I guess the general premise of this benchmark was we just want to see if vision language models are good enough at just, like, plugging into games with the latency constraint included. ‘Cause this actually. I came out with this right after Claude Plays Pokémon came out.
+
+**Alex Zhang \[00:29:33\]:** So this was, like, two years ago, which I guess is, like, ancient now. But I think what’s really cool about this suite of tasks, it’s very diverse in terms of what games they are. And also, I think most of the games are games that people know or, like, have seen before. I saw, yeah, Jeff playing Doom. I will say I don’t think. I think they were just playing, like, really simple levels and stuff. But honestly, like, most models still can’t really do. Or I don’t actually think any models can solve these games very meaningfully. Like, there are some games that they can. I think I’ve seen Astra be able to solve the Kirby game. And we also, for this benchmark, we intentionally designed a really minimal harness. And I will get to this point about harnesses because I think there’s a whole conversation to be had about, like, what is the value of a harness? Like, what is even the purpose of a harness for a model? But in general, like, I think it’s. yeah, I hope to see very quickly or very soon, like, all of these games beaten by newer models.
+
+**Vibhu \[00:30:35\]:** Yeah, it’s interesting. Like, the old Cloud Place Pokemon, they, like, read state from RAM and saw what tiles are walkable and whatnot. We did a podcast with them A long time ago.
+
+**Alex Zhang \[00:30:45\]:** Gotcha.
+
+**Vibhu \[00:30:46\]:** Yeah. Just fun.
+
+**Swyx \[00:30:46\]:** Yeah, and it’s similar. Like, Jeff doesn’t have vision
+
+**Alex Zhang \[00:30:48\]:** Yes
+
+**Swyx \[00:30:48\]:** So you have to kind of feed in,
+
+**Alex Zhang \[00:30:50\]:** Yeah
+
+**Swyx \[00:30:50\]:** These, like, game state and all these things. let’s go right into the harness stuff
+
+**Alex Zhang \[00:30:54\]:** Awesome
+
+**Swyx \[00:30:54\]:** Because you brought it up. Language model harnesses are compositional generalizers.
+
+**Alex Zhang \[00:30:59\]:** Yes.
+
+**Vibhu \[00:31:00\]:** You struggled to read that one.
+
+**Alex Zhang \[00:31:01\]:** Explain. Yes. Okay. So I have been a little unsatisfied maybe with how people think about harnesses, because people compare like, “Oh, like, I love Claude Code, I love Codex, I love Pi.” Like, “No, I love Oh My Pi, I love Prime Agent.” To be honest, I think all of them are the same. Most of the design decisions or, like, the design choices around these harnesses are the same. Maybe Prime Agent is a little bit different because it’s, like, inherently an RLM. But in general, like, I think we can be a lot more creative with harnesses. And what by that is if we think about this from the perspective of what exactly is the harness doing for the model? Well, basically, when you’re trying to solve a problem and you want to use a language model to solve it, like a very difficult task, one thing that we have discovered is that next token prediction is a really awkward form to do a lot of these tasks. So for example, take SWE-bench. When you’re navigating a code base, like, are you going to be able to figure out how to do all of this with a single language model call? Like, you just say, “Solve code,” or like, “Solve my query over this code base.” No. So we rely on a harness to help you do these kinds of things. And I think what is interesting is, like, a harness is a very opinionated program over how you want a language model to be form fit over a problem. And I bring this up because when we think about the, what a harness is doing, we should really think about, like, what choices in the harness let the language model solve this task? And can I actually just have a language model that just does this? Because a harness, if you think about it, now that loop transformers are a thing, I think what’s really interesting about it is you can model a looped transformer in some ways, like, with a harness as well, right? You’re just looping over the model. Now you can say like, “Oh, I’m not decoding,” so it’s, like, a little bit different. But in general, we, for whatever reason, have stuck with the same model architecture choice forever. And I. And there’s many arguments for why, but clearly, like, we are now training models around harness rollouts. And so there is this very awkward way of doing training over harnesses, which is that we train a language model to act within a harness, but, like, now it’s like a really long, maybe, like, multiple agent rollout that we’re doing. And there’s, like, really awkward, hacky ways of doing this. So what this blog talks about is like, well, one way you can think about what is going on here is if the harness is basically helping the model solve a particular task, can different harness design choices actually do something a little bit more meaningful beyond just, “Here are some tool calls that will help you. Here is a way to grep through your code base.” And so this actually. The idea for this blog came with the RLM idea as well. We just didn’t package it that way. And I think this is actually true. There are many other ideas around RLMs that, like, we will be coming out with, but were all there from the beginning. these are all design decisions around. I think with what is. What I like about the RLM is that there were many iterations and versions of different abstractions that I was interested in doing, and ultimately the RLM made the most sense. But there’s a lot of reasons that aren’t public as to why that’s the case. you will see. So in this example, one of the things that we see with an RLM is that if you sufficiently offload context and write. ask the model to write code over that context, you get this really weird but useful property, which is that when the model recognizes during training how to solve a task, it turns out that the solution to many tasks is very similar across, like, tasks where you don’t even. Like, it’s not even that clear to you that the solutions are similar. So in this example, we have, like, a retrieval task and we have, like, an aggregation task, and they’re very different query. Like, the domain is just completely different. And when you train a regular language model over these two tasks, the trajectories look very different. And so what you’re relying when you. Like, let’s say you use Pi or Claude Code or something, which is not in this blog, but we do have these results. You’ll find that, like, these harnesses distinguish too much between these problems, even though the solutions are the same. And so one thing that we find when training RLMs is that, like. When it sees these problems, it’s the same. And the reason it sees these problems as the same is the sub-agent sees different problems, but the sub-agent is solving an easier sub-task, and so you’re confident it’s smart enough to do it. But for the base overall strategy, they end up looking the same. And so when you train on the left task, for example, it can immediately solve the right task. And so if you go down to, like, the plots that we have, one thing you’ll kind of observe is that the. as you just naively train your RLM on these tasks, they naturally learn to generalize, for example, to longer tasks, because the strategy is basically the same. You’re just modifying, like, a length variable. And this actually also holds for tasks that are different, and they’re, it’s not even-- they’re not different across length. They’re completely different tasks, math tasks versus writing tasks. But the solution, the, like, meta high-level solution is the same. And so when you train the RLM on one of them, it generalizes this behavior to the second one. And there’s no magic here. I guess maybe that’s the thing that I wanna kind of stress. Like
+
+**Vibhu \[00:36:38\]:** How would you kind of verbalize what they are learning? So I think in here you say you train it on short tasks, they generalize to stuff 8–30x longer.
+
+**Alex Zhang \[00:36:47\]:** Yeah.
+
+**Vibhu \[00:36:48\]:** They are learning how to solve these type of problems, or what’s the, what’s the core thing they’re actually learning?
+
+**Alex Zhang \[00:36:52\]:** Yeah. They’re learning how to solve these types of problems at a certain length. And it turns out that when you take the strategy that they learned, it is directly transferable to the longer length. Like, they’re
+
+**Vibhu \[00:37:05\]:** Yeah.
+
+**Alex Zhang \[00:37:05\]:** Effectively the same program. And this is something that is really exciting because what this kind of implies is that when you have a corpus of data or environments that you train your model on, the hope is that, like, A, you can train on less environments and generalize to more than what existing models can do through or harnesses through existing kind of, like, naive training. But B, also, you still wanna use all the data you have. So when you train on these tasks, like, hopefully it generalizes to a wider class of problems. And why this is also even more exciting, at least in the context of RLMs or any recursively calling system, is this argument holds inductively. So, like, I’ll give you an example, because I said, I claimed that competitive programming and GPU optimization use very similar skill sets. The model can. the harness potentially, you might have to nudge it a certain way, but it can learn that, like, “Okay, how I’m gonna go about solving this GPU programming task is very similar to what I learned for competitive programming. So I’m gonna list out a set of solutions. I’ll, I’ll, like, spawn subagents to list out promising solutions, and then I’ll, like, write this loop to go through and check these solutions, maybe evolve them, and, like, evolve them against a verifier.” And between these two tasks, this looks the same. But what the subagents are doing are maybe, like, unique and something, like, different. But even what the subagents are solving might actually also be of the same form, right? Because it’s like a, it’s a recursive argument. And so what I’m trying to get at with this whole blog post is just that, like, we should rethink what the role of the harness is, because harnesses can actually greatly increase the generalization capability of your model and the amount of data that it’s given. And this is not exclusive to RLMs. I think there is a wide class of harnesses that are yet to be discovered that actually can yield similar properties. And to extend this argument a little bit further, I think what you can also extrapolate from this is, like, if I look at an RLM, what are the components of an RLM that are actually necessary, and can I actually just directly train a model to do this? Can I train a model to act as an RLM implicitly in its forward pass? It’s a really weird thing to think about because, like, you might say like, “Oh, code is non-differentiable, blah.” But there are many approximations of this behavior that we will start to uncover. And I think, like, we will see beyond just, like, I’m gonna design a new coding harness that uses a special form of compaction or something. I think we can be a lot more creative here. Like, there’s, there’s so much we can do with these language models that I think we are just not doing. And I’m, like, very excited about this because I think, like, I think we can get serious gains from very opinionated and good harness design that lends itself better to scale. And what by this is, like, the RLM, for example, is a very primitive inductive bias. Like, there’s nothing super special about the design other than the fact that it’s very different than what we currently do. But this may potentially scale much better with, like, the data and the environments that we have available to us.
+
+**Vibhu \[00:40:20\]:** I guess the, opposite thing that people would probably ask is current harnesses Are very generalized towards coding, which people see works for a lot of domains. Cloud code is being used for design, presentations
+
+**Alex Zhang \[00:40:33\]:** Yep.
+
+**Vibhu \[00:40:33\]:** Everything. MuseSpark, Grokbot.
+
+**Vibhu \[00:40:36\]:** These are very simple, non-opinionated harnesses that are good at code, and that is also scaling out. what’s the example of how we improve those, I guess?
+
+**Alex Zhang \[00:40:48\]:** Yeah. let me bring up another paper, which came out very recently. It’s like the harness tax paper. I think it’s by Arena. I really like this paper because it puts forward a prior that I had, which is basically that, like, most
+
+**Vibhu \[00:41:07\]:** So it confirms the prior.
+
+**Alex Zhang \[00:41:08\]:** Yeah. Like, most harness choices don’t matter because
+
+**Vibhu \[00:41:12\]:** Yeah.
+
+**Alex Zhang \[00:41:13\]:** All of these harnesses are the same. But I will say, like, Grokbot, for example, is actually quite different, I think, from my understanding, than how some of these other harnesses have been designed, and I like that a lot. and I think it’s clear from here at least that, like, I’m pretty sure. Anthropic or OpenAI are exclusively training on their harnesses. They’re probably not training on their competitor’s harness. I’d assume not, because I don’t know why they would do that. But
+
+**Vibhu \[00:41:38\]:** But, this is a thing you see in open models, right? Like, Qwen is really good at using open code.
+
+**Alex Zhang \[00:41:43\]:** Yes.
+
+**Vibhu \[00:41:43\]:** They need to train in harnesses. Old Gemmas were notoriously bad at this.
+
+**Alex Zhang \[00:41:47\]:** Yeah.
+
+**Vibhu \[00:41:48\]:** Models are good, but you need to train in a harness.
+
+**Alex Zhang \[00:41:50\]:** I think, though, as models get smarter, or, like, as they get better, this distinction becomes, not that important in the sense that, like, if you take Astra and you put it inside of open code, like, it’s not gonna go crazy, because I think it’s, like, just sufficiently good. And so I say this because the only benefits between these different harnesses is just cost, for the most part. And I think, like, what I’m getting at, Sugru, is if you plug these models into RLMs, though, they’re not that good still. They’re okay. And I think it’s mainly because the types, like the class of harness that we are training around is this class of harness, this, like, pi loop, this, like. I like to call it trajectory as a prompt, which just means, like, you keep the whole trajectory of the rollout as the context that your main model is using. Even if you use subagents, it’s still, like, kind of this form. And I think we’re going to. If we want to explore new harnesses, like, there needs to be teams that are dedicated to actually running meaningful experiments over, like, scaling out new harnesses, like maybe post-train scaling out on different harness designs. Like, I think we can actually get very meaningful knowledge or gains from doing this kind of thing, whether it’s an RLM or whether it’s something different. And that’s exciting, ‘cause I think, for example, if you train a lot on. Fable for a long time was the best model for RLMs because they had dynamic workflows, and it was pretty obvious that, like, this was a capability that was somewhat trained in. Even if the model was still, like, a little dumb, like, in the RLM harness, it still worked a lot better than other models did. Astra is now also, like, good enough at doing these things. But
+
+**Swyx \[00:43:33\]:** Wait, is this where we see that Fable is the best for RLMs, or is there some other
+
+**Alex Zhang \[00:43:38\]:** Oh, no, these are all internal results, I guess.
+
+**Alex Zhang \[00:43:40\]:** Yeah, I don’t, I don’t have them
+
+**Swyx \[00:43:41\]:** Okay
+
+**Alex Zhang \[00:43:42\]:** Public right now. But in general, like, I think you can, You can very easily tell that we have not optimized for RLM, like, workflows yet. And I think if we get models that do this correctly, they will be a lot more efficient as well. you can kind of just think through, like, why this is the case, right?
+
+**Vibhu \[00:44:03\]:** I think this is the point where you have to give the ten-second what are RLMs.
+
+**Alex Zhang \[00:44:07\]:** Oh, yes.
+
+**Vibhu \[00:44:07\]:** Because there’s a lot of listeners here that
+
+**Swyx \[00:44:09\]:** Yes. We’re, we’re assuming a lot of knowledge.
+
+**Alex Zhang \[00:44:10\]:** Yes.
+
+**Swyx \[00:44:11\]:** Also, I think you. But you have set some context
+
+**Vibhu \[00:44:13\]:** Yes
+
+**Swyx \[00:44:13\]:** So you can. Like, with everything we just said
+
+**Vibhu \[00:44:15\]:** Yes
+
+**Swyx \[00:44:15\]:** Can we have a clean, crisp definition of RLMs?
+
+**Alex Zhang \[00:44:18\]:** Yes. Okay. I want to go back to the blog, the
+
+**Vibhu \[00:44:21\]:** Yes
+
+**Alex Zhang \[00:44:21\]:** The compositional generalizers blog. This one. Okay.
+
+**Swyx \[00:44:24\]:** Okay.
+
+**Alex Zhang \[00:44:24\]:** This is, like, the best. I wish I had this in the original paper. An RLM is basically just a harness design where the only tool in the harness is code, which is this programmatic subagent calling thing, where it has the option to call itself as a tool, and it has other tools. But all of these things are functions in code, and the context that it’s dealing with is always stored in some memory inside of this code environment. So this could be a file system. Like, this could be, like. I’ll give you an example, Prime Agent. The trajectory of Prime Agent, like the context, even the. when you compact and do all these things, is stored on disk. So the model can always reference its original context, even if it’s compacted, and all of its tools are run inside of, let’s say, like, a Python REPL or a Bash REPL. And so this. it’s like this very primitive abstraction. And I would say, like, where most harnesses differ is, A, context offloading is not done that, like that. if you look at Prime Agent, by the way, Prime Agent does context offloading, but not all the way. So, like, it still maintains the standard cod code, Codex loop of, like, trajectory as a prompt where you compact, but it has the additional kind of, like, the context is offloaded, and it only has. The unique point of Prime Agent is that the only tool is IPython. So this is, like, the very kind of generic abstraction around, like, RLMs. Yeah.
+
+**Vibhu \[00:45:59\]:** Concretely, what’s the core thing RLMs are trying to solve?
+
+**Alex Zhang \[00:46:02\]:** Yeah.
+
+**Vibhu \[00:46:02\]:** At one point, I think when it first came out, it was context.
+
+**Vibhu \[00:46:06\]:** I’ll pass the question.
+
+**Alex Zhang \[00:46:06\]:** Yeah. So the original problem was harnesses have a really bad time dealing with long context. They typically were used to only really do them for, like, specific things like code. Like, they could deal with your code base because it was trained on it. But now it’s more around what this blog is talking about, which is Compositionality and the fact that, like, I think harnesses. We want to have language model systems that have much more control over the actions they make at every step. And what by this is tool calls are very limited because you have to invoke them every turn. Like, you have to invoke tool A, then tool B, then tool C, and there’s no central context that you can kind of draw back from. And RLMs are specifically, like, designed around composition and having, like, a central context that you can always draw from. and this context is, like, designed around the existing language models. Another, like, very similar example actually in design is, like, agent swarms, for example, the Hugging Face incident. Like, these agent swarms have, like, a message board that they learn to communicate over. And this message board, in some sense, is the shared context that they, like, act over. And RLMs basically say that, like, the best way to communicate through this is in code. Like, you write the code to do this, and it’s, it’s because these models are so good at writing code. like, we wanna take advantage of that fact.
+
+**Swyx \[00:47:37\]:** And then for this compositional thing, up to and including generating your own harness, specific for the task.
+
+**Alex Zhang \[00:47:44\]:** Exactly.
+
+**Swyx \[00:47:45\]:** Right?
+
+**Alex Zhang \[00:47:46\]:** I think we will start to see that if you go up to, this figure. Okay. So we talk about this idea of locally in-distribution tasks for a harness, and it is like a, an idea on top of, like, in-distribution tasks. When we think about language models, an in-distribution task is just a task where, like, the prompt is something that the model has either seen before or, like, has seen some version of it. Most harnesses work like the one on the right, which is they keep appending the trajectory as a prompt. And so eventually, unless you’re Anthropic or OpenAI and you train on, like, kind of these, like, user trajectories, most of these things end up being out of distribution for the most part. But locally in distribution is basically the compositional argument of if an RLM breaks down its computation into, like, kind of a meta-harness of sorts or, like, a program that involves subagents that, like, look at a local problem, every individual language model call over the course of this task is in distribution, even if the entire task itself is out of distribution. And this is a very desirable property, I think, for obvious reasons. Like, if every task is in distribution for each individual language model call, you will probably get to the right answer. so.
+
+**Swyx \[00:49:00\]:** The logical limit of RLMs is RLLMs where, like, you not just, you don’t just write the harness, you also train a custom model for
+
+**Alex Zhang \[00:49:11\]:** Exactly.
+
+**Swyx \[00:49:11\]:** You collect data, everything.
+
+**Alex Zhang \[00:49:14\]:** Yeah.
+
+**Swyx \[00:49:14\]:** Like, it’s a fully automated AI researcher inside of your harness.
+
+**Alex Zhang \[00:49:16\]:** Yeah. We will see where the training of RLMs goes. I will say, as an academic, I am not working on this at MIT, or at least in the scaled sense, because I can’t afford to. but there are companies out there that are working on this. I think Prime and Select is very clearly working on this, and it’s very cool. Like, I’m, I’m very excited to see. Maybe we’ll observe, I don’t know, but maybe we’ll observe better, like, post-training scaling laws with when you train around a smart harness. Maybe we’ll even see smarter harnesses that come out and, like, they work better around these kinds of principles.
+
+**Swyx \[00:49:50\]:** What is a smarter harness? Like, that doesn’t mean anything. You just said they’re all the same.
+
+**Alex Zhang \[00:49:54\]:** No. What, more of what is, like, Claude Code, Codex, Pi, et cetera, are all the same in that, like, when you break down the logic of the harness, it’s, like, virtually the same thing.
+
+**Swyx \[00:50:06\]:** Yeah, two calls in a loop or
+
+**Alex Zhang \[00:50:07\]:** Yeah
+
+**Swyx \[00:50:08\]:** Whatever.
+
+**Alex Zhang \[00:50:08\]:** But With RLMs and with other harness abstractions, it looks very different. And this is where I think you really distinguish. it’s, it’s in the same way that, like, I think with language model architecture choices, a lot of architecture choices end up kind of looking the same when you, like, scale it out or, like, it. The differences end up being, like, somewhat minor in terms of. for a lab it’s not minor, but, maybe one model converges better than the other one, like, slightly. But in general, like, if you were. So for example, pre-training scaling laws only hold because the architecture choices we have are somewhat stable right now. But if you were to completely change the architecture, pre-training scaling laws probably don’t hold. Or, like, these kinds of. This, like, power law is gonna look very different. And it’s like the same thing with harnesses. Like, I think all the harnesses we have right now, for the most part, roughly look the same, but there are some exceptions to this, I think, that are coming out.
+
+**Swyx \[00:51:06\]:** I was gonna say, I actually, one of the things that I’ve been more interested by, like, talking about PhD students who take big risks, is that people have been. People also pursuing the other side, which is pre-training scaling laws don’t hold if you change data. right now it’s just raw, unstructured text, corpus of internet. What if you had a better data representation to train on? Then yes, your scaling law would change as well.
+
+**Alex Zhang \[00:51:28\]:** Yeah.
+
+**Swyx \[00:51:28\]:** So there’s architecture, there’s data, and, whatever else, you can think about. Well, so I just wanna get back to this. it all makes sense. It’s, it’s very interesting how you sort of recurse up and down the stack from, like, very conceptual to, like, not like, well, this is where we are today.
+
+**Swyx \[00:51:43\]:** But, like, yeah, obviously, it can scale up and down. I guess, I’m curious, how did you start working with Prime? Is Prime taking on more work with this? Is this their answer to Hermes agents?
+
+**Alex Zhang \[00:51:56\]:** Mm.
+
+**Swyx \[00:51:56\]:** You mentioned Grokbot is a little bit different. I just wanted to, like, namecheck all these guys and get your thoughts on each.
+
+**Alex Zhang \[00:52:01\]:** Yeah. I got involved with Prime, after they released a blog post, by the way, not affiliated with me at all, about, like, how they believed RLMs were kind of the future. And I had a friend that was working there, GPU Mode, Matei. Like, we got in touch, and I think I agreed with a lot of the researchers there and, like, what they believed about harness design. Like, I was very impressed, I think, that, like, they understood the purpose of the RLM paper, which is not necessarily just to say that, like, we’re solving long context tasks, but actually, like, we want more opinionated harness designs.
+
+**Swyx \[00:52:39\]:** Yeah. There’s always, like, the result of the paper that you choose to highlight
+
+**Alex Zhang \[00:52:42\]:** Yes
+
+**Swyx \[00:52:43\]:** Versus the actual point.
+
+**Alex Zhang \[00:52:44\]:** Yes. As I would love to talk about, like, the incentives of academia and, like, the things around, like, why it’s kind of flawed and all the issues, and we’ll get back to that. Yeah. So anyways, I love the guys at Prime. So we kind of had been. After we decided to work together, we decided to look into training in RLM and also build this kind of RLM harness and kinda see where we can take it. That is how, like, Prime Agent came about, and I think the reception for Prime Agent has been pretty good. Like, the one thing I was worried about with Prime Agent is that none of them, at least at the time when we were building it, none of the models were that good at doing RLM stuff. So this was, like, pre-Fable, pre-Astra.
+
+**Swyx \[00:53:27\]:** I guess, I think to take a step back, can you explain what Prime Agent is, how it’s different than
+
+**Alex Zhang \[00:53:32\]:** Yeah
+
+**Swyx \[00:53:33\]:** A traditional, Claude Code, what people would expect harness?
+
+**Alex Zhang \[00:53:36\]:** Yes. So Prime Agent, I think I mentioned this a little bit earlier
+
+**Swyx \[00:53:40\]:** Yeah, there was the diagram. Yeah
+
+**Alex Zhang \[00:53:41\]:** Is basically. it is a. A harness on top of Pi, like Pi Mono, which is-- Pi Mono, for context, is like the, like a
+
+**Swyx \[00:53:50\]:** Core agent
+
+**Alex Zhang \[00:53:51\]:** A minimalist
+
+**Swyx \[00:53:51\]:** Yeah.
+
+**Alex Zhang \[00:53:52\]:** Yeah, like harness. I use Pi as the reference for everything because I think all other harnesses are basically just Pi.
+
+**Alex Zhang \[00:53:57\]:** But it is Pi, except we explicitly restrict IPython to be the only tool that’s available to it. Every other tool gets loaded in as, like, a Python module, or like a Bash kind of script that it can run. So it uses the core RLM abstraction on top of Pi, and then it also has this continual harness thing, which is, Seth, he’s another PhD student. This is a thing that he used to get language model harnesses to play games. Like, so he worked a lot with Joel, who is the, like, Gemini plays Pokemon guy. And continual harness is also, by the way, very simple. I quite like it. It basically is this design, principle around, like, what parts of the harness can you let the harness itself modify? There are certain pieces that, like, you’ll let it modify its own skills, the subagents available to it, what the system prompt to the model is. And continual harness is available basically as a tool inside of the IPython kernel. And so that’s what Prime Agent is, like, how, what it’s designed around. Everything else in Prime Agent is like
+
+**Swyx \[00:55:05\]:** Standard.
+
+**Alex Zhang \[00:55:06\]:** Standard.
+
+**Swyx \[00:55:06\]:** Standard.
+
+**Alex Zhang \[00:55:06\]:** Right? Yeah. I think what is, what I really liked about it, and we got kind of lucky, is that, like, a lot of the new frontier models actually work really well inside. And actually, even a lot of the open-source models work really well, at least some of the newer ones. And there is another thing in Prime Agent I should highlight, which is that, like, we have a very particular agent-to-agent communication system or, like, framework, which is because RLMs tend to spawn many subagents, we want a way for subagents to communicate with maybe the root or with each other. And so there are some design decisions around, like, what each subagent is allowed to talk to, how it does it. Again, everything is in code, so it writes the code to do this kind of communication, which I think is really cool. And then there’s, I guess, persistent subagents is another thing that was kind of added, which is the subagents, they can last beyond, like, the standard runtime of the actual, like, original agent. And you can go into that subagent, you can prompt it more, like, you have more visibility and flexibility into what is kind of going on.
+
+**Swyx \[00:56:10\]:** This is my number one pain with Codex right now. They, their subagents are just very ephemeral And they actively discourage you from using it for long-running things.
+
+**Alex Zhang \[00:56:17\]:** Yeah. Yeah. Which I think it makes sense. Yeah. I
+
+**Swyx \[00:56:21\]:** So the trick is just externalize to a file system, right?
+
+**Alex Zhang \[00:56:24\]:** Yes. Yeah. That’s
+
+**Swyx \[00:56:25\]:** Like, that’s the trick.
+
+**Alex Zhang \[00:56:25\]:** That is the big trick.
+
+**Alex Zhang \[00:56:27\]:** Yeah.
+
+**Swyx \[00:56:27\]:** And well, and also, like, force everything to run through code. trust the model
+
+**Alex Zhang \[00:56:30\]:** Yep
+
+**Swyx \[00:56:30\]:** That can write code, and it’s gonna write its own harnesses itself. So is Prime gonna take on, like, training, post-training custom models for this? Is this a one-off collaboration between you guys, that’s it? Like, what’s
+
+**Alex Zhang \[00:56:41\]:** Yeah. They are training a model, intern-- I think they were pretty public about this actually
+
+**Swyx \[00:56:46\]:** Yeah
+
+**Alex Zhang \[00:56:46\]:** Back in March.
+
+**Swyx \[00:56:47\]:** Clearly it is their business.
+
+**Alex Zhang \[00:56:49\]:** Yeah.
+
+**Swyx \[00:56:49\]:** Yeah, so.
+
+**Alex Zhang \[00:56:50\]:** Yeah. they’re, they’re showing that they can train it on their kind of hosted training stack. But no, so for model training, I’m, I’m not involved with them on that. The main reason is just I have other things in the PhD I wanna work on. I think, like, there are many other big bets to take,
+
+**Swyx \[00:57:03\]:** Ooh
+
+**Alex Zhang \[00:57:03\]:** Outside of just RLMs. some
+
+**Swyx \[00:57:06\]:** Ooh
+
+**Alex Zhang \[00:57:06\]:** Some I don’t know how much I can share yet. but in general, like, I think, I actually think one of the luxuries of being a PhD student, genuinely, is that there’s so many big bets to take. most of them will probably yield nothing, but it’s a really exciting time to be in research, especially because I think most progress in the field has been a little bit boring. Like, I’m not saying the outcome is boring, but the process of doing these things tends to be quite boring. and so there is kind of this question of, like, what do we wanna do next? but
+
+**Swyx \[00:57:39\]:** Yeah
+
+**Alex Zhang \[00:57:39\]:** We can talk about that later.
+
+**Swyx \[00:57:41\]:** Yeah.
+
+**Alex Zhang \[00:57:41\]:** Yeah.
+
+**Swyx \[00:57:41\]:** Okay, I wanna close out a little bit more of your research, and then we can,
+
+**Alex Zhang \[00:57:44\]:** Cool. Yep
+
+**Swyx \[00:57:44\]:** Start putting it out. since you released RLM, a lot of excitement about it. Any secondary third-party work that you wanna shout out as, like, that you guys should take a look at this?
+
+**Alex Zhang \[00:57:53\]:** Oh, yeah. So, Harvey, the legal AI company, released a blog post, not affiliated at all, but they post-trained an RLM on their, like, legal work, which often involves a lot of, like, sifting through documents and kind of looking through, like, a variety of, specific information that maybe is not so easy to retrieve with, like, a pure retrieval system. And they show, like, really good results. It’s very exciting. I was shocked that they worked on this. They did not tell me, so when this came out, I was like, “Oh, that’s awesome.” So there’s this one I think is super cool and what they’re doing there. I think this is a collaboration with Base 10, by the way, as well.
+
+**Swyx \[00:58:33\]:** Yes, this was Base 10.
+
+**Alex Zhang \[00:58:34\]:** Headlong, which is law, the Law Institute’s kind of. it is their, like, persistently running harness. it’s very cool that
+
+**Swyx \[00:58:42\]:** Oh, they renamed it? They used to call it something else.
+
+**Alex Zhang \[00:58:45\]:** It was like Auto
+
+**Swyx \[00:58:46\]:** Terminus.
+
+**Alex Zhang \[00:58:46\]:** Yeah, I know. They’ve gone through. Yeah.
+
+**Swyx \[00:58:49\]:** All right.
+
+**Alex Zhang \[00:58:49\]:** So this is Andy Konwinski’s big project. it’s super cool. I love Andy. I don’t want to downplay what they’re doing because they’re using the RLM abstraction, but they’re doing something much cooler than the RLM, which is like they have a system that kind of what they call, like, thinks persistently. So even when you don’t query it has a way to, think through problems that it has in its context.
+
+**Swyx \[00:59:16\]:** Oh, so it’s just like a always-on type thing.
+
+**Alex Zhang \[00:59:18\]:** It’s like an always-on thing, but it’s, like, not that expensive. Like, they control the token costs, to make sure it’s not, like, burning through all your credits. This is super cool. I’m trying to think. There are many. Actually, if you go to the RLM, GitHub page, there’s a bunch of things I’ve linked, below. There’s a ton of really cool kind of things that people have been doing. Axe is another really cool one that I think it’s just by this one guy. It’s like a harness around DSPy and RLMs. DSPy also has an RLM. Oh, the last thing I’ll shout out is on ARC-AGI-3, I believe, there were a lot harnesses on their, like, Kaggle competition, like the official one, not the, like, public primates, like one that, or like what people have evaluated on. They all, like, claim to use or they reference, like TUFA, for example, some form or some inspired form of the RLN abstraction in their harness, which is really cool. I think it’s, This is where-- this is exactly the setting where you would see a lot of benefits from composition and using code and combining, like, neuro symbolic systems with AI. And so
+
+**Swyx \[01:00:27\]:** Yeah.
+
+**Alex Zhang \[01:00:27\]:** Yeah. Very cool.
+
+**Swyx \[01:00:28\]:** We love a good neuro symbolic reference.
+
+**Alex Zhang \[01:00:30\]:** Yeah.
+
+**Swyx \[01:00:30\]:** You also, mentioning ARC-AGI-3, OpenAI comes out and says, “We’re at 99.9% on this.”
+
+**Alex Zhang \[01:00:36\]:** Yep.
+
+**Swyx \[01:00:37\]:** They also say, “We solved Navier–Stokes. We just threw a model at it.”
+
+**Swyx \[01:00:40\]:** There’s some debate around whether or not it’s just model.
+
+**Swyx \[01:00:44\]:** Are they using an RLM? Do?
+
+**Alex Zhang \[01:00:46\]:** I would guess probably not, unless you say, like. I’ll, I’ll be, I’ll be careful here because, people debate what is an RLM, what is not an RLM. It’s somewhat clear that what they used is some kind of swarm of agents with a shared, some shared context, like some shared file system. And, like, this is very much in the spirit of RLM stuff, but I think there’s a, there’s a lot of, like, more clever things that they did that’s not maybe related to the RLM itself. I agree a little bit with the idea that, like, a harness is not that necessary for what they did. The way that I would put this is that I think a model, like a GPT-6 Astra type thing, is technically smart enough, conditioned on the right information, to come up with a proof for these very difficult problems. Now, how you get to that information is a giant question mark. And in their case, it probably came down to, like, a very long search over, like, many of these sub-age-- or many of these, like, agents in the swarm and maybe also, like, researchers cond-- I’m, I’m actually not sure about this part, but putting in, like, their kind of intuition as to, like, what you should explore and things like this. And ultimately, like, this produced some information that some agent was able to take to finish the proof. And so in that sense, like, I think, was the harness that important? No. And I think what this is pointing at is, like, the specific details of a harness do not really matter, and I think that’s also what that, what the harness task paper is pointing at, which is that, like, beyond the user’s feeling of the harness, realistically all that matters is just, like, how are you composing these agents in a meaningful way to get to the final answer? And maybe that’s what, like, swarms and all these things are really about. And so from my POV at least, if we start to think about, like, for user use cases, what do we want out of harnesses and things like this? Like,
+
+**Alex Zhang \[01:02:51\]:** We want to take the good parts out of these, like, the Claude codes, the Codexes, like the stream that people like to see. But, like, under the hood, whatever is running can be some really weird, complicated swarm of agents that, like, ultimately come up with an answer. The user doesn’t wanna see that, though, obviously, right? Like, it’s, it’s not legible information. And so I-- this was another kind of thing in the spirit of RLMs, like recursive language model. It sounds like it’s a language model and, but it’s not a language model architecture. But the reason for this is, like, I think we will start to see in the future probably one day, and I wrote a blog about this, what we think of as a language model, like the thing that we query, might actually be like a swarm or like a scaffold or like some Weird harness design that scales very well, but the user just doesn’t see it. Ultimately, all the user sees is some front-end version of this harness. And yeah, I think it’s a relatively safe bet at least to make that this is what we will see.
+
+**Swyx \[01:03:48\]:** Yeah.
+
+**Alex Zhang \[01:03:49\]:** And this maybe goes back to the limitations of the base transformer. Like, obviously if you just took a base transformer and you said, like, “Solve Navier–Stokes,” or something, it’s not gonna do it. Like, yeah, we all know this is not what’s gonna happen. But yeah, I think this is maybe the more interesting part. and maybe the claims around, like, did the harness matter is more around this, of, like, just arbitrarily pointing models, like, or agents at a growing kind of context of information maybe is just enough to solve very difficult problems. that I can buy.
+
+**Swyx \[01:04:20\]:** While there’s a lot in there, I do wanna say, the amount that OpenAI spent is semi-public. It’s, 10,000 agents in 88 hours.
+
+**Alex Zhang \[01:04:29\]:** Oh, yeah.
+
+**Swyx \[01:04:29\]:** 130 billion output tokens, which is estimated to be about 40 million dollars in public pricing.
+
+**Alex Zhang \[01:04:34\]:** Surprisingly, actually, like, less than I thought.
+
+**Swyx \[01:04:37\]:** Yeah, not that much.
+
+**Alex Zhang \[01:04:38\]:** Yeah. Yeah.
+
+**Vibhu \[01:04:38\]:** 130 billion output for the final, but as you said, there was a lot of context being passed around.
+
+**Vibhu \[01:04:44\]:** It’s more than double that in just the total agent messages being sent.
+
+**Alex Zhang \[01:04:47\]:** Yeah.
+
+**Swyx \[01:04:48\]:** Yeah.
+
+**Alex Zhang \[01:04:48\]:** Yeah. Yeah.
+
+**Swyx \[01:04:49\]:** I think, one thing I was honored to bring up also was Cursor as far as, like, swarm stuff is concerned.
+
+**Swyx \[01:04:53\]:** This is slightly older, meaning February, which is ancient.
+
+**Alex Zhang \[01:04:57\]:** Whoa.
+
+**Swyx \[01:04:57\]:** But if you scroll down all the way to the final sort of multi-agent architecture that they arrived at, it was basically an org chart of a normal software team. One thing I’m thinking about, because I basically. There’s, like, this, gather all function That you have to do with subagents or. It’s very similar to GPU programming, actually.
+
+**Alex Zhang \[01:05:16\]:** Yeah. Yeah. Yeah.
+
+**Swyx \[01:05:17\]:** And so, that’s a bottleneck. This is a bottleneck.
+
+**Swyx \[01:05:21\]:** If there’s one main guy, that’s coordinating all the sub guys, then they have to, like, gather again and then re-coordinate.
+
+**Swyx \[01:05:29\]:** That’s slow. That’s, that’s crappy. what a true swarm should be is everyone is just their own person.
+
+**Alex Zhang \[01:05:35\]:** Yeah. Yeah.
+
+**Swyx \[01:05:36\]:** Right?
+
+**Alex Zhang \[01:05:36\]:** Well, I agree with this, and I think that there is a question to be had, though. Let me give an analogy, which is like, when would you use compaction and when would you use an RLM? And there are many settings where an RLM can solve maybe a more difficult task than compaction can, but you would prefer to use compaction in most cases because it’s cheaper and it’s quicker. And I think in the context of agent swarms, there is a similar thing going on of, like, I’m. Fairly certain that, like, 95% of the swarm is entirely useless, or, like, what it’s exploring is entirely u-- You’re just burning tokens. Versus in this setup, maybe not so much. I’m not sure. maybe it’s also the case here.
+
+**Swyx \[01:06:17\]:** Everyone has a job. This is your board.
+
+**Alex Zhang \[01:06:19\]:** Yeah.
+
+**Vibhu \[01:06:19\]:** I think at some level that’s how problems are framed, right?
+
+**Alex Zhang \[01:06:23\]:** Yes.
+
+**Vibhu \[01:06:23\]:** So, like, if you have a search problem and you’re spanning out a bunch of subagents to do search, there’s gonna be a lot of useless information, right? There is one retrieval answer That you’re getting and you’re spanning off, but that is consciously understood, right?
+
+**Alex Zhang \[01:06:36\]:** Yes. But there is kind of this question of, like, what is appropriate to solve for which problems? Like, what design-- in theory, OpenAI can use-- can package up this API and they’ll call it swarms, and then they’ll give it to you and they’ll be like, “Point this at any problem and we’ll give you a solution.” But maybe
+
+**Swyx \[01:06:53\]:** Yeah, it’s called, it’s called pro, right?
+
+**Alex Zhang \[01:06:54\]:** Yeah. maybe you’ll have to pay like 40 million dollars to get a result.
+
+**Alex Zhang \[01:06:57\]:** And it’s like, well-- But it’s exciting. I will say, like, it is-- it’s very exciting that we even have the option to point 40 million dollars at a problem and solve it.
+
+**Vibhu \[01:07:07\]:** Yes.
+
+**Alex Zhang \[01:07:08\]:** But there is still kind of, a lot of research to be done in this area around, like, what is necessary. Like, what do we want to do? What design do we want? we probably don’t want everything to be a swarm, but, like, where do we draw the line? Like, can the agent design that or decide that for itself? Et cetera. So.
+
+**Swyx \[01:07:26\]:** Yeah. and then, just a quick check in case you have opinions on this. Have you looked much into open-endedness as a general category of problems?
+
+**Alex Zhang \[01:07:35\]:** Oh
+
+**Swyx \[01:07:35\]:** Meaning no prompts, just go.
+
+**Alex Zhang \[01:07:38\]:** A little bit. so I was at Sakana for a summer, right after, or I guess right before my PhD, and that’s something that they work on a lot there. And I think there’s a lot of people even at, like, Recursive Super Intel-- There’s many of them now.
+
+**Swyx \[01:07:53\]:** Yes, we just had Richard Socher on.
+
+**Alex Zhang \[01:07:55\]:** Oh, yes. Yeah. So, like, Richard’s company and then also. Actually, wait, that might be the s-- it might be the same company. I don’t remember. Is Tim Lautenschlager also
+
+**Swyx \[01:08:03\]:** Yeah.
+
+**Alex Zhang \[01:08:03\]:** Okay. Yes, that company.
+
+**Swyx \[01:08:04\]:** He’s the main co-founder. He used to be head of open-endedness for Google.
+
+**Alex Zhang \[01:08:07\]:** Yeah.
+
+**Swyx \[01:08:07\]:** Yeah.
+
+**Alex Zhang \[01:08:08\]:** So I think with open-endedness problems, like, I view them as somewhat similar to even, like, unsolved math problems. Maybe that’s a weird way of framing it, but, like, I think a lot of the techniques in terms of, like, how people like, approach them are kind of the same. Like, evolutionary search is, like, very similar to just launching swarms of agents and hoping that, like, they come up with, like, an interesting s-- And this is what, like, AlphaEvolve and some of these other works did, like a year or two ago. But I think what maybe is not, And I’m not sure if this is what you were alluding to, but I think what’s not super clear in open-endedness style search problems is do we frame all of them as basically like an unsolved, very difficult problem, or, like, where the objective is clear? If that’s not the case, I still don’t know yet entirely what the value of it is. maybe you have other opinions. Like, I don’t have too many opinions on this, but at least from my time at Sakana, like, I got the sense that, like, we ultimately still kind of wanna approach things the way that, like, say, OpenAI approached Navier–Stokes. We want. We-- There’s still a lot of nudging in certain directions that we want to have to, like, get to the point where we have something interesting.
+
+**Swyx \[01:09:29\]:** My version of it is, like, maybe it’s a split between basic science and applied science. Basic science, you’re researching for researching’s sake.
+
+**Swyx \[01:09:36\]:** You just wanna understand things better. I have no idea if, like, there will be any application at all whatsoever, but, that, And then applied, you have a goal.
+
+**Swyx \[01:09:45\]:** You’re, you’re trying to minimize loss in some way? and so, what I really, think, in terms of, like, the big bets that people have, what if there was no prompt? Like.
+
+**Alex Zhang \[01:09:57\]:** I see.
+
+**Vibhu \[01:09:58\]:** You just pick domain and let it
+
+**Swyx \[01:09:59\]:** Like, you just, like, you just spawned in this, like, swarm of things and you’re like, “Hey, what’s up, guys? Like, what you guys working on?”
+
+**Alex Zhang \[01:10:03\]:** Yeah.
+
+**Swyx \[01:10:03\]:** And, like, you just decide
+
+**Alex Zhang \[01:10:05\]:** I see
+
+**Swyx \[01:10:05\]:** Like, this is an interesting problem.
+
+**Alex Zhang \[01:10:06\]:** The biggest issue that, like. And maybe there’s a clear path to this, but when I was there at least, the biggest issue that people had with open-endedness was like, how do you ultimately choose at the end? How do you pick out the interesting stuff? Because when there is no. Like, maybe the agent comes up with a goal, but in a lot of cases, like, what they. And they have something called Fugu, I think, which is like a It’s like a model router type thing that was, like, inspired at least by this idea of, like, let’s pick a problem where maybe we can pick out the best solutions to something. In this case, it’s like pick the best model for this problem.
+
+**Swyx \[01:10:41\]:** You’re the first person to connect model routing to open-endedness.
+
+**Alex Zhang \[01:10:43\]:** No, yeah. But, so I bring this up because I think, like, with open-endedness, like, just generally the issue is, like, when we have this giant corpus of, like, slop, like, how do we sift through
+
+**Swyx \[01:10:57\]:** Yes
+
+**Alex Zhang \[01:10:57\]:** And find, like, the hidden gems? And, like, the solution to open-endedness really just letting models run forever and, like, finding. Like, just doing data gen-- just doing super high throughput data generation and then, like, asking agents to go through and, like, find meaningful things. Like, I’m not sure. Maybe that’s sufficient? Like, that would be, that would be cool.
+
+**Swyx \[01:11:21\]:** To me, it’s, like, very interesting as a counter to basically all of machine learning Where you have a goal, to have no goal.
+
+**Alex Zhang \[01:11:28\]:** Yeah. Yeah.
+
+**Swyx \[01:11:29\]:** But, or, like, an ill-defined goal that you’re like, “Well, what about this goal?” And you’re like, “Well, okay, maybe.” And then you, like, sort of research more and you find
+
+**Alex Zhang \[01:11:36\]:** Yeah
+
+**Swyx \[01:11:36\]:** That is an interesting goal. ‘Cause, like, I think, like, finding the objective function, like you said, like, Jeff found an objective function That was interesting that no one was exploring.
+
+**Alex Zhang \[01:11:43\]:** Yep. Yeah.
+
+**Swyx \[01:11:44\]:** I think that is, like, similar to your message about grad students as well. Like, you stay in school because you are. you want to pursue open-endedness. If you want to, profit max and, like, join the, escape the permanent underclass, then you join a lab.
+
+**Swyx \[01:11:59\]:** Right?
+
+**Alex Zhang \[01:11:59\]:** Yeah. Yeah. It’s funny. I feel like I don’t, I don’t hear this discourse a lot. I’m, I’m in the East Coast, so it’s, like, a very different type of. But then when I. whenever I come here, it’s like, that’s always, like, the topic of discussion.
+
+**Swyx \[01:12:12\]:** You cannot pay rent without doing this.
+
+**Alex Zhang \[01:12:13\]:** Yeah.
+
+**Swyx \[01:12:15\]:** Yeah, you’re getting priced out, guys.
+
+**Vibhu \[01:12:16\]:** Yeah.
+
+**Swyx \[01:12:17\]:** Okay. So, yeah, there’s, there’s all that. I don’t know if you wanna-- if it’s relevant, enough to talk about the mismanaged geniuses, which you were pulling up.
+
+**Vibhu \[01:12:25\]:** No, it’s just on your blog. But I will poke on, Sakana.
+
+**Swyx \[01:12:28\]:** Oh, Sakana? Oh, okay.
+
+**Vibhu \[01:12:28\]:** Yeah. So they did in their, blog post, I talked to them about this as well. So one of the cool results of Ultra is they basically just let it loose on automated data science research
+
+**Vibhu \[01:12:40\]:** With little to no human intervention. It’s just kind of making
+
+**Swyx \[01:12:44\]:** Yeah, so this is auto research, which is a little bit more open-ended, and there’s degrees of open-endedness, and I agree with that.
+
+**Vibhu \[01:12:51\]:** Yeah, separate than auto research with objective, this is just
+
+**Swyx \[01:12:54\]:** Yeah
+
+**Vibhu \[01:12:54\]:** Do stuff. But, it’s cool. They’re, they’re working on it for those that are interested.
+
+**Swyx \[01:12:58\]:** While you’re bringing it up, actually, what is your take on Sakana? Like, what are they doing apart from being, the Japan one?
+
+**Alex Zhang \[01:13:04\]:** Yeah.
+
+**Alex Zhang \[01:13:05\]:** I actually love the people there. Like, I think they have a really smart team. and it makes sense. it branched off from, like, an earlier team at GDM, which was also kind of, I guess, doing this kind of, like, open-ended evolutionary research style stuff. What I liked about my experience there, at least, was that they did have that, like, mishap back, I forget, at this point when, but I think, like
+
+**Swyx \[01:13:31\]:** You’re talking about AI scientists?
+
+**Alex Zhang \[01:13:32\]:** No, the GPU kernel.
+
+**Swyx \[01:13:34\]:** Oh, okay, yes.
+
+**Alex Zhang \[01:13:35\]:** That one. Yeah.
+
+**Swyx \[01:13:36\]:** People cannot forgive them for that. Yes.
+
+**Alex Zhang \[01:13:37\]:** Yeah. And I guess, like, the AI scientists, like, there’s, there’s some criticisms of it that I don’t, I don’t work on that, so I have no kind of take on it. But I think in general, like, what I like about them at least is that they’re a little bit more of a researchy type lab. So, like, they don’t operate in the same space as, like, OpenAI or Anthropic. Like, for sure, like, definitely no. They do not. it’s pretty obvious probably that, at least when I was there, they do not have a big competitor model or something that, like, that everyone is using. But I think they kind of operate in some ways as, like, a PhD lab, which is cool. Like, and I think, like, David Ha is, like, he’s, he’s really smart. Like, I think he has a good sense of, like. Also, I think the market in Japan is also a little bit different for AI, and, like, who they’re targeting is slightly different than maybe what we’re used to here. But yeah, I like that they take kind of. A lot of their research is kind of weird, I think, when people view it? And I like that. Like, I think it’s
+
+**Swyx \[01:14:34\]:** We should have more weirdness, yes.
+
+**Alex Zhang \[01:14:35\]:** Exactly.
+
+**Swyx \[01:14:36\]:** And you said different market. Just, is it, like, enterprise?
+
+**Alex Zhang \[01:14:39\]:** Like, the way it works there is a bit different, like how deals happen and stuff like that.
+
+**Vibhu \[01:14:44\]:** They do have a. I guess this page is originally in Japanese, but they do have a model
+
+**Alex Zhang \[01:14:49\]:** Oh
+
+**Vibhu \[01:14:49\]:** Specialized for the Japanese market.
+
+**Swyx \[01:14:51\]:** So you didn’t know that.
+
+**Alex Zhang \[01:14:51\]:** I didn’t know that.
+
+**Vibhu \[01:14:52\]:** I didn’t know it too.
+
+**Alex Zhang \[01:14:53\]:** Did not know this.
+
+**Vibhu \[01:14:53\]:** I also have personal friends that know the team.
+
+**Alex Zhang \[01:14:56\]:** Yeah.
+
+**Vibhu \[01:14:56\]:** So there is a. Even from the sense of a way that you speak culturally Responses are tuned towards that. This is not like it’s frontier on benchmarks. It is a cultural appropriate model for them, and then they have, like, chat and all that.
+
+**Alex Zhang \[01:15:11\]:** Yeah.
+
+**Vibhu \[01:15:12\]:** But, to mirror your point, there’s also, like, how should education look like? And someone wants to work on it, and they’re a very PhD lab of, “Do your thing. Why not? We have money. Go research.”
+
+**Swyx \[01:15:22\]:** Oh, they say it’s a Kimi fine-tune. That’s nice.
+
+**Vibhu \[01:15:24\]:** Oh, there you go. Kimi.
+
+**Swyx \[01:15:25\]:** Good for them.
+
+**Swyx \[01:15:26\]:** Yeah, and, speaking of Kimi, right, like another, just a grad student that spit out and like, yeah, I just have this, like, Kimi delta attention that wants-- that I wanna work on.
+
+**Vibhu \[01:15:36\]:** Yeah. Yeah.
+
+**Swyx \[01:15:36\]:** And, like, somehow managed to make Moonshot. Don’t understand it still.
+
+**Alex Zhang \[01:15:41\]:** Yeah. Well, he’s, he’s super cracked, at least my understanding. I think in general, like, a lot of, a lot of the Chinese labs have done really cool work.
+
+**Swyx \[01:15:51\]:** Yeah.
+
+**Alex Zhang \[01:15:51\]:** Like, yeah.
+
+**Vibhu \[01:15:52\]:** Any thoughts on Kimi agent swarms?
+
+**Alex Zhang \[01:15:55\]:** Yes. one thing I will say is whatever OpenAI is doing with their agent swarm is, like, clearly the right thing to do. You have to kind of think about it this way. Like, nothing, especially without, like, a very smart harness design, which I don’t, I don’t think anyone really has so far, Nothing comes so easily for free. For example, like, the agent swarm design is not something you can just take for granted. Like, it’s not like GPT-6 Astra is just super smart and then it just got agent swarms running well. They clearly trained. the Hugging Face incident was them training a system to be like a swarm. and I think, like, clearly they’ve done something really well to the point where you can throw 40 million dollars and solve an unsolved problem. And I think with the Kimi agent swarm thing, like, at least from when I read it just came off as like, this is interesting, but I don’t actually know whether or not this can solve anything novel.
+
+**Swyx \[01:16:59\]:** Yeah, they just. They were like, “It makes spreadsheets for you.”
+
+**Alex Zhang \[01:17:01\]:** They kind of were just like, yeah, like, here is a, here is a swarm that, like, kind of does stuff, and it’s cool. but. And I will say the same thing with dynamic workflows. I actually kind of think the dynamic workflows release was sort of a flop. I don’t know how you guys feel about it, but I think it’s like. my understanding is, like, it’s not used that often or, like
+
+**Swyx \[01:17:21\]:** It’s just very expensive.
+
+**Alex Zhang \[01:17:22\]:** It’s too expensive and like
+
+**Swyx \[01:17:22\]:** It’s ultra code. It’s basically like, take over my bed.
+
+**Alex Zhang \[01:17:26\]:** And it doesn’t I’ve tried it, and, like, it doesn’t act in the way that, like. Again, I’m not, I’m not the biggest OpenAI, like, stan or something, but I think whatever they did was very impressive. Like, they somehow managed to get a way for this swarm to actually act
+
+**Swyx \[01:17:41\]:** I see
+
+**Alex Zhang \[01:17:42\]:** Towards a goal. And yeah.
+
+**Swyx \[01:17:44\]:** I see.
+
+**Alex Zhang \[01:17:44\]:** It’s very difficult.
+
+**Swyx \[01:17:45\]:** I see. So, like, efficiency of the multi-agent swarm is the objective function here.
+
+**Alex Zhang \[01:17:51\]:** Yeah.
+
+**Swyx \[01:17:51\]:** Right?
+
+**Alex Zhang \[01:17:51\]:** Yeah.
+
+**Swyx \[01:17:52\]:** Like, how much of this is slop? Like, this is a lot of slop.
+
+**Alex Zhang \[01:17:55\]:** Yeah, I think so.
+
+**Swyx \[01:17:55\]:** OpenAI is less slop.
+
+**Alex Zhang \[01:17:56\]:** We take for granted what it means for a swarm to converge to an answer.
+
+**Swyx \[01:18:00\]:** Yeah.
+
+**Alex Zhang \[01:18:00\]:** It’s just like. It’s not something we take for granted.
+
+**Swyx \[01:18:02\]:** Yeah. Yeah. We’ve, we’ve done one pod with Noam Brown and, like, his
+
+**Alex Zhang \[01:18:06\]:** Oh, yes, I remember. Yeah
+
+**Swyx \[01:18:06\]:** His thing. His whole thing was like, okay, like, we’ve worked on a lot of, like, competitive agents. we’re working on collaborative agents.
+
+**Alex Zhang \[01:18:13\]:** Yeah.
+
+**Swyx \[01:18:13\]:** And, like, that’s now called a swarm.
+
+**Alex Zhang \[01:18:15\]:** Yeah.
+
+**Vibhu \[01:18:15\]:** I would do a quick poke. Do you have any thoughts on Gemini? They were also IMO gold. Like, there was a time where they were getting agents to reason for a long time and.
+
+**Alex Zhang \[01:18:26\]:** Yeah,
+
+**Vibhu \[01:18:28\]:** Is it too old to think about?
+
+**Alex Zhang \[01:18:29\]:** No. I think it’s a little bit blown out of proportion. Like, Gemini. For, again, I, so I should preface by saying I haven’t worked at any of these places, so take this with a grain of salt, right?
+
+**Vibhu \[01:18:39\]:** You have strong opinions on agent harnesses
+
+**Alex Zhang \[01:18:42\]:** Yeah
+
+**Vibhu \[01:18:42\]:** And, this was
+
+**Alex Zhang \[01:18:43\]:** But, let me just say this first. This work was really impressive. I think what they showed here was, like, they took a time when the models weren’t that good
+
+**Vibhu \[01:18:53\]:** Yes
+
+**Alex Zhang \[01:18:53\]:** And they managed to be very smart about, like, what the harness does. I remember for this at least, like, yeah, like AlphaGeometry, I guess that was a year before this, but it was very cool. They took it to the max, and they, like, designed, I don’t know. I’d say I’m not too big on competitive math, but I think, like, GDM, it’s sort of a shame. Like, everyone I’ve talked to about GDM kind of has the same opinion, which is that it’s way too, like, bureaucratic. Whatever is they have the talent and the resources to do almost anything, but, like, I don’t know, until they figure that part out, like. Nothing against anti-gravity, for example, but, like, I don’t know anybody that uses anti-gravity. And so I’ve tried it once, and it’s. I don’t see a reason to switch to it. and I think for whatever reason, like, they’ve been struggling with this, so, yeah.
+
+**Swyx \[01:19:40\]:** Yeah. Well, a lot of people dogged on Meta for a long time until they started
+
+**Alex Zhang \[01:19:44\]:** Yeah, and they recovered
+
+**Swyx \[01:19:44\]:** Coming out. And, like, I think, Google’s going through that phase right now.
+
+**Alex Zhang \[01:19:47\]:** Yeah.
+
+**Swyx \[01:19:48\]:** And, it’s, it’s just you gotta stay alive and
+
+**Alex Zhang \[01:19:51\]:** Yeah.
+
+**Swyx \[01:19:52\]:** I wanna focus back on
+
+**Alex Zhang \[01:19:53\]:** Yeah
+
+**Swyx \[01:19:53\]:** Just, like, your thoughts, just general. we can talk about speculative PTC
+
+**Swyx \[01:19:58\]:** Mismanaged geniuses, or just, like, throw away all this and just talk about whatever else.
+
+**Alex Zhang \[01:20:03\]:** Okay, let’s, let’s talk about mismanaged genius for a little bit.
+
+**Swyx \[01:20:06\]:** Yeah.
+
+**Alex Zhang \[01:20:06\]:** I, the only comment I’ll say on speculative PTC is that it’s a really simple idea. It’s almost, like, obvious that this should be done, and, like, there’s not much more to talk about it. Like, I think it’s just, like, you should just use it for, like, coding. Like, anything with programmatic agent calling, like RLMs or Kodak, like, yeah, it’s like, it’s like a no-brainer.
+
+**Vibhu \[01:20:25\]:** What’s the, for people that haven’t read it
+
+**Alex Zhang \[01:20:27\]:** Yeah
+
+**Vibhu \[01:20:27\]:** What’s the one-liner for people?
+
+**Alex Zhang \[01:20:29\]:** The simple thing is when the model is, writing its code or, like, even as, like, after it finishes writing the code, a lot of tools tend to be, like, sequential or, like, you have to wait on them, so you should just launch them in advance. Like, if you’re able to jit compile this code, you can probably figure out, like, even though it’s, like, kind of variables and stuff, like, you can figure out, like
+
+**Swyx \[01:20:52\]:** Yeah, statically analyze.
+
+**Alex Zhang \[01:20:53\]:** Yeah. So
+
+**Vibhu \[01:20:54\]:** Speculation.
+
+**Alex Zhang \[01:20:55\]:** Yeah. There is this, Someone pointed to me some actually, like, academics have, especially PL, like programming languages people, have some, like, very kind of cool ways of doing this. And so, like, at some point maybe I’ll, I’ll, I’ll, like, work on this.
+
+**Swyx \[01:21:09\]:** I guess mostly you have to change language, because if you are in JavaScript, Python, you can’t do this.
+
+**Alex Zhang \[01:21:13\]:** Yes. Yeah.
+
+**Swyx \[01:21:14\]:** So, like, Haskell, yes. what’s, what’s the, what’s the normal one that’s, that’s not Haskell?
+
+**Alex Zhang \[01:21:21\]:** Lisp.
+
+**Swyx \[01:21:22\]:** Lisp, OCaml.
+
+**Alex Zhang \[01:21:24\]:** OCaml, oh, yeah.
+
+**Swyx \[01:21:25\]:** Yeah, any functional language
+
+**Alex Zhang \[01:21:25\]:** Yeah
+
+**Swyx \[01:21:25\]:** You can actually, like, pipeline this.
+
+**Alex Zhang \[01:21:27\]:** Yeah.
+
+**Swyx \[01:21:27\]:** So Effect-TS if you wanna do TypeScript.
+
+**Alex Zhang \[01:21:29\]:** Yeah.
+
+**Swyx \[01:21:30\]:** Okay, we can switch over to,
+
+**Vibhu \[01:21:32\]:** I like this diagram.
+
+**Alex Zhang \[01:21:33\]:** Yeah.
+
+**Swyx \[01:21:34\]:** Which is like your, you guys’ whole thesis, right?
+
+**Swyx \[01:21:36\]:** Like, that, to me this is, like, kind of like a restatement, but maybe I’re missing something of
+
+**Alex Zhang \[01:21:41\]:** Yeah
+
+**Swyx \[01:21:41\]:** Like, well, work on better harnesses or, like, your models actually are capable a lot more if you try harder, so this is a skill issue.
+
+**Alex Zhang \[01:21:48\]:** Yeah. Yeah, basically. I think there’s one thing I want to see. I appreciate that there’s a big focus on, like, jagged intelligence, because it paints a big picture of, like, we can do this if we really set our minds on it. But I kind of wish. And maybe someone in academia should do this. Like, really just sit down and think about, like, if I took Astra, even the current frontier models are not good enough at, like, doing a particular job over, let’s say, the span of a month consistently and well. And I think this is, like, a stupid problem. Like, I genuinely think we can solve this. You don’t need to be a frontier lab and, like, do all this, like, fancy stuff for your IPO. Like, I think, like, these models are so smart that even if it’s, like, a silly way, I think that it genuinely is a skill issue of you can get a model to be as good as, let’s say, like, just some 18-year-old high school kid
+
+**Alex Zhang \[01:22:50\]:** Doing some job. I think it’s, like, ridiculous that we can’t do that. And it’s. Part of the reason is, like, the format of a language model is not really amenable to that, but I think you can shape a harness around it and do it. And I think, like, this in itself is, like, ignoring the RLM stuff, ignoring all the, like, what abstractions should we use? Like, I just think someone can design a harness that can do this. Like, I, that’s. Maybe it’s
+
+**Swyx \[01:23:13\]:** When you say do this, do what?
+
+**Alex Zhang \[01:23:15\]:** Do long-running but simple tasks, and do them reliably.
+
+**Swyx \[01:23:20\]:** Okay.
+
+**Vibhu \[01:23:20\]:** What’s an example? So is this different than, like, pick your favorite company, Harvey, for example Using LLMs to do legal work, or what’s the.
+
+**Alex Zhang \[01:23:30\]:** I guess it’s kind of like that, except if the bottleneck was not, like, certain legal knowledge or something. Like, I don’t know. Let’s say,
+
+**Vibhu \[01:23:38\]:** I guess, like, the examples, people can take models and build pipelines or whatever and Have an agent repeatedly do whatever it has they want, right?
+
+**Alex Zhang \[01:23:47\]:** Yeah. So for example, like, if I wanted a general system that I could kind of talk. I can talk to it like I would talk to an intern and basically just ask it to do. to explore some small thing. So maybe an example of this is, like, very silly auto research is maybe an example of this, of, like, not necessarily finding super novel solutions, but at least optimizing all of the easy parts of any problem. They often end up being over-indexed for, like, ML training and things like that. But yeah, I don’t know. maybe that’s, that’s, that’s not, like, super clear, but there is a lot of People’s general workflows where you probably could just vibe code up. Some specific harness to help you do, like automate this thing. Some examples are like automating, finding, like research papers and stuff like that. But usually people will design like a specialized agent to help them do this kind of thing. Or like they’ll vibe put a harness, like, and just run it or like their Slack bot or something. But I almost think there’s just like a standard form, like just a harness that you just plug in. Like you don’t-- It doesn’t need to be designed for finding papers or fi-- Like, you just kind of tell it, find this for me, and you like plug it into that setting. What I’m getting at is that I think there’s a lot of easy things that can be automated. And
+
+**Vibhu \[01:25:13\]:** Is this like a hypothesis or a point around like capability overhang? Like even if we paused, there’s still a lot of impact to be had with current state of models?
+
+**Alex Zhang \[01:25:22\]:** In some sense, yes. Like, I guess what I’m presenting is the easiest form of this. But what this is kind of saying is that, like, we have jagged intelligence on a lot of things. Like, for example, models are like disproportionately good at coding and math. This is saying like we can translate those abilities to many other things. So like for example, if you took-- Usually if you take someone who was an IMO gold or something and you kind of apply them to a lot of different problem-solving domains, they can figure it out. I don’t actually know if this applies to models. For example, like in GPU code optimization, one very interesting question is whe-- if you were to take out all of the GPU programming data, like from a model, but it was re-- it was like as good as Astra is now, just without, like with that taken out, would it be able to still optimize GPU kernels? like would it be able to learn in context roughly what it needs to learn and then like have some pipeline or like come up with some solution to solving like optimization tasks? And I think like there’s like a mismatch between, like if you took a human that was as smart or like knew as much as Astra, there is a mismatch between what that human can do and what Astra can do, maybe around a harness. and I think we can actually approximate the human a lot more.
+
+**Swyx \[01:26:42\]:** To me, it sounds very approximate to the continual learning problem. I think you’re
+
+**Alex Zhang \[01:26:46\]:** That’s the best example. Yes.
+
+**Alex Zhang \[01:26:48\]:** Yes.
+
+**Swyx \[01:26:48\]:** Why didn’t you just say that then?
+
+**Alex Zhang \[01:26:49\]:** Yeah. I guess I
+
+**Vibhu \[01:26:50\]:** I was like, I was like thinking, could I just blurt out some words like learning?
+
+**Alex Zhang \[01:26:54\]:** I’m careful with that. But yes, I
+
+**Vibhu \[01:26:57\]:** You have a very eye.
+
+**Alex Zhang \[01:26:58\]:** Maybe, Maybe, like a bit of a, I don’t know, like a
+
+**Swyx \[01:27:03\]:** No. So I think you’re a very, yeah, I don’t know, I don’t know your undergrad actually. Are you like a math person generally, or
+
+**Alex Zhang \[01:27:09\]:** A little, yeah. Yeah.
+
+**Vibhu \[01:27:09\]:** Did you study math?
+
+**Alex Zhang \[01:27:11\]:** Yeah, that’s what I wanted to do at least.
+
+**Swyx \[01:27:12\]:** Like a category theory type of, abstraction where you think in categories and then you have to like then translate down to the specific. And, but then you like actually really care more about the category.
+
+**Swyx \[01:27:24\]:** And like that’s the communication error because like everyone’s listening for the specific, but actually trying to also, convey the general.
+
+**Alex Zhang \[01:27:31\]:** Yeah.
+
+**Swyx \[01:27:32\]:** Which is hard. I don’t really know. you can, maybe use like a shorthand of like, “Okay, I’m at level two and then I’m gonna go up to level three Then come back to level two.” That we should have say some like epistemic, like shorthand for like this kind of thing.
+
+**Alex Zhang \[01:27:45\]:** Yeah.
+
+**Swyx \[01:27:45\]:** Because it’s hard. Like you’re, you’re compressing a lot into word after, like sequential word decoding.
+
+**Swyx \[01:27:51\]:** Should we convert to Neuralese? is there like a, a better form of output than English or, Python or JavaScript? I don’t know.
+
+**Alex Zhang \[01:28:06\]:** Yeah.
+
+**Swyx \[01:28:06\]:** This is very kind of like a shit post, but like people have speculated about like what is the native language that people want to out-- that models want to output?
+
+**Swyx \[01:28:14\]:** Some people say binary. That’s, that’s Marc Andreessen’s thing. I don’t know. Yeah.
+
+**Swyx \[01:28:19\]:** PTX?
+
+**Alex Zhang \[01:28:20\]:** Let’s say a mix of English and Python. And I only say this because The capability of a model is somewhat a reflection of what we train them on. So we still want like. Yeah, I don’t really buy the binary argument. I guess I, like, I understand, but it’s like
+
+**Swyx \[01:28:40\]:** Yeah. You wanna model the world in some way. I think the,
+
+**Alex Zhang \[01:28:43\]:** Yeah.
+
+**Swyx \[01:28:43\]:** One thing I’ll, I’ll bring up is always, which I always do in this kind of conversation is Sapir–Whorf Which is you, if you choose English, you will have locked into however long English has been around, which is, let’s say five hundred years, which is not that long. Like actually Like what you, the language that you speak constrains how you think.
+
+**Swyx \[01:28:59\]:** And if you learn a different language, for example, someone, in Chinese, we don’t have tenses. I don’t know if you. I actually didn’t know that. And I speak Chinese.
+
+**Alex Zhang \[01:29:09\]:** Oh. I did know that, but my Chinese is not great.
+
+**Swyx \[01:29:12\]:** Okay.
+
+**Alex Zhang \[01:29:13\]:** Yeah.
+
+**Swyx \[01:29:13\]:** Yeah. Or like, in, let’s say in Japanese or, I know, I forget what language it is. Like in Korean, everyone you speak to, yeah, you have to like acknowledge social status.
+
+**Alex Zhang \[01:29:23\]:** Yeah.
+
+**Swyx \[01:29:24\]:** But it’s a different dimension than gender, right? Like, it just like, it just influences everything you do. when I take Ling 101, apparently there’s a, there’s a, there’s a language in Africa where like there’s a vegetable gender. yeah, right? Like just like you have. Or like Eskimos know no word for snow or whatever. Like, anyway, so like the language that you adopt affects your thinking. And if you Choose to output your chain of thought in English, you are biasing towards whatever English solves. I don’t know what the sort of prior of English is.
+
+**Alex Zhang \[01:29:51\]:** That’s interesting. I did not think of it that way.
+
+**Vibhu \[01:29:55\]:** At some level it’s interesting, right? So you’re right on language. a lot of model chain of thought also fluctuates language.
+
+**Vibhu \[01:30:03\]:** The obvious example is Chinese models Speaking in English might still reason in Chinese. but at the same level, most models are very capable multilingually.
+
+**Vibhu \[01:30:13\]:** And that adaptation we can see, you can add in languages. You don’t get that much from adding a whole language, but
+
+**Swyx \[01:30:18\]:** Yeah.
+
+**Vibhu \[01:30:18\]:** They will reason interchanged
+
+**Swyx \[01:30:21\]:** Yeah. So we’re all autoregressive. but also like
+
+**Vibhu \[01:30:23\]:** Right.
+
+**Swyx \[01:30:23\]:** Let’s say German, like, subject-object, agreement, you have to put the verb at the end, which is very super annoying, like very famously. yeah, right. You don’t know what you’re doing until the end where you’re like, “Oh, that Mess of nouns and then the verb.” Well, the most classic one that most people be-- have heard of is Arrival, where, they have the heptapods where they think, that time is like flat to them. So they think in, they output entire sentences at one shot. so it’s, this is closest to, like, the difference between autoregression and diffusion.
+
+**Swyx \[01:30:55\]:** We talk in autoregression. What if you could talk in diffusion Where things just resolve over time?
+
+**Alex Zhang \[01:31:01\]:** I see. I see.
+
+**Swyx \[01:31:02\]:** But like the whole idea shows up at once.
+
+**Alex Zhang \[01:31:05\]:** I see.
+
+**Swyx \[01:31:07\]:** So that is a drastically differenting, language, but it is a language.
+
+**Alex Zhang \[01:31:10\]:** I see. Oh, that’s really interesting. That’s really interesting.
+
+**Swyx \[01:31:12\]:** Which, like, machines could speak, that we, probably will never speak, but like, yeah, machines don’t care.
+
+**Alex Zhang \[01:31:19\]:** Maybe this is a huge tangent
+
+**Swyx \[01:31:20\]:** Yeah
+
+**Alex Zhang \[01:31:20\]:** But are there not, like, things inherently that are reasoning chains that are inherently autoregressive?
+
+**Swyx \[01:31:30\]:** Yeah, time.
+
+**Alex Zhang \[01:31:30\]:** Sometimes, like. Yeah. Or like, yeah.
+
+**Swyx \[01:31:32\]:** Yeah. Something happens first, then something else happens.
+
+**Alex Zhang \[01:31:34\]:** Even like, yeah, anything in code, for example, like has to be causal in some-- usually at least has to be causal.
+
+**Swyx \[01:31:40\]:** Well, no. so it’s a. Then you have to. Then you’re not exploring enough,
+
+**Alex Zhang \[01:31:44\]:** That’s true. Yeah
+
+**Swyx \[01:31:45\]:** Programming language theory, where, everything is like pure functional and like completely relational And, you sort of abstract away the solver that translates the relationships that is, are always true into code. So I, yeah, I feel like this is maybe a little bit too out of my depth.
+
+**Alex Zhang \[01:32:01\]:** No, it’s interesting though. Yeah.
+
+**Swyx \[01:32:01\]:** But I love languages Whether it’s coding or human, and I do think a lot about how that affects reasoning and the boundaries of what we can do. I don’t need to go too much beyond that. I don’t know if you have any other thoughts. my closing question was gonna be, you have all these research, directions that you wanna do. You’re, you had a GPU mode phase. You had a, RLMs phase.
+
+**Swyx \[01:32:25\]:** Presumably you have other stuff planned, which is why you’re not, doubling down on that. By the way, I notice that it is interesting how you guys do start with the GPU side, and then you migrate towards the zero gradient side, it’s, which is what Shenyou called it. Doesn’t that feel less legit than messing with GPUs?
+
+**Alex Zhang \[01:32:44\]:** Yeah, I guess in the sense that, like. So you did bring up that, like, I like to think about things in, like, a math-oriented way.
+
+**Swyx \[01:32:51\]:** Category, yeah.
+
+**Alex Zhang \[01:32:52\]:** And it’s, like, very uncomfortable sometimes to be working on, like, harnesses and agents because it’s so.
+
+**Swyx \[01:32:57\]:** Because you think all harnesses are the same.
+
+**Alex Zhang \[01:32:58\]:** Yeah. So it’s like super fuzzy.
+
+**Swyx \[01:33:00\]:** So like, you just, like, two new ideas in harnesses. Got it.
+
+**Alex Zhang \[01:33:01\]:** Yeah. It’s, it’s It’s, it’s also just, like, empirically it’s hard to, like, verify a lot of findings, at least with the compute that we have available to us. But the reason why I think I’ve moved on to a lot of these problems is I think actually this is where most of, like, the innovation is yet to happen. To me, like, the GPU level is a means to exploring other ideas. Like, you want to, for example, like, get good at writing kernels or, like, even automate writing kernels for the sake of a broader goal of, like, I want to explore ideas where I’m not bottlenecked by systems challenges. In that sense, like, I guess a lot of what’s written there is all harness stuff, but I am also interested in things at the model level as well. but I’ll just leave it at that.
+
+**Swyx \[01:33:48\]:** Okay.
+
+**Alex Zhang \[01:33:48\]:** Yeah.
+
+**Swyx \[01:33:48\]:** That’s a good hint. anything, any. If people wanna reach out to you, what are you looking for help on? What do you want collaborators on? any sort of calls to action?
+
+**Alex Zhang \[01:33:58\]:** Yeah. So, I guess there’s nothing I have in particular where I feel like I need to work with someone on, unless it’s, like. unless it’s with a company before, like, compute or, like, with. to talk with other people about it. But I will say I’m not. I’m never opposed to working on ideas with other people. I get reached out to a lot by often undergrads or even, like, other students.
+
+**Swyx \[01:34:22\]:** Podcasters.
+
+**Alex Zhang \[01:34:23\]:** Podcasters. and usually I feel like I get an email that’s something along the lines of, like, “I really like RLMs.” Like, “I wanna work together.” and I feel like I
+
+**Swyx \[01:34:33\]:** Yeah, that’s a bad reach out, right?
+
+**Alex Zhang \[01:34:35\]:** Yes, yeah.
+
+**Swyx \[01:34:35\]:** The worst is like, “Can I pick your brain?”
+
+**Alex Zhang \[01:34:36\]:** Yeah.
+
+**Swyx \[01:34:37\]:** And like, “On what?” Like, “Read my paper, dude.” Like.
+
+**Alex Zhang \[01:34:39\]:** They’ll like, they’ll be like, “I read your paper,” in quotes, like, “Recursive language models,” or like, “Prime Agent,” like a self-improving RLM harness or something. and it’s kinda like I like. I really like people that are opinionated, even if we disagree. I think if you have strong opinions and are able to, like, think through why you think those opinions are right or wrong, ‘cause usually it’s, it’s hard to actually tell. But, like, you have strong convictions about certain problems. Like, I’m, I’m always happy to, like, chat and even, like, potentially work on something together. I have, like, no limit to who or, like, what I would like to work on. So, yeah.
+
+**Swyx \[01:35:12\]:** No limit?
+
+**Alex Zhang \[01:35:13\]:** Yeah. I. in the era of agents, I think there’s a lot more work you can do, like, bandwidth-wise. So I. Yeah. I think in general, like, I am not hard to impress, but I think it just takes a little bit of effort to
+
+**Swyx \[01:35:30\]:** Yeah
+
+**Alex Zhang \[01:35:30\]:** Kind of. Yeah, know
+
+**Swyx \[01:35:32\]:** Yeah
+
+**Alex Zhang \[01:35:32\]:** Know what you want.
+
+**Swyx \[01:35:32\]:** It’s very clear. and like, when you see a new thing come out, well executed, good, simple idea, then, like, get that
+
+**Alex Zhang \[01:35:40\]:** Yeah
+
+**Swyx \[01:35:40\]:** Immediately gets your attention, right?
+
+**Alex Zhang \[01:35:41\]:** I get excited. Yeah.
+
+**Swyx \[01:35:42\]:** It’s actually, like, not that hard to get the same attention that all the Frontier Lab guys
+
+**Alex Zhang \[01:35:45\]:** Yeah
+
+**Swyx \[01:35:45\]:** Because they are looking for you. you just have to put yourself out there, right?
+
+**Alex Zhang \[01:35:48\]:** Exactly, yeah.
+
+**Swyx \[01:35:49\]:** But yeah, it’s true. I will say, I think human attention very scarce right now, and I do struggle with, like, the number of projects I have going on.
+
+**Swyx \[01:35:57\]:** And, I don’t know how to manage it. I don’t think agents are helping at all.
+
+**Swyx \[01:36:00\]:** Like, I will just prompt it and. I’ll prompt a thing and then never look at it.
+
+**Swyx \[01:36:03\]:** Right? Like, which is very common.
+
+**Alex Zhang \[01:36:05\]:** Yeah.
+
+**Swyx \[01:36:05\]:** Yeah, and that sucks.
+
+**Alex Zhang \[01:36:06\]:** I guess, maybe the. one of the smaller differences in, like. actually, maybe you were doing research. I’m not sure. But for me at least, like, I’ll have maybe, like, 10 or 15 different ideas that I wanna do, but the thing is, like, most of them are bad.
+
+**Swyx \[01:36:20\]:** Yeah.
+
+**Alex Zhang \[01:36:20\]:** And this also maybe is true even for someone that reaches out to me. Like, maybe the idea is actually bad, but it looks interesting to me. And so, like, we can spend, like, some time looking into it, and if, like, we feel like there’s actually something there, like, then we’ll. we should take the next few weeks and just really pursue it. And, like, this is my style with. This is why I love the PhD, by the way, because there are times when I’m just thinking about problems, like, maybe on a run or just, like, playing tennis or something. Like, I’m not, I’m not working, I guess. But it’s like those are the most fun times, and then when I, like, really am convicted about something, I’ll just, like, drop everything and just do it.
+
+**Alex Zhang \[01:36:52\]:** Like, just spend, like, all my time thinking and working on that problem. And then, once you get to the point where, like, you can just run experiments, then it’s, it’s, it’s kind of easy coasting again, so.
+
+**Swyx \[01:37:03\]:** Yeah, sorry. This is
+
+**Alex Zhang \[01:37:04\]:** Yeah. No problem
+
+**Swyx \[01:37:04\]:** Like the, for the fourth last question, which is like, I think a lot of people are also thinking about science as the next frontier, like physical sciences Bio, math even. how do you separate, like, I guess, let’s say your choice of projects that is applicable for industry And then maybe it’s part-- choice project is just, like, science?
+
+**Alex Zhang \[01:37:27\]:** I actually worked on, like, AI for bio stuff before I started my PhD. The field has changed a lot since then
+
+**Swyx \[01:37:33\]:** Yeah
+
+**Alex Zhang \[01:37:34\]:** I should say.
+
+**Swyx \[01:37:34\]:** ‘Cause it’s, it’s like, it used to be a theoretical, like, of course, what do you mean? Like, I have one path and then
+
+**Alex Zhang \[01:37:39\]:** Yeah
+
+**Swyx \[01:37:39\]:** I chose that. But now a lot of people are crossing over.
+
+**Alex Zhang \[01:37:41\]:** Yeah.
+
+**Swyx \[01:37:41\]:** And like, so we have started a science pod to just Cover those things
+
+**Alex Zhang \[01:37:44\]:** Oh, wow
+
+**Swyx \[01:37:45\]:** Because a lot of engineers are like, “Well, actually there’s, Tractable problems there.”
+
+**Alex Zhang \[01:37:50\]:** Yeah. I will preface by saying my understanding of a lot of these topics is probably pretty limited. But I think, like, if I find out either because someone reaches out or, like, I look at a problem and I’m like, “Hey, like, some design principles that we use or that we’re thinking about right now actually make a lot of sense for this problem,” I get excited about those as well. But I think it’s harder. I don’t know. I think with. I think science, especially like empirical or, like, applied science has very long, like, what is it called? Like, feedback loops or whatever.
+
+**Swyx \[01:38:23\]:** Yeah, it converges to a robotics question.
+
+**Alex Zhang \[01:38:25\]:** Yeah. to me, like, also this aspect of, like, what is worth spending and betting my time on now? Because, like, maybe I spend a lot of time on this problem and then, like, in six months, like, a different solution, kind of like maybe a new model comes out and it’s like, “Oh, it’s way better for this.” And so I do have to be careful. I, like, you have to be conscious about, like, where you think things might be going.
+
+**Swyx \[01:38:47\]:** Yeah, exactly.
+
+**Alex Zhang \[01:38:47\]:** So, yeah.
+
+**Swyx \[01:38:48\]:** Publish cycle.
+
+**Alex Zhang \[01:38:49\]:** Yeah. So
+
+**Vibhu \[01:38:51\]:** Which then I can just tell ARC-AGI-3, it’s saturated. We did it.
+
+**Alex Zhang \[01:38:54\]:** Yeah, ARC-AGI-3 got saturated in less than a year, so it’s kind of ? Like, it’s. I don’t know. Like, if you were a lab picking that problem, like, you’re probably kind of sad now ‘cause actually
+
+**Swyx \[01:39:04\]:** Yeah. Well, so exactly. That’s why knowledge work, gaming, all these things are saturated.
+
+**Alex Zhang \[01:39:08\]:** Yeah.
+
+**Swyx \[01:39:08\]:** Now they’re actually the frontier is science. So
+
+**Alex Zhang \[01:39:09\]:** Yeah.
+
+**Vibhu \[01:39:10\]:** Knowledge work is saturated.
+
+**Swyx \[01:39:12\]:** Yeah. GDP val is like 80 something, 90 something.
+
+**Swyx \[01:39:16\]:** Like, there’s, there’s 90 to 100% that was obviously gonna get
+
+**Alex Zhang \[01:39:20\]:** It’s gonna be really hard to tell
+
+**Swyx \[01:39:21\]:** 10 years. But, like, well, the next low-hanging fruit is gonna be
+
+**Alex Zhang \[01:39:25\]:** It makes sense
+
+**Swyx \[01:39:25\]:** The other stuff.
+
+**Alex Zhang \[01:39:26\]:** Yeah. Maybe I’ll think about that more. I actually, I haven’t given too much thought to
+
+**Swyx \[01:39:30\]:** I’m just trying to guess your next direction, actually.
+
+**Alex Zhang \[01:39:32\]:** No. I will say because I think especially at MIT, like, it’s, it’s, it-- Yeah, there’s a lot of really talented scientists there, like, in the natural sciences. And I think it’s, it’s a little bit, like, sacrilegious almost to be like, “I’m gonna figure out, like, your problem.” Like
+
+**Swyx \[01:39:45\]:** No, that’s how, that’s how it’s done.
+
+**Vibhu \[01:39:46\]:** It’s great.
+
+**Alex Zhang \[01:39:46\]:** Oh, no, I know. Yeah.
+
+**Swyx \[01:39:47\]:** So I interviewed Yitai who did the IMO thing. He’s just like
+
+**Alex Zhang \[01:39:50\]:** Oh, yes. Oh, yeah.
+
+**Swyx \[01:39:50\]:** “I’ve never, I’ve never been to IMO. I don’t even know what it is.” It’s a skill model, dude.
+
+**Vibhu \[01:39:55\]:** Yeah.
+
+**Swyx \[01:39:56\]:** Which is, like, very disrespectful, but like, whatever. But that’s why, yeah.
+
+**Vibhu \[01:40:00\]:** Yeah. At some point, like, you have to respect, like, okay, the progress is being made.
+
+**Vibhu \[01:40:05\]:** Like, number is getting output, right?
+
+**Alex Zhang \[01:40:07\]:** True. Yeah, true.
+
+**Swyx \[01:40:08\]:** Yeah. that is a very big lesson. It’s very interesting, like, ‘cause the mathematicians are responding this way to NARI systems right now.
+
+**Alex Zhang \[01:40:13\]:** Right. Yeah.
+
+**Swyx \[01:40:14\]:** Like, Terry Turnstow is like
+
+**Vibhu \[01:40:15\]:** Turnstow
+
+**Swyx \[01:40:16\]:** “No, like, let’s not, let’s not use AI.”
+
+**Alex Zhang \[01:40:17\]:** Yeah.
+
+**Swyx \[01:40:17\]:** I’m like, “Mm, I don’t know.”
+
+**Alex Zhang \[01:40:19\]:** Well, yeah. I think that whole thing is kind of weird ‘cause I feel like, I feel like they would have had a stronger case if a lot of them didn’t work with OpenAI before, like, all this happened.
+
+**Swyx \[01:40:30\]:** No, that’s ad hominem, and they’re really trying to stay away from that. Then so what, right?
+
+**Alex Zhang \[01:40:34\]:** So what? Yeah.
+
+**Swyx \[01:40:35\]:** Like, I don’t know. Like, so what? They got. they’ve, they’ve collaborated. I collaborate with people that I don’t
+
+**Alex Zhang \[01:40:39\]:** I guess it’s true
+
+**Swyx \[01:40:39\]:** I don’t agree with or
+
+**Alex Zhang \[01:40:40\]:** That’s true
+
+**Swyx \[01:40:40\]:** Whatever.
+
+**Alex Zhang \[01:40:41\]:** Yeah. That’s true.
+
+**Swyx \[01:40:41\]:** Or, like, I did a thing and then now I regret that. I changed my mind. whatever.
+
+**Alex Zhang \[01:40:45\]:** Yeah.
+
+**Swyx \[01:40:45\]:** So I’ll defend their right to say that. But like, yeah, a lot of people are reasonably disagreeing with them.
+
+**Alex Zhang \[01:40:50\]:** Yeah.
+
+**Swyx \[01:40:51\]:** Okay, cool. thanks for your joining us. Congrats on, your success so far. I can’t believe you’re still not done with your PhD.
+
+**Alex Zhang \[01:40:58\]:** Well, it’s year two?
+
+**Vibhu \[01:41:00\]:** Yeah. Can’t believe we did this podcast without going through the RL paper.
+
+**Swyx \[01:41:05\]:** He had a, he had a definition.
+
+**Alex Zhang \[01:41:07\]:** I think the paper is more about, like, empirical results. Like, the actual idea is quite simple.
+
+**Vibhu \[01:41:11\]:** Yeah. And you’ve talked about it many times.
+
+**Alex Zhang \[01:41:13\]:** Yeah, at this point. I think there’s, there’s more interesting things to look over now, so.
+
+**Vibhu \[01:41:17\]:** Cool.
+
+**Alex Zhang \[01:41:17\]:** Yeah.
+
+**Vibhu \[01:41:18\]:** Well, we’re excited to see what you do next.
+
+**Alex Zhang \[01:41:19\]:** Thank you so much.
