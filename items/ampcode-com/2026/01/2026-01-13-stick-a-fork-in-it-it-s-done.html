@@ -1,0 +1,25 @@
+<div id="readability-page-1" class="page"><div> <p><strong>Update (2025-05-06):</strong> Four months after this was posted, we removed handoff. So, if you want to fork a thread, the other recommendation here stands: make a new thread and mention the original thread by URL or ID.</p>
+<p>We're ripping out the Fork command.</p>
+<p>We added <a href="https://ampcode.com/news/thread-forking">thread forking</a> back in July 2025 (now ancient, primordial history) as a way to conveniently share context for branching experiments or side quests in Amp.</p>
+<p>Today we have better ways of sharing context between threads: <a href="https://ampcode.com/manual#handoff">handoff</a> and <a href="https://ampcode.com/manual#referencing-threads">thread mentions</a>, which treat threads as first-class stores of context.</p>
+<p>Perhaps there is a great potential UX out there for <code>fork</code>, but we want Amp to be simple as well as powerful. We'd rather spend our time perfecting <code>handoff</code> and <code>thread mentions</code> than support <code>fork</code>.</p>
+<h2>Handoff</h2>
+<p><a href="https://ampcode.com/news/handoff">Handoff</a> is great for extracting useful context from your thread for the next goal at hand. This means you can start a new thread with only the necessary context.</p>
+<ul>
+<li>Use <code>thread: handoff</code> from the command palette.</li>
+<li>Prompt your task and a new thread will be started with the necessary context already in the prompt.</li>
+</ul>
+<h2>Thread Mentions</h2>
+<p>Thread mentions let you pull information from other threads into your current thread. You can reference multiple threads, merging context from many sources.</p>
+<ul>
+<li>Use <code>thread:new</code> and then use the <code>enter</code> shortcut to start a new thread with a reference to the main thread.</li>
+<li>Or, use <code>@@</code> to search for the thread you want to pull context from.</li>
+<li>Once you run your prompt, Amp will <a href="https://ampcode.com/news/read-threads">read the threads</a> and extract context pertinent to your task.</li>
+</ul>
+<h2>Managing Threads</h2>
+<p>Using new threads as branches leads to many threads, often running in parallel. To manage them:</p>
+<ul>
+<li>use <code>thread: switch to previous</code> or <code>thread: switch to parent</code> to return to the main thread.</li>
+<li>use the <a href="https://ampcode.com/news/thread-map"><code>thread: map</code></a> to get a birds eye view and easily navigate back to the main thread (CLI only for now).</li>
+</ul>
+</div></div>

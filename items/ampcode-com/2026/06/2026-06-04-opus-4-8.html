@@ -1,0 +1,25 @@
+<div id="readability-page-1" class="page"><div> <p>Opus 4.8 now powers Amp's <code>smart</code> mode, replacing Opus 4.7.</p>
+<p>It is a better coding agent than Opus 4.7: more faithful to the prompt, tighter in the changes it makes, and better at checking its own work. In our internal evals it solved <strong>62%</strong> of tasks, up from 4.7's <strong>52%</strong>.</p>
+<h2 id="tighter-changes-better-checks">Tighter Changes, Better Checks</h2>
+<p>Opus 4.7 was already strong on hard, multi-file work, and Opus 4.8 keeps that. What changes is how it gets there: with fewer wasted steps and more self-checking.</p>
+<p>The clearest difference is restraint and verification.</p>
+<p>Opus 4.7 can sometimes over-engineer, reaching for a more elaborate solution than the task needs. It also verifies its own work less, occasionally moving on even when a command's output is already warning that something is off.</p>
+<p>Opus 4.8 makes a more focused change that solves the specific intended task, then checks itself. It leans on a tighter write→test loop, often spinning up a quick script, test, or skill to confirm the change works before proceeding. In our evals it ran tests and code 15% more per task than 4.7.</p>
+<p>That restraint is easiest to see on hard tasks. On everyday work the two make a similar number of tool calls. The harder a task gets, the tighter 4.8 stays, just where 4.7 tends to run long and fail more often.</p>
+<p><img width="940" src="https://static.ampcode.com/news/opus-4.8-tool-calls-by-difficulty.svg" alt="Tool calls per task across the difficulty curve: Opus 4.7 and Opus 4.8 track together through p50, then 4.8 stays consistently lower, with the gap widening sharply on the hardest tasks"></p><h2 id="it-reaches-for-the-right-tool">It Reaches for the Right Tool</h2>
+<p>Opus 4.8 is noticeably better at using its tools and sub-agents without being told to.</p>
+<p>When a task needs outside context, it actually calls <code>librarian</code> instead of inferring a library's behavior from the local code. Across our eval it reached for it 14 times, versus once for Opus 4.7. It also reaches for a repo's skills more often to verify its work, for example by driving the browser or the CLI, rather than just assuming the change worked.</p>
+<p>When it edits, it leans on <code>edit_file</code> for surgical, in-place changes rather than rewriting whole files with <code>create_file</code>. In our evals 79% of its file edits go through <code>edit_file</code>, up from 63% on Opus 4.7.</p>
+<h2 id="fewer-built-in-tools">Fewer Built-in Tools</h2>
+<p>We dropped the <code>Read</code> tool from <code>smart</code>.</p>
+<p>Opus 4.8 is good enough at reading files straight from the shell with <code>cat</code>, <code>rg</code>, <code>sed</code>, and <code>nl</code>. It parallelizes those reads when it needs several files at once.</p>
+<h2 id="fast-mode-is-worth-it-now">Fast Mode Is Worth It Now</h2>
+<p>Opus 4.8 has a fast mode at roughly 2.5× the speed. It now costs 2× base tokens, down from 6× on 4.7—3× cheaper.</p>
+<p>Toggle fast mode for a thread from the CLI command palette (<kbd>Ctrl+O</kbd>) → <code>speed: use fast</code>.</p>
+<h2 id="how-to-use-it">How to Use It</h2>
+<p>Opus 4.8 stays close to what you ask, changes less to get there, and checks its own work. A few habits make it shine:</p>
+<ul>
+<li><strong>Say how far to go.</strong> It keeps changes narrow, touching fewer files than 4.7 unless told otherwise. Name the scope when you want it wide: "Fix this for every input format, not just this one." Left unsaid, it changes exactly what you described, which is usually what you want.</li>
+<li><strong>Give it something to verify against.</strong> It runs tests and code more readily than 4.7, so a test, repro command, or repo skill turns that instinct loose. A browser or CLI skill lets it actually exercise the change rather than infer correctness from the code.</li>
+</ul>
+</div></div>

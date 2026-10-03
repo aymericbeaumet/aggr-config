@@ -1,0 +1,21 @@
+<div id="readability-page-1" class="page"><div> <p>You can now store scripts to set up orbs outside of your repository. Amp can store pre-clone and
+pre-setup scripts in your project settings and access them when spawning an orb.</p>
+<p>The pre-clone setup script gives Amp anything it needs before it clones the repository:</p>
+<ul>
+<li>Install Git extensions that fetch files during checkout.</li>
+<li>Configure certificates for an internal Git server.</li>
+<li>Configure a network proxy needed to reach the Git server.</li>
+<li>Connect the orb to a private network with Tailscale (known issue: use <code>TAILSCALE_API_KEY</code>, OIDC
+is not yet working with pre-clone scripts).</li>
+<li>Install a credential helper required by the Git server.</li>
+</ul>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/pre-clone-puck-working-final-cropped-20260825.71aa6f3c.768w.avif 768w, https://static.ampcode.com/news/responsive/pre-clone-puck-working-final-cropped-20260825.71aa6f3c.808w.avif 808w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="808" height="185" src="https://static.ampcode.com/news/pre-clone-puck-working-final-cropped-20260825.png" alt="Puck working on a request to set up a pre-clone script that installs Git LFS" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/pre-clone-puck-working-final-cropped-20260825.png"></picture></p>
+<p>The pre-setup script lets you work with orbs when you aren't ready to commit setup files to the
+repository. Amp agents and Puck can access the scripts and set them for you. Give Puck this prompt,
+or start a thread for the project with this prompt:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/pre-setup-amp-thread-20260826.4d89be5e.768w.avif 768w, https://static.ampcode.com/news/responsive/pre-setup-amp-thread-20260826.4d89be5e.864w.avif 864w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="864" height="208" src="https://static.ampcode.com/news/pre-setup-amp-thread-20260826.png" alt="An Amp thread starting setup without committing files to the repository" loading="lazy" decoding="async" data-lightbox-src="https://static.ampcode.com/news/pre-setup-amp-thread-20260826.png"></picture></p>
+<p>Amp will then inspect the repository and decide which work belongs before or after the clone. It
+will write and test the scripts, then save them in the project settings.</p>
+<p>The scripts are also available on the project settings page, where you can review or edit them by
+hand.</p>
+</div></div>

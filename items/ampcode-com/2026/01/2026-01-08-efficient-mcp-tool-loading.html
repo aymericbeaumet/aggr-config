@@ -1,0 +1,24 @@
+<div id="readability-page-1" class="page"><div> <p>MCP servers often provide a lot of tools, many of which aren't used. That costs a lot of tokens, because these tool definitions have to be inserted into the context window whether they're used by the agent or not.</p>
+<p>As an example: the <a href="https://github.com/ChromeDevTools/chrome-devtools-mcp">chrome-devtools MCP</a> currently provides 26 tools that together take up 17k tokens; that's 10% of Opus 4.5's context window and 26 tools isn't even a lot for many MCP servers.</p>
+<p>To help with that, Amp now allows you to combine MCP server configurations with <a href="https://ampcode.com/news/agent-skills">Agent Skills</a>, allowing the agent to load an MCP server's tool definitions only when the skill is invoked.</p>
+<h2>How It Works</h2>
+<p>Create an <code>mcp.json</code> file in the skill definition, next to the <code>SKILL.md</code> file, containing the MCP servers and tools you want the agent to load along with the skill:</p>
+<pre><code data-language="json">{
+	"chrome-devtools": {
+		"command": "npx",
+		"args": ["-y", "chrome-devtools-mcp@latest"],
+		"includeTools": [
+			// Tool names or glob patterns
+			"navigate_page",
+			"take_screenshot",
+			"new_page",
+			"list_pages"
+		]
+	}
+}
+</code></pre><p>At the start of a thread, all the agent will see in the context window is the skill description. When (and if) it then invokes the skill, Amp will append the tool descriptions matching the <code>includeTools</code> list to the context window, making them available just in time.</p>
+<p>With this specific configuration, instead of loading all 26 tools that <code>chrome-devtools</code> provides, we instead load only four tools, <strong>taking up 1.5k tokens instead of 17k</strong>.</p>
+<p>Take a look at our <a href="https://github.com/ampcode/amp-contrib/tree/main/.agents/skills/ui-preview">ui-preview skill</a>, that makes use of the <code>chrome-devtools</code> MCP, for a full example.</p>
+<p>If you want to learn more about skills in Amp, take a look <a href="https://ampcode.com/manual#agent-skills">at the Agent Skills section in the manual</a>.</p>
+<p>To find out more about the implementation of this feature and how we arrived at it, read <a href="https://nicolaygerold.com/posts/tool-search-is-dead-long-live-skills">this blog post by Nicolay</a>.</p>
+</div></div>

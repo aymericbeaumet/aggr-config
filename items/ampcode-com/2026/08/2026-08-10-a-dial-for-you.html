@@ -1,0 +1,16 @@
+<div id="readability-page-1" class="page"><div> <p>We changed <a href="https://ampcode.com/news/the-dial">the Dial</a>. <a href="https://ampcode.com/settings/model-routing?add=chatgpt">Link a ChatGPT subscription</a> and <code>low</code>, <code>medium</code>, and <code>high</code> only use OpenAI models: as the main agent, as the oracle, as the thread reader, as code review. Every model behind those modes is an OpenAI model, billed to your subscription.</p>
+<p>Before this change, you'd still pay for tokens with a subscription linked, because parts of the work ran on other models: <code>low</code> and the thread reader on GLM-5.2, the <code>high</code> oracle on Claude Fable, code review on Haiku — all billed to Amp credits. That confused people, and we get why.</p>
+<p>With a subscription connected:</p>
+<ul>
+<li><code>low</code> runs GPT-5.6 Terra instead of GLM-5.2.</li>
+<li><code>medium</code> runs GPT-5.6 Sol, as before.</li>
+<li><code>high</code> runs GPT-5.6 Sol as both agent and oracle. The oracle used to be Fable.</li>
+<li>The thread reader and code review move to GPT-5.6 Terra.</li>
+</ul>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/chatgpt-green-light.2a083fb6.768w.avif 768w, https://static.ampcode.com/news/responsive/chatgpt-green-light.2a083fb6.1440w.avif 1440w, https://static.ampcode.com/news/responsive/chatgpt-green-light.2a083fb6.2560w.avif 2560w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="800" src="https://static.ampcode.com/news/chatgpt-green-light.png?v=7" alt="The mode picker with the dial on medium, showing GPT-5.6 Sol as agent and oracle and a green ChatGPT subscription LED" height="665" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/chatgpt-green-light.png?v=7"></picture></p>
+<p>Doesn't this make the modes worse? Barely, and less every month. <a href="https://ampcode.com/news/who-cares-about-the-model">The frontier models have converged</a>: any of them gets you to a good result with a good harness. We swapped the default model for most users overnight and nobody complained. So the modes stay at the frontier, and the tokens come out of a subscription you already pay for.</p>
+<p><code>high</code> also drops its credit minimum when your subscription is active. There's no Fable call left to pay for.</p>
+<p><code>ultra</code> doesn't change. It runs Claude Fable on credits, because <code>ultra</code> is for the tasks where you want the strongest model, whatever it costs.</p>
+<p>If you don't have a subscription, nothing changes. The modes run as before, on Amp credits.</p>
+<p><a href="https://ampcode.com/settings/model-routing?add=chatgpt">Link your subscription</a> and turn the dial.</p>
+</div></div>

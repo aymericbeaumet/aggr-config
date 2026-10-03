@@ -1,0 +1,47 @@
+<div id="readability-page-1" class="page"><div> <p>The <a href="https://ampcode.com/news/librarian">Librarian</a> is now ~3x faster and 43% cheaper, with the same quality.</p>
+<p>It now runs on GPT-5.5 (no reasoning) with <a href="https://ampcode.com/news/faster-deep-rush">websocket mode</a> and an updated system prompt that encourages more parallel exploration. The Librarian fires ~8 tool calls in parallel per turn, up from ~3 with Sonnet, and wraps up a search in ~5 turns instead of ~15.</p>
+<p>In our internal eval, about a quarter of that speedup comes from OpenAI's websocket mode and the rest from switching to GPT-5.5 with no reasoning:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sonnet-4.6 (medium)</th>
+<th>GPT-5.5 (none)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Latency (mean)</td>
+<td>237s</td>
+<td>81s (2.9x faster)</td>
+</tr>
+<tr>
+<td>↳ gain from websocket</td>
+<td>—</td>
+<td>~1.3x</td>
+</tr>
+<tr>
+<td>↳ gain from model</td>
+<td>—</td>
+<td>~2.2x</td>
+</tr>
+<tr>
+<td>Quality (F1, mean)</td>
+<td>0.47</td>
+<td>0.48</td>
+</tr>
+<tr>
+<td>Average cost</td>
+<td>$1.21</td>
+<td>$0.69</td>
+</tr>
+</tbody></table>
+<p>Here's a comparison:</p>
+<blockquote>
+<p>How does Kubernetes' HorizontalPodAutoscaler handle missing pod metrics when scaling down — does it assume missing pods are at 100% of their resource requests, or 100% of the target utilization? Cite the function and logic in the source.</p>
+</blockquote>
+<figure>
+  <video width="940" playsinline="" autoplay="" loop="" muted="" src="https://static.ampcode.com/news/librarian-sonnet-vs-gpt.mp4" type="video/mp4"></video>
+</figure>
+
+<p>Sonnet 4.6 (left) took 2 minutes and cost $1.08, while GPT-5.5 (right) took 40 seconds and cost just $0.47.</p>
+</div></div>

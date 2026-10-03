@@ -1,0 +1,85 @@
+<div id="readability-page-1" class="page"><article data-news-slug="agentic-code-review">  <div> <p>Amp has a new agent and it specializes in code review.</p>
+<p>In the VS Code extension, you can use this agent by going to the review panel. Start by dragging the selection of changes you want to review. Sometimes, you want to review a single commit; other times you want to review all outstanding changes on your branch:</p>
+<figure>
+<picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/range-finder.5f8e1e0a.768w.avif 768w, https://static.ampcode.com/news/responsive/range-finder.5f8e1e0a.1206w.avif 1206w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="793" src="https://static.ampcode.com/news/agentic-review/range-finder.png" height="331" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/agentic-review/range-finder.png"></picture>
+</figure>
+
+<p>Amp will pre-scan the diff and recommend an order in which to review the files. It will also provide a summary of the changes in each file and the changeset overall:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/changes.7dc8e341.768w.avif 768w, https://static.ampcode.com/news/responsive/changes.7dc8e341.1206w.avif 1206w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="793" src="https://static.ampcode.com/news/agentic-review/changes.png?v=2" height="542" loading="lazy" decoding="async" data-lightbox-src="https://static.ampcode.com/news/agentic-review/changes.png?v=2"></picture></p>
+<p>This addresses a key difficulty in reviewing large changesets, as it's often difficult to know where to start.</p>
+<p>Clicking on a file will open the full file diff, which is editable and has code navigation if your diff includes the current working changes:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/file-diff.caed1a00.768w.avif 768w, https://static.ampcode.com/news/responsive/file-diff.caed1a00.1440w.avif 1440w, https://static.ampcode.com/news/responsive/file-diff.caed1a00.1517w.avif 1517w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="793" src="https://static.ampcode.com/news/agentic-review/file-diff.png?v=2" height="571" loading="lazy" decoding="async" data-lightbox-src="https://static.ampcode.com/news/agentic-review/file-diff.png?v=2"></picture></p>
+<h2>Review Agent</h2>
+<p>The review agent lives in a separate panel below. It analyzes the changes and posts a list of actionable improvements, which can then be fed back into the main Amp agent to close the&nbsp;feedback loop:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/agentic-review.4634a823.768w.avif 768w, https://static.ampcode.com/news/responsive/agentic-review.4634a823.1270w.avif 1270w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="793" src="https://static.ampcode.com/news/agentic-review/agentic-review.png?v=2" height="602" loading="lazy" decoding="async" data-lightbox-src="https://static.ampcode.com/news/agentic-review/agentic-review.png?v=2"></picture></p>
+<p>There's a big improvement in review quality over the <a href="https://ampcode.com/news/review">first version</a> of the review panel, which used a single-shot LLM request. The new review agent uses Gemini 3 Pro and a review-oriented toolset to perform a much deeper analysis that surfaces more bugs and actionable feedback while filtering out noise.</p>
+<p>To get to the review panel, click the <span></span> button in the navbar. We've also added a <kbd>⌘</kbd>&nbsp;<kbd>;</kbd> keybinding to make it easy to toggle in and out of review mode.</p>
+<h2>An Opinionated Read-Write Loop</h2>
+<p>If you're wondering how best to incorporate this into your day-to-day workflow, here's our opinionated loop for agentic coding in the editor:</p>
+<div>
+
+
+<div>
+		<div>
+			<p>1</p>
+			<p>Write code with the agent</p>
+		</div>
+		<video autoplay="" loop="" muted="" playsinline="">
+			<source src="https://static.ampcode.com/news/agentic-review/edit-code.mp4" type="video/mp4">
+		</video>
+</div>
+
+
+<div>
+		<div>
+			<p>2</p>
+			<p>Open the review panel <kbd>⌘&nbsp;;</kbd></p>
+		</div>
+		<video autoplay="" loop="" muted="" playsinline="">
+			<source src="https://static.ampcode.com/news/agentic-review/open-review-panel.mp4" type="video/mp4">
+		</video>
+</div>
+
+
+<div>
+		<div>
+			<p>3</p>
+			<p>Drag your target diff range</p>
+		</div>
+		<video autoplay="" loop="" muted="" playsinline="">
+			<source src="https://static.ampcode.com/news/agentic-review/select-diff-range.mp4" type="video/mp4">
+		</video>
+</div>
+
+
+<div>
+		<div>
+			<p>4</p>
+			<p>Request agentic review and<br>read summaries + diffs while waiting</p>
+		</div>
+		<video autoplay="" loop="" muted="" playsinline="">
+			<source src="https://static.ampcode.com/news/agentic-review/generate-review.mp4" type="video/mp4">
+		</video>
+</div>
+
+
+<div>
+		<div>
+			<p>5</p>
+			<p>Feed comments back into the agent</p>
+		</div>
+		<video autoplay="" loop="" muted="" playsinline="">
+			<source src="https://static.ampcode.com/news/agentic-review/address-review.mp4" type="video/mp4">
+		</video>
+</div>
+
+  </div>
+
+<h2>Open Questions</h2>
+<p>We think the review agent and UI help substantially with the bottleneck of reviewing code written by agent. But we're still pondering some more open questions:</p>
+<ul>
+<li><strong>How do reviews map to threads?</strong> It's not 1-1, since you can review the output of multiple threads at once.</li>
+<li><strong>How do we incorporate review feedback into long-term memory?</strong> When you accept or reject review comments, should Amp learn from that? Should it incorporate feedback into AGENTS.md?</li>
+<li><strong>What does the TUI version of this review interface look like?</strong> Should there exist an editable review interface in the TUI? Or should we integrate with existing terminal-based editors and diff viewers?</li>
+</ul>
+</div> </article></div>

@@ -1,0 +1,45 @@
+<div id="readability-page-1" class="page"><article data-news-slug="liberating-code-review">  <div> <p>Code review has traditionally been tied to an interface where a human reads diffs. Now, we've fully decoupled the review agent from any UI, making it a composable and extensible subroutine that can be invoked from many different places where it is useful:</p>
+<ul>
+<li>You can run <code>amp review</code> in the CLI to run the review agent directly</li>
+<li>You can request a review in any thread using natural language like "review the outstanding changes" or "review changes since diverging from main"</li>
+</ul>
+<p>This composability also means you can more easily close the loop by asking the main agent to automatically fix the issues found or by piping review comments into another command.</p>
+<figure>
+<figcaption>Invoking the review agent directly using <code>amp review</code>:</figcaption>
+<video width="800" playsinline="" autoplay="" loop="" muted="" src="https://static.ampcode.com/news/review-skill/amp_review_cli.mp4" type="video/mp4"></video>
+</figure>
+
+<figure>
+<figcaption>Requesting a review from within a thread:</figcaption>
+<video width="800" playsinline="" autoplay="" loop="" muted="" src="https://static.ampcode.com/news/review-skill/cli_review.mp4" type="video/mp4"></video>
+<picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/cli_review.d5191759.768w.avif 768w, https://static.ampcode.com/news/responsive/cli_review.d5191759.1440w.avif 1440w, https://static.ampcode.com/news/responsive/cli_review.d5191759.2560w.avif 2560w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="800" src="https://static.ampcode.com/news/review-skill/cli_review.png" alt="Review tool" height="424" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/review-skill/cli_review.png"></picture>
+</figure>
+
+<h2>Customizing Review with Checks</h2>
+<p>You can also define <a href="https://ampcode.com/manual#checks"><em>Checks</em></a> within your codebase. Checks are user-defined invariants or review criteria scoped to specific parts of your codebase. They are defined in <code>.agents/checks/</code> directories.</p>
+<p>Here's an example performance check, which you could save to <code>.agents/checks/perf.md</code>:</p>
+<pre><code data-language="markdown">---
+name: performance
+description: Flags common performance anti-patterns
+---
+
+Look for these patterns:
+
+- Nested loops over the same collection (O(n²) → O(n) with a Set/Map)
+- Repeated `array.includes()` in a loop
+- Sorting inside a loop
+- String concatenation in a loop (use array + join)
+
+Report the line, why it matters, and how to fix it.
+</code></pre><p>The <code>code_review</code> tool will kick off a separate agent for each check. This provides a stronger guarantee that each check will actually be checked than if the checks were embedded in a general context file like <code>AGENTS.md</code>.</p>
+<p>Here are some more examples of useful checks:</p>
+<ul>
+<li>Performance best practices specific to your stack</li>
+<li>Common anti-patterns your team has hit before</li>
+<li>Security best practices or invariants</li>
+<li>Migration reminders for deprecated APIs</li>
+<li>Stylistic conventions that aren't in the linter</li>
+<li>Compliance requirements</li>
+</ul>
+<p>Checks are scoped to the directory that contains <code>.agents/</code>, so a root <code>.agents/checks</code> directory would cover the entire codebase while <code>api/.agents/checks</code> would cover files under <code>api/</code>.</p>
+</div> </article></div>

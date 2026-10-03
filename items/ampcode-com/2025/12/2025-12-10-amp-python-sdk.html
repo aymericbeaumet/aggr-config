@@ -1,0 +1,50 @@
+<div id="readability-page-1" class="page"><div> <p>For all of you who swear by tabs and clean syntax, the Amp Python SDK is now live.</p>
+<p>You can run Amp programmatically from your Python code, just like you already do in TypeScript.</p>
+<p>Here, for example, is how you instruct Amp to migrate React components with <a href="https://ampcode.com/news/toolboxes">custom toolbox tools</a> to validate changes:</p>
+<pre><code data-language="python">import asyncio
+import os
+from amp_sdk import execute, AmpOptions
+
+prompt = """
+	  Goal: Migrate all React components from React 17 to React 18.
+
+    1. Find all React component files (.tsx, .jsx)
+    2. For each component:
+       - Update deprecated lifecycle methods
+       - Replace ReactDOM.render with createRoot
+    3. Track any components that fail migration with the reason
+    4. Run the typecheck_test_tool after each change
+    5. Output a summary: migrated count, failed list with reasons
+"""
+
+async def main():
+
+    # Use the toolbox directory to share tools with Amp
+    toolbox_dir = os.path.join(os.getcwd(), "toolbox")
+
+    async for message in execute(
+        prompt,
+        AmpOptions(
+            cwd=os.getcwd(),
+            toolbox=toolbox_dir,
+            visibility="workspace",
+            dangerously_allow_all=True,
+        ),
+    ):
+
+        if message.type == "result":
+            if message.is_error:
+                print(f"Error: {message.error}")
+            else:
+                print(f"Summary: {message.result}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+</code></pre><p>To get started, install the pip package and the Amp CLI:</p>
+<pre><code data-language="bash"># Install the Amp SDK with pip
+$ pip install amp-sdk
+
+# Install the Amp CLI globally
+$ npm install -g @ampcode/cli
+</code></pre><p>Now you can build anything with Amp in any Python runtime environment. To get more ideas and familiar with the SDK, take a look at the examples in the <a href="https://ampcode.com/manual/sdk#advanced-usage">manual</a>.</p>
+</div></div>

@@ -1,0 +1,61 @@
+<div id="readability-page-1" class="page"><div> <p>Gemini 3 Pro is now the new main model in Amp, powering the <code>smart</code> agent mode.</p>
+<p>This is a historic change.</p>
+<p>Ever since we've started work on Amp, back in February, Anthropic's Claude has
+been the main model. Not for lack of trying. We've experimented with different
+models for the same role: <a href="https://ampcode.com/news/gpt-5">GPT-5</a>, Gemini 2.5, Grok, and others.</p>
+<p>But Claude has stuck, because it has been the only model that managed to strike
+the balance between intelligence, speed, and the willingness and ability to use
+tools.</p>
+<p>Then, Gemini 3 came along. (And, on the horizon, there are even more models
+lined up to take the crown.)</p>
+<p>In just a few days, the number of ecstatic messages it got in our Slack was
+higher than for any other model:</p>
+<ul>
+<li>"crazy, this is incredible"</li>
+<li>"guys this is really good, I love it, it's a ton of fun"</li>
+<li>"I didn't expect a model drop to affect how much I'm enjoying using amp this much"</li>
+<li>"Wow. It's very persistent - in a great way."</li>
+<li>"Hot dog!! I haven’t tried it yet but you all are getting my hopes up"</li>
+<li>"I'm really loving this model. Feels like a great mix of eagerness mixed with experience. Doesn't feel like a bull in a china shop."</li>
+<li>"am I imaginging things? it is that good, right?"</li>
+</ul>
+<p>Gemini 3 checked off all the boxes that so far only Claude had checked: smart,
+fast, follows instructions very well, works hand-in-hand with the user if
+needed, very eager to use tools and uses them with high dexterity.</p>
+<p>But, as we found out with delight, it does it all and it's <em>better</em> at it.</p>
+<p>In our first internal, not-even-optimized run of Terminal-Bench 2.0 the score
+went up by 17 percentage points, after switching from Sonnet 4.5 to Gemini 3.</p>
+<p>It also feels smarter, it feels better at following instructions, it's
+impressively clever in the way it uses tools, it cleans up after itself, it
+follows existing patterns in a codebase to a degree which we haven't seen
+before, its writing is uncannily good. It doesn't use emojis when it shouldn't.
+It hasn't once said that we're absolutely right. (It does have <a href="#not-perfect">other imperfections though</a>.)</p>
+<p>And yet: should we really make it the default model in Amp? That's a big decision.</p>
+<p>We went back and forth, multiple times. Every time we did, someone would invite
+the rest of the team: "Okay, push back, tell me I'm hallucinating, tell me why
+we shouldn't do it?"</p>
+<p>But, in the end, that question was answered with Gemini 3 passing the ultimate
+test of all tools. When it quickly went down while early-access versions were
+switched, our team immediately despaired: "no, please, they can't take this away
+from me!"</p>
+<p>We hope you enjoy it, too. Happy hacking!</p>
+<hr>
+<p><em>Update (2026-01-06): The Sonnet 4.5 fallback setting mentioned below has been removed, now that ~2 months have passed.</em></p>
+<p>If you want to keep using Amp with Sonnet 4.5 to help with the transition, you can do so by using a temporary configuration setting or command-line flag.</p>
+<p>Either use the following in your Amp configuration (<code>.config/amp/settings.json</code> or <code>.vscode/settings.json</code>):</p>
+<pre><code>"amp.model.sonnet": true
+</code></pre><p>Or use this flag when using the Amp CLI:</p>
+<pre><code>amp --use-sonnet
+</code></pre><hr>
+<p><span id="not-perfect">It's better, but it's not perfect.</span></p>
+<p>Here is a list of issues we've seen and that we're still actively trying to prompt out of it:</p>
+<ul>
+<li>Sometimes it just "thinks" forever</li>
+<li>Other times, thinking-like prose leaks into the output. E.g. "I'm going to x, I did x, I'm going to y. This usually is associated with a very very large number of output tokens.</li>
+<li>Control characters, fake tool calls (<code>&lt;todo_read&gt;&lt;/todo_read&gt;</code>) leaking into the output, <code>}}</code> at the end of the message, repeated words at the end of the message</li>
+<li>It has sometimes been very reluctant to execute bash commands</li>
+<li>Unrequested git commits</li>
+<li>Use of non-absolute file paths</li>
+</ul>
+<p>We still think that even with these issues, it's a great choice as the main model in Amp.</p>
+</div></div>

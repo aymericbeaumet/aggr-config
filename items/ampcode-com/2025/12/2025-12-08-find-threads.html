@@ -1,0 +1,17 @@
+<div id="readability-page-1" class="page"><div> <p>Amp can now search your threads.</p>
+<p>A few weeks ago we shipped <a href="https://ampcode.com/news/read-threads">the ability to read other threads</a>. That was the first step: reference a thread by URL or ID, let Amp pull out the relevant context.</p>
+<p>But what if you don't have the thread ID at hand? What if the only thing you know about a thread is that it changed or created a specific file? Or some keywords?</p>
+<p>That's what the new <code>find_thread</code> tool is for. It lets Amp search your threads in two ways:</p>
+<p><strong>Keyword search</strong>: find threads that mention specific terms. "Find threads where we discussed the database migration." The agent in Amp will then use the same search functionality as on <a href="https://ampcode.com/threads">the thread feed</a> and return matches.</p>
+<p><strong>File search</strong>: find threads that touched a specific file. Think of it like <code>git blame</code>, but for Amp. "Which thread last modified this file?" Amp looks at file changes across threads and tells you which conversations touched it.</p>
+<p>Here's how we've been using it to find threads:</p>
+<ul>
+<li>"Which Amp thread created core/src/tools/tool-service.ts?"</li>
+<li>"Search my threads to find the one in which we added the explosion animation. I want to continue working on that."</li>
+<li>"Show me all threads that modified src/terminal/pty.rs"</li>
+<li>"Find and read the thread that created scripts/deploy.sh."</li>
+<li>"Find the thread in which we added @server/src/backfill-service.ts, read it, and extract the SQL snippet we used to test the migration."</li>
+</ul>
+<p>The <code>find_thread</code> tool is the sibling to <code>read_thread</code>. First you find, then you read. Together they turn your Amp threads into reusable context.</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/find-thread.1ba15f23.768w.avif 768w, https://static.ampcode.com/news/responsive/find-thread.1ba15f23.1440w.avif 1440w, https://static.ampcode.com/news/responsive/find-thread.1ba15f23.1564w.avif 1564w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="793" src="https://static.ampcode.com/news/find-thread.png" alt="Find thread in action" height="479" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/find-thread.png"></picture></p>
+</div></div>

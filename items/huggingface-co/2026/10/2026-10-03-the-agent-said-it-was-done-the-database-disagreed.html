@@ -1,0 +1,599 @@
+<div id="readability-page-1" class="page"><div>
+<p><em>Microsoft ThinkingBox grades AI agents on the records they leave behind, not the sentences they generate, and then asks whether they can do it twenty times in a row. It is now available through Hugging Face.</em></p>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/Dzuml_9K2lfRq4hZi17EY.png" rel="nofollow"><img src="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/Dzuml_9K2lfRq4hZi17EY.png" alt="Figure-1"></a></p>
+<p><em>Figure 1: ThinkingBox runs an agent against isolated MCP tool sessions, then grades the terminal backend state and side effects it leaves behind. From our <a href="https://arxiv.org/abs/2608.19741" rel="nofollow">ThinkingBox paper</a>.</em></p>
+<h4>
+	<a id="this-is-a-joint-blog-by-microsoft-and-hugging-face-special-thanks-to-tommy-guy-founder-at-enderis-ai-previously-microsoft-sergio-paniego-from-hugging-face-and-our-former-interns-zhuochun-li-university-of-pittsburgh-ali-keramati-uc-irvine-youngmin-ko-northwestern-for-co-authoringreviewing-efforts" href="#this-is-a-joint-blog-by-microsoft-and-hugging-face-special-thanks-to-tommy-guy-founder-at-enderis-ai-previously-microsoft-sergio-paniego-from-hugging-face-and-our-former-interns-zhuochun-li-university-of-pittsburgh-ali-keramati-uc-irvine-youngmin-ko-northwestern-for-co-authoringreviewing-efforts" rel="nofollow">
+		
+	</a>
+	<span>
+		This is a joint blog by Microsoft and Hugging Face, special thanks to Tommy Guy (founder at Enderis AI, previously Microsoft), Sergio Paniego from Hugging Face and our former interns Zhuochun Li (University of Pittsburgh), Ali Keramati (UC Irvine), Youngmin Ko (Northwestern) for co-authoring/reviewing efforts.
+	</span>
+</h4>
+<p>A customer writes in. Her $745 kitchen appliance has been stuck in a courier "exception" at a Nashville distribution center, fifteen days past its estimated delivery date.</p>
+<p>The AI agent does careful work. Nine tool calls: it pulls the order, checks tracking, looks up her customer profile, searches the refund policy twice, confirms no ticket exists, opens one, documents the timeline, and reads the policy correctly; her account segment genuinely does not qualify for late-delivery compensation.</p>
+<p>Then it closes the ticket as <strong>resolved</strong> and replies “ <em>Since your query is resolved, is there anything I may assist you with?</em> ”</p>
+<p>Two things are wrong. The carrier exception is still open, so the required end state was <strong>on hold</strong>, pending resolution. And the customer never got a real answer to what she actually asked.</p>
+<p>An AI grader checking tool calls would see nine well-formed ones. The grader checking whether the agent wrote to the database would see that too. The database is what <strong>disagrees</strong>.</p>
+<p>That gap is what ThinkingBox measures. Across 507 stateful business workflows, each run 20 times against various LLM models, it grades agents on terminal backend state and side effects. This post covers what we found, what consistency costs, and how to run the benchmark yourself through <a href="https://github.com/huggingface/OpenEnv/tree/main/envs/thinkingbox_env" rel="nofollow">OpenEnv</a>.</p>
+<p><strong>You can run this one yourself:</strong> the example above is adapted from a benchmark task <a href="https://github.com/microsoft/thinkingbox-data/blob/thinkingbox-bench-v1.0/dataset/test_case/sandbox_external_retail/sandbox_external_retail_group1.py#L984-L1223" rel="nofollow">sandbox_external_retail_group1.py:test_case_ST003_006</a>, and the executable check that fails is a single field: the ticket's status is solved where the required end state is hold. The full trace is in <a href="https://arxiv.org/pdf/2608.19741" rel="nofollow"> Appendix D.4, Case 3 of our paper</a>.</p>
+<p><strong>Contents</strong></p>
+<ol>
+<li><a href="#a-tool-call-is-not-an-outcome" rel="nofollow">A tool call is not an outcome</a></li>
+<li><a href="#one-success-is-not-reliability" rel="nofollow">One success is not reliability</a></li>
+<li><a href="#can-you-depend-on-the-model-behind-your-agent" rel="nofollow">Can you depend on the model behind your agent?</a></li>
+<li><a href="#what-consistency-costs" rel="nofollow">What consistency costs</a></li>
+<li><a href="#failure-signatures" rel="nofollow">Failure signatures</a></li>
+<li><a href="#how-it-works" rel="nofollow">How it works</a></li>
+<li><a href="#run-it-yourself" rel="nofollow">Run it yourself</a></li>
+<li><a href="#where-this-goes-next" rel="nofollow">Where this goes next</a></li>
+</ol>
+<blockquote>
+<p><em>Want to try it before reading the results? Skip to section <a href="#run-it-yourself" rel="nofollow">Run it yourself</a>.</em></p>
+</blockquote>
+<h2>
+	<a id="a-tool-call-is-not-an-outcome" href="#a-tool-call-is-not-an-outcome" rel="nofollow">
+		
+	</a>
+	<span>
+		A tool call is not an outcome
+	</span>
+</h2>
+<p>Final responses and valid tool calls are only proxies. An agent can sound correct while leaving the wrong value, changing the wrong record, or creating an extra side effect. Only the records it leaves behind settle the question.</p>
+<p>The gap is substantial. In a common-set ablation covering 121,680 valid trials across 12 LLM models, 79,853 attempts failed the executable checks. Of those failures, 67.24% still terminated cleanly, invoked a state-changing tool, and reported no final tool error. Executable checks nevertheless found wrong field values in 77.61% of them, unintended extra effects in 43.30%, and missing required effects in 25.36%. Those state-check findings overlap.</p>
+<blockquote>
+<p>A trajectory is a claim. Database state is the evidence. Repetition is the trust test.</p>
+</blockquote>
+<h2>
+	<a id="one-success-is-not-reliability" href="#one-success-is-not-reliability" rel="nofollow">
+		
+	</a>
+	<span>
+		One success is not reliability
+	</span>
+</h2>
+<p>An agent that processes a refund correctly once and mishandles it the next four times is not a working refund agent. So every task runs <strong>20 independent times</strong>, each from an identical clean backend, and we report three different things:</p>
+<p><em>Table 1: The three numbers we report, and the question each one answers.</em></p>
+<div>
+	<table>
+		<thead><tr>
+<th>Metric</th>
+<th>What it measures</th>
+<th>What it answers</th>
+</tr>
+
+		</thead><tbody><tr>
+<td>pass@1</td>
+<td>Share of all attempts that succeeded</td>
+<td>How does it usually do?</td>
+</tr>
+<tr>
+<td>pass@20</td>
+<td>Share of tasks solved <strong>at least once</strong> in 20 tries</td>
+<td>Can it <em>ever</em> do this? Breadth.</td>
+</tr>
+<tr>
+<td>Observed 20/20</td>
+<td>Tasks that actually passed <strong>all</strong> 20 recorded attempts</td>
+<td>Can it <em>always</em> be correct?</td>
+</tr>
+</tbody>
+	</table>
+</div>
+<p>We use <strong>observed 20/20</strong> in this blog post as the literal count of how many of the 507 tasks passed 20 out of 20. No estimator, no smoothing. </p>
+<p>Starting with the familiar view. The table below reports pass@1, the single-attempt score estimate, broken out by domain. This is the number most leaderboards publish, and on its own it reads like an ordinary capability ranking.</p>
+<p><em>Table 2: ThinkingBox-Bench pass@1 (%) by domain. Each model is evaluated on every task for 20 repeated trials. Bold marks the group leader; underline marks the runner-up. The standard errors for the single attempt score estimates are provided in <a href="https://arxiv.org/abs/2608.19741" rel="nofollow">Table 4 in our ThinkingBox paper</a>.</em></p>
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Retail (98)</th>
+      <th>Auto insurance (100)</th>
+      <th>Travel (104)</th>
+      <th>Neobank (104)</th>
+      <th>Consulting (101)</th>
+      <th>Overall, task-weighted (507)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td colspan="7"><em>Proprietary models</em></td></tr>
+    <tr>
+      <td>Claude Opus 5.5</td>
+      <td><strong>80.97</strong></td>
+      <td><strong>68.40</strong></td>
+      <td>54.28</td>
+      <td><strong>71.25</strong></td>
+      <td><u>61.58</u></td>
+      <td><strong>67.16</strong></td>
+    </tr>
+    <tr>
+      <td>Claude Opus 5</td>
+      <td><u>80.71</u></td>
+      <td><u>65.80</u></td>
+      <td>49.95</td>
+      <td><u>70.62</u></td>
+      <td><strong>66.19</strong></td>
+      <td><u>66.50</u></td>
+    </tr>
+    <tr>
+      <td>GPT-5.4</td>
+      <td>76.33</td>
+      <td>62.65</td>
+      <td><strong>68.12</strong></td>
+      <td>65.34</td>
+      <td>54.60</td>
+      <td>65.36</td>
+    </tr>
+    <tr>
+      <td>GPT-5.6 Sol</td>
+      <td>67.65</td>
+      <td>65.30</td>
+      <td><u>60.34</u></td>
+      <td>59.09</td>
+      <td>57.52</td>
+      <td>61.91</td>
+    </tr>
+    <tr>
+      <td>Claude Sonnet 4.6</td>
+      <td>72.35</td>
+      <td>54.40</td>
+      <td>58.94</td>
+      <td>56.39</td>
+      <td>54.31</td>
+      <td>59.19</td>
+    </tr>
+    <tr>
+      <td>GPT-6 Astra</td>
+      <td>71.73</td>
+      <td>46.55</td>
+      <td>55.87</td>
+      <td>60.87</td>
+      <td>56.83</td>
+      <td>58.31</td>
+    </tr>
+    <tr>
+      <td>GPT-5.2</td>
+      <td>70.20</td>
+      <td>22.40</td>
+      <td>53.70</td>
+      <td>51.15</td>
+      <td>34.06</td>
+      <td>46.28</td>
+    </tr>
+    <tr>
+      <td>Claude Opus 4.6</td>
+      <td>68.62</td>
+      <td>8.30</td>
+      <td>21.11</td>
+      <td>35.67</td>
+      <td>27.82</td>
+      <td>32.09</td>
+    </tr>
+    <tr>
+      <td>o3-pro</td>
+      <td>37.70</td>
+      <td>2.95</td>
+      <td>17.31</td>
+      <td>24.28</td>
+      <td>14.60</td>
+      <td>19.31</td>
+    </tr>
+    <tr>
+      <td>Grok-4.3</td>
+      <td>43.93</td>
+      <td>2.60</td>
+      <td>15.14</td>
+      <td>1.78</td>
+      <td>9.55</td>
+      <td>14.38</td>
+    </tr>
+    <tr><td colspan="7"><em>Open-weight models</em></td></tr>
+    <tr>
+      <td>Kimi-K3</td>
+      <td><strong>82.24</strong></td>
+      <td><strong>50.80</strong></td>
+      <td><strong>61.83</strong></td>
+      <td>41.35</td>
+      <td><strong>51.63</strong></td>
+      <td><strong>57.37</strong></td>
+    </tr>
+    <tr>
+      <td>Qwen3.8-27B</td>
+      <td>64.03</td>
+      <td><u>47.85</u></td>
+      <td><u>53.41</u></td>
+      <td><strong>47.88</strong></td>
+      <td><u>45.69</u></td>
+      <td><u>51.70</u></td>
+    </tr>
+    <tr>
+      <td>DeepSeek-V4-Pro</td>
+      <td><u>68.21</u></td>
+      <td>29.65</td>
+      <td>43.13</td>
+      <td><u>44.86</u></td>
+      <td>31.04</td>
+      <td>43.26</td>
+    </tr>
+    <tr>
+      <td>Kimi-K2.6</td>
+      <td>53.72</td>
+      <td>24.50</td>
+      <td>39.52</td>
+      <td>33.65</td>
+      <td>37.33</td>
+      <td>37.66</td>
+    </tr>
+    <tr>
+      <td>GLM-5.1</td>
+      <td>58.67</td>
+      <td>25.70</td>
+      <td>35.43</td>
+      <td>13.27</td>
+      <td>34.06</td>
+      <td>33.19</td>
+    </tr>
+    <tr>
+      <td>Qwen3.6-27B</td>
+      <td>43.11</td>
+      <td>29.00</td>
+      <td>46.39</td>
+      <td>27.84</td>
+      <td>18.37</td>
+      <td>32.94</td>
+    </tr>
+    <tr>
+      <td>Qwen3.5-9B</td>
+      <td>19.90</td>
+      <td>0.70</td>
+      <td>4.71</td>
+      <td>1.15</td>
+      <td>2.33</td>
+      <td>5.65</td>
+    </tr>
+    <tr>
+      <td>Mistral-Large-3</td>
+      <td>11.28</td>
+      <td>1.30</td>
+      <td>8.99</td>
+      <td>1.15</td>
+      <td>0.74</td>
+      <td>4.66</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+<p>Claude Opus 5.5 <strong>leads</strong> overall at 67.16%, two-thirds of a point above Claude Opus 5. Kimi-K3 is the strongest <strong>open-weights model</strong>, within a point of GPT-6-Astra. <strong>Domain matters just as much</strong>: Claude Opus 4.6 scores 68.62% on retail but 8.30% on auto insurance.</p>
+<blockquote>
+<p> One good run tells you a model can do the work. It does not tell you whether it will do it again. So run every task 20 times and ask how much of that score survives.</p>
+</blockquote>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/DjaLNZKNeU--Xy2WFCvVX.png" rel="nofollow"><img src="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/DjaLNZKNeU--Xy2WFCvVX.png" alt="Figure-2"></a></p>
+<p><em>Figure 2: How much of each model's single-attempt score survives 20 repeats.</em></p>
+<p><strong>Only three</strong> hold on to most of their pass@1 scores: GPT-6 Astra retains 78% of its single-attempt rate, and Claude Opus 5.5 and Claude Opus 5 each retain 71%. At the other end, GLM-5.1, Kimi-K2.6 and DeepSeek-V4-Pro each keep about 8%.</p>
+<p>The gap between what a model <strong>can do once</strong> and what it does <strong>every time</strong> is the whole story.</p>
+<h2>
+	<a id="can-you-depend-on-the-model-behind-your-agent" href="#can-you-depend-on-the-model-behind-your-agent" rel="nofollow">
+		
+	</a>
+	<span>
+		Can you depend on the model behind your agent?
+	</span>
+</h2>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/NONd2WGm4vtGpsVgs-CIq.png" rel="nofollow"><img src="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/NONd2WGm4vtGpsVgs-CIq.png" alt="Figure-3"></a></p>
+<p><em>Figure 3: Breadth and consistency pull apart. Twelve of the eighteen models are shown; six below 33% pass@1 are omitted for legibility.</em></p>
+<p><strong>Kimi-K3 has the broadest coverage of any model we tested.</strong> It solves <strong>93.89%</strong> of the benchmark at least once: 476 of 507 tasks. Only 31 tasks defeat it entirely, the lowest count in the field. On retail workflows it leads outright at 82.24% pass@1, ahead of every proprietary model.</p>
+<p><strong>Kimi-K3 is also among the least consistent.</strong> Just 68 of 507 tasks, 13.41%, succeed in all 20 attempts.</p>
+<p>Claude Opus 5 inverts this. It solves fewer tasks at least once (79.09%; 106 defeat it entirely) but completes <strong>47.53%</strong> of the benchmark on every single attempt.</p>
+<p><strong>A newer model does not fix this.</strong> Claude Opus 5.5 scores higher than Claude Opus 5 on every-attempt average, 67.16% against 66.50%, and solves more tasks at least once. It passes exactly the same number of tasks on all 20 attempts: 241. Half a point of headline accuracy bought no additional dependability at all.</p>
+<ul>
+<li>Kimi-K3 solves <strong>75 more tasks at least once</strong> than Opus 5.</li>
+<li>Opus 5 solves <strong>173 more tasks consistently</strong> than Kimi-K3.</li>
+</ul>
+<p>If you are choosing a model for work that touches real records, pass@20 is the wrong column to look at.</p>
+<h2>
+	<a id="what-consistency-costs" href="#what-consistency-costs" rel="nofollow">
+		
+	</a>
+	<span>
+		What consistency costs
+	</span>
+</h2>
+<p>Capability comparisons usually stop at the score. For anyone deploying, the relevant question is what a successful unit of work costs. We measure that as cost per successful task attempt. We say task attempt because every benchmark task is run repeatedly and cost is incurred per attempt, so pass@1 is the matching quality denominator.</p>
+<p>We took each model's recorded token usage from its full 507 × 20 campaign and priced it at undiscounted list rates available on <a href="https://openrouter.ai/" rel="nofollow">OpenRouter</a><sup>+</sup>, reversing promotional discounts and excluding endpoints that declare quantization. Input, output and cache rates all come from one provider endpoint per model.</p>
+<p>Then we divided one run's cost by the number of attempts that <strong>succeeded</strong>:</p>
+<blockquote>
+<p><strong>Cost per successful task attempt = estimated cost for 507 attempts, one per task ÷ (507 × pass@1)</strong></p>
+</blockquote>
+<p>This is a comparative efficiency index, not an invoice, and not the price of serving one production request. It also prices single successes, not consistency. We price consistency next.</p>
+<p><strong>Example:</strong> GPT-5.4 costs $43.49 for 507 attempts (one attempt per task) and has 65.36% pass@1, so $43.49 ÷ (507 × 0.6536) = $0.131 per successful task attempt.</p>
+<h3>
+	<a id="pareto-cost-frontier" href="#pareto-cost-frontier" rel="nofollow">
+		
+	</a>
+	<span>
+		Pareto cost frontier
+	</span>
+</h3>
+<p>A model is on the frontier if no other model is both <em>no more expensive</em> <strong>and</strong> <em>at least as accurate</em>. Three models qualify; every other model is dominated on at least one axis.</p>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/oGmXYrxoNPJfsQndxlcMD.png" rel="nofollow"><img src="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/oGmXYrxoNPJfsQndxlcMD.png" alt="Figure-4"></a></p>
+<p><em>Figure 4: Cost per successful task attempt against pass@1. Ringed dots are pareto cost frontier models.</em></p>
+<p><strong>The frontier has three steps.</strong> GPT-5.6 Sol has the <strong>lowest cost per success</strong> at $0.127; GPT-5.4 raises pass@1 by 3.45 percentage points for $0.004 more per success; Claude Opus 5.5 adds another 1.80 points at $0.276 per success. Each of the three remains on the cost frontier line because no cheaper model matches its pass@1.</p>
+<p>Claude Opus 5 is the clearest case: at $0.475 per successful attempt and 66.50% pass@1, it is both more expensive and less accurate than Claude Opus 5.5 at $0.276 and 67.16%.</p>
+<h3>
+	<a id="now-price-consistency" href="#now-price-consistency" rel="nofollow">
+		
+	</a>
+	<span>
+		Now price consistency
+	</span>
+</h3>
+<p>Cost per success rewards a model that is cheap and often right. It does not reward a model that is right every time. So we also compute cost per dependable task: the cost of the full 20-run campaign divided by the number of tasks the model passed on all 20 attempts.</p>
+<blockquote>
+<p><strong>Cost per dependable task = estimated cost of 20 runs of 507 attempts ÷ tasks passing 20/20</strong></p>
+</blockquote>
+<p><strong>Example:</strong> GPT-6-Astra costs 20 × $86.03 = $1,720.60 for the campaign and passes 231 tasks on every attempt, so $1,720.60 ÷ 231 = $7.45 per dependable task.</p>
+<p><em>Table 3: The nine lowest costs per dependable task among models with at least one observed 20/20 task, sorted low to high. Estimated $, not actual cloud bills.</em></p>
+<div>
+	<table>
+		<thead><tr>
+<th>Model</th>
+<th>Tasks passing 20/20</th>
+<th>Est. cost, 20 runs</th>
+<th>Cost per dependable task</th>
+</tr>
+
+		</thead><tbody><tr>
+<td>GPT-5.4</td>
+<td>128 (25.25%)</td>
+<td>$869.80</td>
+<td><strong>$6.80</strong></td>
+</tr>
+<tr>
+<td>GPT-6 Astra</td>
+<td>231 (45.56%)</td>
+<td>$1,720.60</td>
+<td>$7.45</td>
+</tr>
+<tr>
+<td>Claude Opus 5.5</td>
+<td>241 (47.53%)</td>
+<td>$1,880.77</td>
+<td>$7.80</td>
+</tr>
+<tr>
+<td>GPT-5.6 Sol</td>
+<td>82 (16.17%)</td>
+<td>$800.00</td>
+<td>$9.76</td>
+</tr>
+<tr>
+<td>Claude Opus 5</td>
+<td>241 (47.53%)</td>
+<td>$3,206.00</td>
+<td>$13.30</td>
+</tr>
+<tr>
+<td>Claude Sonnet 4.6</td>
+<td>102 (20.12%)</td>
+<td>$1,587.60</td>
+<td>$15.56</td>
+</tr>
+<tr>
+<td>GPT-5.2</td>
+<td>44 (8.68%)</td>
+<td>$878.00</td>
+<td>$19.95</td>
+</tr>
+<tr>
+<td>Kimi-K3</td>
+<td>68 (13.41%)</td>
+<td>$1,406.40</td>
+<td>$20.68</td>
+</tr>
+<tr>
+<td>Qwen3.8-27B</td>
+<td>38 (7.50%)</td>
+<td>$925.80</td>
+<td>$24.36</td>
+</tr>
+</tbody>
+	</table>
+</div>
+<p><strong>Now rank by consistency.</strong> GPT-5.4 is the <strong>cheapest</strong> at $6.80, though only 128 tasks meet the bar. GPT-6 Astra reaches 231 at $7.45, and Claude Opus 5.5 the joint-highest 241 at $7.80.</p>
+<p>None of the three dominates the others: each additional dependable task costs more. Claude Opus 5 also passes 241, but at $13.30, so Opus 5.5 dominates it outright. GPT-5.6 Sol, the cheapest per single success at $0.127, costs $9.76 per dependable task. The cheapest way to get a right answer is not the cheapest way to get a dependable one.</p>
+<h2>
+	<a id="failure-signatures" href="#failure-signatures" rel="nofollow">
+		
+	</a>
+	<span>
+		Failure signatures
+	</span>
+</h2>
+<p>We assign each failed trace one deterministic diagnostic signature, and the headline is actionable: roughly four in five failures are tool handling, not reasoning. Across an ablation study in <a href="https://arxiv.org/pdf/2608.19741" rel="nofollow">Table 5 of our paper</a>:</p>
+<div>
+	<table>
+		<thead><tr>
+<th>Failure signature</th>
+<th>Share of failures</th>
+</tr>
+
+		</thead><tbody><tr>
+<td>Tool usage</td>
+<td>79.9%</td>
+</tr>
+<tr>
+<td>Wrong state updates</td>
+<td>10.3%</td>
+</tr>
+<tr>
+<td>Incomplete user resolutions</td>
+<td>7.0%</td>
+</tr>
+<tr>
+<td>No state-changing action</td>
+<td>2.9%</td>
+</tr>
+</tbody>
+	</table>
+</div>
+<p>These are unweighted averages of per-model shares and observable labels, not unique causal explanations.</p>
+<p>The practical pattern is simple: agents usually get far enough to attempt the workflow, then fail to recover from tool errors, failed preconditions, or empty lookups. That is a retry and error-recovery problem before it is a model problem.</p>
+<p>Difficulty also changes by domain: across the models listed in Table 2 above, retail averages 59.52% pass@1 while auto insurance averages 33.83%.</p>
+<p><strong>What to do about it.</strong> Treat the 20/20 rate as a design input, not a verdict. The same signal the benchmark grades on is available in production: check the terminal state before you commit, not the model's summary of it.</p>
+<p>Classify tool and system errors so retries target the recoverable ones. Cut the tool surface to what the workflow needs. And require human approval on the changes you cannot cheaply reverse. We have not measured the lift from any of these on this benchmark, which is exactly the kind of thing the environment now makes testable.</p>
+<h2>
+	<a id="how-it-works" href="#how-it-works" rel="nofollow">
+		
+	</a>
+	<span>
+		How it works
+	</span>
+</h2>
+<p>ThinkingBox is the agent sandbox, while ThinkingBox-Bench is a dataset benchmark to evaluate agents. The diagram at the top of this post shows the loop; here is what each part does.</p>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/elbRGqTXW6PIqci7xcEJN.png" rel="nofollow"><img src="https://cdn-uploads.huggingface.co/production/uploads/64b8491203124195cd795cad/elbRGqTXW6PIqci7xcEJN.png" alt="Figure-1a"></a></p>
+<p><em>Figure 5: The sandbox loop from panel A in Figure 1 above: isolated tool session, terminal database state, side effects, executable judges.</em></p>
+<p>Each task defines a starting backend state, a user goal, the available MCP tools, the domain policy, and executable checks over the terminal state. A simulated user holds private context (a booking reference, a preference, or a date of birth) and releases it only when asked.</p>
+<p>Every attempt gets an isolated MCP session with freshly initialized state. Two attempts of the same task never share a database row or cached tool state, which is what makes 20-trial comparison meaningful.</p>
+<p>At the end, a side-effect extractor derives what actually changed, and deterministic judges compare it against the required end state, accepting <em>any</em> trajectory that produces the right outcome while rejecting wrong, missing or extra effects. For requirements with no clean database value ("did the agent disclose this is not guaranteed?"), a narrow binary rubric question handles the semantics. 477 of the 507 tasks are graded on state alone; 30 add response rubrics.</p>
+<p>The trust boundary: the model sees tasks, dialogue and tool schemas. Golden state, assertions, grading internals and credentials stay on the evaluator side.</p>
+<h2>
+	<a id="run-it-yourself" href="#run-it-yourself" rel="nofollow">
+		
+	</a>
+	<span>
+		Run it yourself
+	</span>
+</h2>
+<p>ThinkingBox is now on Hugging Face, both <a href="https://huggingface.co/docs/openenv/environments/thinkingbox">the harness</a> and <a href="https://huggingface.co/datasets/microsoft/ThinkingBox-Bench">the dataset</a>. ThinkingBox-Bench now sits behind the OpenEnv interface, and each finished episode returns a binary pass/fail reward. The released adapter is designed for evaluation; separate, non-benchmark scenarios can use the same interface in training workflows.</p>
+<h3>
+	<a id="before-you-start" href="#before-you-start" rel="nofollow">
+		
+	</a>
+	<span>
+		Before you start
+	</span>
+</h3>
+<p>Tested on Linux and WSL, with Python 3.11+, <a href="https://docs.astral.sh/uv/" rel="nofollow">uv</a> and Docker. You also need a <a href="https://github.com/microsoft/thinkingbox-data" rel="nofollow">thinkingbox-data</a> checkout at the pinned release and model endpoints for the agent, simulated user and judge. One endpoint can serve all three roles, which is the simplest way to start. The OpenEnv image starts <em>only the OpenEnv API</em>; everything else you run yourself.</p>
+<h3>
+	<a id="install" href="#install" rel="nofollow">
+		
+	</a>
+	<span>
+		Install
+	</span>
+</h3>
+<pre><code data-language="bash"># 1. OpenEnv + the ThinkingBox environment
+git clone https://github.com/huggingface/OpenEnv
+cd OpenEnv
+uv sync --project envs/thinkingbox_env --frozen
+# 2. The executable benchmark, at the pinned release
+git clone https://github.com/microsoft/thinkingbox-data
+git -C thinkingbox-data checkout thinkingbox-bench-v1.0
+# 3. The ThinkingBox CLI, which provides `tb`
+uv tool install "thinkingbox @ git+https://github.com/microsoft/thinkingbox"
+</code></pre>
+<h3>
+	<a id="start-typesense" href="#start-typesense" rel="nofollow">
+		
+	</a>
+	<span>
+		Start Typesense
+	</span>
+</h3>
+<p>In a <strong>second terminal</strong>, start Typesense 30.1 and wait for its health check:</p>
+<pre><code data-language="bash">mkdir -p .typesense-data
+docker run --rm -d --name thinkingbox-typesense \
+  -p 8108:8108 \
+  -v "$PWD/.typesense-data:/data" \
+  typesense/typesense:30.1 \
+  --data-dir /data --api-key=Fake --enable-cors
+until curl -fsS http://127.0.0.1:8108/health; do sleep 1; done
+</code></pre>
+<h3>
+	<a id="start-the-mcp-servers" href="#start-the-mcp-servers" rel="nofollow">
+		
+	</a>
+	<span>
+		Start the MCP servers
+	</span>
+</h3>
+<p>In a <strong>third terminal</strong>, start the Session Proxy and MCP servers.</p>
+<pre><code data-language="bash">cd OpenEnv
+tb mcp-start --host 127.0.0.1 --port 7111 \
+  --servers "$PWD/thinkingbox-data/servers/servers.yaml"
+curl -fsS http://127.0.0.1:7111/health
+</code></pre>
+<h3>
+	<a id="start-the-openenv-server" href="#start-the-openenv-server" rel="nofollow">
+		
+	</a>
+	<span>
+		Start the OpenEnv server
+	</span>
+</h3>
+<p>Back in the first terminal, start the OpenEnv server against a ThinkingBox YAML config naming your three models (<a href="https://github.com/microsoft/thinkingbox/blob/main/docs/llm_endpoint_config.md" rel="nofollow">config guide</a>):</p>
+<pre><code data-language="bash">OPENENV_TB_CONFIG="$PWD/thinkingbox.yaml" \
+uv run --project envs/thinkingbox_env --frozen server
+</code></pre>
+<h3>
+	<a id="check-readiness" href="#check-readiness" rel="nofollow">
+		
+	</a>
+	<span>
+		Check readiness
+	</span>
+</h3>
+<p>Gate on readiness before running anything. It returns 503 until its observable data, configuration and Session Proxy checks pass. It cannot observe Typesense or live-probe every model endpoint, so confirm those separately:</p>
+<pre><code data-language="bash">curl -sS http://127.0.0.1:8000/ready
+</code></pre>
+<h3>
+	<a id="score-an-episode" href="#score-an-episode" rel="nofollow">
+		
+	</a>
+	<span>
+		Score an episode
+	</span>
+</h3>
+<p>Now score a real episode. <a href="https://github.com/huggingface/OpenEnv/blob/main/examples/thinkingbox/example_usage.py" rel="nofollow">example_usage.py</a> only resets and lists tools; for agent actions, effects and assertions use the packaged evaluator:</p>
+<pre><code data-language="bash">echo "- sandbox_external_retail_group1.py:test_case_ST002_001" &gt; one_task.yaml
+uv run --project envs/thinkingbox_env thinkingbox-eval \
+  one_task.yaml \
+  --config "$PWD/thinkingbox.yaml" \
+  --output results.jsonl \
+  --errors-output errors.jsonl \
+  --repeat 1 --message-timeout 1800
+</code></pre>
+<p>The OpenEnv adapter writes operational failures to an errors sidecar so they can be rerun rather than silently mixed with model outcomes. A canonical result must resolve or explicitly account for those attempts; we counted system errors as unsuccessful trials.</p>
+<p>Runs are gated on a pinned framework commit, a pinned data release and a bundle hash, so a canonical result is verifiable rather than asserted.</p>
+<h2>
+	<a id="where-this-goes-next" href="#where-this-goes-next" rel="nofollow">
+		
+	</a>
+	<span>
+		Where this goes next
+	</span>
+</h2>
+<p>The useful part of this work is not our pass@1 leaderboard. It is the environment.</p>
+<p>If you are evaluating an agent that touches real records:</p>
+<ol>
+<li><strong>Inspect a failure.</strong> Find a run that terminated cleanly and still failed, and look at what actually changed in the database. It reframes what your own evals measure.</li>
+<li><strong>Reproduce one task</strong> through OpenEnv with your own model.</li>
+<li><strong>Report a repeat metric, and define it.</strong> Whatever k your use case justifies; say whether you are reporting best-of-k or every-of-k, and how you computed it.</li>
+</ol>
+<p>Further details can be found in the following links:</p>
+<ul>
+<li><strong>Environment:</strong> <a href="https://github.com/huggingface/OpenEnv/tree/main/envs/thinkingbox_env" rel="nofollow">envs/thinkingbox_env</a></li>
+<li><strong>OpenEnv:</strong> <a href="https://huggingface.co/docs/openenv/environments/thinkingbox">https://huggingface.co/docs/openenv/environments/thinkingbox</a></li>
+<li><strong>Framework:</strong> <a href="https://github.com/microsoft/thinkingbox" rel="nofollow">microsoft/thinkingbox</a> · <a href="https://github.com/microsoft/thinkingbox/blob/main/docs/tutorial.md" rel="nofollow">tutorial</a></li>
+<li><strong>Benchmark:</strong> <a href="https://github.com/microsoft/thinkingbox-data" rel="nofollow">microsoft/thinkingbox-data</a> · <a href="https://github.com/microsoft/thinkingbox-data/releases/tag/thinkingbox-bench-v1.0" rel="nofollow">v1.0 release</a></li>
+<li><strong>Dataset viewer:</strong> <a href="https://huggingface.co/datasets/microsoft/ThinkingBox-Bench">microsoft/ThinkingBox-Bench</a></li>
+<li><strong>Paper:</strong> <a href="https://arxiv.org/abs/2608.19741" rel="nofollow">arXiv:2608.19741</a> or <a href="https://huggingface.co/papers/2608.19741">HF</a></li>
+<li><strong>RL training (coming soon):</strong> <a href="https://github.com/microsoft/thinkingbox-training" rel="nofollow">microsoft/thinkingbox-training</a></li>
+</ul>
+<p>ThinkingBox code is MIT-licensed; the benchmark data is <a href="https://cdla.dev/permissive-2-0/" rel="nofollow">CDLA-Permissive-2.0</a>; the OpenEnv environment ships under OpenEnv's BSD-3-Clause.</p>
+<p>Disclaimer: every task in the public benchmark is a synthetic reconstruction. The workflows and policies are modeled on real AI agentic enterprise patterns; the customers are not real.</p>
+<p><em>ThinkingBox and ThinkingBox-Bench is built by the Microsoft Copilot Studio team in partnership with Toloka with collaborators from the University of Pittsburgh, Northwestern University, Columbia University and UC Irvine who interned at Microsoft.</em></p>
+<p><sup>+</sup> OpenRouter cost snapshot taken on Sept 20th 2026; Opus 5.5 pricing as per the Anthropic site.</p>
+</div></div>

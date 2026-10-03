@@ -1,0 +1,103 @@
+<div id="readability-page-1" class="page"><div> <p>You can now create custom agents in Amp with plugins.</p>
+<p>You can use these custom agents as your main Amp agent, or as subagents. You can
+use them as a small part of a tool pipeline that you invoke with <code>amp -x</code>. Or
+you can spawn 25 custom worker agents, then switch between them.</p>
+<p>Each custom agent comes with a custom orb color.</p>
+<p>Here is how you define a custom agent in an Amp plugin:</p>
+<pre><code data-language="ts">// .amp/plugins/focused-reviewer-agent.ts
+import type { PluginAPI } from '@ampcode/plugin'
+
+export default function (amp: PluginAPI) {
+	// Create the agent
+	const reviewer = amp.createAgent({
+		name: 'focused-reviewer',
+		model: 'openai/gpt-5.5',
+		instructions: [
+			'You are a focused code-review subagent.',
+			'Inspect only the files and concerns named by the caller.',
+			'Return concise findings with severity, evidence, and suggested fixes.',
+		].join(' '),
+		tools: 'all',
+		display: { label: 'reviewer', color: '#d97706' },
+	})
+
+	// Register a tool. This agent acts as a subagent
+	amp.registerTool({
+		name: 'focused_review',
+		description: 'Run a focused code-review subagent.',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				request: { type: 'string' },
+			},
+			required: ['request'],
+		},
+
+		async execute(input, ctx) {
+			// Run a one-shot agent turn
+			const result = await reviewer.run(input, {
+				parentThreadID: ctx.thread.id,
+			})
+			return result.text
+		},
+	})
+
+	// Or register the agent as a selectable main thread mode
+	amp.registerAgentMode({
+		key: 'focused-reviewer',
+		description: 'Code Review Expert',
+		agent: reviewer.definition,
+	})
+}
+</code></pre><h2>Threads</h2>
+<p>Once you have defined an agent, you can create threads:</p>
+<pre><code data-language="ts">// Spawn a new thread
+const thread = await reviewer.createThread({
+	// Tell the UI switch to this thread
+	show: true,
+})
+
+// Get an existing thread
+const thread = amp.threads.get(input.threadID)
+</code></pre><p>The <code>Thread</code> object lets you interact with a thread in many different ways, and
+is where the real power comes in.</p>
+<h3>Send a message to a Thread</h3>
+<p>Add a new user message to a thread by calling <code>thread.appendUserMessage()</code>. The
+call returns as soon as Amp has accepted the message; it does not wait for
+inference to complete before returning.</p>
+<pre><code data-language="ts">await thread.appendUserMessage({
+	type: 'user-message',
+	content: 'Review the auth changes in this branch.',
+})
+</code></pre><h3>Wait for the Agent's response</h3>
+<p>When you do want to wait, call <code>waitForResponse()</code> on the thread. It resolves
+with the next assistant message after the agent finishes its turn.</p>
+<pre><code data-language="ts">const reply = await thread.waitForResponse()
+</code></pre><h2>Example: Spawn an async thread that responds to the main thread</h2>
+<p>These are just a few primitives provided by the Plugin API. Together, they
+compose into unique workflows. An example used on the Amp team: spawn an agent
+in an asynchronous thread, and give it the tools it needs to respond to the
+parent when it needs to.</p>
+<pre><code data-language="ts">amp.registerTool({
+	name: 'start_async_review',
+	description: 'Start a review in a background thread.',
+	inputSchema: { type: 'object', properties: {} },
+	async execute(_input, ctx) {
+		const thread = await reviewer.createThread({
+			parentThreadID: ctx.thread.id,
+		})
+
+		await thread.appendUserMessage({
+			type: 'user-message',
+			content: [
+				'Review the auth changes in this branch.',
+				`When you are done, call send_to_thread with threadID ${ctx.thread.id}`,
+				'and include your review in the message.',
+			].join(' '),
+		})
+
+		return `Started background review in ${thread.id}.`
+	},
+})
+</code></pre><p>Full documentation is <a href="https://ampcode.com/manual/plugin-api">in the manual</a>. Happy Hacking.</p>
+</div></div>

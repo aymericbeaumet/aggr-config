@@ -1,0 +1,13 @@
+<div id="readability-page-1" class="page"><div> <p>Amp has a new mode: <code>rush</code>, named so because a rushed job is faster and cheaper in the moment, and sometimes that's more important than quality.</p>
+<p>Token-by-token, it's 67% cheaper and 50% faster than <code>smart</code>.</p>
+<p>Prompt-to-result (what you actually care about)? It depends. It's less capable, which means that on complex tasks it often spends more tokens and time fixing its mistakes along the way.</p>
+<p>You can <code>rush</code> small, well-defined tasks: simple bugs, small UI changes, minor features. For best results, mention the files that need to be changed.</p>
+<p>Don't <code>rush</code> complex tasks: new end-to-end features, bugs with no clear diagnosis, an architecture refactor. It'll be slower and not much cheaper, if it even arrives at a solution at all. Use <code>smart</code> instead.</p>
+<p>For example:</p>
+<ul>
+<li>A small <code>rush</code>-able task that took 37 seconds and cost $0.12 (44% faster and 77% cheaper than <code>smart</code>): <a href="https://ampcode.com/threads/T-62d6f9c3-4859-4dbe-a0ec-0460e2a3707a">"warn if there are more than 20 MCP tools..."</a></li>
+<li>A complex, non-<code>rush</code>-worthy refactor where <code>rush</code> took 2x longer than <code>smart</code> and was just 19% cheaper: <a href="https://ampcode.com/threads/T-aae44811-8790-4ea5-9841-ad85014db950">"refactor all hardcoded colors from the CLI and web UI..."</a></li>
+</ul>
+<p>The <code>rush</code> agent mode is a unique combination of system prompt, tools, and model (Haiku 4.5 for now). You can use all of Amp's <a href="https://ampcode.com/modes">subagents</a> in <code>rush</code> mode, including <a href="https://ampcode.com/manual#oracle">the oracle</a> and <a href="https://ampcode.com/manual#librarian">the librarian</a>. You'll also notice it doesn't show its TODOs, which makes it faster.</p>
+<p>To use it: run command <code>mode: use rush</code> in the Amp CLI, or select <code>rush</code> mode in the Amp editor extension's prompt field.</p>
+</div></div>

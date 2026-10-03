@@ -1,0 +1,45 @@
+<div id="readability-page-1" class="page"><div> <p>We're removing custom commands in favor of <a href="https://ampcode.com/manual#agent-skills">skills</a>. They were two ways of doing the same thing, except that only you could invoke custom commands, and only the agent could invoke skills. Now that you can invoke skills directly, there's no reason to keep custom commands around anymore.</p>
+<h2>Migrating Custom Commands to Skills</h2>
+<p>It's easy and takes just a few minutes.</p>
+<h3>Let Amp Do It For You</h3>
+<p>If you have custom commands in <code>.agents/commands/</code> or <code>~/.config/amp/commands/</code>, ask Amp to migrate them for you with the following prompt:</p>
+<pre><code>Migrate my custom commands from .agents/commands/ to skills in .agents/skills.
+
+For each command:
+1. Create a new skill directory in .agents/skills/ named after the command
+2. If it's a markdown file, rename it to SKILL.md and add frontmatter with name and description
+3. If it's an executable, create a SKILL.md that describes when and how to run the script, and move the executable to a scripts/ subdirectory
+4. Delete the original command file
+
+Also do this for global custom commands in ~/.config/amp/commands (which should be migrated to skills ~/.config/agents/skills).
+</code></pre><h3>Or Do It Manually</h3>
+<p><strong>Markdown commands:</strong> Move your <code>.md</code> file to a skill directory:</p>
+<pre><code># Before
+.agents/commands/code-review.md
+
+# After
+.agents/skills/code-review/SKILL.md
+</code></pre><p>Add frontmatter:</p>
+<pre><code data-language="markdown">---
+name: code-review
+description: Review code for quality and best practices
+---
+
+[Your existing content]
+</code></pre><p><strong>Executable commands:</strong> Move the executable into a <code>scripts/</code> subdirectory:</p>
+<pre><code># Before
+.agents/commands/deploy
+
+# After
+.agents/skills/deploy/
+├── SKILL.md
+└── scripts/
+    └── deploy
+</code></pre><p>In <code>SKILL.md</code>, tell the agent how to use it:</p>
+<pre><code data-language="markdown">---
+name: deploy
+description: Deploy the application
+---
+
+Run `{baseDir}/scripts/deploy` to deploy.
+</code></pre></div></div>

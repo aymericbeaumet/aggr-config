@@ -1,0 +1,21 @@
+<div id="readability-page-1" class="page"><div> <p>The Amp CLI now supports workspace-specific settings via <code>.amp/settings.json</code> files in your project directory.</p>
+<p>This allows you to configure the Amp CLI differently for each project, with settings like permissions, MCP servers, and other preferences automatically picked up when you run <code>amp</code> in that workspace.</p>
+<p>For example, here's how you can configure the Amp CLI to use a specific MCP server in a given project:</p>
+<pre><code>$ cd my-project
+$ amp mcp add --workspace playwright -- npx -y @playwright/mcp@latest
+</code></pre><p>Due to the <code>--workspace</code> flag, the setting was added in the <code>.amp/settings.json</code> file in <code>my-project</code>:</p>
+<pre><code>$ cat .amp/settings.json
+{
+  "amp.mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+</code></pre><p>When you then run <code>amp</code> in <code>my-project</code>, the settings in <code>.amp/settings.json</code> will be merged with your global Amp settings.</p>
+<p>See the <a href="https://ampcode.com/manual#configuration">manual</a> for details on how settings are resolved.</p>
+</div></div>

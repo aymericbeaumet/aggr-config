@@ -1,0 +1,32 @@
+<div id="readability-page-1" class="page"><div> 
+
+
+
+<p>You can now start new agents remotely from <a href="https://ampcode.com">ampcode.com</a> anywhere you can run <code>amp</code>:</p>
+
+<p>That means, in addition to running <a href="https://ampcode.com/news/agents-in-orbs">agents in orbs</a>, you can now run agents
+on any machine you want: your laptop, your server, your cloud dev box, your
+Raspberry Pi. Your lawn mower even, if it has a shell.</p>
+<p>Enable it by using the command <code>amp: enable remote creation of threads</code> or with the setting:</p>
+<pre><code data-language="json">// ~/.config/amp/settings.json
+
+{
+	"amp.remoteThreadCreation.enabled": true
+}
+</code></pre><p>Once enabled, every Amp client you start will accept and run new threads in its
+working directory.</p>
+<h2>Runner Mode</h2>
+<p>You can also use the new <em>runner</em> mode with:</p>
+<pre><code>amp --no-tui
+</code></pre><p>That starts Amp in a headless mode in which it only waits to start and run new
+threads:</p>
+
+<p>You can start multiple runners on the same machine, as long as they're started
+in different directories. Each runner is uniquely identified by host and working
+directory. Directories don't have to be version controlled. They can be anything, even home
+directories.</p>
+<p>You can start agents <em>anywhere</em> now.</p>
+<h2>Walkthrough</h2>
+<p>Here's Thorsten with a walkthrough:</p>
+
+</div></div>

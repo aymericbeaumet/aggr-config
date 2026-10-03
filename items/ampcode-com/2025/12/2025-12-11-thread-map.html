@@ -1,0 +1,30 @@
+<div id="readability-page-1" class="page"><div> <p>Two days ago, Lewis wrote about <a href="https://ampcode.com/200k-tokens-is-plenty">working with short threads</a> —&nbsp;a lot of them, connected via <a href="https://ampcode.com/manual#handoff">handoff</a> and <a href="https://ampcode.com/manual#referencing-threads">thread mentions</a> and forks. In his post, he showed a diagram, a <em>map</em> of one feature spread across 13 threads.</p>
+<p>That map? It exists now, we built it:</p>
+
+<div>
+  <picture><img src="https://ampcode.com/(marketing)/news/thread-map2.jpg" alt="Old whisperer of the orb reading a thread map" width="643" height="676" decoding="sync" data-lightbox-src="/(marketing)/news/thread-map2.jpg"></picture>
+</div>
+
+<p>Run <code>threads: map</code> in the <a href="https://ampcode.com/news/command-palette">Amp CLI command palette</a> to try it out.</p>
+<p>You'll see a top-down view of all threads connected to your current thread via mentions, handoffs, or forks. If you hit <code>Enter</code>, you'll open the selected thread and can continue your work there.</p>
+<p>(Yes, it's only available in the Amp CLI right now, but coming to other clients soon.)</p>
+<p>If you only use handoff and forks occasionally, you might not need this yet. But if you do work with many short, connected threads — like <a href="https://ampcode.com/200k-tokens-is-plenty">Lewis</a> or <a href="https://x.com/bedesqui/status/1998374596144406754">Igor</a> — this map might make it even easier, because you can see the <em>shape</em> of your work.</p>
+<p>Here are some patterns we've noticed so far:</p>
+<h2>1. Hub-and-Spokes</h2>
+<div>
+<picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/thread-map-bicycle-spokes.52339f27.768w.avif 768w, https://static.ampcode.com/news/responsive/thread-map-bicycle-spokes.52339f27.940w.avif 940w" sizes="(min-width: 1024px) 400px, (min-width: 456px) 400px, calc(100vw - 56px)"><img src="https://static.ampcode.com/news/thread-map-bicycle-spokes.png" alt="Bicycle spokes pattern" width="400" height="324" loading="lazy" decoding="async" data-lightbox-src="https://static.ampcode.com/news/thread-map-bicycle-spokes.png"></picture>
+</div>
+
+<p>One thread will form a core from which many other threads can be created. This might be an initial implementation thread, or a context-gathering research thread. The spokes might be refactoring threads, or subfeatures. They don't need the context of the other spokes—by linking only to the hub thread, the context window of each spoke remains lean and relevant.</p>
+<h2>2. Chain</h2>
+<div>
+<picture><img src="https://static.ampcode.com/news/thread-map-chains.png" alt="Chains pattern" width="400" height="484" loading="lazy" decoding="async" data-lightbox-src="https://static.ampcode.com/news/thread-map-chains.png"></picture>
+</div>
+
+<p>Many short threads chained together. This is a common pattern when one change depends on another. This pattern often emerges when using the <code>handoff</code> feature to extract only the relevant context from a previous thread, allowing you to keep threads short but still continue serially dependent work. This is common in research or exploratory tasks, where the desired state is unknown.</p>
+<p>It's not uncommon for the end of a chain to lead to the central node of a hub-and-spokes pattern; a desired state is found and work can be more easily parallelised.</p>
+<h2>What's Next?</h2>
+<p>Our bet is that there are many more patterns out there, waiting to be recognised. Let us know what you find.</p>
+<p><img src="https://static.ampcode.com/news/thread-map-patterns-slow.gif" alt="Thread map patterns" width="300"></p>
+
+</div></div>

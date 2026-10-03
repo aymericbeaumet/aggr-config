@@ -1,0 +1,216 @@
+<div id="readability-page-1" class="page"><div> <p>Today we're starting to roll out the new Amp.</p>
+<p>Not all of it, not yet. But the first piece: a rebuilt Amp CLI. Codename: Neo.</p>
+<p>In <a href="https://ampcode.com/news/the-coding-agent-is-dead">The Coding Agent is Dead</a> we wrote about
+where this is going: agents with longer leashes, less handholding, and many more
+places to run. Not just one agent in one terminal. Agents prompted from
+anywhere, running everywhere.</p>
+<p>That's the new Amp we're building.</p>
+<p>But the terminal still matters and will matter. There will be moments where you
+want the agent right next to you.</p>
+<p>So we rebuilt the CLI first. It <em>is</em> still Amp in your terminal. But it's
+running on a completely new architecture: remote-controllable, compaction-first,
+plugin-powered, and much faster. Built for what's coming.</p>
+
+<p>Let's walk through it.</p>
+<h2 id="remote-control">Remote Control</h2>
+
+<p>When you start a thread in the new Amp CLI, you can now remote control it from
+<a href="https://ampcode.com">ampcode.com</a>.</p>
+<p>You'll not only get live updates but you can also send messages, queue and
+dequeue them, or cancel what the agent is currently doing:</p>
+
+<p>The architecture that enables this is the reason we rewrote Amp. And remote control is just the start.</p>
+<p>Update (2026-2026-05-27): You can now <a href="https://ampcode.com/news/proof-of-human">require passkey authentication</a> to use remote control.</p>
+<h2>No More Manual Context Management</h2>
+<p>A core principle behind the rebuild: build for what the frontier models can do
+now, in 2026, and what they will be able to do in the future. Do not build for
+what once was.</p>
+<p>Today's leading frontier models are great at handling compaction.</p>
+<p>So Amp now manages context for you.</p>
+<p>You don't have to watch context percentages anymore, or decide when to
+<a href="https://ampcode.com/news/handoff">handoff</a>, or extract information from a
+thread in a panic.</p>
+<p>When the context window fills up, Amp now compacts the thread: it summarizes the
+current context, starts a fresh window with that summary, and keeps going.</p>
+<p>Compaction now runs automatically when the context window is 90% full.</p>
+<p>It was also the first thing we added to the new architecture. During one
+migration, we had to shut it off for a day and everyone complained. One
+beta-user reported: "I love having auto-compaction. NOT missing handoff..."</p>
+<p>So <a href="https://ampcode.com/news/handoff">handoff</a> is out. Compaction is in.</p>
+<h2>Plugins</h2>
+<p>With this release we're officially releasing the <a href="https://ampcode.com/manual/plugin-api">Amp Plugin API</a>.</p>
+<p>Amp plugins can:</p>
+<ul>
+<li><strong>Handle events</strong> — <code>amp.on(...)</code> for tool calls, tool results, and agent lifecycle events</li>
+<li><strong>Add tools</strong> — <code>amp.registerTool(...)</code> for custom tools the agent can call</li>
+<li><strong>Add commands</strong> — <code>amp.registerCommand(...)</code> for command palette actions</li>
+<li><strong>Show UI elements</strong> — <code>ctx.ui.notify(...)</code>, <code>ctx.ui.confirm(...)</code>, <code>ctx.ui.input(...)</code>, and <code>ctx.ui.select(...)</code></li>
+<li><strong>Ask AI questions</strong> — <code>amp.ai.ask(...)</code> for yes/no classification with confidence and reasoning</li>
+</ul>
+<p>Here, for example, is a plugin that registers a tool called <code>ask_user_choice</code>. The agent can use it to present the user with options:</p>
+<blockquote>
+<p><strong>Update (September 2026):</strong> <code>ask_user_choice</code> is now a built-in Amp tool available to everyone, so you no longer need this plugin. If you added one like it, tell Amp: "Remove the ask-user-choice plugin; Amp now has a built-in <code>ask_user_choice</code> tool." The example below still shows how plugin tools and UI work.</p>
+</blockquote>
+<div><pre><code data-language="typescript">// .amp/plugins/ask-user-choice.ts
+
+import type { PluginAPI } from '@ampcode/plugin'
+
+export default function (amp: PluginAPI) {
+	amp.registerTool({
+		name: 'ask_user_choice',
+		description:
+			'Present the user with a multiple choice question when there are several possible approaches and you need them to pick one. Use when you have 2-5 concrete options to choose from.',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				question: { type: 'string', description: 'The question to ask the user' },
+				options: {
+					type: 'array',
+					items: { type: 'string' },
+					description: 'The options to choose from (2-5 items)',
+				},
+			},
+			required: ['question', 'options'],
+		},
+		async execute(input, ctx) {
+			const question = input.question as string
+			const options = input.options as string[]
+			const optionsList = options.map((opt, i) =&gt; `${i + 1}. ${opt}`).join('\n')
+
+			const answer = await ctx.ui.input({
+				title: question,
+				helpText: `${optionsList}\n\nType the number of your choice`,
+				submitButtonText: 'Select',
+			})
+
+			if (!answer) return 'User dismissed the question without choosing.'
+
+			const index = parseInt(answer.trim(), 10) - 1
+			if (index &gt;= 0 &amp;&amp; index &lt; options.length) {
+				return `User selected option ${index + 1}: ${options[index]}`
+			}
+			return `User responded with: ${answer}`
+		},
+	})
+}
+</code></pre></div><p>That's it: a single file in <code>.amp/plugins</code> and Amp gets a new tool. It looks like this:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/neo-ask-user-choice.077b877c.768w.avif 768w, https://static.ampcode.com/news/responsive/neo-ask-user-choice.077b877c.1440w.avif 1440w, https://static.ampcode.com/news/responsive/neo-ask-user-choice.077b877c.1922w.avif 1922w" sizes="(min-width: 1903px) 961px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="961" src="https://static.ampcode.com/news/neo-ask-user-choice.png" alt="The ask_user_choice tool in action" height="640" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/neo-ask-user-choice.png"></picture></p>
+<p>The <a href="https://ampcode.com/manual/plugin-api">Amp Plugin API</a> documentation has more examples, including a full permissions plugin.</p>
+<h2>Queuing &amp; Steering</h2>
+<p>Queuing messages is now the default. When you send a message while the agent is
+busy, it'll get added to the queue instead of stopping and interrupting the
+agent.</p>
+<p>This, too, we think fits the models of today and tomorrow better. They work for
+longer and need fewer mid-flight yanks.</p>
+
+<p>If you want to fast-track a queued message, you can <em>steer</em>.</p>
+<p>Steering lets you send a queued message as soon as possible, not just when the
+agent becomes idle. The next time a tool result is sent up to the agent, for
+example.</p>
+<p>Use <kbd>↑</kbd> to select a queued message, then steer it with <kbd>⏎</kbd>:</p>
+
+<p>You can also hit <kbd>Esc Esc</kbd> to interrupt the agent and send immediately.</p>
+<h2>Permissions</h2>
+<p>Amp will no longer ask for permission before running tools.</p>
+<p>What was once the <code>--dangerously-allow-all</code> flag is now the default behavior for
+users who have not configured permissions.</p>
+<p>The old permissions system still exists. It's now a built-in plugin. If your
+existing Amp settings already opt into permissions — through <code>amp.permissions</code>,
+<code>amp.dangerouslyAllowAll: false</code>, or <code>amp.guardedFiles.allowlist</code> — Amp loads
+that plugin and works as before. (When the plugin is active, it applies in both
+<code>amp</code> and <code>amp --execute</code>.)</p>
+<p>Why change the default?</p>
+<p>A year ago tool calls were simpler to check: inspect the name, inspect the
+arguments, do string-based matching, allow or deny. Now, frontier models write
+throwaway scripts to get stuff done. They chain shell commands.</p>
+<p>It's near-impossible to determine statically whether a tool invocation will be
+destructive or not.</p>
+<p>When a model writes five 20-line Python scripts in parallel to do something,
+checking whether a tool call contains <code>rm -rf</code> gives you a false sense of
+security.</p>
+<p>On top of that, there are now custom skills and scripts, specifically built for
+agents. And different organizations have different policies around which model
+is allowed to call which tool.</p>
+<p>So permissions now live in the Plugin API.</p>
+<p>If you need a policy, build the one that matches your setup. Point Amp at the
+<a href="https://ampcode.com/manual/plugin-api">Amp Plugin API</a> and ask it to help you.</p>
+<h2>Performance &amp; Efficiency</h2>
+<p>The old Amp CLI got slow with huge threads. Neo doesn't. Here's a comparison,
+using a thread with around 5000 messages:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Old</th>
+<th>New</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU% (mean ± sd)</td>
+<td>84.1% ± 1.6%</td>
+<td>17.4% ± 8.8%</td>
+<td>79% less CPU</td>
+</tr>
+<tr>
+<td>CPU% (peak)</td>
+<td>86.3%</td>
+<td>25.8%</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Memory (idle)</td>
+<td>1814 MB</td>
+<td>540 MB</td>
+<td>70% less memory</td>
+</tr>
+</tbody></table>
+<p>Rendering performance has improved, too.</p>
+<p>Before:</p>
+
+<p>After:</p>
+
+<h2>What's Gone</h2>
+<p>We also removed features. Of course we did, otherwise it wouldn't be an Amp
+release, would it?</p>
+<p>Our goal is to keep you on the frontier. Amp should not make you work like it's
+still 2025.</p>
+<p>Some features made sense when models needed more babysitting, more manual
+context management, more careful steering. They don't anymore. When a feature
+starts tying you to the old way to use agents, it goes.</p>
+<p><strong>Handoff</strong> is gone. As described above, compaction made it obsolete. There are
+some valid use cases for Handoff even when there's enough space left in the
+context, but we don't think it warrants the complexity introduced by many small,
+connected threads.</p>
+<p>You can also still reference other threads and Amp will read them and extract
+the relevant information.</p>
+<p>For example, you can use <kbd>Ctrl+O</kbd> and <code>thread: new</code> to create a new
+thread, then hit <kbd>Enter</kbd> to quickly insert a reference to the previous
+thread. Amp will use that reference along with the rest of your prompt to read
+the previous thread.</p>
+<p><strong>Amp no longer rolls back file changes when you edit or restore a message.</strong>
+We've found ourselves using this less and less as models advanced. The models
+are now good enough to undo changes for you, with more finesse than a rollback.
+And, the truth is, the rollback feature was always best-effort: if the agent
+wrote and ran code that generated files, we didn't keep track of that without
+elaborate snapshotting.</p>
+<p><strong>Skill management</strong>: Amp still supports <a href="https://agentskills.io/home">Agent
+Skills</a> but we no longer offer commands or
+subcommands to add, remove, or update skills. That's better done by separate
+tools, such as <a href="https://github.com/vercel-labs/skills"><code>skills</code></a>.</p>
+<p><strong>User-invokable skills</strong>: We also removed support for user-invokable skills.
+The latest generation of models now invokes skills reliably.</p>
+<p><strong>Themes</strong>: Custom themes made it harder to keep the CLI legible, polished, and
+recognizably Amp. We’d rather ship one good interface than support many
+broken-looking ones.</p>
+<p><strong>Manual bash invocation</strong>: in the old Amp CLI you could invoke bash commands by
+using <code>$</code> and <code>$$</code> in the prompt editor. An interesting idea a year ago, but now
+with models being ever more capable at running commands on their own and without
+blowing up their context window (and that context window being unlimited,
+practically) it's no longer useful.</p>
+<h2>Rollout</h2>
+<p>We’re rolling Neo out over the next several days. If you want to skip the line, send
+us an email. We'll flip the switch for you. (Update 2026-05-12: We've briefly paused adding more people to the Neo beta as we fix some bugs.)</p>
+<p>This is the first piece of the new Amp.</p>
+<p>More soon.</p>
+</div></div>

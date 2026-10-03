@@ -1,0 +1,23 @@
+<div id="readability-page-1" class="page"><div> <p>We're now shipping the Amp CLI as a single-file executable (<a href="https://bun.com/docs/bundler/executables">compiled by Bun</a>) instead of as a JavaScript source package. This makes Amp faster and more compatible across platforms and runtimes, and it's necessary to support <a href="https://ampcode.com/manual#plugins">Amp plugins</a>.</p>
+<p>If you're using the recommended <a href="https://ampcode.com/manual#get-started">direct installation</a>, nothing changes for you. You've been using this single-file executable for several months. You can stop reading here.</p>
+<p>If you've installed Amp via npm, you should switch to direct installation:</p>
+<pre><code data-language="bash">npm uninstall -g @sourcegraph/amp
+curl -fsSL https://ampcode.com/install.sh | bash
+</code></pre><p>(See <a href="https://ampcode.com/manual#get-started">all installation methods</a>.)</p>
+<p>If you need to keep using npm to install Amp, usually because your company has an internal npm mirror/archive, be aware of some changes:</p>
+<div>
+
+<ul>
+<li>The CLI's npm package will now contain the executable instead of sources.</li>
+<li>We're renaming 2 npm packages:<ul>
+<li>The Amp CLI is now <a href="https://www.npmjs.com/package/@ampcode/cli"><code>@ampcode/cli</code></a> (was <a href="https://www.npmjs.com/package/@sourcegraph/amp"><code>@sourcegraph/amp</code></a>)</li>
+<li>The Amp TypeScript SDK is now <a href="https://www.npmjs.com/package/@ampcode/sdk"><code>@ampcode/sdk</code></a> (was <a href="https://www.npmjs.com/package/@sourcegraph/amp-sdk"><code>@sourcegraph/amp-sdk</code></a>)</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+
+<p>The old package names are aliases but will be removed on June 15, 2026.</p>
+</div></div>

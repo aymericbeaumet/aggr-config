@@ -1,0 +1,20 @@
+<div id="readability-page-1" class="page"><div> <p>People are using a lot of <a href="https://ampcode.com/manual/orbs">orbs</a>. We love to see that. We've shipped a lot of things so that <a href="https://ampcode.com/pricing">Amp subscriptions</a> keep covering the whole month of orb usage for almost everyone, even as orb usage grows quickly.</p>
+<p>Way back on July 27, we <a href="https://x.com/sqs/status/2081807392040452225">cut orb prices by 20% for everyone</a>.</p>
+<p>This week, we shipped a lot more improvements.</p>
+<p>We added a new <code>a1.medium</code> size with 4 CPUs and 8 GB of memory. It is 50% cheaper and a better fit for most projects than the previous <code>a0.medium</code>.</p>
+<p>Orbs now auto-pause after 5 minutes of inactivity, down from 15 minutes.</p>
+<p>We've sped up orb startup time considerably, especially when another team member has recently created an orb in the same Amp project.</p>
+<p>You can now choose which orb size to use per-thread, so you can pick a smaller default to save money but go big for especially resource-intensive work.</p>
+<p><picture><source media="(prefers-color-scheme: light)" srcset="https://static.ampcode.com/news/size-the-orbs-of-production-light.png?v=2"><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/size-the-orbs-of-production-dark.681effda.768w.avif 768w, https://static.ampcode.com/news/responsive/size-the-orbs-of-production-dark.681effda.1440w.avif 1440w, https://static.ampcode.com/news/responsive/size-the-orbs-of-production-dark.681effda.1806w.avif 1806w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="1806" height="922" src="https://static.ampcode.com/news/size-the-orbs-of-production-dark.png?v=2" alt="The new thread dialog with the five a1 orb sizes" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/size-the-orbs-of-production-dark.png?v=2"></picture></p>
+<p>When starting new orb threads from the Amp CLI with <a href="https://ampcode.com/manual/orbs#amp-ox"><code>amp -ox '...'</code></a>, the new flag <code>--orb-size &lt;size&gt;</code> lets you specify which orb size to use (instead of the project's default).</p>
+<p>When asking the agent to create other threads, you can now tell it to use smaller (or larger) orbs, which lets you use smaller orbs for simpler fan-out tasks on projects.</p>
+<p><a href="https://ampcode.com/manual/orbs#pricing">Prices for orbs</a> have gone down or stayed the same at every level and for every compute/memory combination. The new set of orb sizes is:</p>
+<ul>
+<li><code>a1.tiny</code>: 1 CPU · 2 GB memory · $0.08/hour</li>
+<li><code>a1.small</code>: 2 CPUs · 4 GB memory · $0.17/hour</li>
+<li><code>a1.medium</code>: 4 CPUs · 8 GB memory · $0.33/hour</li>
+<li><code>a1.large</code>: 8 CPUs · 16 GB memory · $0.66/hour</li>
+<li><code>a1.xxlarge</code>: 16 CPUs · 32 GB memory · $1.32/hour</li>
+</ul>
+<p>We've automatically upgraded projects to the equivalent new orb sizes. If you want to use a different orb size, you can update your projects' settings on the web, or ask Amp to do so using the <code>amp projects</code> subcommands.</p>
+</div></div>

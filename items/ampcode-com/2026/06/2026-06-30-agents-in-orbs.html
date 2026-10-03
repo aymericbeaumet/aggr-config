@@ -1,0 +1,63 @@
+<div id="readability-page-1" class="page"><div> 
+
+
+
+<p>You can now launch Amp agents remotely in orbs:</p>
+
+<p>Orbs are machines where agents can run without supervision. When you create a new thread you get a fresh orb that contains your code, plugins, and tools the agent might need.</p>
+<p>Orbs are billed by the minute. See the <a href="https://ampcode.com/manual/orbs#pricing">current orb sizes and pricing</a>. They start up quick and go to sleep when you and the agent no longer need them.</p>
+<h2>Remote and Yet So Near</h2>
+<p>Agents in orbs aren't running on your machine, but you can control them just like they were.</p>
+<p>You can review changes and browse through the files on the orb:</p>
+
+<p>You can use the terminal:</p>
+
+<p>If you want to iterate alongside the agent, you can sync the changes to your local machine by running:</p>
+<pre><code>amp sync &lt;thread&gt;
+</code></pre><p><code>&lt;thread&gt;</code> can be a thread URL or ID.</p>
+<p>Like this:</p>
+
+<p>And just like you can spawn new Amp thread with <code>amp -x</code>, you can use <code>amp -ox</code> to spawn a thread in an orb:</p>
+<pre><code>amp -ox "Investigate why the latest CI run on 'main' failed"
+</code></pre><p>You don't even have to leave the Amp TUI to spawn an agent that lives in orb:</p>
+
+<p>See the manual for <a href="https://ampcode.com/manual/orbs">more information on orbs and how to use them.</a></p>
+<h2>Things Change</h2>
+<p>The ability to spin up new agents from everywhere and then let them run for as
+long as they need changed how we work with agents.</p>
+<p>Of course, having multiple agents work at the same time was already possible
+before this: one could use different checkouts for different agents, or
+worktrees, or run agents manually via SSH on remote hosts.</p>
+<p>But when it's this easy to launch an agent on a machine that isn't your own, in the
+very same interface that you already use to manage your local agents, right next to
+those local agents, with the very same controls?</p>
+<p>Things <em>change</em>.</p>
+<p>For one, you tend to do it a lot more.</p>
+<p>Why not launch a group of agents to investigate eight different bugs
+independently when there are no local resource clashes to worry about? Why not
+turn a bug report into an agent and an investigation instead of a ticket? Why
+not manage the agent and its results instead of the ticket?</p>
+<p>You also start to use them for things you hadn't considered before.</p>
+<p>Why not launch an agent to run for a very long time and try out all possible
+performance optimizations if it doesn't eat up your CPU? Why not have agents run
+through testing workflows if that doesn't conflict with your local agents and
+steal memory away from them?</p>
+<p>Why not build that prototype? Why not go for that moonshot? Why not try?</p>
+<p>Why not?</p>
+<h2>Time to Find Out</h2>
+<p>Back in February <a href="https://ampcode.com/news/the-coding-agent-is-dead">we said</a> that we hold the
+models back if we treat them as mere assistants and lock them into a sidebar.
+The models, we proclaimed, "want to write code and run even when you're not sitting in
+front of your editor".</p>
+<p>And now we're here. Never mind the editor, now we can let our agents run even when
+we're not sitting at our computer.</p>
+<p>We believe that is how a lot of code will be written in the future. We believe
+that this is not just another step, but a step over an important threshold.</p>
+<p>How <em>exactly</em> this will play out we don't know. Some code will likely always be
+created locally, under close supervision, with a lot of back and forth. But
+these models are getting so good that the amount of code they can write on their
+own (<em>and</em> run, <em>and</em> test, <em>and</em> ship) will only grow. At this point, we hold them
+back if we require them to do it all on a single machine.</p>
+<p>And once you let them loose in orbs, you realize how constrained they’ve been.</p>
+<p>Time to find out how far they can go.</p>
+</div></div>

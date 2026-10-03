@@ -1,0 +1,15 @@
+<div id="readability-page-1" class="page"><div> <p>Two weeks ago <a href="https://ampcode.com/news/the-dial">we shipped the Dial</a> and quietly did something that's supposed to be traumatic: we changed the default model.</p>
+<p>Before the Dial, Amp's default mode was <code>smart</code>, running Claude Opus 4.8 and carrying more than half of all new threads. The Dial made <code>medium</code> the default, and <code>medium</code> runs GPT-5.6 Sol.</p>
+<p>Most Amp users switched from Anthropic to OpenAI overnight.</p>
+<p>We braced for the outcry. Every model swap in every coding tool comes with one. We prepared migration docs, packaged the old modes as <a href="https://ampcode.com/modes">installable plugins</a>, and waited.</p>
+<p>Nothing happened. Not a single complaint.</p>
+<p>Here's what the switch looked like in production:</p>
+<p><img width="940" src="https://static.ampcode.com/news/who-cares-about-the-model-mode-share.svg" alt="Stacked area chart of new threads by agent mode, June 29 to July 26. Smart (Opus 4.8) holds around 55% until July 9, when the Dial ships, then collapses to near zero within days as medium (GPT-5.6) takes over."></p><p>The day before the Dial shipped, <code>smart</code> carried 55% of new threads. A week later: zero. Last week, the four Dial modes carried 93% of all new threads, and <code>medium</code> alone carried two-thirds. Of the users on the Dial, 69% never set it to anything but <code>medium</code>.</p>
+<p>And the Amp plugins we shipped to bring the old modes back — exact prompts, exact models, one command to get <code>smart</code> again? Almost nobody installed them.</p>
+<h2>What This Tells Us</h2>
+<p>The differences between frontier models are now small. Small enough that for one engineer on one task, switching models won't visibly change the result.</p>
+<p>But they still matter to us, here at Amp: across every thread on every tier, small differences compound, so we keep benchmarking and swapping models. That's the trade. The default is good because someone is paid to care about it, and it doesn't have to be you.</p>
+<p>What does change your output are three things, none of which is a model: how hard the task is, what context you put in, and how closely you review what comes out. All three have more impact on the outcome than whether you use this or that latest frontier model.</p>
+<p>The Dial covers the first one: how hard the task is. You tell it how hard the task is and the corresponding setting on the Dial uses whichever model wins it right now, re-tested constantly. You know your tasks, we know the models.</p>
+<p>And for the other two — the context and the review — the rest of Amp lets you do the best job with that.</p>
+</div></div>

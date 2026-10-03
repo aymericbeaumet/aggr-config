@@ -1,0 +1,33 @@
+<div id="readability-page-1" class="page"><div> <p>We're releasing a new version of our agent mode <code>rush</code>.</p>
+<p>Prior to this change, <code>rush</code>’s usefulness was limited. It was faster and cheaper, but also made more mistakes and required more attempts to get to the same results than a slower and ultimately not that much more expensive frontier model.</p>
+<p>Now, <code>rush</code> is tuned to lean into its advantages — speed, low cost — instead of trying to make up for its shortcomings.</p>
+<p>It uses GPT-5.5 with no reasoning instead of Haiku 4.5. It is tuned for small coding tasks that don’t require contemplating the whole repo, but to find the relevant files, make the smallest correct change, run a focused check, and stop.</p>
+<p>This is what <code>rush</code> is good at:</p>
+<ul>
+<li>“Fix the failing <code>renders empty state</code> test.”</li>
+<li>“Update <code>@src/components/ui/Select.tsx</code> to match the focus-ring styling in <code>@src/components/ui/Button.tsx</code>”</li>
+<li>“Rename <code>enableLegacySearch</code> to <code>enableSearchV2</code> in all files that use it”</li>
+</ul>
+<p>Do not use <code>rush</code> for transient bugs, architecture changes, migrations, complex features, and tasks where you do not yet know what “done” means. In those cases, reading more, thinking longer, and building a larger model of the codebase is what gets you good results. Use <code>deep</code> or <code>smart</code> for those.</p>
+<h2 id="what-changed">What Changed</h2>
+<p>The previous system prompt in <code>rush</code> mode was “speed first.” It told the model to move fast, keep explanations short, edit, verify, and stop. With GPT-5.5, we can be more precise: gather only the context needed to act safely, make the smallest correct change, verify narrowly, and stop. This makes it less prone to save time by skipping the parts that make the result usable and to over-contextualize - to keep reading and thinking.</p>
+<p><code>rush</code> now uses <code>shell_command</code> for searching, reading, and verification, and <code>apply_patch</code> for edits. That means we can remove quite a few tools that all do almost the same thing - <code>grep</code>, <code>glob</code>, and <code>create_file</code>.</p>
+<p>The <code>task</code> subagents have the same configuration as the main agent: no reasoning, GPT 5.5.</p>
+<h2 id="evals">Evals</h2>
+<p>On our internal evals, <code>rush</code> solved 44% of tasks, up from 39% for the previous version.</p>
+<p>The cost moved up slightly: $0.58 per task on average, compared to $0.44 for the previous version (an 18% increase).</p>
+<p>The speed changed much more. Rush 2.0 finished in 1 minute and 32 seconds on average, down from 2 minutes and 59 seconds.</p>
+<p>That is the tradeoff we wanted: a little more expensive, meaningfully more capable, and almost twice as fast.</p>
+<p>It is not <code>deep</code>. On the same evals, <code>deep</code> solved 58% of tasks, 14 points higher than <code>rush</code>.</p>
+<h2 id="pair-it-with-the-oracle">Pair It with the Oracle</h2>
+<p>The best pattern we have found is <code>rush</code> plus <a href="https://ampcode.com/manual#oracle">the <code>oracle</code></a>.</p>
+<p>Let <code>rush</code> build. Ask the <code>oracle</code> to plan, criticize, or review. The <code>oracle</code> is slower and more expensive, but it is read-only and good at adversarial thinking.</p>
+<p>This works especially well for tasks that are still bounded, but not trivial. You know the area of the codebase. You know roughly what needs to change. But there is enough surface area that a second, more deliberate pass can prevent <code>rush</code> from making the locally obvious but globally wrong edit.</p>
+<p>Try prompts like:</p>
+<ul>
+<li>“Ask the oracle to inspect <code>@src/billing/applySeatLimit.ts</code>, <code>@src/billing/planLimits.ts</code>, and the failing <code>seat limit is enforced after downgrade</code> test. Have it propose the concrete fix first: which behavior should change, which file should own the rule, and what should stay untouched. Then implement the smallest patch and run the billing tests.”</li>
+<li>“Update the workspace invite flow so expired invites show the same error state in <code>@src/routes/invites/AcceptInvitePage.tsx</code> and <code>@src/components/invites/InviteBanner.tsx</code>. After the patch, ask the oracle to review the diff and suggest the focused tests or manual checks that would actually prove this works. Run the relevant ones before calling it done.”</li>
+<li>“Before changing the caching behavior in <code>@src/search/useSearchResults.ts</code>, ask the oracle for two or three implementation options beyond the obvious one. Have it judge them in context of the codebase: consistency with the existing query hooks, risk of stale data, complexity, and testability. Then implement the best minimal option.”</li>
+</ul>
+<p>To use it: run <code>mode: use rush</code> in the Amp CLI.</p>
+</div></div>

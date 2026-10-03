@@ -1,0 +1,23 @@
+<div id="readability-page-1" class="page"><div> <p>GPT-5.5 now powers Amp's <a href="https://ampcode.com/news/deep-mode"><code>deep</code> mode</a>.</p>
+<p>It is a better coding agent than GPT-5.4: more steerable, more interactive, and better at staying inside constraints.</p>
+<h3>More Agent-Shaped</h3>
+<p>GPT-5.5 is better at the actual agent loop: read enough code, make the change, verify it, explain what happened. Whereas with GPT-5.4, prompts often had to spell out the process.</p>
+<p>With GPT-5.5 we found it's best to clearly describe the outcome and put the rules and repeatable steps into the guidance files and tools.</p>
+<p>If the task is vague, it can still solve the wrong problem cleanly. Good prompts matter more, not less.</p>
+<h3>Reasoning Effort</h3>
+<p>With GPT-5.5 we lowered <code>deep</code>'s default effort from <code>high</code> to <code>medium</code> (<code>deep²</code>).</p>
+<p>Do not assume higher reasoning is always better: in our eval, GPT-5.5 <code>high</code> cost more than <code>medium</code> and performed worse.</p>
+<p><code>xhigh</code> (<code>deep³</code>) is for cases where maximum quality matters more than cost.</p>
+<p>As before, you can toggle the thinking effort directly in the CLI with <code>Opt+D</code> (<code>Alt+D</code>), cycling through <code>low</code> (<code>deep</code>), <code>medium</code>, and <code>xhigh</code>.</p>
+<h3>How To Use It</h3>
+<p>The most important guideline to follow: tell GPT-5.5 what success looks like.</p>
+<p>A few patterns have worked well for us:</p>
+<ul>
+<li><strong>Give it the outcome and the constraints.</strong> Example: “Refactor transcript caching into a separate module. Keep the public API unchanged. Perf logging should only run behind this env var. Cache growth should be capped. Run the focused tests and typecheck.”</li>
+<li><strong>Give it a way to prove the fix.</strong> Example: “This CLI focus bug should be verified in the actual CLI, not just by inspection. Reproduce it interactively, check focus state, then run the focused test.”</li>
+<li><strong>Use it for planning when the shape of the fix is unclear.</strong> Example: “Analyze this protocol deadlock. Is it an infrastructure bug, a protocol bug, or something the client must recover from? Propose 2–3 options with tradeoffs and pseudo-code. Do not implement yet.”</li>
+</ul>
+<p>Update Amp to the latest version by running <code>amp update</code> and you're ready to go.</p>
+<h3>Model Card</h3>
+<p>We wrote up the full <a href="https://ampcode.com/models/gpt-5.5">GPT-5.5 model card</a> with evals, reasoning guidance, prompt changes, and caching/ZDR caveats.</p>
+</div></div>

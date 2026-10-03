@@ -1,0 +1,27 @@
+<div id="readability-page-1" class="page"><div> <p>Opus 4.7 now powers Amp's <code>smart</code> mode.</p>
+<p>In our internal evals, Opus 4.7 scored <strong>~72%</strong>, up from Opus 4.6's <strong>~65%</strong> - the first model since GPT 5.4 to clear 70%.</p>
+<h2 id="it-takes-some-getting-used-to">It takes some getting used to</h2>
+<p>Compared to Opus 4.7, Opus 4.6 was forgiving.</p>
+<p>You could give it a vague task and it would often infer the missing pieces, make a plan, and start working. Sometimes that was useful. But it also could lead to the model confidently solving a nearby problem instead of the one you actually had. Or rushing to the first, but not the best, solution.</p>
+<p>Opus 4.7 is less like that.</p>
+<p>It follows prompts more closely. It fills in fewer gaps. It researches more. It is less likely to silently generalize from "fix this case" to "fix every related case." If the task is underspecified, you are more likely to get a narrow answer, a pause, or a request for the missing constraint.</p>
+<p>At first, that can feel worse. But then you realize that a good prompt can make it go further.</p>
+<p>Opus 4.7 is better at harder coding work, especially tasks that span multiple files, tools, and verification steps. It is better at keeping the shape of a change in its head and carrying it through the codebase. It's better at refactoring too. Its explanations are more thorough.</p>
+<h2 id="fewer-built-in-tools">Fewer Built-in Tools</h2>
+<p>We removed <code>grep</code> and <code>glob</code> from <code>smart</code>.</p>
+<p>Opus 4.7 is good enough at using the shell directly. When it needs to search, it can run <code>rg</code> or use the codebase search agent.</p>
+<p>Its ASCII diagrams are also equal to or better than what Opus 4.6 achieved with rendered diagrams.</p>
+<h2 id="token-usage">Token Usage</h2>
+<p>Our internal assessment matches <a href="https://www.anthropic.com/news/claude-opus-4-7">Anthropic's</a> (see last section and graph): "token usage across all effort levels is improved." Opus 4.7 might use more tokens in some cases, but those tokens are smarter and lead to better results. And better results lead to less tokens wasted.</p>
+<h2 id="tunable-thinking-effort">Tunable Thinking Effort</h2>
+<p>You can now toggle the thinking effort for <code>smart</code> directly from the CLI with <kbd>Opt+D</kbd> (<kbd>Alt+D</kbd>), cycling through <code>high</code>, <code>xhigh</code>, and <code>max</code>.</p>
+<h2 id="how-to-use-it">How to Use It</h2>
+<p>The main change is simple: tell it what success looks like.</p>
+<p>A few patterns have worked well for us:</p>
+<ul>
+<li><strong>Give it success criteria, not steps.</strong> Tell it what done means, not every move to make. Example: "Clean up the billing settings. Done means no public API changes, no database changes, <code>pnpm test billing</code> passes, and <code>pnpm typecheck</code> passes."</li>
+<li><strong>Give it a way to check itself.</strong> A model with a test, CLI, Storybook, preview URL, or screenshot diff is much better than a model guessing from code. Example: "Fix the import flow. Reproduce it with <code>pnpm cli import ./fixtures/bad.csv</code>. It is fixed when that command succeeds and <code>pnpm test import</code> passes."</li>
+<li><strong>Brainstorm, pick, implement.</strong> Use one pass to explore options, then implement the chosen approach. Example: "Compare two ways to remove this duplicate state. Recommend one. Do not edit files yet." Then: "Implement option B. Keep the API unchanged and verify with <code>pnpm test settings</code>."</li>
+</ul>
+<p>Update Amp to the latest version by running <code>amp update</code> and you're ready to go: <code>smart</code> mode is now powered by Opus 4.7.</p>
+</div></div>

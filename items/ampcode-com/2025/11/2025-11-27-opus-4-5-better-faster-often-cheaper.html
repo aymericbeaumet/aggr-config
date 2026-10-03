@@ -1,0 +1,56 @@
+<div id="readability-page-1" class="page"><div><p>Claude Opus 4.5 is the new main model in Amp's <code>smart</code> mode, two days after we shipped <a href="https://ampcode.com/news/try-opus">it</a> for you to try out.</p>
+<p>Only a week ago, we changed Amp's main model to Gemini 3 — <a href="https://ampcode.com/news/gemini-3">a historic change</a>, we said. It was the first time since Amp's creation that we switched away from Claude. Now we're switching again and you may ask: why? Why follow a historic change with another one, in a historically short amount of time?</p>
+<p>We love Gemini 3, but, once rolled out, its impressive highs came with lows. What we internally experienced as <a href="https://ampcode.com/news/gemini-3#not-perfect">rough</a> <a href="https://x.com/sqs/status/1991563112290607422">edges</a> turned into some very frustrating behaviors for our users. Frustrating and costly.</p>
+<p>Then, not even a week later, Opus 4.5 comes out. Opus 4.5, on the other hand, seems as capable as Gemini 3. Its highs might not be as brilliant as Gemini 3's, but it also seems to do away with the lows. It seems more polished. It's faster, even.</p>
+<p>We're also pleasantly surprised by Opus's cost-efficiency. Yes, Opus tokens are more expensive, but it needs fewer tokens to do the job, makes fewer token-wasting mistakes, and needs less human intervention (which results in a higher cache hit rate, which means lower costs and latency).</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sonnet 4.5</th>
+<th>Gemini 3 Pro</th>
+<th>Opus 4.5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Internal Evals</strong></td>
+<td>37.1%</td>
+<td>53.7%</td>
+<td>57.3%</td>
+</tr>
+<tr>
+<td><strong>Avg. Thread Cost</strong></td>
+<td>$2.75</td>
+<td>$2.04</td>
+<td>$2.05</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;0-200k Tokens Only<span data-footnote="1"></span></td>
+<td>$1.48</td>
+<td>$1.19</td>
+<td>$2.05</td>
+</tr>
+<tr>
+<td><strong>Off-the-Rails Cost</strong><span data-footnote="2"></span></td>
+<td>8.4%</td>
+<td>17.8%</td>
+<td>2.4%</td>
+</tr>
+<tr>
+<td><strong>Speed (p50, preliminary)</strong></td>
+<td>2.4 min</td>
+<td>4.3 min</td>
+<td>3.5 min</td>
+</tr>
+</tbody></table>
+<p>In words:</p>
+
+<ul>
+<li><em>If you use long threads (200k+ tokens):</em> Opus will be a lot cheaper. It’s currently limited to 200k tokens of context, which forces you to use <a href="https://ampcode.com/guides/context-management">small threads</a>—our strong recommendation anyway, for both quality and cost. If you need long context, use <a href="https://ampcode.com/modes"><code>large</code> mode</a>.</li>
+<li><em>If Sonnet or Gemini frequently struggles for you or has hit a capability ceiling:</em> Opus will be far more capable and accurate, and often cheaper too (by avoiding wasted tokens).</li>
+<li><em>If you loved Gemini 3 Pro:</em> Opus will be ~40% more expensive but faster and more tolerant of ambiguous prompts. (This describes most of the Amp team, and we still find Opus worth it.)</li>
+<li><em>If you were perfectly satisfied with Sonnet 4.5:</em> Opus will be ~35% more expensive for the same task. The real win comes from getting outside your comfort zone and giving it harder tasks where Sonnet would struggle.</li>
+</ul>
+<p>Staying on the frontier means sometimes shipping despite <a href="https://x.com/sqs/status/1991563112290607422">issues</a> — and sometimes shipping something better a week later.</p>
+</div></div>

@@ -1,0 +1,63 @@
+<div id="readability-page-1" class="page"><div> <p>Amp's orbs can now receive requests and react to events outside Amp.</p>
+<p>That means an orb can wake up when CI fails on GitHub, when someone opens a Linear issue, when a
+monitor raises an alert, or when an event arrives from Discord. If it can send an HTTP request, it
+can wake an orb.</p>
+<h2>More Ways to Wake an Orb</h2>
+<p>GitHub issues are just one example. You can use the same pattern to:</p>
+<ul>
+<li>Investigate every CI failure on <code>main</code> and post the findings to Slack.</li>
+<li>Watch for new releases of your dependencies, then review the changes and open an upgrade PR.</li>
+<li>Start a fresh thread when someone opens a Linear issue, then comment with a fix or report.</li>
+<li>Turn a bug report from Discord into a reproduction and pull request.</li>
+<li>Resume a rollout when a deployment or security scan reports back.</li>
+</ul>
+<p>The event decides when the orb wakes up. You decide what it does next.</p>
+<h2>From a GitHub Event to an Orb</h2>
+<p>Here is the whole setup. Start a thread in an orb for your repository and tell Amp which events to
+watch and what to do with them:</p>
+<p><picture><img width="693" height="106" src="https://ampcode.com/news/webhook-automations-github-prompt.png" alt="Prompt asking Amp to monitor GitHub issues and pull requests with a webhook" decoding="sync" data-lightbox-src="/news/webhook-automations-github-prompt.png"></picture></p>
+<p>Amp turns that request into a project-specific plugin. It scopes the listener to the repository and
+events you asked for, verifies GitHub's signature, deduplicates deliveries, and starts a read-only
+orb thread with trusted event metadata.</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/webhook-automations-plugin-plan.d36caa6a.768w.avif 768w, https://static.ampcode.com/news/responsive/webhook-automations-plugin-plan.d36caa6a.816w.avif 816w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="816" height="106" src="https://ampcode.com/news/webhook-automations-plugin-plan.png" alt="Amp describing the GitHub webhook plugin it will build" loading="lazy" decoding="async" data-lightbox-src="/news/webhook-automations-plugin-plan.png"></picture></p>
+<p>Then Amp loads the plugin and registers its durable endpoint:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/webhook-automations-plugin-loaded.fc2e473d.768w.avif 768w, https://static.ampcode.com/news/responsive/webhook-automations-plugin-loaded.fc2e473d.806w.avif 806w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="806" height="88" src="https://ampcode.com/news/webhook-automations-plugin-loaded.png" alt="Amp registering the plugin's durable webhook endpoint" loading="lazy" decoding="async" data-lightbox-src="/news/webhook-automations-plugin-loaded.png"></picture></p>
+<p>If the orb's GitHub token can administer repository webhooks, Amp connects the endpoint for you. In
+this case it could not, so Amp gave us one manual step without printing the private URL or signing
+secret into the thread:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/webhook-automations-github-setup.18ae8fde.768w.avif 768w, https://static.ampcode.com/news/responsive/webhook-automations-github-setup.18ae8fde.826w.avif 826w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="826" height="670" src="https://ampcode.com/news/webhook-automations-github-setup.png" alt="Amp explaining the manual GitHub webhook configuration step" loading="lazy" decoding="async" data-lightbox-src="/news/webhook-automations-github-setup.png"></picture></p>
+<h2>A Wild Issue Appears</h2>
+<p>Once the webhook is active, someone opens issue #57:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/webhook-automations-github-issue.d75df88a.768w.avif 768w, https://static.ampcode.com/news/responsive/webhook-automations-github-issue.d75df88a.1181w.avif 1181w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="1181" height="366" src="https://ampcode.com/news/webhook-automations-github-issue.png" alt="GitHub issue 57 reporting a typo in a completion description" loading="lazy" decoding="async" data-lightbox-src="/news/webhook-automations-github-issue.png"></picture></p>
+<p>GitHub sends the signed event to Amp. Amp verifies it and starts a fresh orb thread with the trusted
+repository, event, issue, and actor metadata. The issue itself remains untrusted input, not agent
+instructions:</p>
+<p><picture><img width="701" height="505" src="https://ampcode.com/news/webhook-automations-spawned-thread.png" alt="A new Amp thread created from a verified GitHub issue webhook" loading="lazy" decoding="async" data-lightbox-src="/news/webhook-automations-spawned-thread.png"></picture></p>
+<p>The new thread inspects the current issue and relevant code, then reports what it found:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/webhook-automations-investigation-report.c0818baa.768w.avif 768w, https://static.ampcode.com/news/responsive/webhook-automations-investigation-report.c0818baa.817w.avif 817w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="817" height="487" src="https://ampcode.com/news/webhook-automations-investigation-report.png" alt="Amp report confirming issue 57 as a low-impact UI typo" loading="lazy" decoding="async" data-lightbox-src="/news/webhook-automations-investigation-report.png"></picture></p>
+<p>The typo is real, appears once, and only affects secondary menu text. Now the same workflow runs
+for every issue and pull request event while the original orb sleeps.</p>
+<h2>How It Works</h2>
+<p>Webhooks work through the <a href="https://ampcode.com/manual/plugin-api">Amp Plugin API</a>. When you ask Amp to listen for an
+event, it creates a plugin in the orb and calls <code>amp.createWebhook</code> to register a durable endpoint
+for that thread. Then it loads the plugin and gives you the URL to connect to GitHub, Linear,
+Discord, or another service. If the orb already has access, Amp can connect it for you.</p>
+<p>When a request arrives, Amp stores the event and wakes the orb. The plugin validates and filters the
+payload, then handles it using the instructions you gave Amp. The URL stays the same across plugin
+reloads and orb restarts, so the orb does not need to keep running while it waits.</p>
+<h2>React to Events However You Want</h2>
+<p><code>amp.createWebhook</code> gives the plugin a handler, not a fixed workflow. That handler is ordinary
+TypeScript with access to the rest of the Plugin API. The handler can:</p>
+<ul>
+<li>Continue the owning thread with its context intact by appending the event to <code>ctx.thread</code>.</li>
+<li>Start a fresh thread in an orb with
+<code>amp.getBuiltinAgent(...).createThread({ executor: 'orb' })</code>.</li>
+<li>Keep durable state so it can react every time, or handle one matching event and then stop
+listening.</li>
+</ul>
+<p>That is where the flexibility comes from. Tell Amp how you want to handle an event and it writes the
+handler that way. It can also call external APIs to post results back to Slack, Linear, GitHub, or
+wherever the work began. Return to the owning thread whenever you want to change the behavior.</p>
+<p>The webhook URL is a credential. Keep it private, and tell Amp to remove it when you no longer need
+it.</p>
+</div></div>

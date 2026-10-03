@@ -1,0 +1,59 @@
+<div id="readability-page-1" class="page"><div> 
+
+
+
+<p>Claude Opus 5.5 now powers Amp's <code>medium</code> mode by default, replacing GPT-5.6 Sol. If you use a ChatGPT subscription with the <a href="https://ampcode.com/docs/the-dial#use-a-chatgpt-subscription">ChatGPT Only preset</a>, <code>medium</code> stays pinned to GPT-5.6 Sol, billed to your subscription. To switch to Opus 5.5, change <code>medium</code> in <a href="https://ampcode.com/docs/the-dial#tune-the-modes">Tune Modes</a>.</p>
+<p>In our internal evals, Opus 5.5 solved <strong>65%</strong> of tasks, up from GPT-5.6 Sol's <strong>61%</strong> and Opus 5's <strong>56%</strong>. And it did that for <strong>10% less</strong> than GPT-5.6 Sol and <strong>25% less</strong> than Opus 5.</p>
+
+
+<p>It's still behind <a href="https://ampcode.com/news/fable-5.1">Fable 5.1</a>, which solved <strong>71%</strong>, but it costs <strong>40% less</strong>.</p>
+<h2>More Steerable</h2>
+<p>Opus 5.5 responds much better to messages you send while it works. Add a constraint you forgot, point out a wrong turn, or correct its approach, and it folds that into the work instead of arguing or carrying on with its old plan. It doesn't drop what it was doing, either.</p>
+<p>So don't stop it to edit your prompt and start over. Send the correction. <a href="https://ampcode.com/news/steer-dont-queue">Enter steers by default</a>, so your message reaches it right away.</p>
+<h2>High Effort, Not Max</h2>
+<p>Opus 5.5 runs at high reasoning effort. Past high, it starts to overthink. At xhigh and max it burns through tokens, scores lower than at high, and costs several times as much. So we stop at high.</p>
+<h2>Why Not GPT-6 Sol?</h2>
+<p>OpenAI shipped GPT-6 Sol an hour after Opus 5.5. We ran both.</p>
+<p>In our evals, GPT-6 Sol scores about the same as GPT-5.6 Sol, at half the cost. In real work, though, it's much more jagged: strong on one task, off on the next. <code>medium</code> carries most threads, so it needs a model you can count on across all of them.</p>
+<h2>When To Turn the Dial Up</h2>
+<p><code>medium</code> is the right place for most work now. Two kinds of task still belong higher:</p>
+<ul>
+<li><p><strong>Lots of unknowns.</strong> Use <code>ultra</code> with Fable 5.1 when nobody knows the path yet. <a href="https://ampcode.com/@kemper">Alex</a> had to move more than 5,000 users of an enterprise customer's SSO to new email addresses. He started the thread with:</p>
+<blockquote>
+<p>We've never migrated… from one set of email addresses to the next before… and we don't really have a way to test it.</p>
+</blockquote>
+<p>It mapped how sign-in works today, planned the switch, and watched production afterward. The first 41 sign-ins after the switch all worked.</p>
+</li>
+<li><p><strong>Taste and judgment.</strong> Use <code>high</code> with GPT-6 Astra or <code>ultra</code> with Fable 5.1 when the hard part is deciding what good looks like. Ask for options, not one answer. <a href="https://ampcode.com/@hamish">Hamish</a> wanted a better transition out of the iOS image viewer:</p>
+<blockquote>
+<p>Right now it's a hard cut, so can you please give me some options for animations and record them and show me them in line in the transcript here.</p>
+</blockquote>
+<p>It recorded four options on the simulator. He replied "Ship B to main."</p>
+</li>
+</ul>
+<p>Turn the dial up when a miss costs more than the wait, not because the task is long.</p>
+<h2>How To Use It</h2>
+<p>Opus 5.5 is persistent. It keeps going until the job is done, which means it needs to know what done is, and it needs a way to see for itself. These are the habits we use, with prompts from our own threads:</p>
+<ul>
+<li><p><strong>Give it the whole app to run.</strong> Models are very good at writing tests their own code passes. Running the app end to end is the best way to know it works. Make that one command with <a href="https://ampcode.com/docs/orbs/customizing#agents-setup"><code>.agents/setup</code></a>, <a href="https://ampcode.com/docs/orbs/portals#define-services">services</a>, and a <a href="https://ampcode.com/docs/customize/skills">skill</a>. <a href="https://ampcode.com/@tim">Tim</a> hit a sidebar bug in our Mac app and asked:</p>
+<blockquote>
+<p>Repro it in preflight then we can look at fixing it.</p>
+</blockquote>
+<p>It launched our Mac app, dragged the sidebar closed, and measured the bug before touching any code.</p>
+</li>
+<li><p><strong>Tell it what done looks like, including the evidence it should deliver.</strong> Our bug fix prompts include:</p>
+<blockquote>
+<p>Implement the simplest correct fix, verify it, then explain the bug, the fix, and the evidence that the fix resolves it.</p>
+</blockquote>
+<p>That evidence is usually a failing test plus before and after videos.</p>
+</li>
+<li><p><strong>Raise the bar when the check is too easy.</strong> If it verified against an emulator or a mock, send it to the real thing. When it checked an iPad fix in an emulator, <a href="https://ampcode.com/@sqs">Quinn</a> replied:</p>
+<blockquote>
+<p>test all of this in the Buildkite iOS preflight and use an iPad simulator</p>
+</blockquote>
+<p>The simulator caught two bugs the emulator had missed.</p>
+</li>
+<li><p><strong>Hand it the bigger task and go hands off.</strong> It holds up well over long threads. Tell it what evidence to deliver, then go do something else. You shouldn't babysit a capable model: <a href="https://ampcode.com/news/less-noise">if you have the patience to watch it work step by step</a>, you're giving it too short a leash.</p>
+</li>
+</ul>
+</div></div>

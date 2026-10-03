@@ -1,0 +1,40 @@
+<div id="readability-page-1" class="page"><div> <p>Amp's agent modes are now a dial: <code>low</code>, <code>medium</code>, <code>high</code>, <code>ultra</code>. They replace <code>smart</code>, <code>deep</code>, <code>rush</code>, and <code>large</code>.</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/dial-release.eb3b46a1.768w.avif 768w, https://static.ampcode.com/news/responsive/dial-release.eb3b46a1.987w.avif 987w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="987" src="https://static.ampcode.com/news/dial-release.png?v=20260709-2" alt="Amp's mode dial in the CLI showing low, medium, high, and ultra" height="324" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/dial-release.png?v=20260709-2"></picture></p>
+<p>The old modes were models in disguise: each name hid a model, a prompt, a reasoning effort — and to pick one, you had to know what that model was like this month. That world is gone. The models converged, open-weight models got seriously good, and the only question left is capability against cost.</p>
+<p>The dial asks one question: how hard is this task?</p>
+<p>Missing in either direction costs you. Undershoot and the model churns: wrong fix, re-prompt, wrong fix again. You pay three times for a result you could have had once. Overshoot and you're using Fable to fix a typo. Set it right and you pay for exactly the intelligence the task needs.</p>
+<ul>
+<li><strong><code>ultra</code></strong> — The outcome is clear, but the path is full of unknowns. Migrations, architecture, changes that span many files, systems, and decisions the model has to discover as it goes.</li>
+<li><strong><code>high</code></strong> — You know where the change goes, but getting it right is hard: cross-cutting changes, concurrency, bugs where a subtle miss is expensive. You get diffs closer to reviewer-ready than <code>medium</code> gets you — but plan on one round of feedback before merging, and about twice the wait.</li>
+<li><strong><code>medium</code></strong> — You know roughly what you want. This should be your default. It handles messy, multi-part tasks, fuzzy requirements, the steps you didn't spell out. Strong enough for most work, fast enough to steer.</li>
+<li><strong><code>low</code></strong> — You know exactly what you want. Bug fixes, tests, refactors, features you can describe precisely. There is less to figure out for the model, so <code>low</code> builds it.</li>
+</ul>
+<p>Turn the dial with <code>Ctrl+S</code> in the CLI, or with the mode picker in the web app.</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/dial-web.6226a3e7.768w.avif 768w, https://static.ampcode.com/news/responsive/dial-web.6226a3e7.1440w.avif 1440w, https://static.ampcode.com/news/responsive/dial-web.6226a3e7.2462w.avif 2462w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="2462" src="https://static.ampcode.com/news/dial-web.png?v=20260709-2" alt="Amp's mode picker in the web app showing low, medium, high, and ultra" height="1572" loading="lazy" decoding="async" data-lightbox-src="https://static.ampcode.com/news/dial-web.png?v=20260709-2"></picture></p>
+<h2>Under the Hood</h2>
+<p>We want you to know exactly what you're getting, so here's what backs each mode today. This wiring will change as models improve. The dial won't.</p>
+<ul>
+<li><code>ultra</code>: Claude Fable 5, with a system prompt written for it. GPT-5.6 Sol as the oracle.</li>
+<li><code>high</code>: GPT-5.6 Sol at <code>xhigh</code> reasoning effort. Claude Fable 5 as the oracle.</li>
+<li><code>medium</code>: GPT-5.6 Sol at medium reasoning effort. GPT-5.6 Sol at high effort as the oracle.</li>
+<li><code>low</code>: GLM-5.2, Z.ai's open-weight model, the strongest open model on agentic coding. GPT-5.6 Sol as the oracle. (Workspace admins can choose to use GPT-5.6 Terra low instead of GLM-5.2 here.)</li>
+</ul>
+<p>Reasoning effort is part of the tier now. No more cycling <code>Opt+D</code> through effort levels on top of picking a mode.</p>
+<p>Every mode has an oracle for second opinions. On the top tiers, it's the other frontier model: in <code>high</code>, GPT-5.6 Sol writes and Fable reviews. In <code>ultra</code>, Fable writes and GPT-5.6 Sol reviews.</p>
+<h2>Migrating</h2>
+<ul>
+<li><code>smart</code>, <code>deep</code> → <code>medium</code> (same model and effort as <code>deep</code>). Turn up for hard problems.</li>
+<li><code>rush</code> → <code>low</code>.</li>
+<li><code>deep**3</code> -&gt; <code>ultra</code> or <code>high</code></li>
+</ul>
+<h2>Want to Tune It Yourself?</h2>
+<p>The dial removes knobs from the default experience, not from Amp. <a href="https://ampcode.com/manual#define-a-custom-agent-mode">Plugins can register their own agent modes</a> with your model, your prompt, and your tools, and they show up right next to the built-in ones.</p>
+<p>We used that same plugin API to package up the deprecated modes — exact system prompts, exact tool lists, same models and reasoning efforts. If you want <code>smart</code>, <code>deep</code>, <code>rush</code>, or <code>large</code> back, install them:</p>
+<pre><code>amp plugins add --auto-update @amp/smart-classic
+amp plugins add --auto-update @amp/deep-classic
+amp plugins add --auto-update @amp/rush-classic
+amp plugins add --auto-update @amp/large-classic
+</code></pre><p>Then run <code>plugins: reload</code> (or restart the CLI) and they appear in the mode picker as Smart (classic), Deep (classic), Rush (classic), and Large (classic) — the original names stay reserved for the built-ins. <code>--auto-update</code> keeps them current when we update the plugins; drop it if you'd rather pin. The full list of installable modes is on <a href="https://ampcode.com/modes">ampcode.com/modes</a>.</p>
+<p>Start at <code>medium</code>. Turn it down when the task is clear. Turn it up when a miss costs more than the wait.</p>
+<p>We'll follow up with posts on each mode and numbers on what each one can handle.</p>
+</div></div>

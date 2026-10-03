@@ -1,0 +1,22 @@
+<div id="readability-page-1" class="page"><div> <p>Threads outgrew <code>read_thread</code>, so we rewrote it.</p>
+<p><code>read_thread</code> is <a href="https://ampcode.com/news/read-threads">the tool that lets Amp pull context out of other Amp threads</a> when you mention them. Before the rewrite, it would fetch the whole thread and extract the relevant parts in a single call to another LLM.</p>
+<p>That used to work when threads were shorter and contained a single context window. Then we added <a href="https://ampcode.com/news/neo">compaction</a> and now a single thread can run for weeks. Our longest thread has been compacted over 68 times — without compaction, it would be over 21 million tokens long.</p>
+<p>A 21-million-token thread doesn't fit into a single context window, so asking another LLM to extract relevant parts doesn't work anymore. And even threads with 1 million tokens that fit gave bad answers: one giant prompt over-weights whatever the thread ended with or started with and ignores the information in the middle.</p>
+<p><code>read_thread</code> is now a subagent tuned to extract information from long threads. The subagent takes a thread and a question, searches the thread, reads the messages, and checks whether later work revised or reverted what it found.</p>
+<p>Our first version of the <code>read_thread</code> subagent answered from the first plausible hit. In a long thread, the first hit is often an attempt that was later revised or reverted. We switched the model to GLM 5.2 from Gemini 3.5 Flash and tuned its prompt to optimize for correctness over speed:</p>
+<ul>
+<li>"Do not stop at the first relevant hit; check for newer messages that revise, supersede, revert, or contradict it."</li>
+<li>"Tool calls record attempted actions, not outcomes." It checks whether an edit actually succeeded before believing it.</li>
+<li>"Use compactions for orientation, but inspect original messages when exact requirements, wording, code, commands, chronology, edits, or verification matter."</li>
+</ul>
+<p>It also works on the thread you're in. When the agent needs something from three weeks ago — a decision, an error, the original plan — it goes back and looks instead of trusting the compaction.</p>
+<p>Nothing changes on your end. Either tell Amp what you're looking for and let it find the thread, or give it a thread explicitly: paste a URL, or @-mention it. And when you open a new thread, hit Enter twice to reference the thread you just left.</p>
+<p>Mention a thread and ask a question, just like before, except it now works with big threads too:</p>
+<ul>
+<li>"Implement the plan from <a href="https://ampcode.com/threads/T-%E2%80%A6">https://ampcode.com/threads/T-…</a>"</li>
+<li>"What did we implement for the visibility submenu in <a href="https://ampcode.com/threads/T-%E2%80%A6">https://ampcode.com/threads/T-…</a>? Which files changed, and how does it work now?"</li>
+<li>"Summarize the requirements, implementation decisions, and known caveats from <a href="https://ampcode.com/threads/T-%E2%80%A6">https://ampcode.com/threads/T-…</a> before you review this."</li>
+<li>"Find the thread where we debugged the executor connection timeout and summarize the fix."</li>
+<li>"Hey, I know it's a lot, I know I should've stopped way earlier, but can you look at this thread in which we went for 271 rounds and extract that bootstrap script? <a href="https://ampcode.com/threads/T-%E2%80%A6">https://ampcode.com/threads/T-…</a>"</li>
+</ul>
+</div></div>

@@ -1,0 +1,8 @@
+<div id="readability-page-1" class="page"><div> <p>Habemus oraculum! We have a new <a href="https://ampcode.com/manual#oracle">oracle</a> in Amp and it's GPT-5.4.</p>
+<p>It's a great model. In our internal evals response quality went from <strong>60.8% (GPT-5.2)</strong> to <strong>68.2% (GPT-5.4)</strong>. Mean latency is down from <strong>~6.7min</strong> to <strong>~4.9min</strong>.</p>
+<p>In Amp's <code>smart</code> mode GPT-5.4 works really well with Opus 4.6, which is <code>smart</code> mode's current main model. They complement each other with the oracle bringing sage advice on architecture, code reviews, and tricky bugs to the context window, just as we're used to from previous incantations.</p>
+<p>On top of that, we also decided to add the oracle subagent to <code>deep</code> mode. Now you might wonder, since <code>deep</code> mode currently uses GPT-5.3-Codex as the main model, why add another GPT model in the same mode? Does that even make sense?</p>
+<p>We think it does. GPT-5.3-Codex is fantastic at coding (as Codex models tend to be), which is exactly why it is the main model in <code>deep</code>, but the oracle is plain GPT-5.4, a non-Codex model. Less a code specialist, more an all-rounder.</p>
+<p>That gives us two models from the same family, but trained for different goals, with different system prompts, in the same mode — two distinct voices in the same conversation.</p>
+<p>We're still learning what GPT-5.4 can do in practice. There are very likely hidden smarts and treasures we haven't found yet. Let us know once you do.</p>
+</div></div>

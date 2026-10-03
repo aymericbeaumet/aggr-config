@@ -1,0 +1,22 @@
+<div id="readability-page-1" class="page"><div> <p>A <a href="https://ampcode.com/docs/cli/runners">runner</a> can now serve many directories, not just the one it was started in. You can point it at specific projects and directories or let it find your Git repositories.</p>
+<p><picture><source media="(prefers-color-scheme: light)" type="image/avif" srcset="https://static.ampcode.com/news/responsive/one-runner-is-now-enough-picker-light.63f31c77.768w.avif 768w, https://static.ampcode.com/news/responsive/one-runner-is-now-enough-picker-light.63f31c77.1440w.avif 1440w, https://static.ampcode.com/news/responsive/one-runner-is-now-enough-picker-light.63f31c77.1824w.avif 1824w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><source media="(prefers-color-scheme: light)" srcset="https://static.ampcode.com/news/one-runner-is-now-enough-picker-light.png"><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/one-runner-is-now-enough-picker-dark.530ef653.768w.avif 768w, https://static.ampcode.com/news/responsive/one-runner-is-now-enough-picker-dark.530ef653.1440w.avif 1440w, https://static.ampcode.com/news/responsive/one-runner-is-now-enough-picker-dark.530ef653.1824w.avif 1824w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="1824" height="1183" src="https://static.ampcode.com/news/one-runner-is-now-enough-picker-dark.png" alt="The new thread composer on ampcode.com with the runner mac-mini selected and a picker listing its projects and folders" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/one-runner-is-now-enough-picker-dark.png"></picture></p>
+
+
+<p>Start a runner and tell it which directories to serve with <code>--dir</code>. Repeat the flag for each one:</p>
+<pre><code data-language="shell-session">$ amp --no-tui --runner-id mac-mini --dir ~/code/amp --dir ~/code/sandcastle
+</code></pre><p>Or start it in the directory that holds your checkouts and let it find them:</p>
+<pre><code data-language="shell-session">$ cd ~/code
+$ amp --no-tui --runner-id mac-mini --discover-dirs
+</code></pre><p><code>--discover-dirs</code> serves every Git checkout up to two levels beneath the current directory and picks up new ones as you clone them.</p>
+<p>Checkouts somewhere else, or deeper than two levels? Give <code>--discover-dirs</code> a path, repeat it for more, and set <code>--discover-depth</code> to look further down:</p>
+<pre><code data-language="shell-session">$ amp --no-tui --discover-dirs=~/work --discover-dirs=~/code --discover-depth 4
+</code></pre><p>Add or remove directories while the runner is running, without restarting it:</p>
+<pre><code data-language="shell-session">$ amp runner dirs add ~/code/new-repo
+$ amp runner dirs list
+$ amp runner dirs remove ~/code/dotfiles
+</code></pre><p>The runner remembers the directories you add this way and serves them again the next time you start it from the same directory.</p>
+<h2>Oh, They Can Update Themselves Too</h2>
+<p>Runners now update themselves too. If you leave an <code>amp --no-tui</code> runner running, it keeps checking for new releases about once an hour and installs them. Once no thread is running on it, it restarts into the new version, at most once every 12 hours. It keeps its runner ID, its directories, and the rest of its flags.</p>
+<p>Turn it off with <code>amp.runner.autoUpdate.enabled: false</code> in your settings.</p>
+<p>Read more about <a href="https://ampcode.com/docs/cli/runners#serve-multiple-directories">serving multiple directories</a> and <a href="https://ampcode.com/docs/cli/runners#keep-a-runner-updated">runner updates</a> in the runner docs.</p>
+</div></div>

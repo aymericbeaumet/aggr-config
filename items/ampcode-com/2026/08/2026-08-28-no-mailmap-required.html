@@ -1,0 +1,18 @@
+<div id="readability-page-1" class="page"><div> <p>Amp can now use a Git identity that is separate from the email on your Amp account. Pick the name
+and verified email that should appear on commits made in orbs.</p>
+<p>You can ask Puck to set it for you:</p>
+<p><picture><source type="image/avif" srcset="https://static.ampcode.com/news/responsive/git-identity-puck-20260826.6d150e25.768w.avif 768w, https://static.ampcode.com/news/responsive/git-identity-puck-20260826.6d150e25.832w.avif 832w" sizes="(min-width: 1307px) 660px, (min-width: 1024px) 50.5vw, (min-width: 716px) 660px, calc(100vw - 56px)"><img width="832" height="225" src="https://static.ampcode.com/news/git-identity-puck-20260826.png?v=3" alt="Puck setting Tim Culverhouse and tim@culver.house as the personal default Git identity" decoding="sync" data-lightbox-src="https://static.ampcode.com/news/git-identity-puck-20260826.png?v=3"></picture></p>
+<p>If you have not added the identity yet, Puck sends a verification link to the email address. Once
+you click it, Puck gets notified and can make the identity your personal default if you asked it to.</p>
+<p>You can also manage identities under <a href="https://ampcode.com/settings/keys#git-identities">Signing Keys</a>. Your personal
+default applies to personal projects unless you choose another identity in a project's settings.
+Workspace admins choose one rule for the whole workspace:</p>
+<ul>
+<li><strong>Amp</strong> uses the Amp identity.</li>
+<li><strong>Amp Account</strong> uses each member's Amp account.</li>
+<li><strong>User Choice</strong> lets each member choose.</li>
+</ul>
+<p>When Amp starts an orb, it sets <code>GIT_AUTHOR_*</code> and <code>GIT_COMMITTER_*</code> from the selected identity. If
+commit signing is on, Amp only signs for an email you have verified.</p>
+<p>Your Amp login can stay <code>tfc@ampcode.com</code> while your commits use <code>tim@culver.house</code>.</p>
+</div></div>
