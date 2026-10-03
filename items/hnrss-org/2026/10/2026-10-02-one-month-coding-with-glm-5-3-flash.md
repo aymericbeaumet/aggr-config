@@ -46,6 +46,12 @@ images:
     width: 800
     height: 466
   color: '#151b27'
+- source: https://i.ytimg.com/vi/TOtoB0RMPvg/hqdefault.jpg
+  original:
+    file: 2026-10-02-one-month-coding-with-glm-5-3-flash.image-419cb4a3f821.jpg
+    width: 480
+    height: 360
+  color: '#fdfdfd'
 ---
 
 ![Screenshot of AgentsView tokens usage for September 2026 over 2B tokens](https://media.wagtail.org/images/agentsview_tokens_september_2026.width-950.png)
