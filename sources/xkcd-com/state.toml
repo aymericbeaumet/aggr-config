@@ -3,5 +3,5 @@ resolved_url = "https://xkcd.com/atom.xml"
 title = "xkcd.com"
 site_url = "https://xkcd.com/"
 language = "en"
-etag = '"6abdfc57-9b8"'
-body_hash = "7cf89f5301fe39491b4b852eba0b78c82af2aec7"
+etag = '"6ac04580-9c8"'
+body_hash = "40b8b935d88db55dc692b95e735b5b34d4fbb6be"
