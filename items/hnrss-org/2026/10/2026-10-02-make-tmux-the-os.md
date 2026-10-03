@@ -272,6 +272,12 @@ images:
     width: 895
     height: 413
   color: '#fbfbfc'
+- source: https://i.ytimg.com/vi/B7t_BCmY-lg/hqdefault.jpg
+  original:
+    file: 2026-10-02-make-tmux-the-os.image-8d4d2ed555e6.jpg
+    width: 480
+    height: 360
+  color: '#c6ddcd'
 ---
 
 I recently watched the talk by Scott Jenson titled "Are we really going to use the same Desktop UX forever?" [https://www.youtube.com/watch?v=V7AfAcQwLW0&t=445s](https://www.youtube.com/watch?v=V7AfAcQwLW0&t=445s). He's a great presenter, really articulate and concise. The kind of speaker that you'd gladly listen to for 3+ hours if given the chance. Which for a talk about window management is quite the compliment.
