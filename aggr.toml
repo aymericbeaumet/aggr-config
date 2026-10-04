@@ -13,9 +13,17 @@ provider = "reddit"
 category = "news"
 url = """
 https://feeds.acast.com/public/shows/le-rdv-tech # le rdv tech
+https://open.spotify.com/show/1sz1NhoHqbpXbzNlpOnFoz # underscore
+"""
+
+# Aggregators publish a submission, not the article. Heavy mode downloads the original page;
+# light mode keeps the feed blurb, which for these two is only points and a comments link.
+[[sources]]
+category = "news"
+content = "heavy"
+url = """
 https://hnrss.org/frontpage?points=100
 https://lobste.rs/top/1w # top of the week
-https://open.spotify.com/show/1sz1NhoHqbpXbzNlpOnFoz # underscore
 """
 
 [[sources]]
