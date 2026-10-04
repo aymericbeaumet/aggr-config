@@ -68,6 +68,7 @@ images:
 extra:
   audio_type: audio/mpeg
   audio_url: https://api.substack.com/feed/podcast/217889431/bba96d28746310eb65c6f215045feb9f.mp3
+  duration_seconds: 6110
 ---
 
 **Listen and watch now on [YouTube](https://youtu.be/0GzwuYGvKA4), [Apple](https://podcasts.apple.com/us/podcast/the-pragmatic-engineer/id1769051199), and [Spotify](https://open.spotify.com/show/2Bho9xCbOQMWMJ7UKmqCzD).** See the episode transcript at the top of this page, and timestamps for the episode at the bottom.
