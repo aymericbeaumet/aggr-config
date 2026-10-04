@@ -22,6 +22,7 @@ images:
   color: '#f8fad7'
 extra:
   audio_url: https://api.substack.com/feed/podcast/213743581/4c0eca6027e44f8c6127802366f5c91e.mp3
+  duration_seconds: 4171
 ---
 
 Recently, I gave a talk called *[The Root of the Root of All Evil](https://www.computerenhance.com/p/theroot)*. Like *[The Big OOPs](https://www.computerenhance.com/p/the-big-oops-anatomy-of-a-thirty)*, it was a research-intensive talk, so Demetri and I decided it might serve as a good spot test for how well the frontier models do on historical research.

@@ -23,6 +23,7 @@ images:
   color: '#868678'
 extra:
   audio_url: https://api.substack.com/feed/podcast/204716904/62555ec3f995d3f6595187f0e36fb918.mp3
+  duration_seconds: 4048
 ---
 
 AI companies seem fixated on scaling. From massive marketing budgets to supply-chain-altering datacenter plans, the drive to scale appears to be more urgent and aggressive than in any tech boom that came before.

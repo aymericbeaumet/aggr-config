@@ -22,6 +22,7 @@ images:
   color: '#f8fad7'
 extra:
   audio_url: https://api.substack.com/feed/podcast/200639467/82f6e62ca7fe4f0f40754d62b952ac6c.mp3
+  duration_seconds: 5540
 ---
 
 As people integrate more and more AI into their daily work, will the quality of the work they produce suffer? Will their own skills degrade as a result of relying on AI? Will there be negative psychological effects in the shift from doing work directly to doing it indirectly through AI prompting?

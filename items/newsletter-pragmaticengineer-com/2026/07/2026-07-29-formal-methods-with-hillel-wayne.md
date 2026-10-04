@@ -30,6 +30,7 @@ images:
   color: '#fdfdfd'
 extra:
   audio_url: https://api.substack.com/feed/podcast/208490793/39e73f549d0e5b122bbc9dfe29a9b11a.mp3
+  duration_seconds: 5023
 ---
 
 **Listen and watch now on [YouTube](https://youtu.be/KSkcgIYQy0U) , [Apple](https://podcasts.apple.com/us/podcast/formal-methods-with-hillel-wayne/id1769051199?i=1000778935586) and [Spotify](https://open.spotify.com/episode/7pF97J4VB96PpLJdPShK7W) .** See the episode transcript at the top of this page, and timestamps for the episode at the bottom.

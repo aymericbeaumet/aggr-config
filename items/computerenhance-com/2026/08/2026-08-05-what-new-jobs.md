@@ -23,6 +23,7 @@ images:
   color: '#792c22'
 extra:
   audio_url: https://api.substack.com/feed/podcast/209966043/fe98ebd13e0d65617a69cd9b7ab6ad4e.mp3
+  duration_seconds: 5274
 ---
 
 Appeals to prior technological revolutions are often used to assuage fears that AI will lead to widespread unemployment. Yes, you may lose your job because of AI, but eventually you'll get a different job in a new field created by the resulting technological progress - or so the argument goes.

@@ -22,6 +22,7 @@ images:
   color: '#f8fad7'
 extra:
   audio_url: https://api.substack.com/feed/podcast/215000996/c0c59fdab51f2b770f342fd3de254765.mp3
+  duration_seconds: 6752
 ---
 
 Over the course of 2026, AI has advanced from being a mathematician’s assistant to, in some cases, doing the majority of the work behind important new discoveries. What does this mean for formal mathematics as a discipline?

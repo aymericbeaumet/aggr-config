@@ -22,6 +22,7 @@ images:
   color: '#f8fad7'
 extra:
   audio_url: https://api.substack.com/feed/podcast/202147095/d2160c409d818ca6125e04be51283665.mp3
+  duration_seconds: 3648
 ---
 
 With previously open source projects going closed, and artists increasingly concerned about posting their work online, is AI reversing the internet’s long-established trend toward openness?
