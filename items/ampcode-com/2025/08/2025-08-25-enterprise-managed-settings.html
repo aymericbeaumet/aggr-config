@@ -1,0 +1,15 @@
+<p>Amp now allows system administrators to configure organization-wide settings that override individual settings for Enterprise Amp customers. These settings can help ensure security, standardization, and best practices across an organization. Managed settings can be used, for example, to do the following:</p>
+<ul>
+<li>Set MCP servers to those that work well in your organization (<code>amp.mcpServers</code>)</li>
+<li>Allow or block MCP servers (<code>amp.mcpPermissions</code>)</li>
+<li>Allow or block Bash commands that match specified patterns (<code>amp.permissions</code>)</li>
+<li>Override any other Amp setting</li>
+</ul>
+<p>To use managed settings, system administrators should ensure the settings are defined in the following files:</p>
+<ul>
+<li><strong>macOS</strong>: <code>/Library/Application Support/ampcode/managed-settings.json</code></li>
+<li><strong>Linux</strong>: <code>/etc/ampcode/managed-settings.json</code></li>
+<li><strong>Windows</strong>: <code>%ProgramData%\ampcode\managed-settings.json</code></li>
+</ul>
+<p>Settings in these files use the same schema as individual settings.</p>
+<p>You can read more about managed settings <a href="/manual?internal#enterprise-managed-policy-settings">in the manual.</a></p>
