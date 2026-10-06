@@ -38,6 +38,14 @@ since = "2026-09-27T19:29:15.293681927Z"
 message = 'light mode only imports RSS, Atom, or JSON Feed; no feed was discovered; use a feed URL or set content = "heavy" for HTML extraction'
 since = "2026-10-04T12:50:30.804479567Z"
 
+[errors.youtube-com-arstechnica]
+message = 'light mode only imports RSS, Atom, or JSON Feed; no feed was discovered; use a feed URL or set content = "heavy" for HTML extraction'
+since = "2026-10-06T00:45:55.302474734Z"
+
+[errors.youtube-com-scienceetonnante]
+message = 'light mode only imports RSS, Atom, or JSON Feed; no feed was discovered; use a feed URL or set content = "heavy" for HTML extraction'
+since = "2026-10-06T00:45:55.302474734Z"
+
 [errors.zhipuai-cn]
 message = "fetching the configured URL and common feed endpoints: request exceeded total timeout of 20 seconds"
 since = "2026-10-04T12:50:30.804479567Z"
