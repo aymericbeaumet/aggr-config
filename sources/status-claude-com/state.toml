@@ -3,5 +3,5 @@ resolved_url = "https://status.claude.com/history.atom"
 title = "Claude Status - Incident History"
 site_url = "https://status.claude.com/"
 language = "en-US"
-etag = 'W/"45d59ae43340c4fd22eca165267946de"'
-body_hash = "f1de71e292de3c2640237c5a1189f1200f08fad8"
+etag = 'W/"9d6b464d621d98b04bccd1cbedd9dbc1"'
+body_hash = "e0b882cd472d19620111d3fbee01d701a5164613"
